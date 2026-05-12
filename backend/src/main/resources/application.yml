@@ -1,0 +1,40 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: mealcheck-backend
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/mealcheck}
+    username: ${SPRING_DATASOURCE_USERNAME:mealcheck}
+    password: ${SPRING_DATASOURCE_PASSWORD:mealcheck123}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 12MB
+
+mealcheck:
+  jwt:
+    secret: ${MEALCHECK_JWT_SECRET:mealcheck-jwt-secret-change-me-please-32chars}
+    expiration-minutes: ${MEALCHECK_JWT_EXPIRATION_MINUTES:10080}
+  cors:
+    allowed-origins: ${MEALCHECK_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+  upload-dir: ${MEALCHECK_UPLOAD_DIR:./uploads}
+  ai:
+    api-key: ${MEALCHECK_AI_API_KEY:}
+    base-url: ${MEALCHECK_AI_BASE_URL:}
+    model: ${MEALCHECK_AI_MODEL:qwen2.5-vl-3b-instruct}
+    timeout-seconds: ${MEALCHECK_AI_TIMEOUT_SECONDS:60}
+  knowledge:
+    auto-index: ${MEALCHECK_KNOWLEDGE_AUTO_INDEX:true}
+    embedding-dim: 384

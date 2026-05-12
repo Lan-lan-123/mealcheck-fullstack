@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: mealcheck-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mealcheck
+      POSTGRES_USER: mealcheck
+      POSTGRES_PASSWORD: mealcheck123
+    ports:
+      - "5432:5432"
+    volumes:
+      - mealcheck_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mealcheck -d mealcheck"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  mealcheck_pgdata:
