@@ -112,3 +112,16 @@ MEALCHECK_AI_MODEL=qwen3-vl
 - The default RAG source is `backend/src/main/resources/knowledge/diet_guides.md`.
 - RAG entries manually added by administrators are stored in the database and preserved separately.
 
+## Pictures
+
+### user 
+
+![user](pictures/p1.png)
+
+### admin
+
+![admin](pictures/p2.png)
+
+### demo
+
+![demo](pictures/p3.png)
