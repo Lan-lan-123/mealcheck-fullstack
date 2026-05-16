@@ -4,15 +4,23 @@ import { Camera, LogOut, ShieldCheck, Utensils } from 'lucide-react'
 import {
   analyzeMeal,
   clearSession,
-  getToken,
+  deleteMeal,
   getUser,
   listMeals,
   login,
+  logout,
+  mealTrends,
   register,
   setSession,
-  weeklyReport,
-  deleteMeal
+  weeklyReport
 } from './api/client'
+import AssistantCard from './components/AssistantCard'
+import Empty from './components/Empty'
+import RecordItem from './components/RecordItem'
+import ReportView from './components/ReportView'
+import ResultView from './components/ResultView'
+import TrendCard from './components/TrendCard'
+import WeeklyReportModal from './components/WeeklyReportModal'
 import AdminPage from './pages/AdminPage'
 import './styles.css'
 
@@ -22,6 +30,37 @@ const goals = [
   { value: 'muscle_gain', label: '增肌目标' },
   { value: 'light', label: '清淡饮食' }
 ]
+
+const defaultRecordFilters = {
+  goal: '',
+  from: '',
+  to: '',
+  minScore: '',
+  maxScore: ''
+}
+
+function compactFilters(filters) {
+  return Object.fromEntries(Object.entries(filters).filter(([, value]) => value !== undefined && value !== null && value !== ''))
+}
+
+function emptyPage(size = 5) {
+  return { content: [], page: 0, size, totalElements: 0, totalPages: 0 }
+}
+
+function normalizePage(data, size = 5) {
+  if (Array.isArray(data)) {
+    return { content: data, page: 0, size: data.length || size, totalElements: data.length, totalPages: data.length ? 1 : 0 }
+  }
+  return data || emptyPage(size)
+}
+
+function isAdmin(user) {
+  return user?.role === 'ADMIN'
+}
+
+function defaultPageFor(user) {
+  return isAdmin(user) ? 'admin' : 'dashboard'
+}
 
 function AuthPage({ onAuthed }) {
   const [mode, setMode] = useState('login')
@@ -37,7 +76,6 @@ function AuthPage({ onAuthed }) {
     e.preventDefault()
     setLoading(true)
     setError('')
-
     try {
       const auth = mode === 'login' ? await login(form) : await register(form)
       setSession(auth)
@@ -56,24 +94,15 @@ function AuthPage({ onAuthed }) {
           <Utensils size={34} />
           <div>
             <h1>MealCheck</h1>
-            <p>饮食结构评估系统</p>
+            <p>校园食堂饮食结构识别与智能建议系统</p>
           </div>
         </div>
 
         <div className="tabs">
-          <button
-            className={mode === 'login' ? 'active' : ''}
-            onClick={() => setMode('login')}
-            type="button"
-          >
+          <button className={mode === 'login' ? 'active' : ''} onClick={() => setMode('login')} type="button">
             登录
           </button>
-
-          <button
-            className={mode === 'register' ? 'active' : ''}
-            onClick={() => setMode('register')}
-            type="button"
-          >
+          <button className={mode === 'register' ? 'active' : ''} onClick={() => setMode('register')} type="button">
             注册
           </button>
         </div>
@@ -81,41 +110,25 @@ function AuthPage({ onAuthed }) {
         <form onSubmit={submit}>
           <label>
             用户名
-            <input
-              value={form.username}
-              onChange={e => setForm({ ...form, username: e.target.value })}
-            />
+            <input value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} />
           </label>
-
           <label>
             密码
-            <input
-              type="password"
-              value={form.password}
-              onChange={e => setForm({ ...form, password: e.target.value })}
-            />
+            <input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
           </label>
-
           {mode === 'register' && (
             <label>
               昵称
-              <input
-                value={form.displayName}
-                onChange={e => setForm({ ...form, displayName: e.target.value })}
-              />
+              <input value={form.displayName} onChange={e => setForm({ ...form, displayName: e.target.value })} />
             </label>
           )}
-
           {error && <p className="error">{error}</p>}
-
           <button className="primary" disabled={loading}>
             {loading ? '处理中...' : mode === 'login' ? '登录系统' : '创建账号'}
           </button>
         </form>
 
-        <p className="hint">
-          首次使用可切换到注册；若后端未配置 API Key，系统会自动进入演示识别模式。
-        </p>
+        <p className="hint">管理员登录后会进入管理后台，普通用户登录后进入图片上传分析页面。</p>
       </section>
     </main>
   )
@@ -123,36 +136,46 @@ function AuthPage({ onAuthed }) {
 
 function App() {
   const [user, setUser] = useState(getUser())
-  const [page, setPage] = useState('dashboard')
+  const [page, setPage] = useState(() => defaultPageFor(getUser()))
 
   function handleAuthed(auth) {
-    setUser({
+    const nextUser = {
       username: auth.username,
       displayName: auth.displayName,
       role: auth.role || 'USER'
-    })
-    setPage('dashboard')
+    }
+    setUser(nextUser)
+    setPage(defaultPageFor(nextUser))
   }
 
   function handleLogout() {
+    logout().catch(() => {})
     clearSession()
     setUser(null)
     setPage('dashboard')
   }
 
+  useEffect(() => {
+    if (user && page === 'admin' && !isAdmin(user)) {
+      setPage('dashboard')
+    }
+  }, [user, page])
+
   if (!user) {
     return <AuthPage onAuthed={handleAuthed} />
   }
 
-  if (page === 'admin') {
-    return <AdminPage onBack={() => setPage('dashboard')} />
+  if (page === 'admin' && isAdmin(user)) {
+    return <AdminPage onBack={() => setPage('dashboard')} onLogout={handleLogout} />
   }
 
   return (
     <Dashboard
       user={user}
       onLogout={handleLogout}
-      onOpenAdmin={() => setPage('admin')}
+      onOpenAdmin={() => {
+        if (isAdmin(user)) setPage('admin')
+      }}
     />
   )
 }
@@ -162,21 +185,32 @@ function Dashboard({ user, onLogout, onOpenAdmin }) {
   const [preview, setPreview] = useState('')
   const [goal, setGoal] = useState('balanced')
   const [result, setResult] = useState(null)
-  const [records, setRecords] = useState([])
+  const [recordPageData, setRecordPageData] = useState(emptyPage())
+  const [recordPage, setRecordPage] = useState(0)
+  const [recordSize, setRecordSize] = useState(5)
+  const [recordFiltersDraft, setRecordFiltersDraft] = useState(defaultRecordFilters)
+  const [recordFilters, setRecordFilters] = useState(defaultRecordFilters)
   const [report, setReport] = useState(null)
+  const [trend, setTrend] = useState(null)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [showWeeklyDetail, setShowWeeklyDetail] = useState(false)
+  const [activeSection, setActiveSection] = useState('overview')
 
   async function refresh() {
-    const [m, r] = await Promise.all([listMeals(), weeklyReport(7)])
-    setRecords(m)
+    const [m, r, t] = await Promise.all([
+      listMeals({ page: recordPage, size: recordSize, ...compactFilters(recordFilters) }),
+      weeklyReport(7),
+      mealTrends(30)
+    ])
+    setRecordPageData(normalizePage(m, recordSize))
     setReport(r)
+    setTrend(t)
   }
 
   useEffect(() => {
     refresh().catch(err => setMessage(err.message))
-  }, [])
+  }, [recordPage, recordSize, recordFilters])
 
   function onFileChange(e) {
     const picked = e.target.files?.[0]
@@ -186,16 +220,15 @@ function Dashboard({ user, onLogout, onOpenAdmin }) {
 
   async function analyze() {
     if (!file) {
-      setMessage('请先选择一张饭菜图片')
+      setMessage('请先选择一张饮食图片。')
       return
     }
-
     setLoading(true)
     setMessage('')
-
     try {
       const data = await analyzeMeal(file, goal)
       setResult(data)
+      setRecordPage(0)
       await refresh()
     } catch (err) {
       setMessage(err.message)
@@ -205,31 +238,38 @@ function Dashboard({ user, onLogout, onOpenAdmin }) {
   }
 
   async function handleDeleteRecord(id) {
-    const ok = window.confirm('确定要删除这条饮食记录吗？')
-    if (!ok) return
-
+    if (!window.confirm('确认删除这条饮食记录吗？相关图片也会一起删除。')) return
     setLoading(true)
     setMessage('')
-
     try {
       await deleteMeal(id)
-      setMessage('记录已删除')
+      setMessage('饮食记录已删除。')
       await refresh()
     } catch (err) {
-      setMessage(err.message || '删除失败，请稍后重试')
+      setMessage(err.message || '删除饮食记录失败。')
     } finally {
       setLoading(false)
     }
   }
 
-  const avgLabel = useMemo(() => {
-    return report ? `${report.averageScore || 0}` : '--'
-  }, [report])
+  function applyRecordFilters(e) {
+    e.preventDefault()
+    setRecordPage(0)
+    setRecordFilters(recordFiltersDraft)
+  }
 
+  function resetRecordFilters() {
+    setRecordFiltersDraft(defaultRecordFilters)
+    setRecordFilters(defaultRecordFilters)
+    setRecordPage(0)
+  }
+
+  const avgLabel = useMemo(() => (report ? `${report.averageScore || 0}` : '--'), [report])
   const weeklyRecords = useMemo(() => {
     const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000
-    return records.filter(r => new Date(r.createdAt).getTime() >= cutoff)
-  }, [records])
+    return (recordPageData.content || []).filter(r => new Date(r.createdAt).getTime() >= cutoff)
+  }, [recordPageData.content])
+  const records = recordPageData.content || []
 
   return (
     <main className="app-shell">
@@ -238,20 +278,17 @@ function Dashboard({ user, onLogout, onOpenAdmin }) {
           <Utensils />
           <div>
             <h1>MealCheck</h1>
-            <p>拍照式饮食结构评估系统</p>
+            <p>AI 饮食识别、评分、RAG 建议与趋势分析</p>
           </div>
         </div>
-
         <div className="userbox">
-          {user?.role === 'ADMIN' && (
+          {isAdmin(user) && (
             <button onClick={onOpenAdmin} type="button">
               <ShieldCheck size={16} />
               管理后台
             </button>
           )}
-
           <span>{user.displayName || user.username}</span>
-
           <button onClick={onLogout} type="button">
             <LogOut size={16} />
             退出
@@ -261,347 +298,115 @@ function Dashboard({ user, onLogout, onOpenAdmin }) {
 
       {message && <div className="toast">{message}</div>}
 
-      <section className="grid">
-        <div className="card upload-card">
-          <h2>
-            <Camera size={20} />
-            上传饭菜图片
-          </h2>
-
-          <p>系统评估饮食结构，接入 Qwen系列VL API</p>
-
-          <label className="file-picker">
-            <input type="file" accept="image/*" onChange={onFileChange} />
-            {preview ? <img src={preview} alt="preview" /> : <span>点击选择图片</span>}
-          </label>
-
-          <select value={goal} onChange={e => setGoal(e.target.value)}>
-            {goals.map(g => (
-              <option key={g.value} value={g.value}>
-                {g.label}
-              </option>
-            ))}
-          </select>
-
-          <button className="primary" onClick={analyze} disabled={loading}>
-            {loading ? '分析中...' : '开始分析'}
+      <section className="dashboard-page">
+        <nav className="dashboard-tabs" aria-label="用户页面切换">
+          <button className={activeSection === 'overview' ? 'active' : ''} onClick={() => setActiveSection('overview')} type="button">
+            概览分析
           </button>
-        </div>
+          <button className={activeSection === 'records' ? 'active' : ''} onClick={() => setActiveSection('records')} type="button">
+            饮食记录
+          </button>
+        </nav>
 
-        <div className="card score-card">
-          <h2>
-            <ShieldCheck size={20} />
-            本餐分析结果
-          </h2>
+        {activeSection === 'overview' ? (
+          <>
+            <section className="analysis-layout">
+              <div className="card upload-card">
+                <h2>
+                  <Camera size={20} />
+                  上传饮食图片
+                </h2>
+                <p>选择餐盘图片后，系统会识别食物、计算结构评分，并结合知识库生成建议。</p>
+                <label className="file-picker">
+                  <input type="file" accept="image/*" onChange={onFileChange} />
+                  {preview ? <img src={preview} alt="preview" /> : <span>选择图片</span>}
+                </label>
+                <div className="upload-actions">
+                  <select value={goal} onChange={e => setGoal(e.target.value)}>
+                    {goals.map(g => (
+                      <option key={g.value} value={g.value}>
+                        {g.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button className="primary" onClick={analyze} disabled={loading}>
+                    {loading ? '分析中...' : '开始分析'}
+                  </button>
+                </div>
+              </div>
 
-          {result ? (
-            <ResultView result={result} />
-          ) : (
-            <Empty text="上传图片后，这里会显示识别食物、结构评分、风险标签和饮食建议。" />
-          )}
-        </div>
+              <div className="card score-card">
+                <h2>
+                  <ShieldCheck size={20} />
+                  本次分析结果
+                </h2>
+                {result ? <ResultView result={result} /> : <Empty text="上传图片后，这里会显示评分、食物识别、风险标签和饮食建议。" />}
+              </div>
+            </section>
 
-        {report ? (
-          <ReportView
-            report={report}
-            avgLabel={avgLabel}
-            onOpenDetail={() => setShowWeeklyDetail(true)}
-          />
+            <section className="insight-layout">
+              {report ? <ReportView report={report} avgLabel={avgLabel} onOpenDetail={() => setShowWeeklyDetail(true)} /> : <div className="card"><Empty text="暂无周报数据" /></div>}
+              <TrendCard trend={trend} />
+            </section>
+          </>
         ) : (
-          <Empty text="暂无周报" />
+          <div className="card history-card records-page">
+            <div className="section-title-row">
+              <div>
+                <h2>最近饮食记录</h2>
+                <p>按目标、日期和评分筛选历史记录。</p>
+              </div>
+              <span>{recordPageData.totalElements || 0} 条</span>
+            </div>
+            <form className="record-filter-form" onSubmit={applyRecordFilters}>
+              <select value={recordFiltersDraft.goal} onChange={e => setRecordFiltersDraft({ ...recordFiltersDraft, goal: e.target.value })}>
+                <option value="">全部目标</option>
+                {goals.map(g => (
+                  <option key={g.value} value={g.value}>
+                    {g.label}
+                  </option>
+                ))}
+              </select>
+              <input type="date" value={recordFiltersDraft.from} onChange={e => setRecordFiltersDraft({ ...recordFiltersDraft, from: e.target.value })} />
+              <input type="date" value={recordFiltersDraft.to} onChange={e => setRecordFiltersDraft({ ...recordFiltersDraft, to: e.target.value })} />
+              <input type="number" min="0" max="100" placeholder="最低评分" value={recordFiltersDraft.minScore} onChange={e => setRecordFiltersDraft({ ...recordFiltersDraft, minScore: e.target.value })} />
+              <input type="number" min="0" max="100" placeholder="最高评分" value={recordFiltersDraft.maxScore} onChange={e => setRecordFiltersDraft({ ...recordFiltersDraft, maxScore: e.target.value })} />
+              <button className="secondary-btn" type="submit" disabled={loading}>筛选</button>
+              <button className="secondary-btn" type="button" onClick={resetRecordFilters} disabled={loading}>重置</button>
+            </form>
+
+            <div className="record-list">
+              {records.length ? records.map(r => <RecordItem key={r.id} record={r} onDelete={handleDeleteRecord} />) : <Empty text="暂无饮食记录" />}
+            </div>
+            <RecordPagination pageData={recordPageData} pageSize={recordSize} setPage={setRecordPage} setPageSize={setRecordSize} loading={loading} />
+          </div>
         )}
 
-        <div className="card history-card">
-          <h2>最近记录</h2>
-
-          {records.length ? (
-            records.map(r => (
-              <RecordItem
-                key={r.id}
-                record={r}
-                onDelete={handleDeleteRecord}
-              />
-            ))
-          ) : (
-            <Empty text="还没有饮食记录" />
-          )}
-        </div>
+        <AssistantCard onError={setMessage} />
       </section>
 
-      {showWeeklyDetail && (
-        <WeeklyReportModal
-          report={report}
-          avgLabel={avgLabel}
-          records={weeklyRecords}
-          onClose={() => setShowWeeklyDetail(false)}
-        />
-      )}
+      {showWeeklyDetail && <WeeklyReportModal report={report} avgLabel={avgLabel} records={weeklyRecords} onClose={() => setShowWeeklyDetail(false)} />}
     </main>
   )
 }
 
-function ResultView({ result }) {
-  const evaluation = result?.evaluation || {}
-  const recognition = result?.recognition || {}
-  const foods = Array.isArray(recognition.foods) ? recognition.foods : []
-  const riskTags = Array.isArray(evaluation.riskTags) ? evaluation.riskTags : []
-  const references = Array.isArray(result?.references) ? result.references : []
-
+function RecordPagination({ pageData, pageSize, setPage, setPageSize, loading }) {
+  if ((pageData.totalElements || 0) <= 0) return null
   return (
-    <div>
-      <div className="score-circle">
-        <strong>{evaluation.score ?? '--'}</strong>
-        <span>分</span>
-      </div>
-
-      <p className="summary">{evaluation.summary || '暂无分析摘要'}</p>
-
-      {recognition.demoMode && <span className="badge warn">演示识别模式</span>}
-
-      <h3>识别食物</h3>
-      <div className="chips">
-        {foods.map((f, i) => (
-          <span key={i}>
-            {f.name} · {categoryName(f.category)}
-          </span>
-        ))}
-      </div>
-
-      <h3>风险标签</h3>
-      <div className="chips risk">
-        {riskTags.length ? (
-          riskTags.map(x => <span key={x}>{x}</span>)
-        ) : (
-          <span>暂无明显风险</span>
-        )}
-      </div>
-
-      <h3>RAG 饮食建议</h3>
-      <pre className="advice">{result?.advice || '暂无建议'}</pre>
-
-      <h3>参考知识片段</h3>
-      {references.map(ref => (
-        <details key={ref.id}>
-          <summary>
-            {ref.title} · 相似度 {Number(ref.score).toFixed(2)}
-          </summary>
-          <p>{ref.content}</p>
-        </details>
-      ))}
-    </div>
-  )
-}
-
-function ReportView({ report, avgLabel, onOpenDetail }) {
-  return (
-    <div>
-      <div className="metrics">
-        <div>
-          <strong>{report.totalMeals}</strong>
-          <span>记录餐次</span>
-        </div>
-
-        <div>
-          <strong>{avgLabel}</strong>
-          <span>平均评分</span>
-        </div>
-      </div>
-
-      <p>{report.reportText}</p>
-
-      <button className="ghost detail-report-btn" onClick={onOpenDetail} type="button">
-        查看详细周报
+    <div className="pagination compact-pagination">
+      <button className="secondary-btn" type="button" onClick={() => setPage(page => Math.max(0, page - 1))} disabled={pageData.page <= 0 || loading}>
+        上一页
       </button>
-
-      <h3>风险统计</h3>
-      <div className="chips risk">
-        {Object.entries(report.riskTotals || {}).length ? (
-          Object.entries(report.riskTotals).map(([k, v]) => (
-            <span key={k}>
-              {k} × {v}
-            </span>
-          ))
-        ) : (
-          <span>暂无明显风险</span>
-        )}
-      </div>
+      <span>第 {(pageData.page ?? 0) + 1} / {Math.max(1, pageData.totalPages || 1)} 页，共 {pageData.totalElements || 0} 条</span>
+      <button className="secondary-btn" type="button" onClick={() => setPage(page => page + 1)} disabled={(pageData.page ?? 0) + 1 >= (pageData.totalPages || 1) || loading}>
+        下一页
+      </button>
+      <select value={pageSize} onChange={e => { setPageSize(Number(e.target.value)); setPage(0) }}>
+        <option value="5">5 条/页</option>
+        <option value="10">10 条/页</option>
+        <option value="20">20 条/页</option>
+      </select>
     </div>
-  )
-}
-
-function WeeklyReportModal({ report, avgLabel, records, onClose }) {
-  return (
-    <div className="modal-backdrop">
-      <div className="weekly-modal">
-        <div className="modal-head">
-          <div>
-            <h2>一周详细饮食报告</h2>
-            <p>展示最近 7 天的饮食结构总结和提交图片。</p>
-          </div>
-
-          <button className="modal-close" onClick={onClose} type="button">
-            关闭
-          </button>
-        </div>
-
-        <div className="metrics">
-          <div>
-            <strong>{report?.totalMeals || 0}</strong>
-            <span>记录餐次</span>
-          </div>
-
-          <div>
-            <strong>{avgLabel}</strong>
-            <span>平均评分</span>
-          </div>
-        </div>
-
-        <section className="weekly-section">
-          <h3>一周总结</h3>
-          <p>{report?.reportText || '最近 7 天暂无记录。'}</p>
-        </section>
-
-        <section className="weekly-section">
-          <h3>风险统计</h3>
-          <div className="chips risk">
-            {Object.entries(report?.riskTotals || {}).length ? (
-              Object.entries(report.riskTotals).map(([k, v]) => (
-                <span key={k}>
-                  {k} × {v}
-                </span>
-              ))
-            ) : (
-              <span>暂无明显风险</span>
-            )}
-          </div>
-        </section>
-
-        <section className="weekly-section">
-          <h3>本周饮食照片</h3>
-
-          {records.length ? (
-            <div className="weekly-photo-grid">
-              {records.map(record => (
-                <article className="weekly-photo-card" key={record.id}>
-                  <AuthImage url={record.imageUrl} alt="饭菜图片" />
-
-                  <div className="weekly-photo-info">
-                    <strong>{record.score} 分</strong>
-                    <span>{new Date(record.createdAt).toLocaleString()}</span>
-                  </div>
-
-                  <p>{record.summary}</p>
-
-                  <div className="chips small">
-                    {record.foods?.slice(0, 6).map((f, i) => (
-                      <span key={i}>{f.name}</span>
-                    ))}
-                  </div>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <Empty text="最近 7 天暂无饮食照片" />
-          )}
-        </section>
-      </div>
-    </div>
-  )
-}
-
-function buildApiUrl(path) {
-  if (!path) return ''
-  if (/^https?:\/\//i.test(path)) return path
-
-  const base = import.meta.env.VITE_API_BASE || ''
-  return `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`
-}
-
-function AuthImage({ url, alt }) {
-  const [src, setSrc] = useState('')
-
-  useEffect(() => {
-    if (!url) {
-      setSrc('')
-      return
-    }
-
-    let objectUrl = ''
-    const token = getToken()
-
-    fetch(buildApiUrl(url), {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    })
-      .then(res => {
-        if (!res.ok) throw new Error('图片加载失败')
-        return res.blob()
-      })
-      .then(blob => {
-        objectUrl = URL.createObjectURL(blob)
-        setSrc(objectUrl)
-      })
-      .catch(() => setSrc(''))
-
-    return () => {
-      if (objectUrl) URL.revokeObjectURL(objectUrl)
-    }
-  }, [url])
-
-  if (!src) {
-    return <div className="photo-placeholder">图片加载中</div>
-  }
-
-  return <img src={src} alt={alt} />
-}
-
-function RecordItem({ record, onDelete }) {
-  return (
-    <article className="record">
-      <div className="record-head">
-        <div>
-          <strong>{record.score} 分</strong>
-          <span>{new Date(record.createdAt).toLocaleString()}</span>
-        </div>
-
-        <button
-          className="delete-btn"
-          onClick={() => onDelete(record.id)}
-          type="button"
-        >
-          删除
-        </button>
-      </div>
-
-      <p>{record.summary}</p>
-
-      <div className="chips small">
-        {record.foods?.slice(0, 6).map((f, i) => (
-          <span key={i}>{f.name}</span>
-        ))}
-      </div>
-    </article>
-  )
-}
-
-function Empty({ text }) {
-  return <p className="empty">{text}</p>
-}
-
-function categoryName(c) {
-  return (
-    {
-      staple: '主食',
-      protein: '蛋白质',
-      vegetable: '蔬菜',
-      fruit: '水果',
-      dairy: '乳制品',
-      soup: '汤品',
-      drink: '饮品',
-      dessert: '甜品',
-      fried: '油炸',
-      oily: '高油',
-      other: '其他'
-    }[c] || c
   )
 }
 

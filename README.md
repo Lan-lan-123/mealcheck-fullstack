@@ -4,7 +4,6 @@ MealCheck is a meal image analysis system. Users can upload meal photos, get foo
 
 ## Tech Stack
 
-- Frontend: React + Vite
 - Backend: Spring Boot
 - Database: PostgreSQL
 - Vector Search: pgvector
@@ -24,23 +23,42 @@ MealCheck is a meal image analysis system. Users can upload meal photos, get foo
   - Global meal record pagination, filtering, deletion, and visual analytics
   - RAG knowledge creation, editing, deletion, search, rebuild, and hit statistics
 
+## New in This Version
+
+Compared with the previous project version, [MealCheck-agent](https://github.com/Lan-lan-123/MealCheck-agent), this version adds the following modules and capabilities:
+
+- Intelligent diet assistant module
+  - Added `LangChainDietAssistantService` and assistant-related DTOs/controllers
+  - Supports structured RAG responses with `summary`, `suggestions`, `references`, and `riskLevel`
+  - Supports multi-turn conversation context and user-specific assistant memory
+- Redis-based infrastructure
+  - Added Redis integration for short-term assistant context, RAG retrieval cache, admin statistics cache, token blacklist, and API rate limiting
+- User diet profile and trend analysis
+  - Added `UserDietProfile` persistence and profile services
+  - Added user meal trend statistics, 30-day overview, and richer weekly report support
+
 ## Project Structure
 
 ```text
 mealcheck-fullstack/
   backend/              Spring Boot backend
   frontend/             React + Vite frontend
-  docker-compose.yml    PostgreSQL + pgvector services
+  docker-compose.yml    PostgreSQL + Redis + optional full-stack services
   .env.example          Environment variable example
 ```
 
 ## Quick Start
 
-### 1. Start the database
+### 1. Start only infrastructure services for local development
 
 ```bash
 docker compose up -d
 ```
+
+This starts only:
+
+- PostgreSQL + pgvector
+- Redis
 
 ### 2. Start the backend
 
@@ -69,6 +87,14 @@ Default frontend URL:
 http://localhost:5173
 ```
 
+### Optional: start the whole stack with Docker
+
+```bash
+docker compose --profile fullstack up --build -d
+```
+
+This starts PostgreSQL, Redis, backend, and frontend together.
+
 ## Environment Variables
 
 ```text
@@ -77,7 +103,7 @@ SPRING_DATASOURCE_USERNAME=mealcheck
 SPRING_DATASOURCE_PASSWORD=mealcheck123
 MEALCHECK_AI_API_KEY=your_api_key
 MEALCHECK_AI_BASE_URL=https://example.com/compatible-mode/v1/chat/completions
-MEALCHECK_AI_MODEL=qwen3-vl-32b-instruct
+MEALCHECK_AI_MODEL=qwen3-vl
 ```
 
 ## Notes

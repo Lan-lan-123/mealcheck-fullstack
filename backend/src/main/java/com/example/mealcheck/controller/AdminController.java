@@ -1,11 +1,15 @@
 package com.example.mealcheck.controller;
 
+import com.example.mealcheck.dto.AdminAuditLogPageResponse;
 import com.example.mealcheck.dto.AdminDashboardResponse;
+import com.example.mealcheck.dto.AdminKnowledgeChunkPageResponse;
 import com.example.mealcheck.dto.AdminKnowledgeChunkRequest;
 import com.example.mealcheck.dto.AdminKnowledgeChunkResponse;
+import com.example.mealcheck.dto.AdminMealAnalyticsResponse;
 import com.example.mealcheck.dto.AdminMealPageResponse;
 import com.example.mealcheck.dto.AdminMealRecordResponse;
 import com.example.mealcheck.dto.AdminStatsResponse;
+import com.example.mealcheck.dto.AdminUserPageResponse;
 import com.example.mealcheck.dto.AdminUserResponse;
 import com.example.mealcheck.security.UserPrincipal;
 import com.example.mealcheck.service.AdminService;
@@ -39,9 +43,18 @@ public class AdminController {
         return adminService.dashboard();
     }
 
+    @GetMapping("/audit-logs")
+    public AdminAuditLogPageResponse auditLogs(@RequestParam(value = "page", defaultValue = "0") int page,
+                                               @RequestParam(value = "size", defaultValue = "20") int size) {
+        return adminService.auditLogs(page, size);
+    }
+
     @GetMapping("/users")
-    public List<AdminUserResponse> users() {
-        return adminService.users();
+    public AdminUserPageResponse users(@RequestParam(value = "page", defaultValue = "0") int page,
+                                       @RequestParam(value = "size", defaultValue = "20") int size,
+                                       @RequestParam(value = "username", required = false) String username,
+                                       @RequestParam(value = "role", required = false) String role) {
+        return adminService.users(page, size, username, role);
     }
 
     @DeleteMapping("/users/{id}")
@@ -62,33 +75,52 @@ public class AdminController {
         return adminService.meals(page, size, username, from, to, minScore, maxScore);
     }
 
+    @GetMapping("/meals/analytics")
+    public AdminMealAnalyticsResponse mealAnalytics(@RequestParam(value = "username", required = false) String username,
+                                                   @RequestParam(value = "from", required = false) LocalDate from,
+                                                   @RequestParam(value = "to", required = false) LocalDate to,
+                                                   @RequestParam(value = "minScore", required = false) Integer minScore,
+                                                   @RequestParam(value = "maxScore", required = false) Integer maxScore) {
+        return adminService.mealAnalytics(username, from, to, minScore, maxScore);
+    }
+
     @DeleteMapping("/meals/{id}")
-    public ResponseEntity<Void> deleteMeal(@PathVariable Long id) {
-        adminService.deleteMealRecord(id);
+    public ResponseEntity<Void> deleteMeal(@PathVariable Long id,
+                                           @AuthenticationPrincipal UserPrincipal principal) {
+        adminService.deleteMealRecord(id, principal);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/knowledge/chunks")
-    public List<AdminKnowledgeChunkResponse> knowledgeChunks(@RequestParam(value = "title", required = false) String title) {
-        return adminService.knowledgeChunks(title);
+    public AdminKnowledgeChunkPageResponse knowledgeChunks(@RequestParam(value = "keyword", required = false) String keyword,
+                                                          @RequestParam(value = "title", required = false) String title,
+                                                          @RequestParam(value = "source", required = false) String source,
+                                                          @RequestParam(value = "sort", required = false) String sort,
+                                                          @RequestParam(value = "page", defaultValue = "0") int page,
+                                                          @RequestParam(value = "size", defaultValue = "8") int size) {
+        String search = keyword == null || keyword.isBlank() ? title : keyword;
+        return adminService.knowledgeChunks(search, source, sort, page, size);
     }
 
     @PostMapping("/knowledge/chunks")
-    public ResponseEntity<Void> addKnowledgeChunk(@Valid @RequestBody AdminKnowledgeChunkRequest request) {
-        adminService.addKnowledgeChunk(request);
+    public ResponseEntity<Void> addKnowledgeChunk(@Valid @RequestBody AdminKnowledgeChunkRequest request,
+                                                  @AuthenticationPrincipal UserPrincipal principal) {
+        adminService.addKnowledgeChunk(request, principal);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/knowledge/chunks/{id}")
-    public ResponseEntity<Void> deleteKnowledgeChunk(@PathVariable Long id) {
-        adminService.deleteKnowledgeChunk(id);
+    public ResponseEntity<Void> deleteKnowledgeChunk(@PathVariable Long id,
+                                                     @AuthenticationPrincipal UserPrincipal principal) {
+        adminService.deleteKnowledgeChunk(id, principal);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/knowledge/chunks/{id}")
     public ResponseEntity<Void> updateKnowledgeChunk(@PathVariable Long id,
-                                                     @Valid @RequestBody AdminKnowledgeChunkRequest request) {
-        adminService.updateKnowledgeChunk(id, request);
+                                                     @Valid @RequestBody AdminKnowledgeChunkRequest request,
+                                                     @AuthenticationPrincipal UserPrincipal principal) {
+        adminService.updateKnowledgeChunk(id, request, principal);
         return ResponseEntity.noContent().build();
     }
 

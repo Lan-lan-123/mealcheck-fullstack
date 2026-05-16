@@ -9,6 +9,12 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME:mealcheck}
     password: ${SPRING_DATASOURCE_PASSWORD:mealcheck123}
     driver-class-name: org.postgresql.Driver
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: ${SPRING_REDIS_PORT:6379}
+      password: ${SPRING_REDIS_PASSWORD:}
+      timeout: ${SPRING_REDIS_TIMEOUT:2s}
   jpa:
     hibernate:
       ddl-auto: update
@@ -31,9 +37,9 @@ mealcheck:
     allowed-origins: ${MEALCHECK_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
   upload-dir: ${MEALCHECK_UPLOAD_DIR:./uploads}
   ai:
-    api-key: ${MEALCHECK_AI_API_KEY:}
-    base-url: ${MEALCHECK_AI_BASE_URL:}
-    model: ${MEALCHECK_AI_MODEL:qwen2.5-vl-3b-instruct}
+    api-key: ${MEALCHECK_AI_API_KEY:your_api_key}
+    base-url: ${MEALCHECK_AI_BASE_URL:https://example.com/compatible-mode/v1/chat/completions}
+    model: ${MEALCHECK_AI_MODEL:qwen3-vl}
     timeout-seconds: ${MEALCHECK_AI_TIMEOUT_SECONDS:60}
   knowledge:
     auto-index: ${MEALCHECK_KNOWLEDGE_AUTO_INDEX:true}

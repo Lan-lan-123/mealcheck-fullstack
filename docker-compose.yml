@@ -1,4 +1,18 @@
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: mealcheck-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - mealcheck_redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
   postgres:
     image: pgvector/pgvector:pg16
     container_name: mealcheck-postgres
@@ -17,5 +31,48 @@ services:
       timeout: 5s
       retries: 20
 
+  backend:
+    profiles:
+      - fullstack
+    build:
+      context: ./backend
+    container_name: mealcheck-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/mealcheck
+      SPRING_DATASOURCE_USERNAME: mealcheck
+      SPRING_DATASOURCE_PASSWORD: mealcheck123
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      MEALCHECK_UPLOAD_DIR: /app/uploads
+      MEALCHECK_CORS_ALLOWED_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+      MEALCHECK_AI_API_KEY: ${MEALCHECK_AI_API_KEY:-}
+      MEALCHECK_AI_BASE_URL: ${MEALCHECK_AI_BASE_URL:-}
+      MEALCHECK_AI_MODEL: ${MEALCHECK_AI_MODEL:-qwen2.5-vl-3b-instruct}
+    ports:
+      - "8080:8080"
+    volumes:
+      - mealcheck_uploads:/app/uploads
+
+  frontend:
+    profiles:
+      - fullstack
+    build:
+      context: ./frontend
+    container_name: mealcheck-frontend
+    depends_on:
+      - backend
+    environment:
+      VITE_PROXY_TARGET: http://backend:8080
+    ports:
+      - "5173:5173"
+
 volumes:
   mealcheck_pgdata:
+  mealcheck_redisdata:
+  mealcheck_uploads:

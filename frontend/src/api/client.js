@@ -1,5 +1,9 @@
 const API_BASE = import.meta.env.VITE_API_BASE || ''
 
+const API_ENDPOINTS = {
+  assistantAsk: '/api/assistant/ask'
+}
+
 export function getToken() {
   return localStorage.getItem('mealcheck_token')
 }
@@ -78,6 +82,12 @@ export function login(payload) {
   })
 }
 
+export function logout() {
+  return request('/api/auth/logout', {
+    method: 'POST'
+  })
+}
+
 export function analyzeMeal(file, goal) {
   const form = new FormData()
   form.append('image', file)
@@ -88,17 +98,33 @@ export function analyzeMeal(file, goal) {
   })
 }
 
-export function listMeals() {
-  return request('/api/meals')
+export function listMeals(params = {}) {
+  return request(`/api/meals${toQuery(params)}`)
 }
 
 export function weeklyReport(days = 7) {
   return request(`/api/reports/weekly?days=${days}`)
 }
 
+export function mealTrends(days = 30) {
+  return request(`/api/meals/trends?days=${days}`)
+}
+
+export function healthCheck() {
+  return request('/api/health')
+}
+
 export function deleteMeal(id) {
   return request(`/api/meals/${id}`, {
     method: 'DELETE'
+  })
+}
+
+export function askDietAssistant(question, history = []) {
+  return request(API_ENDPOINTS.assistantAsk, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question, history })
   })
 }
 
@@ -122,8 +148,12 @@ export function adminDashboard() {
   return request('/api/admin/dashboard')
 }
 
-export function adminUsers() {
-  return request('/api/admin/users')
+export function adminAuditLogs(params = {}) {
+  return request(`/api/admin/audit-logs${toQuery(params)}`)
+}
+
+export function adminUsers(params = {}) {
+  return request(`/api/admin/users${toQuery(params)}`)
 }
 
 export function adminDeleteUser(id) {
@@ -145,6 +175,10 @@ function toQuery(params = {}) {
 
 export function adminMeals(params = {}) {
   return request(`/api/admin/meals${toQuery(params)}`)
+}
+
+export function adminMealAnalytics(params = {}) {
+  return request(`/api/admin/meals/analytics${toQuery(params)}`)
 }
 
 export function adminDeleteMeal(id) {

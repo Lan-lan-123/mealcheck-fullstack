@@ -1,11 +1,15 @@
 package com.example.mealcheck.controller;
 
 import com.example.mealcheck.dto.MealAnalysisResponse;
+import com.example.mealcheck.dto.MealRecordPageResponse;
 import com.example.mealcheck.dto.MealRecordResponse;
+import com.example.mealcheck.dto.UserMealTrendResponse;
 import com.example.mealcheck.dto.WeeklyReportResponse;
 import com.example.mealcheck.security.UserPrincipal;
 import com.example.mealcheck.service.MealAnalysisService;
+import com.example.mealcheck.service.RateLimitService;
 import com.example.mealcheck.service.WeeklyReportService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,8 +25,11 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
 
 import java.util.List;
+import java.time.LocalDate;
+import java.time.Duration;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api")
@@ -30,11 +37,14 @@ public class MealController {
 
     private final MealAnalysisService mealAnalysisService;
     private final WeeklyReportService weeklyReportService;
+    private final RateLimitService rateLimitService;
 
     public MealController(MealAnalysisService mealAnalysisService,
-                          WeeklyReportService weeklyReportService) {
+                          WeeklyReportService weeklyReportService,
+                          RateLimitService rateLimitService) {
         this.mealAnalysisService = mealAnalysisService;
         this.weeklyReportService = weeklyReportService;
+        this.rateLimitService = rateLimitService;
     }
 
     @PostMapping("/meals/analyze")
@@ -45,12 +55,35 @@ public class MealController {
             throw new IllegalArgumentException("请上传饭菜图片");
         }
 
+        if (!rateLimitService.allow("meal-analyze:" + principal.getUsername(), 10, Duration.ofMinutes(1))) {
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "图片分析太频繁了，请稍后再试。");
+        }
+
         return mealAnalysisService.analyze(principal, image, goal);
     }
 
     @GetMapping("/meals")
-    public List<MealRecordResponse> list(@AuthenticationPrincipal UserPrincipal principal) {
-        return mealAnalysisService.listRecent(principal);
+    public Object list(@AuthenticationPrincipal UserPrincipal principal,
+                       @RequestParam(value = "page", required = false) Integer page,
+                       @RequestParam(value = "size", required = false) Integer size,
+                       @RequestParam(value = "goal", required = false) String goal,
+                       @RequestParam(value = "from", required = false) LocalDate from,
+                       @RequestParam(value = "to", required = false) LocalDate to,
+                       @RequestParam(value = "minScore", required = false) Integer minScore,
+                       @RequestParam(value = "maxScore", required = false) Integer maxScore) {
+        if (page == null && size == null && goal == null && from == null && to == null && minScore == null && maxScore == null) {
+            return mealAnalysisService.listRecent(principal);
+        }
+        return mealAnalysisService.listRecentPage(
+                principal,
+                page == null ? 0 : page,
+                size == null ? 10 : size,
+                goal,
+                from,
+                to,
+                minScore,
+                maxScore
+        );
     }
 
     @DeleteMapping("/meals/{id}")
@@ -64,6 +97,12 @@ public class MealController {
     public WeeklyReportResponse weekly(@AuthenticationPrincipal UserPrincipal principal,
                                        @RequestParam(value = "days", defaultValue = "7") int days) {
         return weeklyReportService.generate(principal, days);
+    }
+
+    @GetMapping("/meals/trends")
+    public UserMealTrendResponse trends(@AuthenticationPrincipal UserPrincipal principal,
+                                        @RequestParam(value = "days", defaultValue = "30") int days) {
+        return mealAnalysisService.trend(principal, days);
     }
 
     @GetMapping("/meals/{id}/image")

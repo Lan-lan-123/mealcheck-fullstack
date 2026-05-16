@@ -1,11 +1,13 @@
 package com.example.mealcheck.service;
 
-import com.example.mealcheck.config.AppProperties;
 import com.example.mealcheck.dto.KnowledgeSnippet;
+import com.example.mealcheck.dto.FoodItem;
 import com.example.mealcheck.dto.MealAnalysisResponse;
+import com.example.mealcheck.dto.MealRecordPageResponse;
 import com.example.mealcheck.dto.MealRecordResponse;
 import com.example.mealcheck.dto.RecognitionResult;
 import com.example.mealcheck.dto.StructureEvaluation;
+import com.example.mealcheck.dto.UserMealTrendResponse;
 import com.example.mealcheck.entity.MealRecord;
 import com.example.mealcheck.entity.UserAccount;
 import com.example.mealcheck.repository.MealRecordRepository;
@@ -15,16 +17,24 @@ import com.example.mealcheck.util.Jsons;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,8 +46,9 @@ public class MealAnalysisService {
     private final MealScoringService scoringService;
     private final KnowledgeIndexService knowledgeIndexService;
     private final AdviceGenerationService adviceGenerationService;
+    private final ImageStorageService imageStorageService;
+    private final UserDietProfileService userDietProfileService;
     private final ObjectMapper objectMapper;
-    private final AppProperties properties;
 
     public MealAnalysisService(UserAccountRepository userRepository,
                                MealRecordRepository mealRecordRepository,
@@ -45,16 +56,18 @@ public class MealAnalysisService {
                                MealScoringService scoringService,
                                KnowledgeIndexService knowledgeIndexService,
                                AdviceGenerationService adviceGenerationService,
-                               ObjectMapper objectMapper,
-                               AppProperties properties) {
+                               ImageStorageService imageStorageService,
+                               UserDietProfileService userDietProfileService,
+                               ObjectMapper objectMapper) {
         this.userRepository = userRepository;
         this.mealRecordRepository = mealRecordRepository;
         this.recognitionService = recognitionService;
         this.scoringService = scoringService;
         this.knowledgeIndexService = knowledgeIndexService;
         this.adviceGenerationService = adviceGenerationService;
+        this.imageStorageService = imageStorageService;
+        this.userDietProfileService = userDietProfileService;
         this.objectMapper = objectMapper;
-        this.properties = properties;
     }
 
     @Transactional
@@ -62,7 +75,7 @@ public class MealAnalysisService {
         UserAccount user = userRepository.findByUsername(principal.getUsername()).orElseThrow();
 
         String normalizedGoal = goal == null || goal.isBlank() ? "balanced" : goal;
-        String imagePath = storeImage(user.getId(), image);
+        String imagePath = imageStorageService.store(user.getId(), image);
 
         RecognitionResult recognition = recognitionService.recognize(image);
         StructureEvaluation evaluation = scoringService.evaluate(recognition, normalizedGoal);
@@ -92,6 +105,7 @@ public class MealAnalysisService {
 
         user.setLastUploadAt(LocalDateTime.now());
         userRepository.save(user);
+        userDietProfileService.refresh(user);
 
         MealAnalysisResponse response = new MealAnalysisResponse();
         response.setRecordId(record.getId());
@@ -114,10 +128,99 @@ public class MealAnalysisService {
     }
 
     @Transactional(readOnly = true)
+    public MealRecordPageResponse listRecentPage(UserPrincipal principal,
+                                                 int page,
+                                                 int size,
+                                                 String goal,
+                                                 LocalDate from,
+                                                 LocalDate to,
+                                                 Integer minScore,
+                                                 Integer maxScore) {
+        UserAccount user = userRepository.findByUsername(principal.getUsername()).orElseThrow();
+        int safePage = Math.max(0, page);
+        int safeSize = Math.max(1, Math.min(size, 50));
+
+        Page<MealRecord> records = mealRecordRepository.findAll(
+                userMealSpecification(user, goal, from, to, minScore, maxScore),
+                PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "createdAt"))
+        );
+
+        return new MealRecordPageResponse(
+                records.getContent().stream().map(this::toResponse).toList(),
+                records.getTotalElements(),
+                records.getTotalPages(),
+                records.getNumber(),
+                records.getSize()
+        );
+    }
+
+    private Specification<MealRecord> userMealSpecification(UserAccount user,
+                                                            String goal,
+                                                            LocalDate from,
+                                                            LocalDate to,
+                                                            Integer minScore,
+                                                            Integer maxScore) {
+        return (root, query, cb) -> {
+            List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("user"), user));
+
+            if (goal != null && !goal.isBlank() && !"all".equalsIgnoreCase(goal)) {
+                predicates.add(cb.equal(root.get("goal"), goal.trim()));
+            }
+            if (from != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), from.atStartOfDay()));
+            }
+            if (to != null) {
+                predicates.add(cb.lessThan(root.get("createdAt"), to.plusDays(1).atStartOfDay()));
+            }
+            if (minScore != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("score"), minScore));
+            }
+            if (maxScore != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("score"), maxScore));
+            }
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+    }
+
+    @Transactional(readOnly = true)
     public List<MealRecord> listSince(UserAccount user, int days) {
         return mealRecordRepository.findByUserAndCreatedAtAfterOrderByCreatedAtAsc(
                 user,
                 LocalDateTime.now().minusDays(days)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public UserMealTrendResponse trend(UserPrincipal principal, int days) {
+        UserAccount user = userRepository.findByUsername(principal.getUsername()).orElseThrow();
+        int safeDays = Math.max(7, Math.min(days, 90));
+        List<MealRecord> records = mealRecordRepository.findByUserAndCreatedAtAfterOrderByCreatedAtAsc(
+                user,
+                LocalDateTime.now().minusDays(safeDays)
+        );
+
+        List<Integer> scores = records.stream()
+                .map(MealRecord::getScore)
+                .filter(Objects::nonNull)
+                .toList();
+        int averageScore = scores.isEmpty()
+                ? 0
+                : (int) Math.round(scores.stream().mapToInt(Integer::intValue).average().orElse(0));
+        long lowScoreCount = scores.stream().filter(score -> score < 70).count();
+        long highScoreCount = scores.stream().filter(score -> score >= 80).count();
+
+        return new UserMealTrendResponse(
+                safeDays,
+                records.size(),
+                averageScore,
+                lowScoreCount,
+                highScoreCount,
+                scoreTrend(records),
+                trendSuggestion(averageScore, lowScoreCount, records.size()),
+                dailyAverageScores(records),
+                topMetrics(records.stream().flatMap(record -> extractFoodNames(record).stream()).toList(), 8),
+                topMetrics(records.stream().flatMap(record -> extractRiskTags(record).stream()).toList(), 8)
         );
     }
 
@@ -137,7 +240,7 @@ public class MealAnalysisService {
 
         mealRecordRepository.delete(record);
 
-        deleteImageFileSafely(storedImagePath);
+        imageStorageService.deleteSafely(storedImagePath);
     }
 
     @Transactional(readOnly = true)
@@ -156,7 +259,7 @@ public class MealAnalysisService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "图片不存在");
         }
 
-        return Path.of(record.getStoredImagePath());
+        return imageStorageService.resolve(record.getStoredImagePath());
     }
 
     public MealRecordResponse toResponse(MealRecord record) {
@@ -189,6 +292,105 @@ public class MealAnalysisService {
         response.setAdvice(record.getAdvice());
 
         return response;
+    }
+
+    private List<String> extractFoodNames(MealRecord record) {
+        List<FoodItem> foods = Jsons.fromJson(
+                objectMapper,
+                record.getDetectedFoodsJson(),
+                new TypeReference<List<FoodItem>>() {}
+        );
+
+        if (foods == null) {
+            return List.of();
+        }
+
+        return foods.stream()
+                .map(FoodItem::getName)
+                .filter(name -> name != null && !name.isBlank())
+                .toList();
+    }
+
+    private List<String> extractRiskTags(MealRecord record) {
+        List<String> tags = Jsons.fromJson(
+                objectMapper,
+                record.getRiskTagsJson(),
+                new TypeReference<List<String>>() {}
+        );
+
+        if (tags == null) {
+            return List.of();
+        }
+
+        return tags.stream()
+                .filter(tag -> tag != null && !tag.isBlank())
+                .toList();
+    }
+
+    private List<UserMealTrendResponse.MetricItem> topMetrics(List<String> values, int limit) {
+        Map<String, Integer> counts = new LinkedHashMap<>();
+        values.stream()
+                .filter(value -> value != null && !value.isBlank())
+                .forEach(value -> counts.merge(value.trim(), 1, Integer::sum));
+
+        return counts.entrySet()
+                .stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder()))
+                .limit(limit)
+                .map(entry -> new UserMealTrendResponse.MetricItem(entry.getKey(), entry.getValue()))
+                .toList();
+    }
+
+    private List<UserMealTrendResponse.MetricItem> dailyAverageScores(List<MealRecord> records) {
+        return records.stream()
+                .filter(record -> record.getCreatedAt() != null && record.getScore() != null)
+                .collect(Collectors.groupingBy(
+                        record -> record.getCreatedAt().toLocalDate(),
+                        LinkedHashMap::new,
+                        Collectors.averagingInt(MealRecord::getScore)
+                ))
+                .entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(entry -> new UserMealTrendResponse.MetricItem(
+                        entry.getKey().toString(),
+                        (int) Math.round(entry.getValue())
+                ))
+                .toList();
+    }
+
+    private String scoreTrend(List<MealRecord> records) {
+        List<MealRecord> scored = records.stream()
+                .filter(record -> record.getScore() != null)
+                .sorted(Comparator.comparing(MealRecord::getCreatedAt))
+                .toList();
+
+        if (scored.size() < 2) {
+            return "记录较少，趋势暂不明显";
+        }
+
+        int first = scored.get(0).getScore();
+        int last = scored.get(scored.size() - 1).getScore();
+        if (Math.abs(last - first) < 3) {
+            return "整体评分比较稳定";
+        }
+        return last > first ? "最近评分有上升趋势" : "最近评分略有下降";
+    }
+
+    private String trendSuggestion(int averageScore, long lowScoreCount, int total) {
+        if (total == 0) {
+            return "还没有足够记录。可以先上传几餐，系统会逐步生成更可靠的趋势判断。";
+        }
+        if (averageScore >= 82 && lowScoreCount == 0) {
+            return "整体表现不错，继续保持主食、蛋白质和蔬菜的稳定搭配。";
+        }
+        if (lowScoreCount >= Math.max(2, total / 3)) {
+            return "低分记录占比偏高，建议优先减少油炸、高糖饮品和蔬菜不足的情况。";
+        }
+        if (averageScore < 75) {
+            return "平均分还有提升空间，下一阶段先把每餐蛋白质和蔬菜补齐。";
+        }
+        return "整体处于可控范围，建议继续管理高油高糖频率，并保持规律记录。";
     }
 
     private String buildRagQuery(RecognitionResult recognition, StructureEvaluation evaluation, String goal) {
@@ -300,52 +502,4 @@ public class MealAnalysisService {
         });
     }
 
-    private String storeImage(Long userId, MultipartFile image) {
-        try {
-            Path dir = Path.of(properties.getUploadDir(), "user-" + userId);
-            Files.createDirectories(dir);
-
-            String ext = ".jpg";
-            String original = image.getOriginalFilename();
-
-            if (original != null && original.contains(".")) {
-                ext = original.substring(original.lastIndexOf('.'))
-                        .replaceAll("[^a-zA-Z0-9.]", "");
-            }
-
-            Path target = dir.resolve(UUID.randomUUID() + ext);
-            Files.copy(image.getInputStream(), target);
-
-            return target.toString();
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private void deleteImageFileSafely(String storedImagePath) {
-        if (storedImagePath == null || storedImagePath.isBlank()) {
-            return;
-        }
-
-        try {
-            Path uploadRoot = Path.of(properties.getUploadDir())
-                    .toAbsolutePath()
-                    .normalize();
-
-            Path imagePath = Path.of(storedImagePath)
-                    .toAbsolutePath()
-                    .normalize();
-
-            if (!imagePath.startsWith(uploadRoot)) {
-                System.err.println("拒绝删除 uploads 目录外的文件: " + imagePath);
-                return;
-            }
-
-            if (Files.exists(imagePath) && Files.isRegularFile(imagePath)) {
-                Files.deleteIfExists(imagePath);
-            }
-        } catch (Exception e) {
-            System.err.println("删除图片文件失败: " + storedImagePath + "，原因: " + e.getMessage());
-        }
-    }
 }

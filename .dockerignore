@@ -1,0 +1,8 @@
+.git
+.idea
+backend/target
+backend/uploads
+frontend/node_modules
+frontend/dist
+*.log
+hs_err_pid*.log

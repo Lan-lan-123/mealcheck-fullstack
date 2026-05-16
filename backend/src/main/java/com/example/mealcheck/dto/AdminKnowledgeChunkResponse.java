@@ -9,6 +9,7 @@ public class AdminKnowledgeChunkResponse {
     private String title;
     private String content;
     private String contentPreview;
+    private String category;
     private int vectorDimension;
     private int contentLength;
     private long hitCount;
@@ -22,6 +23,7 @@ public class AdminKnowledgeChunkResponse {
                                        String title,
                                        String content,
                                        String contentPreview,
+                                       String category,
                                        int vectorDimension,
                                        int contentLength,
                                        long hitCount,
@@ -31,6 +33,7 @@ public class AdminKnowledgeChunkResponse {
         this.title = title;
         this.content = content;
         this.contentPreview = contentPreview;
+        this.category = category;
         this.vectorDimension = vectorDimension;
         this.contentLength = contentLength;
         this.hitCount = hitCount;
@@ -55,6 +58,10 @@ public class AdminKnowledgeChunkResponse {
 
     public String getContentPreview() {
         return contentPreview;
+    }
+
+    public String getCategory() {
+        return category;
     }
 
     public int getVectorDimension() {
