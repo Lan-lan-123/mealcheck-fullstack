@@ -6,6 +6,7 @@ import com.example.mealcheck.repository.UserAccountRepository;
 import com.example.mealcheck.security.JwtService;
 import com.example.mealcheck.security.UserPrincipal;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,13 +19,21 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final CaptchaService captchaService;
 
     public AuthService(UserAccountRepository userRepository, PasswordEncoder passwordEncoder,
-                       AuthenticationManager authenticationManager, JwtService jwtService) {
+                       AuthenticationManager authenticationManager,
+                       JwtService jwtService,
+                       CaptchaService captchaService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.captchaService = captchaService;
+    }
+
+    public AuthDtos.CaptchaResponse captcha() {
+        return captchaService.create();
     }
 
     @Transactional
@@ -49,9 +58,16 @@ public class AuthService {
     }
 
     public AuthDtos.AuthResponse login(AuthDtos.LoginRequest request) {
+        if (!captchaService.verify(request.getCaptchaId(), request.getCaptchaAnswer())) {
+            throw new BadCredentialsException("验证码错误或已过期");
+        }
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
         UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
+        String expectedRole = request.getExpectedRole() == null ? "" : request.getExpectedRole().trim().toUpperCase();
+        if (!expectedRole.isBlank() && !principal.getRole().equalsIgnoreCase(expectedRole)) {
+            throw new BadCredentialsException("登录入口与账号角色不匹配");
+        }
         return new AuthDtos.AuthResponse(
                 jwtService.generateToken(principal),
                 principal.getUsername(),

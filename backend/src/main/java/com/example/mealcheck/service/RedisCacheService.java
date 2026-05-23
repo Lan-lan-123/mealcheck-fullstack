@@ -9,6 +9,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -35,11 +37,13 @@ public class RedisCacheService {
         }
     }
 
-    public void set(String key, String value, Duration ttl) {
+    public boolean set(String key, String value, Duration ttl) {
         try {
             redisTemplate.opsForValue().set(key, value, ttl);
+            return true;
         } catch (Exception e) {
             log.debug("Redis set failed for key {}: {}", key, e.getMessage());
+            return false;
         }
     }
 
@@ -48,6 +52,27 @@ public class RedisCacheService {
             return Optional.ofNullable(redisTemplate.opsForValue().get(key));
         } catch (Exception e) {
             log.debug("Redis get failed for key {}: {}", key, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    public Optional<String> getRequired(String key) {
+        try {
+            return Optional.ofNullable(redisTemplate.opsForValue().get(key));
+        } catch (Exception e) {
+            throw new IllegalStateException("Redis is unavailable.", e);
+        }
+    }
+
+    public Optional<Duration> ttl(String key) {
+        try {
+            Long seconds = redisTemplate.getExpire(key);
+            if (seconds == null || seconds < 0) {
+                return Optional.empty();
+            }
+            return Optional.of(Duration.ofSeconds(seconds));
+        } catch (Exception e) {
+            log.debug("Redis TTL get failed for key {}: {}", key, e.getMessage());
             return Optional.empty();
         }
     }
@@ -92,6 +117,24 @@ public class RedisCacheService {
         }
     }
 
+    public <T> List<T> listJsonByPrefix(String prefix, TypeReference<T> typeReference) {
+        try {
+            Set<String> keys = redisTemplate.keys(prefix + "*");
+            if (keys == null || keys.isEmpty()) {
+                return List.of();
+            }
+
+            List<T> values = new ArrayList<>();
+            for (String key : keys) {
+                getJson(key, typeReference).ifPresent(values::add);
+            }
+            return values;
+        } catch (Exception e) {
+            log.debug("Redis prefix JSON get failed for prefix {}: {}", prefix, e.getMessage());
+            return List.of();
+        }
+    }
+
     public long increment(String key, Duration ttl) {
         try {
             Long value = redisTemplate.opsForValue().increment(key);
@@ -101,10 +144,10 @@ public class RedisCacheService {
             return value == null ? 0L : value;
         } catch (RedisConnectionFailureException e) {
             log.debug("Redis increment skipped because Redis is unavailable: {}", e.getMessage());
-            return 0L;
+            return -1L;
         } catch (Exception e) {
             log.debug("Redis increment failed for key {}: {}", key, e.getMessage());
-            return 0L;
+            return -1L;
         }
     }
 }

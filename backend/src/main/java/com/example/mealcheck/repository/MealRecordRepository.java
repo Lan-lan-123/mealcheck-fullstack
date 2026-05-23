@@ -20,6 +20,7 @@ public interface MealRecordRepository extends JpaRepository<MealRecord, Long>, J
     List<MealRecord> findByUser(UserAccount user);
 
     List<MealRecord> findByUserAndCreatedAtAfterOrderByCreatedAtAsc(UserAccount user, LocalDateTime since);
+    List<MealRecord> findByCreatedAtAfterOrderByCreatedAtAsc(LocalDateTime since);
 
     long countByCreatedAtAfter(LocalDateTime time);
 

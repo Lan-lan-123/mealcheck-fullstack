@@ -37,10 +37,16 @@ mealcheck:
     allowed-origins: ${MEALCHECK_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
   upload-dir: ${MEALCHECK_UPLOAD_DIR:./uploads}
   ai:
-    api-key: ${MEALCHECK_AI_API_KEY:your_api_key}
-    base-url: ${MEALCHECK_AI_BASE_URL:https://example.com/compatible-mode/v1/chat/completions}
-    model: ${MEALCHECK_AI_MODEL:qwen3-vl}
+    api-key: ${MEALCHECK_AI_API_KEY:}
+    base-url: ${MEALCHECK_AI_BASE_URL:}
+    model: ${MEALCHECK_AI_MODEL:qwen3-vl-30b-a3b-instruct}
     timeout-seconds: ${MEALCHECK_AI_TIMEOUT_SECONDS:60}
   knowledge:
     auto-index: ${MEALCHECK_KNOWLEDGE_AUTO_INDEX:true}
     embedding-dim: 384
+  upload-guard:
+    non-food-window-minutes: ${MEALCHECK_NON_FOOD_WINDOW_MINUTES:5}
+    non-food-limit: ${MEALCHECK_NON_FOOD_LIMIT:10}
+    non-food-block-minutes: ${MEALCHECK_NON_FOOD_BLOCK_MINUTES:60}
+  weekly-report:
+    cron: ${MEALCHECK_WEEKLY_REPORT_CRON:0 0 6 * * MON}

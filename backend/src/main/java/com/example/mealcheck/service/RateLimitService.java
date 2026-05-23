@@ -14,6 +14,6 @@ public class RateLimitService {
 
     public boolean allow(String key, int maxRequests, Duration window) {
         long current = redisCacheService.increment("rate:" + key, window);
-        return current == 0L || current <= maxRequests;
+        return current > 0L && current <= maxRequests;
     }
 }

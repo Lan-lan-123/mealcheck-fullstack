@@ -48,6 +48,8 @@ public class MealAnalysisService {
     private final AdviceGenerationService adviceGenerationService;
     private final ImageStorageService imageStorageService;
     private final UserDietProfileService userDietProfileService;
+    private final NonFoodUploadGuardService nonFoodUploadGuardService;
+    private final UserGoalService userGoalService;
     private final ObjectMapper objectMapper;
 
     public MealAnalysisService(UserAccountRepository userRepository,
@@ -58,6 +60,8 @@ public class MealAnalysisService {
                                AdviceGenerationService adviceGenerationService,
                                ImageStorageService imageStorageService,
                                UserDietProfileService userDietProfileService,
+                               NonFoodUploadGuardService nonFoodUploadGuardService,
+                               UserGoalService userGoalService,
                                ObjectMapper objectMapper) {
         this.userRepository = userRepository;
         this.mealRecordRepository = mealRecordRepository;
@@ -67,17 +71,42 @@ public class MealAnalysisService {
         this.adviceGenerationService = adviceGenerationService;
         this.imageStorageService = imageStorageService;
         this.userDietProfileService = userDietProfileService;
+        this.nonFoodUploadGuardService = nonFoodUploadGuardService;
+        this.userGoalService = userGoalService;
         this.objectMapper = objectMapper;
     }
 
     @Transactional
     public MealAnalysisResponse analyze(UserPrincipal principal, MultipartFile image, String goal) {
         UserAccount user = userRepository.findByUsername(principal.getUsername()).orElseThrow();
-
-        String normalizedGoal = goal == null || goal.isBlank() ? "balanced" : goal;
-        String imagePath = imageStorageService.store(user.getId(), image);
+        if (nonFoodUploadGuardService.isBlocked(user.getUsername())) {
+            throw new ResponseStatusException(
+                    HttpStatus.TOO_MANY_REQUESTS,
+                    "因连续上传非饮食图片，已临时限制上传。剩余 "
+                            + nonFoodUploadGuardService.remainingBlockMinutes(user.getUsername()) + " 分钟后可再试。"
+            );
+        }
 
         RecognitionResult recognition = recognitionService.recognize(image);
+        if (!recognition.isFoodImage()) {
+            String reason = recognition.getRejectionReason() == null || recognition.getRejectionReason().isBlank()
+                    ? "上传的图片不是饮食图片，请上传包含餐食的照片。"
+                    : recognition.getRejectionReason();
+            NonFoodUploadGuardService.NonFoodUploadDecision decision = nonFoodUploadGuardService.register(user, reason);
+
+            if (decision.thresholdReached()) {
+                throw new ResponseStatusException(
+                        HttpStatus.TOO_MANY_REQUESTS,
+                        "因连续上传非饮食图片，已临时限制上传。系统已向管理员发出预警。剩余 "
+                                + nonFoodUploadGuardService.remainingBlockMinutes(user.getUsername()) + " 分钟后可再试。"
+                );
+            }
+
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, reason);
+        }
+
+        String normalizedGoal = userGoalService.effectiveGoal(user, goal);
+        String imagePath = imageStorageService.store(user.getId(), image);
         StructureEvaluation evaluation = scoringService.evaluate(recognition, normalizedGoal);
 
         String query = buildRagQuery(recognition, evaluation, normalizedGoal);

@@ -1,6 +1,7 @@
 package com.example.mealcheck.service;
 
 import com.example.mealcheck.dto.KnowledgeSnippet;
+import com.example.mealcheck.dto.AdminAssistantStatsResponse;
 import com.example.mealcheck.dto.AdminKnowledgeChunkPageResponse;
 import com.example.mealcheck.dto.AdminKnowledgeChunkResponse;
 import org.springframework.beans.factory.InitializingBean;
@@ -192,6 +193,22 @@ public class PgVectorKnowledgeService implements InitializingBean {
         long safeTotal = total == null ? 0 : total;
         int totalPages = safeTotal == 0 ? 0 : (int) Math.ceil((double) safeTotal / safeSize);
         return new AdminKnowledgeChunkPageResponse(pageContent, safeTotal, totalPages, safePage, safeSize);
+    }
+
+    @Transactional(readOnly = true)
+    public List<AdminAssistantStatsResponse.MetricItem> topHitChunks(int limit) {
+        int safeLimit = Math.max(1, Math.min(limit, 20));
+        return jdbcTemplate.query("""
+                SELECT COALESCE(NULLIF(title, ''), CONCAT('知识片段 ', id)) AS label,
+                       COALESCE(hit_count, 0) AS value
+                FROM knowledge_chunks
+                WHERE COALESCE(hit_count, 0) > 0
+                ORDER BY COALESCE(hit_count, 0) DESC, last_hit_at DESC NULLS LAST, id ASC
+                LIMIT ?
+                """, (rs, rowNum) -> new AdminAssistantStatsResponse.MetricItem(
+                rs.getString("label"),
+                rs.getInt("value")
+        ), safeLimit);
     }
 
     private FilterSql buildFilterSql(String keyword, String source) {

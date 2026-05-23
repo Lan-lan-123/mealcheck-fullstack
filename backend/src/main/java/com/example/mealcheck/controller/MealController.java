@@ -50,7 +50,7 @@ public class MealController {
     @PostMapping("/meals/analyze")
     public MealAnalysisResponse analyze(@AuthenticationPrincipal UserPrincipal principal,
                                         @RequestParam("image") MultipartFile image,
-                                        @RequestParam(value = "goal", defaultValue = "balanced") String goal) {
+                                        @RequestParam(value = "goal", defaultValue = "current") String goal) {
         if (image == null || image.isEmpty()) {
             throw new IllegalArgumentException("请上传饭菜图片");
         }
@@ -97,6 +97,11 @@ public class MealController {
     public WeeklyReportResponse weekly(@AuthenticationPrincipal UserPrincipal principal,
                                        @RequestParam(value = "days", defaultValue = "7") int days) {
         return weeklyReportService.generate(principal, days);
+    }
+
+    @GetMapping("/reports/weekly/latest")
+    public WeeklyReportResponse latestWeekly(@AuthenticationPrincipal UserPrincipal principal) {
+        return weeklyReportService.latest(principal);
     }
 
     @GetMapping("/meals/trends")

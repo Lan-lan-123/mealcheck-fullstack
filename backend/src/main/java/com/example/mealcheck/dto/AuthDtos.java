@@ -48,6 +48,14 @@ public class AuthDtos {
         @NotBlank
         private String password;
 
+        @NotBlank
+        private String captchaId;
+
+        @NotBlank
+        private String captchaAnswer;
+
+        private String expectedRole;
+
         public String getUsername() {
             return username;
         }
@@ -62,6 +70,48 @@ public class AuthDtos {
 
         public void setPassword(String password) {
             this.password = password;
+        }
+
+        public String getCaptchaId() {
+            return captchaId;
+        }
+
+        public void setCaptchaId(String captchaId) {
+            this.captchaId = captchaId;
+        }
+
+        public String getCaptchaAnswer() {
+            return captchaAnswer;
+        }
+
+        public void setCaptchaAnswer(String captchaAnswer) {
+            this.captchaAnswer = captchaAnswer;
+        }
+
+        public String getExpectedRole() {
+            return expectedRole;
+        }
+
+        public void setExpectedRole(String expectedRole) {
+            this.expectedRole = expectedRole;
+        }
+    }
+
+    public static class CaptchaResponse {
+        private String captchaId;
+        private String question;
+
+        public CaptchaResponse(String captchaId, String question) {
+            this.captchaId = captchaId;
+            this.question = question;
+        }
+
+        public String getCaptchaId() {
+            return captchaId;
+        }
+
+        public String getQuestion() {
+            return question;
         }
     }
 

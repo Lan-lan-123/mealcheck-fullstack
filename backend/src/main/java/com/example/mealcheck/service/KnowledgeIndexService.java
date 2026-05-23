@@ -22,6 +22,7 @@ public class KnowledgeIndexService {
     private final PgVectorKnowledgeService vectorKnowledgeService;
     private final AppProperties properties;
     private final RedisCacheService redisCacheService;
+    private final RagEvaluationService ragEvaluationService;
 
     public long countChunks() {
         return vectorKnowledgeService.count();
@@ -29,10 +30,12 @@ public class KnowledgeIndexService {
 
     public KnowledgeIndexService(PgVectorKnowledgeService vectorKnowledgeService,
                                  AppProperties properties,
-                                 RedisCacheService redisCacheService) {
+                                 RedisCacheService redisCacheService,
+                                 RagEvaluationService ragEvaluationService) {
         this.vectorKnowledgeService = vectorKnowledgeService;
         this.properties = properties;
         this.redisCacheService = redisCacheService;
+        this.ragEvaluationService = ragEvaluationService;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -56,12 +59,14 @@ public class KnowledgeIndexService {
 
     public List<KnowledgeSnippet> search(String query, int limit) {
         String key = searchCacheKey(query, limit);
-        return redisCacheService.getJson(key, new TypeReference<List<KnowledgeSnippet>>() {})
+        List<KnowledgeSnippet> snippets = redisCacheService.getJson(key, new TypeReference<List<KnowledgeSnippet>>() {})
                 .orElseGet(() -> {
-                    List<KnowledgeSnippet> snippets = vectorKnowledgeService.search(query, limit);
-                    redisCacheService.setJson(key, snippets, SEARCH_CACHE_TTL);
-                    return snippets;
+                    List<KnowledgeSnippet> freshSnippets = vectorKnowledgeService.search(query, limit);
+                    redisCacheService.setJson(key, freshSnippets, SEARCH_CACHE_TTL);
+                    return freshSnippets;
                 });
+        ragEvaluationService.recordSearch(query, snippets);
+        return snippets;
     }
 
     public void recordHits(List<Long> ids) {

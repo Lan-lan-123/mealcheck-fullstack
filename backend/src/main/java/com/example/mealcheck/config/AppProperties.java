@@ -9,6 +9,7 @@ public class AppProperties {
     private String uploadDir = "./uploads";
     private Ai ai = new Ai();
     private Knowledge knowledge = new Knowledge();
+    private UploadGuard uploadGuard = new UploadGuard();
 
     public Jwt getJwt() { return jwt; }
     public void setJwt(Jwt jwt) { this.jwt = jwt; }
@@ -20,6 +21,8 @@ public class AppProperties {
     public void setAi(Ai ai) { this.ai = ai; }
     public Knowledge getKnowledge() { return knowledge; }
     public void setKnowledge(Knowledge knowledge) { this.knowledge = knowledge; }
+    public UploadGuard getUploadGuard() { return uploadGuard; }
+    public void setUploadGuard(UploadGuard uploadGuard) { this.uploadGuard = uploadGuard; }
 
     public static class Jwt {
         private String secret;
@@ -58,5 +61,20 @@ public class AppProperties {
         public void setAutoIndex(boolean autoIndex) { this.autoIndex = autoIndex; }
         public int getEmbeddingDim() { return embeddingDim; }
         public void setEmbeddingDim(int embeddingDim) { this.embeddingDim = embeddingDim; }
+    }
+
+    public static class UploadGuard {
+        private int nonFoodWindowMinutes = 5;
+        private int nonFoodLimit = 10;
+        private int nonFoodBlockMinutes = 60;
+
+        public int getNonFoodWindowMinutes() { return nonFoodWindowMinutes; }
+        public void setNonFoodWindowMinutes(int nonFoodWindowMinutes) {
+            this.nonFoodWindowMinutes = nonFoodWindowMinutes;
+        }
+        public int getNonFoodLimit() { return nonFoodLimit; }
+        public void setNonFoodLimit(int nonFoodLimit) { this.nonFoodLimit = nonFoodLimit; }
+        public int getNonFoodBlockMinutes() { return nonFoodBlockMinutes; }
+        public void setNonFoodBlockMinutes(int nonFoodBlockMinutes) { this.nonFoodBlockMinutes = nonFoodBlockMinutes; }
     }
 }

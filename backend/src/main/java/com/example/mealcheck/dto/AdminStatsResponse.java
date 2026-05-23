@@ -4,7 +4,8 @@ public class AdminStatsResponse {
 
     private long userCount;
     private long mealRecordCount;
-    private long todayMealRecordCount;
+    private long todayNormalUploadCount;
+    private long todayAbnormalUploadCount;
     private long knowledgeChunkCount;
 
     public AdminStatsResponse() {
@@ -12,11 +13,13 @@ public class AdminStatsResponse {
 
     public AdminStatsResponse(long userCount,
                               long mealRecordCount,
-                              long todayMealRecordCount,
+                              long todayNormalUploadCount,
+                              long todayAbnormalUploadCount,
                               long knowledgeChunkCount) {
         this.userCount = userCount;
         this.mealRecordCount = mealRecordCount;
-        this.todayMealRecordCount = todayMealRecordCount;
+        this.todayNormalUploadCount = todayNormalUploadCount;
+        this.todayAbnormalUploadCount = todayAbnormalUploadCount;
         this.knowledgeChunkCount = knowledgeChunkCount;
     }
 
@@ -36,12 +39,20 @@ public class AdminStatsResponse {
         this.mealRecordCount = mealRecordCount;
     }
 
-    public long getTodayMealRecordCount() {
-        return todayMealRecordCount;
+    public long getTodayNormalUploadCount() {
+        return todayNormalUploadCount;
     }
 
-    public void setTodayMealRecordCount(long todayMealRecordCount) {
-        this.todayMealRecordCount = todayMealRecordCount;
+    public void setTodayNormalUploadCount(long todayNormalUploadCount) {
+        this.todayNormalUploadCount = todayNormalUploadCount;
+    }
+
+    public long getTodayAbnormalUploadCount() {
+        return todayAbnormalUploadCount;
+    }
+
+    public void setTodayAbnormalUploadCount(long todayAbnormalUploadCount) {
+        this.todayAbnormalUploadCount = todayAbnormalUploadCount;
     }
 
     public long getKnowledgeChunkCount() {

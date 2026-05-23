@@ -1,0 +1,52 @@
+[
+  {
+    "question": "减脂时晚餐怎么吃更合适？",
+    "expectedTitleKeywords": ["减脂"],
+    "expectedCategory": "fat_loss"
+  },
+  {
+    "question": "炸鸡为什么不适合经常吃？",
+    "expectedTitleKeywords": ["高油"],
+    "expectedCategory": "high_oil"
+  },
+  {
+    "question": "一餐里蔬菜太少会有什么问题？",
+    "expectedTitleKeywords": ["蔬菜"],
+    "expectedCategory": "vegetable"
+  },
+  {
+    "question": "含糖饮料为什么要少喝？",
+    "expectedTitleKeywords": ["含糖", "甜饮"],
+    "expectedCategory": "sugar"
+  },
+  {
+    "question": "增肌时优质蛋白怎么补？",
+    "expectedTitleKeywords": ["蛋白", "增肌"],
+    "expectedCategory": "muscle_gain"
+  },
+  {
+    "question": "主食是不是可以完全不吃？",
+    "expectedTitleKeywords": ["主食"],
+    "expectedCategory": "staple"
+  },
+  {
+    "question": "清淡饮食应该注意什么？",
+    "expectedTitleKeywords": ["清淡"],
+    "expectedCategory": "general"
+  },
+  {
+    "question": "早餐喝什么更合适？",
+    "expectedTitleKeywords": ["早餐", "饮品"],
+    "expectedCategory": "general"
+  },
+  {
+    "question": "怎样让一餐更均衡？",
+    "expectedTitleKeywords": ["多样", "均衡"],
+    "expectedCategory": "general"
+  },
+  {
+    "question": "烤肉类食物该怎么搭配？",
+    "expectedTitleKeywords": ["高油", "蔬菜"],
+    "expectedCategory": "high_oil"
+  }
+]

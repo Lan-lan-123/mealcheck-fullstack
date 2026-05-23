@@ -3,6 +3,7 @@ package com.example.mealcheck.dto;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDateTime;
 
 public class WeeklyReportResponse {
     private int days;
@@ -12,6 +13,9 @@ public class WeeklyReportResponse {
     private Map<String, Integer> riskTotals = new LinkedHashMap<>();
     private List<String> highlights;
     private String reportText;
+    private List<String> nextWeekSuggestions;
+    private String goalType;
+    private LocalDateTime generatedAt;
 
     public int getDays() { return days; }
     public void setDays(int days) { this.days = days; }
@@ -27,4 +31,10 @@ public class WeeklyReportResponse {
     public void setHighlights(List<String> highlights) { this.highlights = highlights; }
     public String getReportText() { return reportText; }
     public void setReportText(String reportText) { this.reportText = reportText; }
+    public List<String> getNextWeekSuggestions() { return nextWeekSuggestions; }
+    public void setNextWeekSuggestions(List<String> nextWeekSuggestions) { this.nextWeekSuggestions = nextWeekSuggestions; }
+    public String getGoalType() { return goalType; }
+    public void setGoalType(String goalType) { this.goalType = goalType; }
+    public LocalDateTime getGeneratedAt() { return generatedAt; }
+    public void setGeneratedAt(LocalDateTime generatedAt) { this.generatedAt = generatedAt; }
 }

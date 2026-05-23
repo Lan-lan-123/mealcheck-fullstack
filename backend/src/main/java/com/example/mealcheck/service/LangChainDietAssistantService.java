@@ -7,6 +7,7 @@ import com.example.mealcheck.dto.assistant.AssistantChatMessage;
 import com.example.mealcheck.dto.assistant.AssistantReference;
 import com.example.mealcheck.dto.assistant.AssistantResponse;
 import com.example.mealcheck.entity.MealRecord;
+import com.example.mealcheck.entity.AssistantConversation;
 import com.example.mealcheck.entity.UserAccount;
 import com.example.mealcheck.entity.UserDietProfile;
 import com.example.mealcheck.repository.MealRecordRepository;
@@ -52,6 +53,8 @@ public class LangChainDietAssistantService {
     private final AiStatusService aiStatusService;
     private final RedisCacheService redisCacheService;
     private final UserDietProfileService userDietProfileService;
+    private final AssistantToolOrchestrator toolOrchestrator;
+    private final AssistantConversationService conversationService;
 
     public LangChainDietAssistantService(AppProperties properties,
                                          UserAccountRepository userRepository,
@@ -60,7 +63,9 @@ public class LangChainDietAssistantService {
                                          ObjectMapper objectMapper,
                                          AiStatusService aiStatusService,
                                          RedisCacheService redisCacheService,
-                                         UserDietProfileService userDietProfileService) {
+                                         UserDietProfileService userDietProfileService,
+                                         AssistantToolOrchestrator toolOrchestrator,
+                                         AssistantConversationService conversationService) {
         this.properties = properties;
         this.userRepository = userRepository;
         this.mealRecordRepository = mealRecordRepository;
@@ -69,46 +74,64 @@ public class LangChainDietAssistantService {
         this.aiStatusService = aiStatusService;
         this.redisCacheService = redisCacheService;
         this.userDietProfileService = userDietProfileService;
+        this.toolOrchestrator = toolOrchestrator;
+        this.conversationService = conversationService;
     }
 
     @Transactional
-    public AssistantResponse ask(UserPrincipal principal, String question, List<AssistantChatMessage> history) {
+    public AssistantResponse ask(UserPrincipal principal, String question, Long conversationId, List<AssistantChatMessage> history) {
         UserAccount user = userRepository.findByUsername(principal.getUsername()).orElseThrow();
-        List<MealRecord> records = mealRecordRepository.findTop30ByUserOrderByCreatedAtDesc(user)
-                .stream()
+        FoodIntent intent = detectIntent(question);
+        AssistantConversation conversation = conversationService.resolve(user, conversationId, question);
+        AssistantToolOrchestrator.AssistantToolContext toolContext = toolOrchestrator.gather(user, buildRagQuery(question, intent));
+        List<MealRecord> records = toolContext.recentRecords().stream()
+                .sorted(Comparator.comparing(MealRecord::getCreatedAt).reversed())
                 .limit(RECENT_RECORD_LIMIT)
                 .toList();
-
-        FoodIntent intent = detectIntent(question);
         UserDietProfile profile = userDietProfileService.getOrRefresh(user);
-        List<KnowledgeSnippet> snippets = knowledgeIndexService.search(buildRagQuery(question, intent), RAG_REFERENCE_LIMIT);
+        List<KnowledgeSnippet> snippets = toolContext.snippets();
         knowledgeIndexService.recordHits(snippets.stream().map(KnowledgeSnippet::getId).toList());
 
         List<AssistantReference> references = toReferences(snippets);
-        AssistantResponse fallback = buildLocalResponse(intent, records, references, profile);
-        List<AssistantChatMessage> historyContext = mergeHistory(user.getUsername(), history);
+        AssistantResponse fallback = withConversationId(
+                buildLocalResponse(intent, records, references, profile, toolContext),
+                conversation.getId()
+        );
+        List<AssistantChatMessage> historyContext = mergeHistory(user.getUsername(), conversationService.history(conversation), history);
 
         if (!hasRemoteModelConfig()) {
+            conversationService.append(conversation, "user", question);
+            conversationService.append(conversation, "assistant", fallback.getAnswer());
             saveHistory(user.getUsername(), historyContext, question, fallback);
             return fallback;
         }
 
+        long startedAt = System.nanoTime();
         try {
-            String rawAnswer = buildChatModel().chat(buildPrompt(question, intent, profile, records, snippets, historyContext));
-            aiStatusService.recordSuccess("diet-assistant");
-            AssistantResponse response = parseModelResponse(rawAnswer, fallback, references);
+            String rawAnswer = buildChatModel().chat(buildPrompt(question, intent, profile, records, snippets, historyContext, toolContext));
+            aiStatusService.recordSuccess("diet-assistant", Duration.ofNanos(System.nanoTime() - startedAt).toMillis());
+            AssistantResponse response = withConversationId(parseModelResponse(rawAnswer, fallback, references), conversation.getId());
+            conversationService.append(conversation, "user", question);
+            conversationService.append(conversation, "assistant", response.getAnswer());
             saveHistory(user.getUsername(), historyContext, question, response);
             return response;
         } catch (Exception e) {
-            aiStatusService.recordFailure("diet-assistant", e.getMessage());
+            aiStatusService.recordFailure("diet-assistant", e.getMessage(), Duration.ofNanos(System.nanoTime() - startedAt).toMillis());
             log.warn("LangChain diet assistant call failed, fallback response will be used: {}", e.getMessage());
+            conversationService.append(conversation, "user", question);
+            conversationService.append(conversation, "assistant", fallback.getAnswer());
             saveHistory(user.getUsername(), historyContext, question, fallback);
             return fallback;
         }
     }
 
-    private List<AssistantChatMessage> mergeHistory(String username, List<AssistantChatMessage> requestHistory) {
+    private List<AssistantChatMessage> mergeHistory(String username,
+                                                    List<AssistantChatMessage> conversationHistory,
+                                                    List<AssistantChatMessage> requestHistory) {
         List<AssistantChatMessage> merged = new ArrayList<>();
+        if (conversationHistory != null) {
+            merged.addAll(conversationHistory);
+        }
         redisCacheService.getJson(historyKey(username), new TypeReference<List<AssistantChatMessage>>() {})
                 .ifPresent(merged::addAll);
         if (requestHistory != null) {
@@ -162,7 +185,8 @@ public class LangChainDietAssistantService {
                                UserDietProfile profile,
                                List<MealRecord> records,
                                List<KnowledgeSnippet> snippets,
-                               List<AssistantChatMessage> history) {
+                               List<AssistantChatMessage> history,
+                               AssistantToolOrchestrator.AssistantToolContext toolContext) {
         return """
                 You are MealCheck's diet assistant. Answer in Chinese.
                 The latest user intent is: %s.
@@ -183,7 +207,19 @@ public class LangChainDietAssistantService {
                 Conversation history:
                 %s
 
+                Current goal tool:
+                %s
+
+                Weekly report tool:
+                %s
+
+                Proactive insights tool:
+                %s
+
                 Long-term user diet profile:
+                %s
+
+                Personalization strategy:
                 %s
 
                 Recent meal records:
@@ -195,7 +231,11 @@ public class LangChainDietAssistantService {
                 intent.name(),
                 question,
                 buildHistoryContext(history),
+                toolContext.currentGoal(),
+                buildWeeklyReportContext(toolContext.weeklyReport()),
+                String.join("\n", toolContext.proactiveAdvice().getItems()),
                 userDietProfileService.promptText(profile),
+                buildPersonalizationStrategy(profile, intent),
                 buildMealContext(records),
                 buildPromptReferences(snippets)
         );
@@ -300,17 +340,67 @@ public class LangChainDietAssistantService {
     private AssistantResponse buildLocalResponse(FoodIntent intent,
                                                  List<MealRecord> records,
                                                  List<AssistantReference> references,
-                                                 UserDietProfile profile) {
+                                                 UserDietProfile profile,
+                                                 AssistantToolOrchestrator.AssistantToolContext toolContext) {
         int averageScore = averageScore(records);
-        String riskLevel = deriveRiskLevel(intent, averageScore);
+        String riskLevel = deriveRiskLevel(intent, averageScore, profile);
         String weeklyTrend = buildWeeklyTrend(records);
         String summary = buildQuestionSpecificSummary(intent, averageScore, records.isEmpty());
         if (profile != null && profile.getTotalMeals() > 0) {
             summary = summary + " " + profile.getProfileSummary();
         }
-        List<String> suggestions = buildLocalSuggestions(intent, averageScore, references);
+        if (toolContext.weeklyReport() != null && toolContext.weeklyReport().getTotalMeals() > 0) {
+            summary = summary + " 本周报告显示平均评分约 " + toolContext.weeklyReport().getAverageScore() + "。";
+        }
+        List<String> suggestions = buildLocalSuggestions(intent, averageScore, references, profile);
+        suggestions.addAll(toolContext.proactiveAdvice().getItems().stream().limit(2).toList());
         String answer = composeAnswer(summary, suggestions, weeklyTrend);
         return new AssistantResponse(answer, summary, suggestions, riskLevel, weeklyTrend, references);
+    }
+
+    private String buildWeeklyReportContext(com.example.mealcheck.dto.WeeklyReportResponse report) {
+        if (report == null) {
+            return "No weekly report.";
+        }
+        return "days=" + report.getDays()
+                + ", totalMeals=" + report.getTotalMeals()
+                + ", averageScore=" + report.getAverageScore()
+                + ", goal=" + nullToEmpty(report.getGoalType())
+                + ", highlights=" + String.join("; ", report.getHighlights() == null ? List.of() : report.getHighlights())
+                + ", nextWeekSuggestions=" + String.join("; ", report.getNextWeekSuggestions() == null ? List.of() : report.getNextWeekSuggestions());
+    }
+
+    private AssistantResponse withConversationId(AssistantResponse response, Long conversationId) {
+        return new AssistantResponse(
+                response.getAnswer(),
+                response.getSummary(),
+                response.getSuggestions(),
+                response.getRiskLevel(),
+                response.getWeeklyTrend(),
+                response.getReferences(),
+                conversationId
+        );
+    }
+
+    private String buildPersonalizationStrategy(UserDietProfile profile, FoodIntent intent) {
+        if (profile == null || profile.getTotalMeals() == 0) {
+            return "No personalized preference data yet. Keep the answer concrete and question-specific.";
+        }
+
+        List<String> foods = userDietProfileService.commonFoods(profile);
+        List<String> risks = userDietProfileService.commonRisks(profile);
+        String preferredGoal = nullToEmpty(profile.getPreferredGoal());
+        StringBuilder strategy = new StringBuilder();
+        strategy.append("Preferred goal=").append(preferredGoal.isBlank() ? "unknown" : preferredGoal).append(". ");
+        if (!foods.isEmpty()) {
+            strategy.append("Mention familiar foods when useful: ").append(String.join(", ", foods)).append(". ");
+        }
+        if (!risks.isEmpty()) {
+            strategy.append("Watch repeated risk patterns: ").append(String.join(", ", risks)).append(". ");
+        }
+        strategy.append("Current question intent=").append(intent.name())
+                .append(". Tie suggestions to the user's actual habits, not only generic nutrition rules.");
+        return strategy.toString();
     }
 
     private String buildRagQuery(String question, FoodIntent intent) {
@@ -374,7 +464,10 @@ public class LangChainDietAssistantService {
         };
     }
 
-    private List<String> buildLocalSuggestions(FoodIntent intent, int averageScore, List<AssistantReference> references) {
+    private List<String> buildLocalSuggestions(FoodIntent intent,
+                                               int averageScore,
+                                               List<AssistantReference> references,
+                                               UserDietProfile profile) {
         List<String> suggestions = new ArrayList<>();
 
         switch (intent) {
@@ -425,6 +518,8 @@ public class LangChainDietAssistantService {
                 .filter(title -> title != null && !title.isBlank())
                 .ifPresent(title -> suggestions.add("本次建议主要参考了知识库片段：" + title + "。"));
 
+        appendProfileSuggestions(suggestions, profile);
+
         return suggestions;
     }
 
@@ -439,7 +534,7 @@ public class LangChainDietAssistantService {
                 .orElse(0));
     }
 
-    private String deriveRiskLevel(FoodIntent intent, int averageScore) {
+    private String deriveRiskLevel(FoodIntent intent, int averageScore, UserDietProfile profile) {
         String base = switch (intent) {
             case FRIED, SWEET_DRINK -> "HIGH";
             case BARBECUE -> "MEDIUM";
@@ -449,7 +544,30 @@ public class LangChainDietAssistantService {
         if (averageScore > 0 && averageScore < 65 && !"HIGH".equals(base)) {
             return "MEDIUM";
         }
+        if (profile != null && !userDietProfileService.commonRisks(profile).isEmpty() && "LOW".equals(base)) {
+            return "MEDIUM";
+        }
         return base;
+    }
+
+    private void appendProfileSuggestions(List<String> suggestions, UserDietProfile profile) {
+        if (profile == null || profile.getTotalMeals() == 0) {
+            return;
+        }
+
+        List<String> foods = userDietProfileService.commonFoods(profile);
+        List<String> risks = userDietProfileService.commonRisks(profile);
+        if (!foods.isEmpty()) {
+            suggestions.add("结合你常吃的食物，可以优先在 " + String.join("、", foods.subList(0, Math.min(3, foods.size())))
+                    + " 之外补一份当前餐盘里最缺的类别。");
+        }
+        if (!risks.isEmpty()) {
+            suggestions.add("你最近较常出现的风险是 " + String.join("、", risks.subList(0, Math.min(2, risks.size())))
+                    + "，这次选择时可以先避开同类重复叠加。");
+        }
+        if (profile.getPreferredGoal() != null && !profile.getPreferredGoal().isBlank()) {
+            suggestions.add("按照你常用的目标“" + profile.getPreferredGoal() + "”，这一餐尽量让建议和目标保持一致。");
+        }
     }
 
     private String normalizeRiskLevel(String riskLevel) {

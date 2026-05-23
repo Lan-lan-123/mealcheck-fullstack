@@ -2,6 +2,7 @@ package com.example.mealcheck.controller;
 
 import com.example.mealcheck.dto.KnowledgeDtos;
 import com.example.mealcheck.service.KnowledgeIndexService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +19,7 @@ public class KnowledgeController {
     }
 
     @PostMapping("/reindex")
+    @PreAuthorize("hasRole('ADMIN')")
     public KnowledgeDtos.ReindexResponse reindex() {
         return new KnowledgeDtos.ReindexResponse(knowledgeIndexService.reindex());
     }

@@ -53,6 +53,12 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.BAD_GATEWAY, "AI_CALL_FAILED", safeMessage(ex, "AI 服务调用失败。"));
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiErrorResponse> illegalState(IllegalStateException ex) {
+        log.warn("Service dependency unavailable: {}", ex.getMessage());
+        return error(HttpStatus.SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", safeMessage(ex, "服务依赖暂时不可用，请稍后重试。"));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> server(Exception ex) {
         log.error("Unhandled server error", ex);

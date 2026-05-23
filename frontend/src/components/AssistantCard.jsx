@@ -1,6 +1,12 @@
-import { useMemo, useState } from 'react'
-import { Bot, MessageCircle, Send, X } from 'lucide-react'
-import { askDietAssistant } from '../api/client'
+import { useEffect, useMemo, useState } from 'react'
+import { Bot, MessageCircle, Plus, Send, Trash2, X } from 'lucide-react'
+import {
+  askDietAssistant,
+  assistantConversation,
+  assistantConversations,
+  assistantProactiveAdvice,
+  deleteAssistantConversation
+} from '../api/client'
 
 const INITIAL_MESSAGES = [
   {
@@ -10,9 +16,9 @@ const INITIAL_MESSAGES = [
 ]
 
 const QUICK_QUESTIONS = [
+  '我这周吃得怎么样？',
   '今天食堂怎么选更均衡？',
-  '我想吃炸鸡，怎么搭配好一点？',
-  '帮我复盘最近饮食趋势'
+  '明天更适合怎么吃？'
 ]
 
 const RISK_LABELS = {
@@ -39,6 +45,9 @@ export default function AssistantCard({ onError }) {
   const [question, setQuestion] = useState('')
   const [messages, setMessages] = useState(INITIAL_MESSAGES)
   const [loading, setLoading] = useState(false)
+  const [conversations, setConversations] = useState([])
+  const [conversationId, setConversationId] = useState(null)
+  const [proactiveItems, setProactiveItems] = useState([])
 
   const requestHistory = useMemo(
     () =>
@@ -49,9 +58,22 @@ export default function AssistantCard({ onError }) {
     [messages]
   )
 
+  useEffect(() => {
+    if (!open) return
+    refreshSidebar().catch(err => onError?.(err.message))
+  }, [open])
+
+  async function refreshSidebar() {
+    const [sessionData, proactiveData] = await Promise.all([
+      assistantConversations(),
+      assistantProactiveAdvice()
+    ])
+    setConversations(sessionData || [])
+    setProactiveItems(proactiveData?.items || [])
+  }
+
   async function submit(e, presetQuestion) {
     e?.preventDefault()
-
     const text = (presetQuestion || question).trim()
     if (!text || loading) return
 
@@ -61,7 +83,10 @@ export default function AssistantCard({ onError }) {
     setMessages(current => [...current, { role: 'user', text }])
 
     try {
-      const data = await askDietAssistant(text, requestHistory)
+      const data = await askDietAssistant(text, requestHistory, conversationId)
+      if (data.conversationId) {
+        setConversationId(data.conversationId)
+      }
       setMessages(current => [
         ...current,
         {
@@ -74,6 +99,7 @@ export default function AssistantCard({ onError }) {
           references: Array.isArray(data.references) ? data.references : []
         }
       ])
+      await refreshSidebar()
     } catch (err) {
       const message = err.message || '饮食助手暂时不可用，请稍后再试。'
       setMessages(current => [...current, { role: 'assistant', text: message }])
@@ -81,6 +107,25 @@ export default function AssistantCard({ onError }) {
     } finally {
       setLoading(false)
     }
+  }
+
+  async function openConversation(id) {
+    const data = await assistantConversation(id)
+    setConversationId(data.id)
+    setMessages(data.messages?.length ? data.messages : INITIAL_MESSAGES)
+  }
+
+  async function removeConversation(id) {
+    await deleteAssistantConversation(id)
+    if (conversationId === id) {
+      startNewConversation()
+    }
+    await refreshSidebar()
+  }
+
+  function startNewConversation() {
+    setConversationId(null)
+    setMessages(INITIAL_MESSAGES)
   }
 
   return (
@@ -97,49 +142,77 @@ export default function AssistantCard({ onError }) {
             </button>
           </header>
 
-          <div className="assistant-messages">
-            {messages.map((message, index) => (
-              <div className={`assistant-message ${message.role}`} key={`${message.role}-${index}`}>
-                {message.riskLevel && (
-                  <span className={`assistant-risk ${String(message.riskLevel).toLowerCase()}`}>
-                    {RISK_LABELS[message.riskLevel] || message.riskLevel}
-                  </span>
-                )}
-                <div>{message.text}</div>
-                {message.references?.length > 0 && (
-                  <div className="assistant-reference-list">
-                    <span>参考依据</span>
-                    {message.references.map(reference => (
-                      <details key={reference.id || reference.title}>
-                        <summary>{reference.title || '知识片段'}</summary>
-                        <p>{reference.content}</p>
-                      </details>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-            {loading && <div className="assistant-message assistant">正在结合饮食记录和知识库生成建议...</div>}
-          </div>
-
-          <div className="assistant-quick-list">
-            {QUICK_QUESTIONS.map(item => (
-              <button key={item} type="button" onClick={e => submit(e, item)} disabled={loading}>
-                {item}
+          <div className="assistant-workspace">
+            <aside className="assistant-sidebar">
+              <button className="assistant-new-btn" type="button" onClick={startNewConversation}>
+                <Plus size={16} />
+                新对话
               </button>
-            ))}
-          </div>
+              <div className="assistant-session-list">
+                {conversations.map(item => (
+                  <div className={conversationId === item.id ? 'active' : ''} key={item.id}>
+                    <button type="button" onClick={() => openConversation(item.id)}>{item.title}</button>
+                    <button type="button" onClick={() => removeConversation(item.id)} aria-label="删除会话">
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </aside>
 
-          <form className="assistant-chat-form" onSubmit={submit}>
-            <input
-              value={question}
-              onChange={e => setQuestion(e.target.value)}
-              placeholder="问问怎么吃更合适"
-            />
-            <button type="submit" disabled={loading || !question.trim()} aria-label="发送问题">
-              <Send size={18} />
-            </button>
-          </form>
+            <div className="assistant-main">
+              {!!proactiveItems.length && (
+                <div className="assistant-proactive">
+                  <strong>主动建议</strong>
+                  {proactiveItems.slice(0, 4).map(item => <span key={item}>{item}</span>)}
+                </div>
+              )}
+
+              <div className="assistant-messages">
+                {messages.map((message, index) => (
+                  <div className={`assistant-message ${message.role}`} key={`${message.role}-${index}`}>
+                    {message.riskLevel && (
+                      <span className={`assistant-risk ${String(message.riskLevel).toLowerCase()}`}>
+                        {RISK_LABELS[message.riskLevel] || message.riskLevel}
+                      </span>
+                    )}
+                    <div>{message.text}</div>
+                    {message.references?.length > 0 && (
+                      <div className="assistant-reference-list">
+                        <span>参考依据</span>
+                        {message.references.map(reference => (
+                          <details key={reference.id || reference.title}>
+                            <summary>{reference.title || '知识片段'}</summary>
+                            <p>{reference.content}</p>
+                          </details>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {loading && <div className="assistant-message assistant">正在调用用户记录、目标、周报和知识库生成建议...</div>}
+              </div>
+
+              <div className="assistant-quick-list">
+                {QUICK_QUESTIONS.map(item => (
+                  <button key={item} type="button" onClick={e => submit(e, item)} disabled={loading}>
+                    {item}
+                  </button>
+                ))}
+              </div>
+
+              <form className="assistant-chat-form" onSubmit={submit}>
+                <input
+                  value={question}
+                  onChange={e => setQuestion(e.target.value)}
+                  placeholder="问问怎么吃更合适"
+                />
+                <button type="submit" disabled={loading || !question.trim()} aria-label="发送问题">
+                  <Send size={18} />
+                </button>
+              </form>
+            </div>
+          </div>
         </section>
       )}
 

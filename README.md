@@ -1,15 +1,20 @@
 # MealCheck Fullstack
 
-MealCheck is a meal image analysis system. Users can upload meal photos, get food recognition results, receive nutrition scores, and view RAG-based dietary suggestions. Administrators can manage users, meal records, and the RAG knowledge base.
+MealCheck is a meal image analysis system. Users can upload meal photos, get food recognition results, receive nutrition scores, and view RAG-based dietary suggestions. In addition, users can interact with an AI assistant powered by LangChain4j and RAG to receive personalized dietary advice. Administrators can manage users, meal records, and the RAG knowledge base.
 
 ## Tech Stack
 
 - Backend: Spring Boot
+- Frontend: React + Vite
 - Database: PostgreSQL
 - Vector Search: pgvector
+- Cache & Session: Redis
 - Authentication: JWT
-- AI: Qwen VL API
-- Knowledge Base: Markdown + RAG retrieval
+- AI Vision: Qwen VL API
+- AI Assistant: LangChain4j + RAG
+- Knowledge Base: Markdown + pgvector Retrieval
+- Agent Workflow: Tool orchestration, conversation memory, proactive suggestions
+- Deployment: Docker Compose
 
 ## Features
 
@@ -17,25 +22,32 @@ MealCheck is a meal image analysis system. Users can upload meal photos, get foo
 - Meal image upload and food recognition
 - Meal structure scoring and risk tag analysis
 - RAG-based nutrition advice
+- AI Assistant: LangChain4j + RAG
+  - Provides personalized diet Q&A based on user meal history and nutrition knowledge
+  - Supports conversation context, RAG references, and structured responses
+  - Generates proactive suggestions based on recent diet trends
 - Meal history and weekly reports
 - Admin dashboard
   - User management
   - Global meal record pagination, filtering, deletion, and visual analytics
   - RAG knowledge creation, editing, deletion, search, rebuild, and hit statistics
+  - AI assistant usage statistics, question trends, RAG reference ranking, and session analytics
 
 ## New in This Version
 
-Compared with the previous project version, [MealCheck-agent](https://github.com/Lan-lan-123/MealCheck-agent), this version adds the following modules and capabilities:
+Compared with the previous project version, [MealCheck-agent2](https://github.com/Lan-lan-123/MealCheck-agent2), this version mainly improves the AI Assistant module and adds more detailed user-side and admin-side capabilities:
 
-- Intelligent diet assistant module
-  - Added `LangChainDietAssistantService` and assistant-related DTOs/controllers
-  - Supports structured RAG responses with `summary`, `suggestions`, `references`, and `riskLevel`
-  - Supports multi-turn conversation context and user-specific assistant memory
-- Redis-based infrastructure
-  - Added Redis integration for short-term assistant context, RAG retrieval cache, admin statistics cache, token blacklist, and API rate limiting
-- User diet profile and trend analysis
-  - Added `UserDietProfile` persistence and profile services
-  - Added user meal trend statistics, 30-day overview, and richer weekly report support
+- Enhanced AI Assistant
+  - Improved the LangChain4j + RAG based diet assistant with structured responses, reference display, conversation context, and personalized suggestions.
+  - Added assistant usage statistics, RAG reference tracking, session analytics, and proactive diet advice.
+
+- Improved user-side features
+  - Added richer diet trend analysis, user goal/profile management, weekly report generation, and clearer upload feedback.
+  - Added abnormal upload handling for non-food images, including user warnings and temporary upload restrictions.
+
+- Enhanced admin dashboard
+  - Added more detailed user, meal record, RAG knowledge base, assistant usage, abnormal upload, and system operation statistics.
+  - Improved pagination, filtering, deletion confirmation, visual analytics, RAG evaluation, and AI observability panels.
 
 ## Project Structure
 

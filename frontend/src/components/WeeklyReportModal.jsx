@@ -31,6 +31,20 @@ export default function WeeklyReportModal({ report, avgLabel, records, onClose }
         <section className="weekly-section">
           <h3>周报总结</h3>
           <p>{report?.reportText || '最近 7 天暂无可分析的饮食记录。'}</p>
+          {report?.generatedAt && <p className="report-meta">自动生成于 {new Date(report.generatedAt).toLocaleString()}</p>}
+        </section>
+
+        <section className="weekly-section">
+          <h3>下周建议</h3>
+          {report?.nextWeekSuggestions?.length ? (
+            <ul className="weekly-suggestions">
+              {report.nextWeekSuggestions.map(item => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          ) : (
+            <Empty text="暂无下周建议" />
+          )}
         </section>
 
         <section className="weekly-section">

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDateTime;
 
 public interface UserAccountRepository extends JpaRepository<UserAccount, Long>, JpaSpecificationExecutor<UserAccount> {
 
@@ -14,4 +15,6 @@ public interface UserAccountRepository extends JpaRepository<UserAccount, Long>,
     boolean existsByUsername(String username);
 
     List<UserAccount> findAllByOrderByCreatedAtDesc();
+
+    long countByLastUploadAtAfter(LocalDateTime time);
 }

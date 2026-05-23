@@ -9,6 +9,8 @@ import {
   adminKnowledgeChunks,
   adminMealAnalytics,
   adminMeals,
+  adminNonFoodUploads,
+  adminRagEvaluation,
   adminReindexKnowledge,
   adminUpdateKnowledgeChunk,
   adminUsers,
@@ -20,6 +22,7 @@ import MiniBars from '../components/MiniBars'
 const defaultUserFilters = { username: '', role: 'ALL' }
 const defaultMealFilters = { username: '', from: '', to: '', minScore: '', maxScore: '' }
 const defaultKnowledgeFilters = { keyword: '', source: 'all', sort: 'id' }
+const defaultNonFoodFilters = { username: '', blockedOnly: false }
 
 function emptyPage(size = 20) {
   return { content: [], page: 0, size, totalElements: 0, totalPages: 0 }
@@ -68,7 +71,9 @@ export default function AdminPage({ onBack, onLogout }) {
   const [mealPageData, setMealPageData] = useState(emptyPage())
   const [knowledgePageData, setKnowledgePageData] = useState(emptyPage(8))
   const [auditPageData, setAuditPageData] = useState(emptyPage(10))
+  const [nonFoodPageData, setNonFoodPageData] = useState(emptyPage())
   const [mealAnalytics, setMealAnalytics] = useState(null)
+  const [ragBenchmark, setRagBenchmark] = useState(null)
   const [chunks, setChunks] = useState([])
 
   const [activeTab, setActiveTab] = useState('overview')
@@ -101,26 +106,41 @@ export default function AdminPage({ onBack, onLogout }) {
   const [viewingChunk, setViewingChunk] = useState(null)
   const [auditPage, setAuditPage] = useState(0)
   const [auditSize, setAuditSize] = useState(10)
+  const [nonFoodPage, setNonFoodPage] = useState(0)
+  const [nonFoodSize, setNonFoodSize] = useState(20)
+  const [nonFoodFiltersDraft, setNonFoodFiltersDraft] = useState(defaultNonFoodFilters)
+  const [nonFoodFilters, setNonFoodFilters] = useState(defaultNonFoodFilters)
 
   const users = userPageData.content || []
   const meals = mealPageData.content || []
   const auditLogs = auditPageData.content || []
+  const nonFoodUploads = nonFoodPageData.content || []
   const overview = dashboard?.overview || {}
   const system = dashboard?.system || {}
+  const nonFoodUploadAlerts = dashboard?.nonFoodUploadAlerts || []
+  const operations = dashboard?.operations || {}
+  const ragEvaluation = dashboard?.ragEvaluation || {}
+  const uploadTrends = dashboard?.uploadTrends || {}
+  const assistantStats = dashboard?.assistantStats || {}
+  const ragCategoryCounts = (ragEvaluation.categoryCounts || []).map(item => ({
+    ...item,
+    label: categoryLabel(item.label)
+  }))
   const currentUser = getUser()
 
   async function loadAdminData() {
     setLoading(true)
     setError('')
     try {
-      const [dashboardData, healthData, userData, mealData, analyticsData, chunkData, auditData] = await Promise.all([
+      const [dashboardData, healthData, userData, mealData, analyticsData, chunkData, auditData, nonFoodData] = await Promise.all([
         adminDashboard(),
         healthCheck(),
         adminUsers({ page: userPage, size: userSize, ...userFilters }),
         adminMeals({ page: mealPage, size: mealSize, ...mealFilters }),
         adminMealAnalytics(mealFilters),
         adminKnowledgeChunks({ page: knowledgePage, size: knowledgeSize, ...knowledgeFilters }),
-        adminAuditLogs({ page: auditPage, size: auditSize })
+        adminAuditLogs({ page: auditPage, size: auditSize }),
+        adminNonFoodUploads({ page: nonFoodPage, size: nonFoodSize, ...nonFoodFilters })
       ])
 
       const nextMealPage = normalizePage(mealData, mealSize)
@@ -133,6 +153,7 @@ export default function AdminPage({ onBack, onLogout }) {
       setKnowledgePageData(nextKnowledgePage)
       setChunks(nextKnowledgePage.content || [])
       setAuditPageData(normalizePage(auditData, auditSize))
+      setNonFoodPageData(normalizePage(nonFoodData, nonFoodSize))
       setSelectedMealIds(ids => ids.filter(id => (nextMealPage.content || []).some(meal => meal.id === id)))
     } catch (err) {
       setError(err.message || '加载管理数据失败')
@@ -143,7 +164,7 @@ export default function AdminPage({ onBack, onLogout }) {
 
   useEffect(() => {
     loadAdminData()
-  }, [userPage, userSize, userFilters, mealPage, mealSize, mealFilters, knowledgePage, knowledgeSize, knowledgeFilters, auditPage, auditSize])
+  }, [userPage, userSize, userFilters, mealPage, mealSize, mealFilters, knowledgePage, knowledgeSize, knowledgeFilters, auditPage, auditSize, nonFoodPage, nonFoodSize, nonFoodFilters])
 
   function applyUserFilters(e) {
     e.preventDefault()
@@ -163,6 +184,12 @@ export default function AdminPage({ onBack, onLogout }) {
     setKnowledgeFilters({ ...knowledgeFiltersDraft })
   }
 
+  function applyNonFoodFilters(e) {
+    e.preventDefault()
+    setNonFoodPage(0)
+    setNonFoodFilters({ ...nonFoodFiltersDraft })
+  }
+
   async function handleReindex() {
     setLoading(true)
     setMessage('')
@@ -173,6 +200,21 @@ export default function AdminPage({ onBack, onLogout }) {
       setMessage(getReindexMessage(result))
     } catch (err) {
       setError(err.message || '重建 RAG 知识库失败')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleRunRagEvaluation() {
+    setLoading(true)
+    setMessage('')
+    setError('')
+    try {
+      const result = await adminRagEvaluation()
+      setRagBenchmark(result)
+      setMessage('RAG 评测已完成')
+    } catch (err) {
+      setError(err.message || 'RAG 评测失败')
     } finally {
       setLoading(false)
     }
@@ -316,7 +358,8 @@ export default function AdminPage({ onBack, onLogout }) {
       <section className="admin-grid">
         <MetricCard value={overview.userCount ?? 0} label="注册用户" />
         <MetricCard value={overview.mealRecordCount ?? 0} label="饮食记录" />
-        <MetricCard value={overview.todayMealRecordCount ?? 0} label="今日上传" />
+        <MetricCard value={overview.todayNormalUploadCount ?? 0} label="今日正常上传" />
+        <MetricCard value={overview.todayAbnormalUploadCount ?? 0} label="今日异常上传" />
         <MetricCard value={overview.knowledgeChunkCount ?? 0} label="RAG 片段" />
       </section>
 
@@ -325,6 +368,7 @@ export default function AdminPage({ onBack, onLogout }) {
           ['overview', '系统概览'],
           ['users', '用户管理'],
           ['meals', '饮食记录'],
+          ['nonfood', '异常上传'],
           ['knowledge', 'RAG 知识库'],
           ['audit', '审计日志']
         ].map(([key, label]) => (
@@ -352,6 +396,48 @@ export default function AdminPage({ onBack, onLogout }) {
             数据库：{health?.databaseReachable ? '正常' : '异常'}；Redis：{health?.redisReachable ? '正常' : '降级运行'}；上传目录：{health?.uploadDirectoryWritable ? '可写' : '不可写'}；知识片段：{health?.knowledgeChunkCount ?? overview.knowledgeChunkCount ?? 0} 条。
           </div>
 
+          {nonFoodUploadAlerts.length > 0 && (
+            <div className="admin-alert-panel">
+              <div>
+                <h3>非饮食图片上传预警</h3>
+                <p>以下用户在短时间内连续上传了非饮食图片，请关注是否存在误用或异常操作。</p>
+              </div>
+              <div className="admin-alert-list">
+                {nonFoodUploadAlerts.map(alert => (
+                  <article key={alert.username}>
+                    <strong>{alert.username}</strong>
+                    <span>{alert.displayName || '未设置昵称'}</span>
+                    <span>{alert.windowMinutes} 分钟内 {alert.count} 次，阈值 {alert.limit} 次</span>
+                    <span>{formatTime(alert.lastTriggeredAt)}</span>
+                  </article>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="operations-grid">
+            <MetricSmall label="近 7 天活跃用户" value={operations.activeUsers7d ?? 0} />
+            <MetricSmall label="近 7 天上传记录" value={operations.mealUploads7d ?? 0} />
+            <MetricSmall label="AI 成功调用" value={operations.aiSuccessCount ?? 0} />
+            <MetricSmall label="AI 失败调用" value={operations.aiFailureCount ?? 0} />
+            <MetricSmall label="活跃违规预警" value={operations.activeNonFoodAlerts ?? 0} />
+          </div>
+
+          <div className="meal-analytics-grid">
+            <Chart title="近 7 天正常上传" items={uploadTrends.dailyNormalUploads} empty="暂无正常上传记录" />
+            <Chart title="近 7 天异常上传" items={uploadTrends.dailyAbnormalUploads} empty="暂无异常上传记录" />
+            <Chart title="近 7 天触发预警" items={uploadTrends.dailyAlertTriggers} empty="暂无预警记录" />
+            <Chart title="近 7 天受限用户" items={uploadTrends.dailyBlockedUsers} empty="暂无受限用户" />
+          </div>
+
+          <div className="rag-evaluation-grid">
+            <MetricSmall label="24h 检索次数" value={ragEvaluation.searches24h ?? 0} />
+            <MetricSmall label="平均 Top1 分数" value={ragEvaluation.averageTopScore24h ?? 0} />
+            <MetricSmall label="平均检索分数" value={ragEvaluation.averageScore24h ?? 0} />
+            <MetricSmall label="低置信检索" value={ragEvaluation.lowConfidenceSearches24h ?? 0} />
+            <Chart title="RAG 命中类别分布" items={ragCategoryCounts} empty="暂无检索记录" wide />
+          </div>
+
           <div className="meal-analytics-grid">
             {(health?.aiCalls || system.aiCalls || []).length ? (
               (health?.aiCalls || system.aiCalls || []).map(call => (
@@ -368,6 +454,52 @@ export default function AdminPage({ onBack, onLogout }) {
                 <p className="muted-text">暂无 AI 调用记录。</p>
               </div>
             )}
+          </div>
+
+          {(system.aiMetrics || []).length > 0 && (
+            <div className="admin-table-wrap ai-metrics-table">
+              <table className="admin-table">
+                <thead>
+                  <tr><th>AI 操作</th><th>调用数</th><th>成功</th><th>失败</th><th>平均耗时</th><th>最大耗时</th></tr>
+                </thead>
+                <tbody>
+                  {(system.aiMetrics || []).map(metric => (
+                    <tr key={metric.operation}>
+                      <td>{metric.operation}</td>
+                      <td>{metric.calls}</td>
+                      <td>{metric.successCount}</td>
+                      <td>{metric.failureCount}</td>
+                      <td>{metric.averageLatencyMs} ms</td>
+                      <td>{metric.maxLatencyMs} ms</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <div className="assistant-stats-panel">
+            <div className="admin-section-head compact-head">
+              <div>
+                <h2>助手统计</h2>
+                <p>观察智能问答助手的使用频率、会话质量、常见问题和 RAG 引用情况。</p>
+              </div>
+            </div>
+
+            <div className="operations-grid compact-five">
+              <MetricSmall label="助手会话数量" value={assistantStats.conversationCount ?? 0} />
+              <MetricSmall label="用户提问次数" value={assistantStats.questionCount ?? 0} />
+              <MetricSmall label="平均轮次" value={assistantStats.averageTurns ?? 0} />
+              <MetricSmall label="主动建议触发" value={assistantStats.proactiveTriggerCount ?? 0} />
+              <MetricSmall label="RAG 引用知识数" value={(assistantStats.topRagReferences || []).length} />
+            </div>
+
+            <div className="assistant-stats-grid">
+              <Chart title="最近 7 天助手问答趋势" items={assistantStats.questionTrend7d} empty="暂无助手问答记录" />
+              <Chart title="用户常问问题分类" items={assistantStats.questionCategories} empty="暂无问题分类数据" />
+              <Chart title="每个用户提问次数" items={assistantStats.questionsByUser} empty="暂无用户提问数据" />
+              <Chart title="RAG 知识引用排行" items={assistantStats.topRagReferences} empty="暂无 RAG 引用记录" />
+            </div>
           </div>
         </section>
       )}
@@ -489,6 +621,40 @@ export default function AdminPage({ onBack, onLogout }) {
 
           <div className="admin-note">系统会根据知识标题和内容自动标记分类，例如减脂、增肌、高油、糖饮甜品、蔬菜和主食。检索时同类知识会优先排序。</div>
 
+          <div className="knowledge-toolbar">
+            <button className="secondary-btn" type="button" onClick={handleRunRagEvaluation} disabled={loading}>运行 RAG 评测集</button>
+          </div>
+
+          {ragBenchmark && (
+            <div className="rag-benchmark-panel">
+              <div className="operations-grid compact-five">
+                <MetricSmall label="评测题数" value={ragBenchmark.caseCount ?? 0} />
+                <MetricSmall label="Hit@3" value={ragBenchmark.hitAt3 ?? 0} />
+                <MetricSmall label="MRR" value={ragBenchmark.mrr ?? 0} />
+                <MetricSmall label="类别@3(1条)" value={ragBenchmark.categoryAccuracy ?? 0} />
+              </div>
+              <div className="admin-table-wrap">
+                <table className="admin-table">
+                  <thead>
+                    <tr><th>问题</th><th>命中</th><th>首个相关排名</th><th>期望类别</th><th>类别命中</th><th>Top3 标题</th></tr>
+                  </thead>
+                  <tbody>
+                    {(ragBenchmark.cases || []).map(item => (
+                      <tr key={item.question}>
+                        <td>{item.question}</td>
+                        <td>{item.hitAt3 ? '是' : '否'}</td>
+                        <td>{item.firstRelevantRank || '-'}</td>
+                        <td>{categoryLabel(item.expectedCategory)}</td>
+                        <td>{item.categoryHitAt3 ? '是' : '否'}</td>
+                        <td>{(item.topTitles || []).join(' / ') || '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
           <form className="filter-grid compact" onSubmit={applyKnowledgeFilters}>
             <input value={knowledgeFiltersDraft.keyword} onChange={e => setKnowledgeFiltersDraft({ ...knowledgeFiltersDraft, keyword: e.target.value })} placeholder="按标题或内容搜索" />
             <select value={knowledgeFiltersDraft.source} onChange={e => setKnowledgeFiltersDraft({ ...knowledgeFiltersDraft, source: e.target.value })}>
@@ -547,6 +713,51 @@ export default function AdminPage({ onBack, onLogout }) {
             )) : <div className="empty-box">暂无 RAG 知识片段</div>}
           </div>
           <Pagination pageData={knowledgePageData} pageSize={knowledgeSize} setPage={setKnowledgePage} setPageSize={setKnowledgeSize} loading={loading} sizes={[8, 10, 20, 50]} />
+        </section>
+      )}
+
+      {activeTab === 'nonfood' && (
+        <section className="admin-section">
+          <div className="admin-section-head">
+            <div>
+              <h2>异常上传记录</h2>
+              <p>查看用户上传非饮食图片的历史记录、窗口内次数、频率和是否触发管理员预警。</p>
+            </div>
+          </div>
+
+          <form className="filter-grid compact" onSubmit={applyNonFoodFilters}>
+            <input value={nonFoodFiltersDraft.username} onChange={e => setNonFoodFiltersDraft({ ...nonFoodFiltersDraft, username: e.target.value })} placeholder="按用户名筛选" />
+            <label className="inline-check">
+              <input type="checkbox" checked={nonFoodFiltersDraft.blockedOnly} onChange={e => setNonFoodFiltersDraft({ ...nonFoodFiltersDraft, blockedOnly: e.target.checked })} />
+              只看限制中用户
+            </label>
+            <button className="secondary-btn" type="submit">筛选</button>
+            <button className="secondary-btn" type="button" onClick={() => { setNonFoodFiltersDraft(defaultNonFoodFilters); setNonFoodFilters(defaultNonFoodFilters); setNonFoodPage(0) }}>重置</button>
+          </form>
+
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr><th>ID</th><th>用户</th><th>昵称</th><th>窗口内次数</th><th>频率</th><th>当前状态</th><th>是否预警</th><th>原因</th><th>时间</th></tr>
+              </thead>
+              <tbody>
+                {nonFoodUploads.length ? nonFoodUploads.map(item => (
+                  <tr key={item.id}>
+                    <td>{item.id}</td>
+                    <td>{item.username}</td>
+                    <td>{item.displayName || '暂无'}</td>
+                    <td>{item.windowMinutes} 分钟内 {item.windowCount} 次</td>
+                    <td>{item.windowCount} 次 / {item.observedMinutes || 1} 分钟（{item.perMinuteRate} 次/分钟）</td>
+                    <td><span className={item.currentlyBlocked ? 'status-bad' : 'status-ok'}>{item.currentlyBlocked ? '限制中' : '可上传'}</span></td>
+                    <td><span className={item.thresholdReached ? 'status-bad' : 'status-ok'}>{item.thresholdReached ? '已预警' : '未达阈值'}</span></td>
+                    <td className="summary-cell">{item.reason || '暂无'}</td>
+                    <td>{formatTime(item.createdAt)}</td>
+                  </tr>
+                )) : <tr><td colSpan="9" className="empty-cell">暂无异常上传记录</td></tr>}
+              </tbody>
+            </table>
+          </div>
+          <Pagination pageData={nonFoodPageData} pageSize={nonFoodSize} setPage={setNonFoodPage} setPageSize={setNonFoodSize} loading={loading} />
         </section>
       )}
 

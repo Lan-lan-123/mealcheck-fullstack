@@ -5,6 +5,7 @@ import java.util.List;
 public class AssistantRequest {
     private String question;
     private String message;
+    private Long conversationId;
     private List<AssistantChatMessage> history;
 
     public String getQuestion() {
@@ -21,6 +22,14 @@ public class AssistantRequest {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public Long getConversationId() {
+        return conversationId;
+    }
+
+    public void setConversationId(Long conversationId) {
+        this.conversationId = conversationId;
     }
 
     public List<AssistantChatMessage> getHistory() {

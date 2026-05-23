@@ -1,6 +1,7 @@
 package com.example.mealcheck.service;
 
 import com.example.mealcheck.dto.AdminAuditLogPageResponse;
+import com.example.mealcheck.dto.AdminAssistantStatsResponse;
 import com.example.mealcheck.dto.AdminDashboardResponse;
 import com.example.mealcheck.dto.AdminKnowledgeChunkPageResponse;
 import com.example.mealcheck.dto.AdminKnowledgeChunkRequest;
@@ -8,14 +9,25 @@ import com.example.mealcheck.dto.AdminKnowledgeChunkResponse;
 import com.example.mealcheck.dto.AdminMealAnalyticsResponse;
 import com.example.mealcheck.dto.AdminMealPageResponse;
 import com.example.mealcheck.dto.AdminMealRecordResponse;
+import com.example.mealcheck.dto.AdminNonFoodUploadEventPageResponse;
+import com.example.mealcheck.dto.AdminNonFoodUploadEventResponse;
+import com.example.mealcheck.dto.AdminOperationsResponse;
 import com.example.mealcheck.dto.AdminStatsResponse;
 import com.example.mealcheck.dto.AdminSystemResponse;
+import com.example.mealcheck.dto.AdminUploadTrendResponse;
 import com.example.mealcheck.dto.AdminUserPageResponse;
 import com.example.mealcheck.dto.AdminUserResponse;
 import com.example.mealcheck.dto.FoodItem;
+import com.example.mealcheck.dto.RagEvaluationSummaryResponse;
+import com.example.mealcheck.dto.RagBenchmarkResponse;
+import com.example.mealcheck.entity.AssistantConversationMessage;
 import com.example.mealcheck.entity.MealRecord;
+import com.example.mealcheck.entity.NonFoodUploadEvent;
 import com.example.mealcheck.entity.UserAccount;
 import com.example.mealcheck.repository.MealRecordRepository;
+import com.example.mealcheck.repository.NonFoodUploadEventRepository;
+import com.example.mealcheck.repository.AssistantConversationMessageRepository;
+import com.example.mealcheck.repository.AssistantConversationRepository;
 import com.example.mealcheck.repository.UserAccountRepository;
 import com.example.mealcheck.security.UserPrincipal;
 import com.example.mealcheck.util.Jsons;
@@ -40,9 +52,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 public class AdminService {
@@ -51,6 +65,9 @@ public class AdminService {
 
     private final UserAccountRepository userAccountRepository;
     private final MealRecordRepository mealRecordRepository;
+    private final NonFoodUploadEventRepository nonFoodUploadEventRepository;
+    private final AssistantConversationRepository assistantConversationRepository;
+    private final AssistantConversationMessageRepository assistantConversationMessageRepository;
     private final KnowledgeIndexService knowledgeIndexService;
     private final PgVectorKnowledgeService pgVectorKnowledgeService;
     private final ImageStorageService imageStorageService;
@@ -58,6 +75,10 @@ public class AdminService {
     private final AiStatusService aiStatusService;
     private final RedisCacheService redisCacheService;
     private final AdminAuditService adminAuditService;
+    private final NonFoodUploadGuardService nonFoodUploadGuardService;
+    private final RagEvaluationService ragEvaluationService;
+    private final RagBenchmarkService ragBenchmarkService;
+    private final AssistantProactiveAdviceService assistantProactiveAdviceService;
 
     @Value("${mealcheck.ai.api-key:}")
     private String apiKey;
@@ -70,15 +91,25 @@ public class AdminService {
 
     public AdminService(UserAccountRepository userAccountRepository,
                         MealRecordRepository mealRecordRepository,
+                        NonFoodUploadEventRepository nonFoodUploadEventRepository,
+                        AssistantConversationRepository assistantConversationRepository,
+                        AssistantConversationMessageRepository assistantConversationMessageRepository,
                         KnowledgeIndexService knowledgeIndexService,
                         PgVectorKnowledgeService pgVectorKnowledgeService,
                         ImageStorageService imageStorageService,
                         ObjectMapper objectMapper,
                         AiStatusService aiStatusService,
                         RedisCacheService redisCacheService,
-                        AdminAuditService adminAuditService) {
+                        AdminAuditService adminAuditService,
+                        NonFoodUploadGuardService nonFoodUploadGuardService,
+                        RagEvaluationService ragEvaluationService,
+                        RagBenchmarkService ragBenchmarkService,
+                        AssistantProactiveAdviceService assistantProactiveAdviceService) {
         this.userAccountRepository = userAccountRepository;
         this.mealRecordRepository = mealRecordRepository;
+        this.nonFoodUploadEventRepository = nonFoodUploadEventRepository;
+        this.assistantConversationRepository = assistantConversationRepository;
+        this.assistantConversationMessageRepository = assistantConversationMessageRepository;
         this.knowledgeIndexService = knowledgeIndexService;
         this.pgVectorKnowledgeService = pgVectorKnowledgeService;
         this.imageStorageService = imageStorageService;
@@ -86,6 +117,10 @@ public class AdminService {
         this.aiStatusService = aiStatusService;
         this.redisCacheService = redisCacheService;
         this.adminAuditService = adminAuditService;
+        this.nonFoodUploadGuardService = nonFoodUploadGuardService;
+        this.ragEvaluationService = ragEvaluationService;
+        this.ragBenchmarkService = ragBenchmarkService;
+        this.assistantProactiveAdviceService = assistantProactiveAdviceService;
     }
 
     public AdminStatsResponse stats() {
@@ -102,14 +137,16 @@ public class AdminService {
         long mealRecordCount = mealRecordRepository.count();
 
         LocalDateTime todayStart = LocalDate.now().atStartOfDay();
-        long todayMealRecordCount = mealRecordRepository.countByCreatedAtAfter(todayStart);
+        long todayNormalUploadCount = mealRecordRepository.countByCreatedAtAfter(todayStart);
+        long todayAbnormalUploadCount = nonFoodUploadEventRepository.countByCreatedAtAfter(todayStart);
 
         long knowledgeChunkCount = knowledgeIndexService.countChunks();
 
         return new AdminStatsResponse(
                 userCount,
                 mealRecordCount,
-                todayMealRecordCount,
+                todayNormalUploadCount,
+                todayAbnormalUploadCount,
                 knowledgeChunkCount
         );
     }
@@ -127,10 +164,67 @@ public class AdminService {
                 apiKey != null && !apiKey.isBlank(),
                 baseUrl != null && !baseUrl.isBlank(),
                 "resources/knowledge/diet_guides.md",
-                aiStatusService.recentCalls()
+                aiStatusService.recentCalls(),
+                aiStatusService.metrics()
+        );
+        List<com.example.mealcheck.dto.NonFoodUploadAlert> alerts = nonFoodUploadGuardService.activeAlerts();
+        AdminOperationsResponse operations = new AdminOperationsResponse(
+                userAccountRepository.countByLastUploadAtAfter(LocalDateTime.now().minusDays(7)),
+                mealRecordRepository.countByCreatedAtAfter(LocalDateTime.now().minusDays(7)),
+                aiStatusService.successCount(),
+                aiStatusService.failureCount(),
+                alerts.size()
+        );
+        RagEvaluationSummaryResponse ragEvaluation = ragEvaluationService.summary24h();
+        AdminUploadTrendResponse uploadTrends = buildUploadTrends();
+        AdminAssistantStatsResponse assistantStats = buildAssistantStats();
+
+        return new AdminDashboardResponse(overview, system, alerts, operations, ragEvaluation, uploadTrends, assistantStats);
+    }
+
+    private AdminAssistantStatsResponse buildAssistantStats() {
+        long conversationCount = assistantConversationRepository.count();
+        long questionCount = assistantConversationMessageRepository.countByRole("user");
+        double averageTurns = conversationCount == 0
+                ? 0.0
+                : Math.round((double) questionCount / conversationCount * 100.0) / 100.0;
+
+        LocalDate today = LocalDate.now();
+        LocalDate start = today.minusDays(6);
+        List<AssistantConversationMessage> recentQuestions =
+                assistantConversationMessageRepository.findByRoleAndCreatedAtAfterOrderByCreatedAtAsc("user", start.atStartOfDay());
+        Map<LocalDate, Integer> questionsByDay = recentQuestions.stream()
+                .filter(message -> message.getCreatedAt() != null)
+                .collect(Collectors.groupingBy(
+                        message -> message.getCreatedAt().toLocalDate(),
+                        LinkedHashMap::new,
+                        Collectors.collectingAndThen(Collectors.counting(), Long::intValue)
+                ));
+
+        List<AdminAssistantStatsResponse.MetricItem> questionsByUser =
+                assistantConversationMessageRepository.countUserQuestionsByUsername()
+                        .stream()
+                        .limit(10)
+                        .map(row -> new AdminAssistantStatsResponse.MetricItem(
+                                String.valueOf(row[0]),
+                                toInt((Long) row[1])
+                        ))
+                        .toList();
+
+        List<AdminAssistantStatsResponse.MetricItem> questionCategories = topAssistantCategories(
+                assistantConversationMessageRepository.findTop500ByRoleOrderByCreatedAtDesc("user")
         );
 
-        return new AdminDashboardResponse(overview, system);
+        return new AdminAssistantStatsResponse(
+                conversationCount,
+                questionCount,
+                averageTurns,
+                assistantProactiveAdviceService.triggerCount(),
+                questionsByUser,
+                assistantTrendItems(start, questionsByDay),
+                questionCategories,
+                pgVectorKnowledgeService.topHitChunks(8)
+        );
     }
 
     public List<AdminUserResponse> users() {
@@ -229,10 +323,50 @@ public class AdminService {
         return adminAuditService.list(page, size);
     }
 
+    @Transactional(readOnly = true)
+    public AdminNonFoodUploadEventPageResponse nonFoodUploads(int page, int size, String username, boolean blockedOnly) {
+        int safePage = Math.max(0, page);
+        int safeSize = Math.max(1, Math.min(size, 100));
+        if (blockedOnly) {
+            List<NonFoodUploadEvent> filtered = nonFoodUploadEventRepository.findAll(
+                            nonFoodUploadSpecification(username),
+                            Sort.by(Sort.Direction.DESC, "createdAt")
+                    )
+                    .stream()
+                    .filter(event -> nonFoodUploadGuardService.isBlocked(event.getUsername()))
+                    .toList();
+            int from = Math.min(safePage * safeSize, filtered.size());
+            int to = Math.min(from + safeSize, filtered.size());
+            int totalPages = filtered.isEmpty() ? 0 : (int) Math.ceil((double) filtered.size() / safeSize);
+            return new AdminNonFoodUploadEventPageResponse(
+                    filtered.subList(from, to).stream().map(this::toNonFoodUploadResponse).toList(),
+                    filtered.size(),
+                    totalPages,
+                    safePage,
+                    safeSize
+            );
+        }
+        Page<NonFoodUploadEvent> events = nonFoodUploadEventRepository.findAll(
+                nonFoodUploadSpecification(username),
+                PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "createdAt"))
+        );
+        return new AdminNonFoodUploadEventPageResponse(
+                events.getContent().stream().map(this::toNonFoodUploadResponse).toList(),
+                events.getTotalElements(),
+                events.getTotalPages(),
+                events.getNumber(),
+                events.getSize()
+        );
+    }
+
     public Object reindexKnowledge() {
         Object result = knowledgeIndexService.reindex();
         clearAdminCaches();
         return result;
+    }
+
+    public RagBenchmarkResponse ragBenchmark() {
+        return ragBenchmarkService.evaluate();
     }
 
     public void addKnowledgeChunk(AdminKnowledgeChunkRequest request, UserPrincipal admin) {
@@ -295,8 +429,11 @@ public class AdminService {
                 .map(MealRecord::getStoredImagePath)
                 .filter(path -> path != null && !path.isBlank())
                 .toList();
+        List<NonFoodUploadEvent> nonFoodEvents = nonFoodUploadEventRepository.findByUser(user);
+        nonFoodEvents.forEach(event -> event.setUser(null));
 
         mealRecordRepository.deleteAll(records);
+        nonFoodUploadEventRepository.saveAll(nonFoodEvents);
         userAccountRepository.delete(user);
         imagePaths.forEach(imageStorageService::deleteSafely);
         clearAdminCaches();
@@ -342,6 +479,86 @@ public class AdminService {
                 foodNames,
                 record.getCreatedAt()
         );
+    }
+
+    private AdminNonFoodUploadEventResponse toNonFoodUploadResponse(NonFoodUploadEvent event) {
+        int observedMinutes = Math.max(1, event.getObservedMinutes());
+        double perMinuteRate = Math.round((double) event.getWindowCount() / observedMinutes * 100.0) / 100.0;
+        return new AdminNonFoodUploadEventResponse(
+                event.getId(),
+                event.getUsername(),
+                event.getDisplayName(),
+                event.getReason(),
+                event.getWindowCount(),
+                event.getWindowMinutes(),
+                observedMinutes,
+                perMinuteRate,
+                event.isThresholdReached(),
+                nonFoodUploadGuardService.isBlocked(event.getUsername()),
+                event.getCreatedAt()
+        );
+    }
+
+    private List<AdminAssistantStatsResponse.MetricItem> assistantTrendItems(LocalDate start, Map<LocalDate, Integer> values) {
+        return IntStream.rangeClosed(0, 6)
+                .mapToObj(start::plusDays)
+                .map(date -> new AdminAssistantStatsResponse.MetricItem(date.toString(), values.getOrDefault(date, 0)))
+                .toList();
+    }
+
+    private List<AdminAssistantStatsResponse.MetricItem> topAssistantCategories(List<AssistantConversationMessage> messages) {
+        Map<String, Integer> counts = new LinkedHashMap<>();
+        messages.stream()
+                .map(AssistantConversationMessage::getText)
+                .filter(text -> text != null && !text.isBlank())
+                .map(this::classifyAssistantQuestion)
+                .forEach(category -> counts.merge(category, 1, Integer::sum));
+
+        return counts.entrySet()
+                .stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder()))
+                .limit(8)
+                .map(entry -> new AdminAssistantStatsResponse.MetricItem(entry.getKey(), entry.getValue()))
+                .toList();
+    }
+
+    private String classifyAssistantQuestion(String question) {
+        String text = question.toLowerCase(Locale.ROOT);
+        if (containsAny(text, "减脂", "减肥", "瘦", "控卡", "低脂", "fat")) {
+            return "减脂控卡";
+        }
+        if (containsAny(text, "增肌", "蛋白", "肌肉", "训练", "muscle")) {
+            return "增肌蛋白";
+        }
+        if (containsAny(text, "食堂", "怎么选", "搭配", "均衡", "下一餐")) {
+            return "食堂搭配";
+        }
+        if (containsAny(text, "炸", "烤肉", "烧烤", "奶茶", "甜", "饮料", "高油", "高糖")) {
+            return "高油高糖";
+        }
+        if (containsAny(text, "蔬菜", "水果", "纤维", "维生素")) {
+            return "蔬果摄入";
+        }
+        if (containsAny(text, "这周", "最近", "复盘", "趋势", "怎么样")) {
+            return "饮食复盘";
+        }
+        return "日常咨询";
+    }
+
+    private boolean containsAny(String text, String... keywords) {
+        for (String keyword : keywords) {
+            if (text.contains(keyword)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private int toInt(Long value) {
+        if (value == null) {
+            return 0;
+        }
+        return value > Integer.MAX_VALUE ? Integer.MAX_VALUE : value.intValue();
     }
 
     private List<String> extractFoodNames(MealRecord record) {
@@ -466,6 +683,70 @@ public class AdminService {
 
             return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
         };
+    }
+
+    private Specification<NonFoodUploadEvent> nonFoodUploadSpecification(String username) {
+        return (root, query, cb) -> {
+            if (username == null || username.isBlank()) {
+                return cb.conjunction();
+            }
+            return cb.like(cb.lower(root.get("username")), "%" + username.trim().toLowerCase() + "%");
+        };
+    }
+
+    private AdminUploadTrendResponse buildUploadTrends() {
+        LocalDate today = LocalDate.now();
+        LocalDate start = today.minusDays(6);
+        List<MealRecord> meals = mealRecordRepository.findByCreatedAtAfterOrderByCreatedAtAsc(start.atStartOfDay());
+        List<NonFoodUploadEvent> abnormalEvents = nonFoodUploadEventRepository.findByCreatedAtAfterOrderByCreatedAtAsc(start.atStartOfDay());
+
+        Map<LocalDate, Integer> normalByDay = meals.stream()
+                .filter(record -> record.getCreatedAt() != null)
+                .collect(Collectors.groupingBy(
+                        record -> record.getCreatedAt().toLocalDate(),
+                        LinkedHashMap::new,
+                        Collectors.collectingAndThen(Collectors.counting(), Long::intValue)
+                ));
+        Map<LocalDate, Integer> abnormalByDay = abnormalEvents.stream()
+                .filter(event -> event.getCreatedAt() != null)
+                .collect(Collectors.groupingBy(
+                        event -> event.getCreatedAt().toLocalDate(),
+                        LinkedHashMap::new,
+                        Collectors.collectingAndThen(Collectors.counting(), Long::intValue)
+                ));
+        Map<LocalDate, Integer> alertsByDay = abnormalEvents.stream()
+                .filter(NonFoodUploadEvent::isThresholdReached)
+                .filter(event -> event.getCreatedAt() != null)
+                .collect(Collectors.groupingBy(
+                        event -> event.getCreatedAt().toLocalDate(),
+                        LinkedHashMap::new,
+                        Collectors.collectingAndThen(Collectors.counting(), Long::intValue)
+                ));
+        Map<LocalDate, Integer> blockedUsersByDay = abnormalEvents.stream()
+                .filter(NonFoodUploadEvent::isThresholdReached)
+                .filter(event -> event.getCreatedAt() != null)
+                .collect(Collectors.groupingBy(
+                        event -> event.getCreatedAt().toLocalDate(),
+                        LinkedHashMap::new,
+                        Collectors.collectingAndThen(
+                                Collectors.mapping(NonFoodUploadEvent::getUsername, Collectors.toSet()),
+                                java.util.Set::size
+                        )
+                ));
+
+        return new AdminUploadTrendResponse(
+                trendItems(start, normalByDay),
+                trendItems(start, abnormalByDay),
+                trendItems(start, alertsByDay),
+                trendItems(start, blockedUsersByDay)
+        );
+    }
+
+    private List<AdminUploadTrendResponse.MetricItem> trendItems(LocalDate start, Map<LocalDate, Integer> values) {
+        return IntStream.rangeClosed(0, 6)
+                .mapToObj(start::plusDays)
+                .map(date -> new AdminUploadTrendResponse.MetricItem(date.toString(), values.getOrDefault(date, 0)))
+                .toList();
     }
 
 }

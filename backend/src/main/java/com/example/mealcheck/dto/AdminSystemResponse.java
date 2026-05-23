@@ -12,6 +12,7 @@ public class AdminSystemResponse {
     private boolean baseUrlConfigured;
     private String ragKnowledgeFile;
     private java.util.List<AiCallStatusResponse> aiCalls;
+    private java.util.List<AiOperationMetricsResponse> aiMetrics;
 
     public AdminSystemResponse() {
     }
@@ -25,7 +26,8 @@ public class AdminSystemResponse {
                                boolean apiKeyConfigured,
                                boolean baseUrlConfigured,
                                String ragKnowledgeFile,
-                               java.util.List<AiCallStatusResponse> aiCalls) {
+                               java.util.List<AiCallStatusResponse> aiCalls,
+                               java.util.List<AiOperationMetricsResponse> aiMetrics) {
         this.backend = backend;
         this.database = database;
         this.vectorDatabase = vectorDatabase;
@@ -36,6 +38,7 @@ public class AdminSystemResponse {
         this.baseUrlConfigured = baseUrlConfigured;
         this.ragKnowledgeFile = ragKnowledgeFile;
         this.aiCalls = aiCalls;
+        this.aiMetrics = aiMetrics;
     }
 
     public String getBackend() {
@@ -116,5 +119,13 @@ public class AdminSystemResponse {
 
     public void setAiCalls(java.util.List<AiCallStatusResponse> aiCalls) {
         this.aiCalls = aiCalls;
+    }
+
+    public java.util.List<AiOperationMetricsResponse> getAiMetrics() {
+        return aiMetrics;
+    }
+
+    public void setAiMetrics(java.util.List<AiOperationMetricsResponse> aiMetrics) {
+        this.aiMetrics = aiMetrics;
     }
 }

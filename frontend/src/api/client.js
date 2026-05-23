@@ -82,6 +82,10 @@ export function login(payload) {
   })
 }
 
+export function captcha() {
+  return request('/api/auth/captcha')
+}
+
 export function logout() {
   return request('/api/auth/logout', {
     method: 'POST'
@@ -106,6 +110,22 @@ export function weeklyReport(days = 7) {
   return request(`/api/reports/weekly?days=${days}`)
 }
 
+export function latestWeeklyReport() {
+  return request('/api/reports/weekly/latest')
+}
+
+export function currentGoal() {
+  return request('/api/profile/goals/current')
+}
+
+export function updateCurrentGoal(payload) {
+  return request('/api/profile/goals/current', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+}
+
 export function mealTrends(days = 30) {
   return request(`/api/meals/trends?days=${days}`)
 }
@@ -120,12 +140,28 @@ export function deleteMeal(id) {
   })
 }
 
-export function askDietAssistant(question, history = []) {
+export function askDietAssistant(question, history = [], conversationId = null) {
   return request(API_ENDPOINTS.assistantAsk, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question, history })
+    body: JSON.stringify({ question, history, conversationId })
   })
+}
+
+export function assistantConversations() {
+  return request('/api/assistant/conversations')
+}
+
+export function assistantConversation(id) {
+  return request(`/api/assistant/conversations/${id}`)
+}
+
+export function deleteAssistantConversation(id) {
+  return request(`/api/assistant/conversations/${id}`, { method: 'DELETE' })
+}
+
+export function assistantProactiveAdvice() {
+  return request('/api/assistant/proactive')
 }
 
 export function reindexKnowledge() {
@@ -150,6 +186,10 @@ export function adminDashboard() {
 
 export function adminAuditLogs(params = {}) {
   return request(`/api/admin/audit-logs${toQuery(params)}`)
+}
+
+export function adminNonFoodUploads(params = {}) {
+  return request(`/api/admin/non-food-uploads${toQuery(params)}`)
 }
 
 export function adminUsers(params = {}) {
@@ -217,4 +257,8 @@ export function adminReindexKnowledge() {
   return request('/api/admin/knowledge/reindex', {
     method: 'POST'
   })
+}
+
+export function adminRagEvaluation() {
+  return request('/api/admin/knowledge/evaluation')
 }

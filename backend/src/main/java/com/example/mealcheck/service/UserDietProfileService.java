@@ -92,6 +92,14 @@ public class UserDietProfileService {
                 + ". Preferred goal: " + nullToEmpty(profile.getPreferredGoal()) + ".";
     }
 
+    public List<String> commonFoods(UserDietProfile profile) {
+        return profile == null ? List.of() : readStringList(profile.getCommonFoodsJson());
+    }
+
+    public List<String> commonRisks(UserDietProfile profile) {
+        return profile == null ? List.of() : readStringList(profile.getCommonRisksJson());
+    }
+
     private String buildSummary(long total, int averageScore, String goal, List<String> foods, List<String> risks) {
         if (total == 0) {
             return "还没有长期饮食画像，建议先持续上传饮食记录。";

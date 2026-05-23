@@ -3,16 +3,19 @@ import { createRoot } from 'react-dom/client'
 import { Camera, LogOut, ShieldCheck, Utensils } from 'lucide-react'
 import {
   analyzeMeal,
+  captcha,
   clearSession,
+  currentGoal,
   deleteMeal,
   getUser,
+  latestWeeklyReport,
   listMeals,
   login,
   logout,
   mealTrends,
   register,
   setSession,
-  weeklyReport
+  updateCurrentGoal
 } from './api/client'
 import AssistantCard from './components/AssistantCard'
 import Empty from './components/Empty'
@@ -25,6 +28,7 @@ import AdminPage from './pages/AdminPage'
 import './styles.css'
 
 const goals = [
+  { value: 'current', label: '使用当前目标' },
   { value: 'balanced', label: '均衡饮食' },
   { value: 'fat_loss', label: '减脂目标' },
   { value: 'muscle_gain', label: '增肌目标' },
@@ -64,24 +68,64 @@ function defaultPageFor(user) {
 
 function AuthPage({ onAuthed }) {
   const [mode, setMode] = useState('login')
+  const [loginRole, setLoginRole] = useState('USER')
   const [form, setForm] = useState({
     username: 'demo',
     password: '123456',
-    displayName: 'Demo 用户'
+    displayName: 'Demo 用户',
+    captchaAnswer: ''
   })
+  const [captchaData, setCaptchaData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  async function refreshCaptcha() {
+    const data = await captcha()
+    setCaptchaData(data)
+    setForm(current => ({ ...current, captchaAnswer: '' }))
+  }
+
+  useEffect(() => {
+    refreshCaptcha().catch(err => setError(err.message))
+  }, [])
+
+  function switchRole(role) {
+    setLoginRole(role)
+    setMode('login')
+    setForm(current => ({
+      ...current,
+      username: role === 'ADMIN' ? 'admin' : 'demo',
+      displayName: role === 'ADMIN' ? '管理员' : 'Demo 用户',
+      captchaAnswer: ''
+    }))
+    refreshCaptcha().catch(err => setError(err.message))
+  }
 
   async function submit(e) {
     e.preventDefault()
     setLoading(true)
     setError('')
     try {
-      const auth = mode === 'login' ? await login(form) : await register(form)
+      const auth = mode === 'login'
+        ? await login({
+            username: form.username,
+            password: form.password,
+            expectedRole: loginRole,
+            captchaId: captchaData?.captchaId,
+            captchaAnswer: form.captchaAnswer
+          })
+        : await register({
+            username: form.username,
+            password: form.password,
+            displayName: form.displayName
+          })
       setSession(auth)
       onAuthed(auth)
     } catch (err) {
       setError(err.message)
+      if (mode === 'login') {
+        refreshCaptcha().catch(() => {})
+      }
     } finally {
       setLoading(false)
     }
@@ -98,13 +142,24 @@ function AuthPage({ onAuthed }) {
           </div>
         </div>
 
+        <div className="role-tabs">
+          <button className={loginRole === 'USER' ? 'active' : ''} onClick={() => switchRole('USER')} type="button">
+            普通用户
+          </button>
+          <button className={loginRole === 'ADMIN' ? 'active' : ''} onClick={() => switchRole('ADMIN')} type="button">
+            管理员
+          </button>
+        </div>
+
         <div className="tabs">
           <button className={mode === 'login' ? 'active' : ''} onClick={() => setMode('login')} type="button">
             登录
           </button>
-          <button className={mode === 'register' ? 'active' : ''} onClick={() => setMode('register')} type="button">
-            注册
-          </button>
+          {loginRole === 'USER' && (
+            <button className={mode === 'register' ? 'active' : ''} onClick={() => setMode('register')} type="button">
+              注册
+            </button>
+          )}
         </div>
 
         <form onSubmit={submit}>
@@ -122,13 +177,23 @@ function AuthPage({ onAuthed }) {
               <input value={form.displayName} onChange={e => setForm({ ...form, displayName: e.target.value })} />
             </label>
           )}
+          {mode === 'login' && (
+            <label>
+              验证码
+              <div className="captcha-row">
+                <span>{captchaData?.question || '加载中...'}</span>
+                <input value={form.captchaAnswer} onChange={e => setForm({ ...form, captchaAnswer: e.target.value })} placeholder="答案" />
+                <button type="button" onClick={refreshCaptcha}>换一题</button>
+              </div>
+            </label>
+          )}
           {error && <p className="error">{error}</p>}
           <button className="primary" disabled={loading}>
-            {loading ? '处理中...' : mode === 'login' ? '登录系统' : '创建账号'}
+            {loading ? '处理中...' : mode === 'login' ? `${loginRole === 'ADMIN' ? '管理员' : '用户'}登录` : '创建账号'}
           </button>
         </form>
 
-        <p className="hint">管理员登录后会进入管理后台，普通用户登录后进入图片上传分析页面。</p>
+        <p className="hint">管理员账号只能从管理员入口登录，普通用户登录后进入图片上传分析页面。</p>
       </section>
     </main>
   )
@@ -148,11 +213,15 @@ function App() {
     setPage(defaultPageFor(nextUser))
   }
 
-  function handleLogout() {
-    logout().catch(() => {})
-    clearSession()
-    setUser(null)
-    setPage('dashboard')
+  async function handleLogout() {
+    try {
+      await logout()
+      clearSession()
+      setUser(null)
+      setPage('dashboard')
+    } catch (err) {
+      window.alert(err.message || '退出失败，请稍后重试')
+    }
   }
 
   useEffect(() => {
@@ -183,7 +252,9 @@ function App() {
 function Dashboard({ user, onLogout, onOpenAdmin }) {
   const [file, setFile] = useState(null)
   const [preview, setPreview] = useState('')
-  const [goal, setGoal] = useState('balanced')
+  const [goal, setGoal] = useState('current')
+  const [goalProfile, setGoalProfile] = useState(null)
+  const [goalDraft, setGoalDraft] = useState({ goalType: 'balanced', endDate: '', note: '' })
   const [result, setResult] = useState(null)
   const [recordPageData, setRecordPageData] = useState(emptyPage())
   const [recordPage, setRecordPage] = useState(0)
@@ -198,14 +269,23 @@ function Dashboard({ user, onLogout, onOpenAdmin }) {
   const [activeSection, setActiveSection] = useState('overview')
 
   async function refresh() {
-    const [m, r, t] = await Promise.all([
+    const [m, r, t, g] = await Promise.all([
       listMeals({ page: recordPage, size: recordSize, ...compactFilters(recordFilters) }),
-      weeklyReport(7),
-      mealTrends(30)
+      latestWeeklyReport(),
+      mealTrends(30),
+      currentGoal()
     ])
     setRecordPageData(normalizePage(m, recordSize))
     setReport(r)
     setTrend(t)
+    setGoalProfile(g)
+    if (g?.goalType) {
+      setGoalDraft({
+        goalType: g.goalType,
+        endDate: g.endDate || '',
+        note: g.note || ''
+      })
+    }
   }
 
   useEffect(() => {
@@ -264,7 +344,27 @@ function Dashboard({ user, onLogout, onOpenAdmin }) {
     setRecordPage(0)
   }
 
+  async function saveGoal(e) {
+    e.preventDefault()
+    setLoading(true)
+    setMessage('')
+    try {
+      const nextGoal = await updateCurrentGoal({
+        goalType: goalDraft.goalType,
+        endDate: goalDraft.endDate || null,
+        note: goalDraft.note
+      })
+      setGoalProfile(nextGoal)
+      setMessage('当前目标已更新')
+    } catch (err) {
+      setMessage(err.message || '更新目标失败')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const avgLabel = useMemo(() => (report ? `${report.averageScore || 0}` : '--'), [report])
+  const goalLabel = goals.find(item => item.value === goalProfile?.goalType)?.label || '均衡饮食'
   const weeklyRecords = useMemo(() => {
     const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000
     return (recordPageData.content || []).filter(r => new Date(r.createdAt).getTime() >= cutoff)
@@ -333,6 +433,20 @@ function Dashboard({ user, onLogout, onOpenAdmin }) {
                     {loading ? '分析中...' : '开始分析'}
                   </button>
                 </div>
+                <form className="goal-form" onSubmit={saveGoal}>
+                  <div>
+                    <strong>当前目标</strong>
+                    <span>{goalLabel}</span>
+                  </div>
+                  <select value={goalDraft.goalType} onChange={e => setGoalDraft({ ...goalDraft, goalType: e.target.value })}>
+                    {goals.filter(item => item.value !== 'current').map(g => (
+                      <option key={g.value} value={g.value}>{g.label}</option>
+                    ))}
+                  </select>
+                  <input type="date" value={goalDraft.endDate} onChange={e => setGoalDraft({ ...goalDraft, endDate: e.target.value })} />
+                  <input value={goalDraft.note} onChange={e => setGoalDraft({ ...goalDraft, note: e.target.value })} placeholder="目标说明" />
+                  <button className="secondary-btn" type="submit" disabled={loading}>保存目标</button>
+                </form>
               </div>
 
               <div className="card score-card">

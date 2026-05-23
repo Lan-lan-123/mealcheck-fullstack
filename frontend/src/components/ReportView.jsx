@@ -16,6 +16,21 @@ export default function ReportView({ report, avgLabel, onOpenDetail }) {
 
       <p>{report.reportText}</p>
 
+      {report.generatedAt && (
+        <p className="report-meta">自动生成于 {new Date(report.generatedAt).toLocaleString()}</p>
+      )}
+
+      {!!report.nextWeekSuggestions?.length && (
+        <>
+          <h3>下周建议</h3>
+          <ul className="weekly-suggestions">
+            {report.nextWeekSuggestions.map(item => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </>
+      )}
+
       <button className="ghost detail-report-btn" onClick={onOpenDetail} type="button">
         查看周报详情
       </button>

@@ -21,14 +21,17 @@ public class TokenBlacklistService {
         if (token == null || token.isBlank() || ttl == null || ttl.isZero() || ttl.isNegative()) {
             return;
         }
-        redisCacheService.set(PREFIX + hash(token), "1", ttl);
+        boolean stored = redisCacheService.set(PREFIX + hash(token), "1", ttl);
+        if (!stored) {
+            throw new IllegalStateException("Logout failed because Redis token blacklist is unavailable.");
+        }
     }
 
     public boolean isBlacklisted(String token) {
         if (token == null || token.isBlank()) {
             return false;
         }
-        return redisCacheService.get(PREFIX + hash(token)).isPresent();
+        return redisCacheService.getRequired(PREFIX + hash(token)).isPresent();
     }
 
     private String hash(String token) {

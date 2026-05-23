@@ -8,9 +8,11 @@ import com.example.mealcheck.dto.AdminKnowledgeChunkResponse;
 import com.example.mealcheck.dto.AdminMealAnalyticsResponse;
 import com.example.mealcheck.dto.AdminMealPageResponse;
 import com.example.mealcheck.dto.AdminMealRecordResponse;
+import com.example.mealcheck.dto.AdminNonFoodUploadEventPageResponse;
 import com.example.mealcheck.dto.AdminStatsResponse;
 import com.example.mealcheck.dto.AdminUserPageResponse;
 import com.example.mealcheck.dto.AdminUserResponse;
+import com.example.mealcheck.dto.RagBenchmarkResponse;
 import com.example.mealcheck.security.UserPrincipal;
 import com.example.mealcheck.service.AdminService;
 import jakarta.validation.Valid;
@@ -47,6 +49,14 @@ public class AdminController {
     public AdminAuditLogPageResponse auditLogs(@RequestParam(value = "page", defaultValue = "0") int page,
                                                @RequestParam(value = "size", defaultValue = "20") int size) {
         return adminService.auditLogs(page, size);
+    }
+
+    @GetMapping("/non-food-uploads")
+    public AdminNonFoodUploadEventPageResponse nonFoodUploads(@RequestParam(value = "page", defaultValue = "0") int page,
+                                                              @RequestParam(value = "size", defaultValue = "20") int size,
+                                                              @RequestParam(value = "username", required = false) String username,
+                                                              @RequestParam(value = "blockedOnly", defaultValue = "false") boolean blockedOnly) {
+        return adminService.nonFoodUploads(page, size, username, blockedOnly);
     }
 
     @GetMapping("/users")
@@ -127,5 +137,10 @@ public class AdminController {
     @PostMapping("/knowledge/reindex")
     public Object reindexKnowledge() {
         return adminService.reindexKnowledge();
+    }
+
+    @GetMapping("/knowledge/evaluation")
+    public RagBenchmarkResponse ragEvaluation() {
+        return adminService.ragBenchmark();
     }
 }

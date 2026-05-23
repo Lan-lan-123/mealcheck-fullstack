@@ -6,6 +6,7 @@ import com.example.mealcheck.service.AuthService;
 import com.example.mealcheck.service.TokenBlacklistService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +28,11 @@ public class AuthController {
         this.tokenBlacklistService = tokenBlacklistService;
     }
 
+    @GetMapping("/captcha")
+    public AuthDtos.CaptchaResponse captcha() {
+        return authService.captcha();
+    }
+
     @PostMapping("/register")
     public AuthDtos.AuthResponse register(@Valid @RequestBody AuthDtos.RegisterRequest request) {
         return authService.register(request);
@@ -41,11 +47,14 @@ public class AuthController {
     public ResponseEntity<Void> logout(@RequestHeader(value = "Authorization", required = false) String authorization) {
         if (authorization != null && authorization.startsWith("Bearer ")) {
             String token = authorization.substring(7);
+            java.time.Duration ttl;
             try {
-                tokenBlacklistService.blacklist(token, jwtService.remainingTtl(token));
+                ttl = jwtService.remainingTtl(token);
             } catch (Exception ignored) {
                 // Invalid or expired tokens are already unusable.
+                return ResponseEntity.noContent().build();
             }
+            tokenBlacklistService.blacklist(token, ttl);
         }
         return ResponseEntity.noContent().build();
     }

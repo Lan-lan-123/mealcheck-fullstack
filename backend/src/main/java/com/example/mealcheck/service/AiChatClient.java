@@ -49,6 +49,7 @@ public class AiChatClient {
             throw new IllegalStateException("AI API Key, Base URL or model is not configured.");
         }
 
+        long startedAt = System.nanoTime();
         try {
             URI endpoint = AiEndpointResolver.chatCompletions(properties.getAi().getBaseUrl());
             Map<String, Object> body = new LinkedHashMap<>();
@@ -74,15 +75,19 @@ public class AiChatClient {
             }
 
             String content = extractMessageContent(response.body());
-            aiStatusService.recordSuccess(operation);
+            aiStatusService.recordSuccess(operation, elapsedMs(startedAt));
             return content;
         } catch (AiClientException e) {
-            aiStatusService.recordFailure(operation, e.getMessage());
+            aiStatusService.recordFailure(operation, e.getMessage(), elapsedMs(startedAt));
             throw e;
         } catch (Exception e) {
-            aiStatusService.recordFailure(operation, e.getMessage());
+            aiStatusService.recordFailure(operation, e.getMessage(), elapsedMs(startedAt));
             throw new AiClientException("AI request failed: " + e.getMessage(), e);
         }
+    }
+
+    private long elapsedMs(long startedAt) {
+        return Duration.ofNanos(System.nanoTime() - startedAt).toMillis();
     }
 
     private String extractMessageContent(String responseBody) throws Exception {

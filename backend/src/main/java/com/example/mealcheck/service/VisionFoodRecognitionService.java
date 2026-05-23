@@ -1,6 +1,5 @@
 package com.example.mealcheck.service;
 
-import com.example.mealcheck.dto.FoodItem;
 import com.example.mealcheck.dto.RecognitionResult;
 import com.example.mealcheck.util.Jsons;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -28,8 +26,7 @@ public class VisionFoodRecognitionService {
 
     public RecognitionResult recognize(MultipartFile image) {
         if (!aiChatClient.isConfigured()) {
-            log.warn("Vision recognition fallback: AI is not fully configured.");
-            return demoResult("未配置 AI API Key、Base URL 或模型，已使用演示识别结果。");
+            throw new AiChatClient.AiClientException("视觉识别服务未配置 AI API Key、Base URL 或模型。");
         }
 
         try {
@@ -38,18 +35,25 @@ public class VisionFoodRecognitionService {
             String content = aiChatClient.complete("vision-recognition", visionMessages(dataUrl), 0.1);
 
             RecognitionResult result = objectMapper.readValue(Jsons.extractJsonObject(content), RecognitionResult.class);
+            if (!result.isFoodImage()) {
+                result.setDemoMode(false);
+                return result;
+            }
+
             if (result.getFoods() == null || result.getFoods().isEmpty()) {
-                String message = "视觉模型没有返回 foods 字段，已使用演示识别结果。";
+                String message = "视觉模型没有返回有效 foods 字段。";
                 log.warn("{} content={}", message, content);
-                return demoResult(message);
+                throw new AiChatClient.AiClientException(message);
             }
 
             result.setDemoMode(false);
             return result;
+        } catch (AiChatClient.AiClientException e) {
+            throw e;
         } catch (Exception e) {
             String message = "视觉模型调用失败：" + e.getMessage();
             log.warn(message, e);
-            return demoResult(message);
+            throw new AiChatClient.AiClientException(message, e);
         }
     }
 
@@ -65,40 +69,31 @@ public class VisionFoodRecognitionService {
 
     private String visionPrompt() {
         return """
-                你是 MealCheck 的食物图片识别助手。请识别图片中的所有可见食物，并只返回 JSON，不要 Markdown。
-
-                返回格式：
+                You are MealCheck's food-image recognition assistant.
+                Determine whether the uploaded image is a meal or food-related image before identifying foods.
+                Return JSON only, without Markdown:
                 {
-                  "sceneSummary": "一句话概括这张餐食图片",
+                  "foodImage": true,
+                  "rejectionReason": "",
+                  "sceneSummary": "short summary of the visible meal",
                   "foods": [
                     {
-                      "name": "食物名称",
+                      "name": "food name",
                       "category": "staple|protein|vegetable|fruit|dairy|soup|drink|dessert|fried|oily|other",
                       "confidence": 0.0,
-                      "note": "简短说明"
+                      "note": "short visible cue"
                     }
                   ]
                 }
 
-                规则：
-                1. 能识别具体食物就写具体名称，例如米饭、鸡腿、炒青菜、鸡蛋汤。
-                2. 不确定时可以用较宽泛名称，例如肉类、绿叶蔬菜、汤品。
-                3. confidence 使用 0 到 1 之间的小数。
-                4. 如果有饮料、甜品、油炸或高油菜品，也要列出。
+                Rules:
+                1. If the image is not mainly about edible food, a meal tray, tableware containing food, packaged food, or drinks,
+                   return "foodImage": false, set "foods": [], and explain briefly in "rejectionReason" in Chinese.
+                2. For non-food images such as people, scenery, pets, documents, screens, empty tables, or unrelated objects,
+                   do not guess any dishes.
+                3. If it is a food image, return "foodImage": true, keep "rejectionReason" empty, and identify only foods that are visibly present.
+                4. confidence must be between 0 and 1.
                 """;
     }
 
-    private RecognitionResult demoResult(String reason) {
-        RecognitionResult result = new RecognitionResult();
-        result.setDemoMode(true);
-        result.setSceneSummary(reason);
-
-        List<FoodItem> foods = new ArrayList<>();
-        foods.add(new FoodItem("米饭", "staple", 0.82, "演示数据"));
-        foods.add(new FoodItem("鸡腿", "protein", 0.78, "演示数据"));
-        foods.add(new FoodItem("炒青菜", "vegetable", 0.74, "演示数据"));
-        foods.add(new FoodItem("鸡蛋汤", "soup", 0.69, "演示数据"));
-        result.setFoods(foods);
-        return result;
-    }
 }
