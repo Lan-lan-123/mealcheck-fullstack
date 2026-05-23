@@ -128,12 +128,20 @@ MEALCHECK_AI_MODEL=qwen3-vl
 
 ### user 
 
-![user](pictures/p1.png)
+![user](pictures/user1.png)
+![user](pictures/user2.png)
+![user](pictures/user3.png)
 
 ### admin
 
-![admin](pictures/p2.png)
+![admin](pictures/admin1.png)
+![admin](pictures/admin2.png)
+![admin](pictures/admin3.png)
+![admin](pictures/admin4.png)
+![admin](pictures/admin5.png)
+![admin](pictures/admin6.png)
 
-### demo
+### assistant
 
-![demo](pictures/p3.png)
+![demo](pictures/assistant1.png)
+![demo](pictures/assistant2.png)
