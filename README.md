@@ -115,7 +115,7 @@ SPRING_DATASOURCE_USERNAME=mealcheck
 SPRING_DATASOURCE_PASSWORD=mealcheck123
 MEALCHECK_AI_API_KEY=your_api_key
 MEALCHECK_AI_BASE_URL=https://example.com/compatible-mode/v1
-MEALCHECK_AI_MODEL=qwen3-vl
+MEALCHECK_AI_MODEL=qwen3-vl-30b-a3b-instruct
 ```
 
 ## Notes
