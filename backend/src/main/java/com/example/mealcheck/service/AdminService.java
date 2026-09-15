@@ -57,11 +57,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.Set;
 
 @Service
 public class AdminService {
     private static final String ADMIN_STATS_CACHE_KEY = "admin:stats";
+    private static final String ADMIN_STATS_STALE_CACHE_KEY = "admin:stats:stale";
     private static final java.time.Duration ADMIN_STATS_TTL = java.time.Duration.ofSeconds(60);
+    private static final java.time.Duration ADMIN_STATS_TTL_JITTER = java.time.Duration.ofSeconds(15);
+    private static final java.time.Duration ADMIN_STATS_STALE_TTL = java.time.Duration.ofMinutes(5);
 
     private final UserAccountRepository userAccountRepository;
     private final MealRecordRepository mealRecordRepository;
@@ -79,6 +83,8 @@ public class AdminService {
     private final RagEvaluationService ragEvaluationService;
     private final RagBenchmarkService ragBenchmarkService;
     private final AssistantProactiveAdviceService assistantProactiveAdviceService;
+    private final AdminAnalyticsQueryService analyticsQueryService;
+    private final MealRecordPersistenceService mealRecordPersistenceService;
 
     @Value("${mealcheck.ai.api-key:}")
     private String apiKey;
@@ -104,7 +110,9 @@ public class AdminService {
                         NonFoodUploadGuardService nonFoodUploadGuardService,
                         RagEvaluationService ragEvaluationService,
                         RagBenchmarkService ragBenchmarkService,
-                        AssistantProactiveAdviceService assistantProactiveAdviceService) {
+                        AssistantProactiveAdviceService assistantProactiveAdviceService,
+                        AdminAnalyticsQueryService analyticsQueryService,
+                        MealRecordPersistenceService mealRecordPersistenceService) {
         this.userAccountRepository = userAccountRepository;
         this.mealRecordRepository = mealRecordRepository;
         this.nonFoodUploadEventRepository = nonFoodUploadEventRepository;
@@ -121,15 +129,32 @@ public class AdminService {
         this.ragEvaluationService = ragEvaluationService;
         this.ragBenchmarkService = ragBenchmarkService;
         this.assistantProactiveAdviceService = assistantProactiveAdviceService;
+        this.analyticsQueryService = analyticsQueryService;
+        this.mealRecordPersistenceService = mealRecordPersistenceService;
     }
 
     public AdminStatsResponse stats() {
-        return redisCacheService.getJson(ADMIN_STATS_CACHE_KEY, new TypeReference<AdminStatsResponse>() {})
-                .orElseGet(() -> {
+        java.util.Optional<AdminStatsResponse> cached = redisCacheService.getJson(
+                ADMIN_STATS_CACHE_KEY, new TypeReference<AdminStatsResponse>() {});
+        if (cached.isPresent()) {
+            return cached.get();
+        }
+        java.util.Optional<AdminStatsResponse> stale = redisCacheService.getJson(
+                ADMIN_STATS_STALE_CACHE_KEY, new TypeReference<AdminStatsResponse>() {});
+        return redisCacheService.singleFlight(
+                "load:" + ADMIN_STATS_CACHE_KEY,
+                () -> redisCacheService.getJson(
+                                ADMIN_STATS_CACHE_KEY, new TypeReference<AdminStatsResponse>() {})
+                        .orElseGet(() -> {
                     AdminStatsResponse stats = buildStats();
-                    redisCacheService.setJson(ADMIN_STATS_CACHE_KEY, stats, ADMIN_STATS_TTL);
+                    redisCacheService.setJsonWithJitter(
+                            ADMIN_STATS_CACHE_KEY, stats, ADMIN_STATS_TTL, ADMIN_STATS_TTL_JITTER);
+                    redisCacheService.setJsonWithJitter(
+                            ADMIN_STATS_STALE_CACHE_KEY, stats, ADMIN_STATS_STALE_TTL, ADMIN_STATS_TTL_JITTER);
                     return stats;
-                });
+                }),
+                stale
+        );
     }
 
     private AdminStatsResponse buildStats() {
@@ -158,8 +183,8 @@ public class AdminService {
                 "Spring Boot",
                 "PostgreSQL",
                 "pgvector",
-                "HashEmbeddingService / Feature Hashing",
-                384,
+                pgVectorKnowledgeService.embeddingProviderName(),
+                pgVectorKnowledgeService.embeddingDimension(),
                 aiModel,
                 apiKey != null && !apiKey.isBlank(),
                 baseUrl != null && !baseUrl.isBlank(),
@@ -191,15 +216,7 @@ public class AdminService {
 
         LocalDate today = LocalDate.now();
         LocalDate start = today.minusDays(6);
-        List<AssistantConversationMessage> recentQuestions =
-                assistantConversationMessageRepository.findByRoleAndCreatedAtAfterOrderByCreatedAtAsc("user", start.atStartOfDay());
-        Map<LocalDate, Integer> questionsByDay = recentQuestions.stream()
-                .filter(message -> message.getCreatedAt() != null)
-                .collect(Collectors.groupingBy(
-                        message -> message.getCreatedAt().toLocalDate(),
-                        LinkedHashMap::new,
-                        Collectors.collectingAndThen(Collectors.counting(), Long::intValue)
-                ));
+        Map<LocalDate, Integer> questionsByDay = analyticsQueryService.assistantQuestionTrend(start, today);
 
         List<AdminAssistantStatsResponse.MetricItem> questionsByUser =
                 assistantConversationMessageRepository.countUserQuestionsByUsername()
@@ -282,37 +299,7 @@ public class AdminService {
                                                     LocalDate to,
                                                     Integer minScore,
                                                     Integer maxScore) {
-        List<MealRecord> records = mealRecordRepository.findAll(
-                mealSpecification(username, from, to, minScore, maxScore),
-                Sort.by(Sort.Direction.ASC, "createdAt")
-        );
-        List<Integer> scores = records.stream()
-                .map(MealRecord::getScore)
-                .filter(Objects::nonNull)
-                .toList();
-        int averageScore = scores.isEmpty()
-                ? 0
-                : (int) Math.round(scores.stream().mapToInt(Integer::intValue).average().orElse(0));
-
-        return new AdminMealAnalyticsResponse(
-                records.size(),
-                averageScore,
-                List.of(
-                        new AdminMealAnalyticsResponse.MetricItem("80 分及以上", (int) scores.stream().filter(score -> score >= 80).count()),
-                        new AdminMealAnalyticsResponse.MetricItem("60-79 分", (int) scores.stream().filter(score -> score >= 60 && score < 80).count()),
-                        new AdminMealAnalyticsResponse.MetricItem("60 分以下", (int) scores.stream().filter(score -> score < 60).count())
-                ),
-                topMetrics(records.stream()
-                        .map(record -> record.getUser() == null ? "未知用户" : record.getUser().getUsername())
-                        .toList(), 8),
-                topMetrics(records.stream()
-                        .flatMap(record -> extractFoodNames(record).stream())
-                        .toList(), 10),
-                topMetrics(records.stream()
-                        .flatMap(record -> extractRiskTags(record).stream())
-                        .toList(), 10),
-                dailyAverageScores(records)
-        );
+        return analyticsQueryService.mealAnalytics(username, from, to, minScore, maxScore);
     }
 
     public AdminKnowledgeChunkPageResponse knowledgeChunks(String keyword, String source, String sort, int page, int size) {
@@ -327,31 +314,28 @@ public class AdminService {
     public AdminNonFoodUploadEventPageResponse nonFoodUploads(int page, int size, String username, boolean blockedOnly) {
         int safePage = Math.max(0, page);
         int safeSize = Math.max(1, Math.min(size, 100));
+        PageRequest pageable = PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "createdAt"));
         if (blockedOnly) {
-            List<NonFoodUploadEvent> filtered = nonFoodUploadEventRepository.findAll(
-                            nonFoodUploadSpecification(username),
-                            Sort.by(Sort.Direction.DESC, "createdAt")
-                    )
-                    .stream()
-                    .filter(event -> nonFoodUploadGuardService.isBlocked(event.getUsername()))
-                    .toList();
-            int from = Math.min(safePage * safeSize, filtered.size());
-            int to = Math.min(from + safeSize, filtered.size());
-            int totalPages = filtered.isEmpty() ? 0 : (int) Math.ceil((double) filtered.size() / safeSize);
+            Page<NonFoodUploadEvent> filtered = nonFoodUploadEventRepository.findActiveBlocked(
+                    username == null ? "" : username.trim(), LocalDateTime.now(), pageable);
             return new AdminNonFoodUploadEventPageResponse(
-                    filtered.subList(from, to).stream().map(this::toNonFoodUploadResponse).toList(),
-                    filtered.size(),
-                    totalPages,
-                    safePage,
-                    safeSize
+                    filtered.getContent().stream().map(event -> toNonFoodUploadResponse(event, true)).toList(),
+                    filtered.getTotalElements(),
+                    filtered.getTotalPages(),
+                    filtered.getNumber(),
+                    filtered.getSize()
             );
         }
         Page<NonFoodUploadEvent> events = nonFoodUploadEventRepository.findAll(
                 nonFoodUploadSpecification(username),
-                PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "createdAt"))
+                pageable
         );
+        Set<String> blockedUsernames = nonFoodUploadGuardService.activeBlockedUsernames(
+                events.getContent().stream().map(NonFoodUploadEvent::getUsername).collect(Collectors.toSet()));
         return new AdminNonFoodUploadEventPageResponse(
-                events.getContent().stream().map(this::toNonFoodUploadResponse).toList(),
+                events.getContent().stream()
+                        .map(event -> toNonFoodUploadResponse(event, blockedUsernames.contains(event.getUsername())))
+                        .toList(),
                 events.getTotalElements(),
                 events.getTotalPages(),
                 events.getNumber(),
@@ -409,8 +393,8 @@ public class AdminService {
         MealRecord record = mealRecordRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "饮食记录不存在"));
         String imagePath = record.getStoredImagePath();
-        mealRecordRepository.delete(record);
-        imageStorageService.deleteSafely(imagePath);
+        mealRecordPersistenceService.delete(record);
+        imageStorageService.deleteAfterCommit(imagePath);
         clearAdminCaches();
         adminAuditService.log(admin, "DELETE_MEAL", "meal_record", id, "delete meal record");
     }
@@ -429,19 +413,16 @@ public class AdminService {
                 .map(MealRecord::getStoredImagePath)
                 .filter(path -> path != null && !path.isBlank())
                 .toList();
-        List<NonFoodUploadEvent> nonFoodEvents = nonFoodUploadEventRepository.findByUser(user);
-        nonFoodEvents.forEach(event -> event.setUser(null));
-
-        mealRecordRepository.deleteAll(records);
-        nonFoodUploadEventRepository.saveAll(nonFoodEvents);
         userAccountRepository.delete(user);
-        imagePaths.forEach(imageStorageService::deleteSafely);
+        userAccountRepository.flush();
+        imagePaths.forEach(imageStorageService::deleteAfterCommit);
         clearAdminCaches();
         adminAuditService.log(currentAdmin, "DELETE_USER", "user", userId, "delete user " + user.getUsername());
     }
 
     private void clearAdminCaches() {
         redisCacheService.delete(ADMIN_STATS_CACHE_KEY);
+        redisCacheService.delete(ADMIN_STATS_STALE_CACHE_KEY);
     }
 
     private AdminUserResponse toUserResponse(UserAccount user) {
@@ -481,7 +462,7 @@ public class AdminService {
         );
     }
 
-    private AdminNonFoodUploadEventResponse toNonFoodUploadResponse(NonFoodUploadEvent event) {
+    private AdminNonFoodUploadEventResponse toNonFoodUploadResponse(NonFoodUploadEvent event, boolean currentlyBlocked) {
         int observedMinutes = Math.max(1, event.getObservedMinutes());
         double perMinuteRate = Math.round((double) event.getWindowCount() / observedMinutes * 100.0) / 100.0;
         return new AdminNonFoodUploadEventResponse(
@@ -494,7 +475,7 @@ public class AdminService {
                 observedMinutes,
                 perMinuteRate,
                 event.isThresholdReached(),
-                nonFoodUploadGuardService.isBlocked(event.getUsername()),
+                currentlyBlocked,
                 event.getCreatedAt()
         );
     }
@@ -697,49 +678,7 @@ public class AdminService {
     private AdminUploadTrendResponse buildUploadTrends() {
         LocalDate today = LocalDate.now();
         LocalDate start = today.minusDays(6);
-        List<MealRecord> meals = mealRecordRepository.findByCreatedAtAfterOrderByCreatedAtAsc(start.atStartOfDay());
-        List<NonFoodUploadEvent> abnormalEvents = nonFoodUploadEventRepository.findByCreatedAtAfterOrderByCreatedAtAsc(start.atStartOfDay());
-
-        Map<LocalDate, Integer> normalByDay = meals.stream()
-                .filter(record -> record.getCreatedAt() != null)
-                .collect(Collectors.groupingBy(
-                        record -> record.getCreatedAt().toLocalDate(),
-                        LinkedHashMap::new,
-                        Collectors.collectingAndThen(Collectors.counting(), Long::intValue)
-                ));
-        Map<LocalDate, Integer> abnormalByDay = abnormalEvents.stream()
-                .filter(event -> event.getCreatedAt() != null)
-                .collect(Collectors.groupingBy(
-                        event -> event.getCreatedAt().toLocalDate(),
-                        LinkedHashMap::new,
-                        Collectors.collectingAndThen(Collectors.counting(), Long::intValue)
-                ));
-        Map<LocalDate, Integer> alertsByDay = abnormalEvents.stream()
-                .filter(NonFoodUploadEvent::isThresholdReached)
-                .filter(event -> event.getCreatedAt() != null)
-                .collect(Collectors.groupingBy(
-                        event -> event.getCreatedAt().toLocalDate(),
-                        LinkedHashMap::new,
-                        Collectors.collectingAndThen(Collectors.counting(), Long::intValue)
-                ));
-        Map<LocalDate, Integer> blockedUsersByDay = abnormalEvents.stream()
-                .filter(NonFoodUploadEvent::isThresholdReached)
-                .filter(event -> event.getCreatedAt() != null)
-                .collect(Collectors.groupingBy(
-                        event -> event.getCreatedAt().toLocalDate(),
-                        LinkedHashMap::new,
-                        Collectors.collectingAndThen(
-                                Collectors.mapping(NonFoodUploadEvent::getUsername, Collectors.toSet()),
-                                java.util.Set::size
-                        )
-                ));
-
-        return new AdminUploadTrendResponse(
-                trendItems(start, normalByDay),
-                trendItems(start, abnormalByDay),
-                trendItems(start, alertsByDay),
-                trendItems(start, blockedUsersByDay)
-        );
+        return analyticsQueryService.uploadTrends(start, today);
     }
 
     private List<AdminUploadTrendResponse.MetricItem> trendItems(LocalDate start, Map<LocalDate, Integer> values) {

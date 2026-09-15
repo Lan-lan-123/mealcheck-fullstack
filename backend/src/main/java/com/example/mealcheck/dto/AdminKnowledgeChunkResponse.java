@@ -12,6 +12,12 @@ public class AdminKnowledgeChunkResponse {
     private String category;
     private int vectorDimension;
     private int contentLength;
+    private int tokenCount;
+    private int chunkIndex;
+    private String contentHash;
+    private String sourceVersion;
+    private LocalDateTime sourceUpdatedAt;
+    private LocalDateTime updatedAt;
     private long hitCount;
     private LocalDateTime lastHitAt;
 
@@ -26,6 +32,12 @@ public class AdminKnowledgeChunkResponse {
                                        String category,
                                        int vectorDimension,
                                        int contentLength,
+                                       int tokenCount,
+                                       int chunkIndex,
+                                       String contentHash,
+                                       String sourceVersion,
+                                       LocalDateTime sourceUpdatedAt,
+                                       LocalDateTime updatedAt,
                                        long hitCount,
                                        LocalDateTime lastHitAt) {
         this.id = id;
@@ -36,6 +48,12 @@ public class AdminKnowledgeChunkResponse {
         this.category = category;
         this.vectorDimension = vectorDimension;
         this.contentLength = contentLength;
+        this.tokenCount = tokenCount;
+        this.chunkIndex = chunkIndex;
+        this.contentHash = contentHash;
+        this.sourceVersion = sourceVersion;
+        this.sourceUpdatedAt = sourceUpdatedAt;
+        this.updatedAt = updatedAt;
         this.hitCount = hitCount;
         this.lastHitAt = lastHitAt;
     }
@@ -71,6 +89,18 @@ public class AdminKnowledgeChunkResponse {
     public int getContentLength() {
         return contentLength;
     }
+
+    public int getTokenCount() { return tokenCount; }
+
+    public int getChunkIndex() { return chunkIndex; }
+
+    public String getContentHash() { return contentHash; }
+
+    public String getSourceVersion() { return sourceVersion; }
+
+    public LocalDateTime getSourceUpdatedAt() { return sourceUpdatedAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
 
     public long getHitCount() {
         return hitCount;

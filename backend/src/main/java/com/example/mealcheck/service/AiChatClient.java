@@ -24,15 +24,21 @@ public class AiChatClient {
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
     private final AiStatusService aiStatusService;
+    private final ApplicationObservability observability;
+    private final RemoteCallGuard remoteCallGuard;
 
     public AiChatClient(AppProperties properties,
                         HttpClient httpClient,
                         ObjectMapper objectMapper,
-                        AiStatusService aiStatusService) {
+                        AiStatusService aiStatusService,
+                        ApplicationObservability observability,
+                        RemoteCallGuard remoteCallGuard) {
         this.properties = properties;
         this.httpClient = httpClient;
         this.objectMapper = objectMapper;
         this.aiStatusService = aiStatusService;
+        this.observability = observability;
+        this.remoteCallGuard = remoteCallGuard;
     }
 
     public boolean isConfigured() {
@@ -68,7 +74,8 @@ public class AiChatClient {
                     .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(body)))
                     .build();
 
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = remoteCallGuard.execute(
+                    "ai-chat", () -> send(request, "AI chat request"));
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
                 throw new AiClientException("AI request failed: HTTP " + response.statusCode()
                         + " - " + truncate(response.body(), 500));
@@ -76,18 +83,42 @@ public class AiChatClient {
 
             String content = extractMessageContent(response.body());
             aiStatusService.recordSuccess(operation, elapsedMs(startedAt));
+            observability.recordAiCall(startedAt, operation, "success");
             return content;
         } catch (AiClientException e) {
             aiStatusService.recordFailure(operation, e.getMessage(), elapsedMs(startedAt));
+            observability.recordAiCall(startedAt, operation, "failure");
             throw e;
         } catch (Exception e) {
             aiStatusService.recordFailure(operation, e.getMessage(), elapsedMs(startedAt));
+            observability.recordAiCall(startedAt, operation, "failure");
             throw new AiClientException("AI request failed: " + e.getMessage(), e);
         }
     }
 
     private long elapsedMs(long startedAt) {
         return Duration.ofNanos(System.nanoTime() - startedAt).toMillis();
+    }
+
+    private HttpResponse<String> send(HttpRequest request, String operation) {
+        try {
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() >= 400 && response.statusCode() < 500 && response.statusCode() != 429) {
+                throw new RemoteCallGuard.NonRetryableRemoteCallException(
+                        operation + " rejected with HTTP " + response.statusCode());
+            }
+            if (response.statusCode() == 429 || response.statusCode() >= 500) {
+                throw new AiClientException(operation + " failed with HTTP " + response.statusCode());
+            }
+            return response;
+        } catch (RemoteCallGuard.NonRetryableRemoteCallException e) {
+            throw e;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new AiClientException(operation + " was interrupted", e);
+        } catch (Exception e) {
+            throw new AiClientException(operation + " failed: " + e.getMessage(), e);
+        }
     }
 
     private String extractMessageContent(String responseBody) throws Exception {

@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 import java.time.LocalDateTime;
 
@@ -25,7 +26,23 @@ public class UserDietProfile {
     private UserAccount user;
 
     private long totalMeals;
+    private long totalScore;
     private int averageScore;
+
+    @Column(nullable = false)
+    private boolean aggregateInitialized;
+
+    @Basic(fetch = FetchType.LAZY)
+    @Column(columnDefinition = "TEXT")
+    private String foodCountsJson;
+
+    @Basic(fetch = FetchType.LAZY)
+    @Column(columnDefinition = "TEXT")
+    private String riskCountsJson;
+
+    @Basic(fetch = FetchType.LAZY)
+    @Column(columnDefinition = "TEXT")
+    private String goalCountsJson;
 
     @Column(length = 32)
     private String preferredGoal;
@@ -43,13 +60,26 @@ public class UserDietProfile {
 
     private LocalDateTime updatedAt = LocalDateTime.now();
 
+    @Version
+    private long version;
+
     public Long getId() { return id; }
     public UserAccount getUser() { return user; }
     public void setUser(UserAccount user) { this.user = user; }
     public long getTotalMeals() { return totalMeals; }
     public void setTotalMeals(long totalMeals) { this.totalMeals = totalMeals; }
+    public long getTotalScore() { return totalScore; }
+    public void setTotalScore(long totalScore) { this.totalScore = totalScore; }
     public int getAverageScore() { return averageScore; }
     public void setAverageScore(int averageScore) { this.averageScore = averageScore; }
+    public boolean isAggregateInitialized() { return aggregateInitialized; }
+    public void setAggregateInitialized(boolean aggregateInitialized) { this.aggregateInitialized = aggregateInitialized; }
+    public String getFoodCountsJson() { return foodCountsJson; }
+    public void setFoodCountsJson(String foodCountsJson) { this.foodCountsJson = foodCountsJson; }
+    public String getRiskCountsJson() { return riskCountsJson; }
+    public void setRiskCountsJson(String riskCountsJson) { this.riskCountsJson = riskCountsJson; }
+    public String getGoalCountsJson() { return goalCountsJson; }
+    public void setGoalCountsJson(String goalCountsJson) { this.goalCountsJson = goalCountsJson; }
     public String getPreferredGoal() { return preferredGoal; }
     public void setPreferredGoal(String preferredGoal) { this.preferredGoal = preferredGoal; }
     public String getCommonFoodsJson() { return commonFoodsJson; }
@@ -60,4 +90,5 @@ public class UserDietProfile {
     public void setProfileSummary(String profileSummary) { this.profileSummary = profileSummary; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public long getVersion() { return version; }
 }

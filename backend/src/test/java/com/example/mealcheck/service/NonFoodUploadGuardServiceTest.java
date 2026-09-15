@@ -3,7 +3,9 @@ package com.example.mealcheck.service;
 import com.example.mealcheck.config.AppProperties;
 import com.example.mealcheck.dto.NonFoodUploadAlert;
 import com.example.mealcheck.entity.UserAccount;
+import com.example.mealcheck.entity.UserRestriction;
 import com.example.mealcheck.repository.NonFoodUploadEventRepository;
+import com.example.mealcheck.repository.UserRestrictionRepository;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -27,7 +29,9 @@ class NonFoodUploadGuardServiceTest {
         properties.getUploadGuard().setNonFoodLimit(10);
         properties.getUploadGuard().setNonFoodBlockMinutes(60);
         NonFoodUploadEventRepository eventRepository = mock(NonFoodUploadEventRepository.class);
-        NonFoodUploadGuardService service = new NonFoodUploadGuardService(redisCacheService, properties, eventRepository);
+        UserRestrictionRepository restrictionRepository = mock(UserRestrictionRepository.class);
+        NonFoodUploadGuardService service = new NonFoodUploadGuardService(
+                redisCacheService, properties, eventRepository, restrictionRepository);
         UserAccount user = user("demo", "Demo");
 
         when(redisCacheService.increment("upload:nonfood:count:demo", Duration.ofMinutes(5))).thenReturn(10L);
@@ -40,6 +44,9 @@ class NonFoodUploadGuardServiceTest {
         assertThat(decision.count()).isEqualTo(10);
         verify(redisCacheService).setJson(eq("upload:nonfood:alert:demo"), any(NonFoodUploadAlert.class), eq(Duration.ofMinutes(5)));
         verify(redisCacheService).set("upload:nonfood:block:demo", "blocked", Duration.ofMinutes(60));
+        verify(restrictionRepository).upsert(
+                eq(null), eq("demo"), eq("NON_FOOD_UPLOAD"), any(LocalDateTime.class),
+                eq("not food"), any(LocalDateTime.class));
         verify(eventRepository).save(any());
     }
 
@@ -50,7 +57,8 @@ class NonFoodUploadGuardServiceTest {
         properties.getUploadGuard().setNonFoodWindowMinutes(5);
         properties.getUploadGuard().setNonFoodLimit(10);
         NonFoodUploadEventRepository eventRepository = mock(NonFoodUploadEventRepository.class);
-        NonFoodUploadGuardService service = new NonFoodUploadGuardService(redisCacheService, properties, eventRepository);
+        NonFoodUploadGuardService service = new NonFoodUploadGuardService(
+                redisCacheService, properties, eventRepository, mock(UserRestrictionRepository.class));
 
         when(redisCacheService.increment("upload:nonfood:count:demo", Duration.ofMinutes(5))).thenReturn(9L);
         when(eventRepository.findFirstByUsernameAndCreatedAtAfterOrderByCreatedAtAsc(eq("demo"), any(LocalDateTime.class)))
@@ -65,7 +73,8 @@ class NonFoodUploadGuardServiceTest {
     void isBlockedReadsRedisBlockKey() {
         RedisCacheService redisCacheService = mock(RedisCacheService.class);
         NonFoodUploadEventRepository eventRepository = mock(NonFoodUploadEventRepository.class);
-        NonFoodUploadGuardService service = new NonFoodUploadGuardService(redisCacheService, new AppProperties(), eventRepository);
+        NonFoodUploadGuardService service = new NonFoodUploadGuardService(
+                redisCacheService, new AppProperties(), eventRepository, mock(UserRestrictionRepository.class));
 
         when(redisCacheService.get("upload:nonfood:block:demo")).thenReturn(java.util.Optional.of("blocked"));
 
@@ -76,11 +85,29 @@ class NonFoodUploadGuardServiceTest {
     void remainingBlockMinutesRoundsUpRedisTtl() {
         RedisCacheService redisCacheService = mock(RedisCacheService.class);
         NonFoodUploadEventRepository eventRepository = mock(NonFoodUploadEventRepository.class);
-        NonFoodUploadGuardService service = new NonFoodUploadGuardService(redisCacheService, new AppProperties(), eventRepository);
+        NonFoodUploadGuardService service = new NonFoodUploadGuardService(
+                redisCacheService, new AppProperties(), eventRepository, mock(UserRestrictionRepository.class));
 
         when(redisCacheService.ttl("upload:nonfood:block:demo")).thenReturn(Optional.of(Duration.ofSeconds(2500)));
 
         assertThat(service.remainingBlockMinutes("demo")).isEqualTo(42);
+    }
+
+    @Test
+    void isBlockedFallsBackToDatabaseAndWarmsRedis() {
+        RedisCacheService redisCacheService = mock(RedisCacheService.class);
+        NonFoodUploadEventRepository eventRepository = mock(NonFoodUploadEventRepository.class);
+        UserRestrictionRepository restrictionRepository = mock(UserRestrictionRepository.class);
+        NonFoodUploadGuardService service = new NonFoodUploadGuardService(
+                redisCacheService, new AppProperties(), eventRepository, restrictionRepository);
+        UserRestriction restriction = new UserRestriction();
+        restriction.setBlockedUntil(LocalDateTime.now().plusMinutes(20));
+        when(restrictionRepository.findFirstByUsernameAndRestrictionTypeAndBlockedUntilAfter(
+                eq("demo"), eq(UserRestriction.NON_FOOD_UPLOAD), any(LocalDateTime.class)))
+                .thenReturn(Optional.of(restriction));
+
+        assertThat(service.isBlocked("demo")).isTrue();
+        verify(redisCacheService).set(eq("upload:nonfood:block:demo"), eq("blocked"), any(Duration.class));
     }
 
     private UserAccount user(String username, String displayName) {

@@ -4,7 +4,9 @@ import com.example.mealcheck.config.AppProperties;
 import com.example.mealcheck.dto.NonFoodUploadAlert;
 import com.example.mealcheck.entity.NonFoodUploadEvent;
 import com.example.mealcheck.entity.UserAccount;
+import com.example.mealcheck.entity.UserRestriction;
 import com.example.mealcheck.repository.NonFoodUploadEventRepository;
+import com.example.mealcheck.repository.UserRestrictionRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -13,24 +15,31 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class NonFoodUploadGuardService {
     private static final String COUNT_KEY_PREFIX = "upload:nonfood:count:";
     private static final String ALERT_KEY_PREFIX = "upload:nonfood:alert:";
     private static final String BLOCK_KEY_PREFIX = "upload:nonfood:block:";
+    private static final String ALLOW_KEY_PREFIX = "upload:nonfood:allow:";
+    private static final Duration ALLOW_CACHE_TTL = Duration.ofSeconds(30);
 
     private final RedisCacheService redisCacheService;
     private final AppProperties properties;
     private final NonFoodUploadEventRepository eventRepository;
+    private final UserRestrictionRepository restrictionRepository;
 
     public NonFoodUploadGuardService(RedisCacheService redisCacheService,
                                      AppProperties properties,
-                                     NonFoodUploadEventRepository eventRepository) {
+                                     NonFoodUploadEventRepository eventRepository,
+                                     UserRestrictionRepository restrictionRepository) {
         this.redisCacheService = redisCacheService;
         this.properties = properties;
         this.eventRepository = eventRepository;
+        this.restrictionRepository = restrictionRepository;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -59,6 +68,15 @@ public class NonFoodUploadGuardService {
             );
             redisCacheService.setJson(ALERT_KEY_PREFIX + username, alert, ttl);
             redisCacheService.set(BLOCK_KEY_PREFIX + username, "blocked", blockTtl());
+            redisCacheService.delete(ALLOW_KEY_PREFIX + username);
+            restrictionRepository.upsert(
+                    user.getId(),
+                    username,
+                    UserRestriction.NON_FOOD_UPLOAD,
+                    now.plus(blockTtl()),
+                    reason == null ? "" : reason,
+                    now
+            );
         }
 
         NonFoodUploadEvent event = new NonFoodUploadEvent();
@@ -89,7 +107,35 @@ public class NonFoodUploadGuardService {
     }
 
     public boolean isBlocked(String username) {
-        return redisCacheService.get(BLOCK_KEY_PREFIX + username).isPresent();
+        if (username == null || username.isBlank()) {
+            return false;
+        }
+        if (redisCacheService.get(BLOCK_KEY_PREFIX + username).isPresent()) {
+            return true;
+        }
+        if (redisCacheService.get(ALLOW_KEY_PREFIX + username).isPresent()) {
+            return false;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        return restrictionRepository.findFirstByUsernameAndRestrictionTypeAndBlockedUntilAfter(
+                        username, UserRestriction.NON_FOOD_UPLOAD, now)
+                .map(restriction -> {
+                    Duration remaining = Duration.between(now, restriction.getBlockedUntil());
+                    redisCacheService.set(BLOCK_KEY_PREFIX + username, "blocked", remaining);
+                    return true;
+                })
+                .orElseGet(() -> {
+                    redisCacheService.set(ALLOW_KEY_PREFIX + username, "allowed", ALLOW_CACHE_TTL);
+                    return false;
+                });
+    }
+
+    public Set<String> activeBlockedUsernames(Collection<String> usernames) {
+        if (usernames == null || usernames.isEmpty()) {
+            return Set.of();
+        }
+        return restrictionRepository.findActiveUsernames(
+                usernames, UserRestriction.NON_FOOD_UPLOAD, LocalDateTime.now());
     }
 
     public int blockMinutes() {
@@ -98,6 +144,9 @@ public class NonFoodUploadGuardService {
 
     public int remainingBlockMinutes(String username) {
         return redisCacheService.ttl(BLOCK_KEY_PREFIX + username)
+                .or(() -> restrictionRepository.findFirstByUsernameAndRestrictionTypeAndBlockedUntilAfter(
+                                username, UserRestriction.NON_FOOD_UPLOAD, LocalDateTime.now())
+                        .map(restriction -> Duration.between(LocalDateTime.now(), restriction.getBlockedUntil())))
                 .map(duration -> Math.max(1, (int) Math.ceil(duration.getSeconds() / 60.0)))
                 .orElse(0);
     }

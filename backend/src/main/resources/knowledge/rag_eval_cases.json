@@ -1,52 +1,60 @@
 [
-  {
-    "question": "减脂时晚餐怎么吃更合适？",
-    "expectedTitleKeywords": ["减脂"],
-    "expectedCategory": "fat_loss"
-  },
-  {
-    "question": "炸鸡为什么不适合经常吃？",
-    "expectedTitleKeywords": ["高油"],
-    "expectedCategory": "high_oil"
-  },
-  {
-    "question": "一餐里蔬菜太少会有什么问题？",
-    "expectedTitleKeywords": ["蔬菜"],
-    "expectedCategory": "vegetable"
-  },
-  {
-    "question": "含糖饮料为什么要少喝？",
-    "expectedTitleKeywords": ["含糖", "甜饮"],
-    "expectedCategory": "sugar"
-  },
-  {
-    "question": "增肌时优质蛋白怎么补？",
-    "expectedTitleKeywords": ["蛋白", "增肌"],
-    "expectedCategory": "muscle_gain"
-  },
-  {
-    "question": "主食是不是可以完全不吃？",
-    "expectedTitleKeywords": ["主食"],
-    "expectedCategory": "staple"
-  },
-  {
-    "question": "清淡饮食应该注意什么？",
-    "expectedTitleKeywords": ["清淡"],
-    "expectedCategory": "general"
-  },
-  {
-    "question": "早餐喝什么更合适？",
-    "expectedTitleKeywords": ["早餐", "饮品"],
-    "expectedCategory": "general"
-  },
-  {
-    "question": "怎样让一餐更均衡？",
-    "expectedTitleKeywords": ["多样", "均衡"],
-    "expectedCategory": "general"
-  },
-  {
-    "question": "烤肉类食物该怎么搭配？",
-    "expectedTitleKeywords": ["高油", "蔬菜"],
-    "expectedCategory": "high_oil"
-  }
+  {"question":"减脂时晚餐怎么吃更合适？","expectedTitleKeywords":["减脂"],"expectedCategory":"fat_loss"},
+  {"question":"控制体重期间外卖应该怎么选？","expectedTitleKeywords":["减脂期外食","减脂目标"],"expectedCategory":"fat_loss"},
+  {"question":"减脂餐的主食和蔬菜怎么分配？","expectedTitleKeywords":["减脂","高分餐盘"],"expectedCategory":"fat_loss"},
+  {"question":"炸鸡为什么不适合经常吃？","expectedTitleKeywords":["炸鸡","高油"],"expectedCategory":"high_oil"},
+  {"question":"红烧和油炸食品应该怎样控制？","expectedTitleKeywords":["高油","油炸"],"expectedCategory":"high_oil"},
+  {"question":"烤肉怎样选择能少摄入油脂？","expectedTitleKeywords":["烤肉","高油"],"expectedCategory":"high_oil"},
+  {"question":"一餐里蔬菜太少会有什么问题？","expectedTitleKeywords":["蔬菜结构","蔬菜餐"],"expectedCategory":"vegetable"},
+  {"question":"只有蔬菜的轻食应该怎样搭配？","expectedTitleKeywords":["蔬菜餐","蛋白质"],"expectedCategory":"vegetable"},
+  {"question":"怎样提高每餐的蔬菜覆盖率？","expectedTitleKeywords":["蔬菜结构"],"expectedCategory":"vegetable"},
+  {"question":"含糖饮料为什么要少喝？","expectedTitleKeywords":["含糖饮料","甜饮"],"expectedCategory":"sugar"},
+  {"question":"奶茶应该如何控制频率？","expectedTitleKeywords":["奶茶","含糖饮料"],"expectedCategory":"sugar"},
+  {"question":"甜品和饮料可以同时吃吗？","expectedTitleKeywords":["含糖饮料","甜品"],"expectedCategory":"sugar"},
+  {"question":"增肌时优质蛋白怎么补？","expectedTitleKeywords":["增肌","蛋白质"],"expectedCategory":"muscle_gain"},
+  {"question":"训练后在食堂怎样搭配增肌餐？","expectedTitleKeywords":["增肌期食堂","增肌目标"],"expectedCategory":"muscle_gain"},
+  {"question":"增肌是不是每餐都要吃蛋白质？","expectedTitleKeywords":["增肌","蛋白质"],"expectedCategory":"muscle_gain"},
+  {"question":"主食是不是可以完全不吃？","expectedTitleKeywords":["主食结构"],"expectedCategory":"staple"},
+  {"question":"米饭、面条和红薯应该怎么选？","expectedTitleKeywords":["主食结构"],"expectedCategory":"staple"},
+  {"question":"一餐的主食份量怎样判断？","expectedTitleKeywords":["主食结构","高分餐盘"],"expectedCategory":"staple"},
+  {"question":"清淡饮食应该注意什么？","expectedTitleKeywords":["清淡饮食"],"expectedCategory":"general"},
+  {"question":"早餐喝什么更合适？","expectedTitleKeywords":["早餐饮品"],"expectedCategory":"general"},
+  {"question":"怎样让一餐更加均衡？","expectedTitleKeywords":["高分餐盘","食堂选餐","饮食多样性"],"expectedCategory":"general"},
+  {"question":"食堂窗口很多时怎样快速选餐？","expectedTitleKeywords":["食堂选餐"],"expectedCategory":"general"},
+  {"question":"夜宵饿了应该选择什么？","expectedTitleKeywords":["夜宵"],"expectedCategory":"general"},
+  {"question":"高分餐盘通常包含哪些食物？","expectedTitleKeywords":["高分餐盘"],"expectedCategory":"general"},
+  {"question":"一餐评分低通常是什么原因？","expectedTitleKeywords":["低分餐"],"expectedCategory":"general"},
+  {"question":"如何增加一周内食物的多样性？","expectedTitleKeywords":["饮食多样性"],"expectedCategory":"general"},
+  {"question":"烤肉搭配什么蔬菜和主食更均衡？","expectedTitleKeywords":["烤肉","蔬菜餐"],"expectedCategory":"high_oil"},
+  {"question":"蛋白质来源只有鸡蛋够不够？","expectedTitleKeywords":["蛋白质结构"],"expectedCategory":"general"},
+  {"question":"经常漏掉蛋白质会影响餐食结构吗？","expectedTitleKeywords":["蛋白质结构"],"expectedCategory":"general"},
+  {"question":"均衡餐盘的主食蛋白质蔬菜比例怎么安排？","expectedTitleKeywords":["高分餐盘","食堂选餐"],"expectedCategory":"general"},
+  {"question":"早上时间很紧怎样快速搭配早餐？","expectedTitleKeywords":["一日餐次"],"expectedCategory":"general"},
+  {"question":"午餐吃得太油下午容易困应该怎么选？","expectedTitleKeywords":["一日餐次"],"expectedCategory":"general"},
+  {"question":"漏了一餐后下一餐需要多吃补回来吗？","expectedTitleKeywords":["一日餐次"],"expectedCategory":"general"},
+  {"question":"食堂固定套餐只有米饭和肉怎么补足结构？","expectedTitleKeywords":["食堂菜品识别与替换"],"expectedCategory":"general"},
+  {"question":"盖饭酱汁很多时怎样控制份量？","expectedTitleKeywords":["食堂菜品识别与替换"],"expectedCategory":"general"},
+  {"question":"麻辣烫怎样自选食材更均衡？","expectedTitleKeywords":["食堂菜品识别与替换"],"expectedCategory":"general"},
+  {"question":"没有秤时怎样估算餐盘比例？","expectedTitleKeywords":["份量与餐盘估算"],"expectedCategory":"general"},
+  {"question":"混合菜里有一点肉末算蛋白质充足吗？","expectedTitleKeywords":["份量与餐盘估算"],"expectedCategory":"general"},
+  {"question":"吃完正常份量还是饿应该先加什么？","expectedTitleKeywords":["份量与餐盘估算"],"expectedCategory":"general"},
+  {"question":"训练前距离很近时应该怎样吃？","expectedTitleKeywords":["运动学习与恢复饮食"],"expectedCategory":"muscle_gain"},
+  {"question":"运动后一定要喝蛋白粉吗？","expectedTitleKeywords":["运动学习与恢复饮食"],"expectedCategory":"muscle_gain"},
+  {"question":"考试周靠甜饮提神怎么调整？","expectedTitleKeywords":["运动学习与恢复饮食"],"expectedCategory":"muscle_gain"},
+  {"question":"点外卖时怎样判断套餐是否完整？","expectedTitleKeywords":["外卖聚餐与特殊场景"],"expectedCategory":"general"},
+  {"question":"火锅聚餐怎样选择食材和蘸料？","expectedTitleKeywords":["外卖聚餐与特殊场景"],"expectedCategory":"general"},
+  {"question":"便利店里怎样组合一顿完整的饭？","expectedTitleKeywords":["外卖聚餐与特殊场景"],"expectedCategory":"general"},
+  {"question":"每一餐都必须达到高分吗？","expectedTitleKeywords":["饮食记录与持续改进"],"expectedCategory":"general"},
+  {"question":"怎样用具体替换方案减少奶茶和炸鸡？","expectedTitleKeywords":["饮食记录与持续改进"],"expectedCategory":"general"},
+  {"question":"每周复盘饮食记录应该看哪些指标？","expectedTitleKeywords":["饮食记录与持续改进"],"expectedCategory":"general"},
+  {"question":"明天A股哪只股票会涨停？","expectedTitleKeywords":[],"expectedCategory":"none","expectNoAnswer":true},
+  {"question":"帮我预测下一期彩票中奖号码。","expectedTitleKeywords":[],"expectedCategory":"none","expectNoAnswer":true},
+  {"question":"量子计算机的纠错算法应该怎么实现？","expectedTitleKeywords":[],"expectedCategory":"none","expectNoAnswer":true},
+  {"question":"用Java写一个分布式锁需要哪些步骤？","expectedTitleKeywords":[],"expectedCategory":"none","expectNoAnswer":true},
+  {"question":"下周北京的天气和降雨概率是多少？","expectedTitleKeywords":[],"expectedCategory":"none","expectNoAnswer":true},
+  {"question":"劳动合同纠纷应该依据哪条法律起诉？","expectedTitleKeywords":[],"expectedCategory":"none","expectNoAnswer":true},
+  {"question":"抗生素一次应该服用多少毫克？","expectedTitleKeywords":[],"expectedCategory":"none","expectNoAnswer":true},
+  {"question":"根据我的描述判断我是不是得了糖尿病。","expectedTitleKeywords":[],"expectedCategory":"none","expectNoAnswer":true},
+  {"question":"去日本旅游七天应该怎么安排路线？","expectedTitleKeywords":[],"expectedCategory":"none","expectNoAnswer":true},
+  {"question":"分析这场足球比赛哪支球队会获胜。","expectedTitleKeywords":[],"expectedCategory":"none","expectNoAnswer":true}
 ]

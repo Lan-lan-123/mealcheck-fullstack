@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Base64;
 import java.util.List;
@@ -24,14 +23,14 @@ public class VisionFoodRecognitionService {
         this.objectMapper = objectMapper;
     }
 
-    public RecognitionResult recognize(MultipartFile image) {
+    public RecognitionResult recognize(ValidatedImage image) {
         if (!aiChatClient.isConfigured()) {
             throw new AiChatClient.AiClientException("视觉识别服务未配置 AI API Key、Base URL 或模型。");
         }
 
         try {
-            String mime = image.getContentType() == null ? "image/jpeg" : image.getContentType();
-            String dataUrl = "data:" + mime + ";base64," + Base64.getEncoder().encodeToString(image.getBytes());
+            String dataUrl = "data:" + image.contentType() + ";base64,"
+                    + Base64.getEncoder().encodeToString(image.bytes());
             String content = aiChatClient.complete("vision-recognition", visionMessages(dataUrl), 0.1);
 
             RecognitionResult result = objectMapper.readValue(Jsons.extractJsonObject(content), RecognitionResult.class);
