@@ -28,7 +28,16 @@ public class AssistantProactiveAdviceService {
     }
 
     public AssistantProactiveAdviceResponse build(UserAccount user, String goalType) {
-        List<MealRecord> records = mealAnalysisService.listSince(user, 7);
+        return build(user, goalType, mealAnalysisService.listSince(user, 7));
+    }
+
+    public AssistantProactiveAdviceResponse build(UserAccount user,
+                                                   String goalType,
+                                                   List<MealRecord> availableRecords) {
+        LocalDateTime cutoff = LocalDateTime.now().minusDays(7);
+        List<MealRecord> records = availableRecords == null ? List.of() : availableRecords.stream()
+                .filter(record -> record.getCreatedAt() != null && !record.getCreatedAt().isBefore(cutoff))
+                .toList();
         List<String> items = new ArrayList<>();
         addTodayBalanceAdvice(records, items);
         addVegetableStreakAdvice(records, items);

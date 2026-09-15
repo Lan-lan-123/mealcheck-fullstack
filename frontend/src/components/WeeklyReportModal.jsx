@@ -1,5 +1,6 @@
 import AuthImage from './AuthImage'
 import Empty from './Empty'
+import { reportGenerationLabel, reportReviewLabel } from '../utils/mealLabels'
 
 export default function WeeklyReportModal({ report, avgLabel, records, onClose }) {
   return (
@@ -32,6 +33,11 @@ export default function WeeklyReportModal({ report, avgLabel, records, onClose }
           <h3>周报总结</h3>
           <p>{report?.reportText || '最近 7 天暂无可分析的饮食记录。'}</p>
           {report?.generatedAt && <p className="report-meta">自动生成于 {new Date(report.generatedAt).toLocaleString()}</p>}
+          {report?.generationMode && (
+            <p className="report-meta">
+              {reportGenerationLabel(report.generationMode)} · {reportReviewLabel(report.reviewStatus)}
+            </p>
+          )}
         </section>
 
         <section className="weekly-section">

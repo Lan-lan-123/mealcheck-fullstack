@@ -47,9 +47,10 @@ public class MealAnalysisService {
     private final KnowledgeIndexService knowledgeIndexService;
     private final AdviceGenerationService adviceGenerationService;
     private final ImageStorageService imageStorageService;
-    private final UserDietProfileService userDietProfileService;
+    private final ImageUploadValidationService imageUploadValidationService;
     private final NonFoodUploadGuardService nonFoodUploadGuardService;
     private final UserGoalService userGoalService;
+    private final MealRecordPersistenceService persistenceService;
     private final ObjectMapper objectMapper;
 
     public MealAnalysisService(UserAccountRepository userRepository,
@@ -59,9 +60,10 @@ public class MealAnalysisService {
                                KnowledgeIndexService knowledgeIndexService,
                                AdviceGenerationService adviceGenerationService,
                                ImageStorageService imageStorageService,
-                               UserDietProfileService userDietProfileService,
+                               ImageUploadValidationService imageUploadValidationService,
                                NonFoodUploadGuardService nonFoodUploadGuardService,
                                UserGoalService userGoalService,
+                               MealRecordPersistenceService persistenceService,
                                ObjectMapper objectMapper) {
         this.userRepository = userRepository;
         this.mealRecordRepository = mealRecordRepository;
@@ -70,13 +72,13 @@ public class MealAnalysisService {
         this.knowledgeIndexService = knowledgeIndexService;
         this.adviceGenerationService = adviceGenerationService;
         this.imageStorageService = imageStorageService;
-        this.userDietProfileService = userDietProfileService;
+        this.imageUploadValidationService = imageUploadValidationService;
         this.nonFoodUploadGuardService = nonFoodUploadGuardService;
         this.userGoalService = userGoalService;
+        this.persistenceService = persistenceService;
         this.objectMapper = objectMapper;
     }
 
-    @Transactional
     public MealAnalysisResponse analyze(UserPrincipal principal, MultipartFile image, String goal) {
         UserAccount user = userRepository.findByUsername(principal.getUsername()).orElseThrow();
         if (nonFoodUploadGuardService.isBlocked(user.getUsername())) {
@@ -87,7 +89,8 @@ public class MealAnalysisService {
             );
         }
 
-        RecognitionResult recognition = recognitionService.recognize(image);
+        ValidatedImage validatedImage = imageUploadValidationService.validateAndNormalize(image);
+        RecognitionResult recognition = recognitionService.recognize(validatedImage);
         if (!recognition.isFoodImage()) {
             String reason = recognition.getRejectionReason() == null || recognition.getRejectionReason().isBlank()
                     ? "上传的图片不是饮食图片，请上传包含餐食的照片。"
@@ -106,7 +109,6 @@ public class MealAnalysisService {
         }
 
         String normalizedGoal = userGoalService.effectiveGoal(user, goal);
-        String imagePath = imageStorageService.store(user.getId(), image);
         StructureEvaluation evaluation = scoringService.evaluate(recognition, normalizedGoal);
 
         String query = buildRagQuery(recognition, evaluation, normalizedGoal);
@@ -121,8 +123,7 @@ public class MealAnalysisService {
 
         MealRecord record = new MealRecord();
         record.setUser(user);
-        record.setOriginalFileName(image.getOriginalFilename());
-        record.setStoredImagePath(imagePath);
+        record.setOriginalFileName(validatedImage.originalFilename());
         record.setGoal(normalizedGoal);
         record.setScore(evaluation.getScore());
         record.setSummary(evaluation.getSummary());
@@ -130,11 +131,7 @@ public class MealAnalysisService {
         record.setCategoryCountsJson(Jsons.toJson(objectMapper, evaluation.getCategoryCounts()));
         record.setRiskTagsJson(Jsons.toJson(objectMapper, evaluation.getRiskTags()));
         record.setAdvice(advice);
-        mealRecordRepository.save(record);
-
-        user.setLastUploadAt(LocalDateTime.now());
-        userRepository.save(user);
-        userDietProfileService.refresh(user);
+        persistenceService.saveWithImage(user, record, validatedImage);
 
         MealAnalysisResponse response = new MealAnalysisResponse();
         response.setRecordId(record.getId());
@@ -267,9 +264,9 @@ public class MealAnalysisService {
 
         String storedImagePath = record.getStoredImagePath();
 
-        mealRecordRepository.delete(record);
+        persistenceService.delete(record);
 
-        imageStorageService.deleteSafely(storedImagePath);
+        imageStorageService.deleteAfterCommit(storedImagePath);
     }
 
     @Transactional(readOnly = true)

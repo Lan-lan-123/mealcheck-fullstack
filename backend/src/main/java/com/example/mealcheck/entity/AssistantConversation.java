@@ -32,7 +32,17 @@ public class AssistantConversation {
     @Column(nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
 
+    @Column(columnDefinition = "TEXT")
+    private String memorySummary;
+
+    @Column(columnDefinition = "TEXT")
+    private String memoryState;
+
+    @Column(nullable = false)
+    private int summarizedMessageCount = 0;
+
     public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     public UserAccount getUser() { return user; }
     public void setUser(UserAccount user) { this.user = user; }
     public String getTitle() { return title; }
@@ -40,4 +50,12 @@ public class AssistantConversation {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public String getMemorySummary() { return memorySummary; }
+    public void setMemorySummary(String memorySummary) { this.memorySummary = memorySummary; }
+    public String getMemoryState() { return memoryState; }
+    public void setMemoryState(String memoryState) { this.memoryState = memoryState; }
+    public int getSummarizedMessageCount() { return summarizedMessageCount; }
+    public void setSummarizedMessageCount(int summarizedMessageCount) {
+        this.summarizedMessageCount = Math.max(0, summarizedMessageCount);
+    }
 }

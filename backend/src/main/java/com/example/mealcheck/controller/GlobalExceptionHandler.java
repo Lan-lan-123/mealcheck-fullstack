@@ -2,6 +2,7 @@ package com.example.mealcheck.controller;
 
 import com.example.mealcheck.dto.ApiErrorResponse;
 import com.example.mealcheck.service.AiChatClient;
+import com.example.mealcheck.service.RateLimitExceededException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -51,6 +52,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiErrorResponse> aiClient(AiChatClient.AiClientException ex) {
         log.warn("AI client error: {}", ex.getMessage());
         return error(HttpStatus.BAD_GATEWAY, "AI_CALL_FAILED", safeMessage(ex, "AI 服务调用失败。"));
+    }
+
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<ApiErrorResponse> rateLimitExceeded(RateLimitExceededException ex) {
+        ApiErrorResponse body = new ApiErrorResponse(
+                HttpStatus.TOO_MANY_REQUESTS.value(),
+                HttpStatus.TOO_MANY_REQUESTS.getReasonPhrase(),
+                "RATE_LIMIT_EXCEEDED",
+                safeMessage(ex, "请求太频繁，请稍后重试。"),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .headers(RateLimitHttpHeaders.from(ex.getLimit(), ex.getRemaining(), ex.getRetryAfter()))
+                .body(body);
     }
 
     @ExceptionHandler(IllegalStateException.class)

@@ -59,7 +59,8 @@ function categoryLabel(category) {
     sugar: '糖饮甜品',
     vegetable: '蔬菜',
     staple: '主食',
-    general: '通用'
+    general: '通用',
+    none: '无答案'
   }
   return labels[category] || category || '通用'
 }
@@ -435,6 +436,10 @@ export default function AdminPage({ onBack, onLogout }) {
             <MetricSmall label="平均 Top1 分数" value={ragEvaluation.averageTopScore24h ?? 0} />
             <MetricSmall label="平均检索分数" value={ragEvaluation.averageScore24h ?? 0} />
             <MetricSmall label="低置信检索" value={ragEvaluation.lowConfidenceSearches24h ?? 0} />
+            <MetricSmall label="平均粗排 Top1" value={ragEvaluation.averageRoughTopScore24h ?? 0} />
+            <MetricSmall label="平均精排原始 Top1" value={ragEvaluation.averageRerankerTopScore24h ?? 0} />
+            <MetricSmall label="精排调用次数" value={ragEvaluation.rerankerAppliedSearches24h ?? 0} />
+            <MetricSmall label="空证据次数" value={ragEvaluation.noAnswerSearches24h ?? 0} />
             <Chart title="RAG 命中类别分布" items={ragCategoryCounts} empty="暂无检索记录" wide />
           </div>
 
@@ -629,23 +634,49 @@ export default function AdminPage({ onBack, onLogout }) {
             <div className="rag-benchmark-panel">
               <div className="operations-grid compact-five">
                 <MetricSmall label="评测题数" value={ragBenchmark.caseCount ?? 0} />
+                <MetricSmall label="有答案题数" value={ragBenchmark.answerableCaseCount ?? 0} />
+                <MetricSmall label="无答案题数" value={ragBenchmark.noAnswerCaseCount ?? 0} />
+                <MetricSmall label="初排 Hit@3" value={ragBenchmark.baselineHitAt3 ?? 0} />
                 <MetricSmall label="Hit@3" value={ragBenchmark.hitAt3 ?? 0} />
+                <MetricSmall label="初排 Hit@5" value={ragBenchmark.baselineHitAt5 ?? 0} />
+                <MetricSmall label="Hit@5" value={ragBenchmark.hitAt5 ?? 0} />
+                <MetricSmall label="初排 MRR" value={ragBenchmark.baselineMrr ?? 0} />
                 <MetricSmall label="MRR" value={ragBenchmark.mrr ?? 0} />
+                <MetricSmall label="初排 nDCG@5" value={ragBenchmark.baselineNdcgAt5 ?? 0} />
+                <MetricSmall label="nDCG@5" value={ragBenchmark.ndcgAt5 ?? 0} />
+                <MetricSmall label="初排类别@3" value={ragBenchmark.baselineCategoryAccuracy ?? 0} />
                 <MetricSmall label="类别@3(1条)" value={ragBenchmark.categoryAccuracy ?? 0} />
+                <MetricSmall label="重排模型" value={ragBenchmark.rerankerEnabled ? (ragBenchmark.rerankerProvider || '已启用') : '未启用'} />
+                <MetricSmall label="回归检查" value={ragBenchmark.regressionPassed ? '通过' : '未通过'} />
+                <MetricSmall label="平均检索耗时" value={`${ragBenchmark.averageRetrievalDurationMs ?? 0} ms`} />
+                <MetricSmall label="平均重排耗时" value={`${ragBenchmark.averageRerankDurationMs ?? 0} ms`} />
+                <MetricSmall label="平均候选数" value={ragBenchmark.averageCandidateCount ?? 0} />
+                <MetricSmall label="过滤后平均结果" value={ragBenchmark.averageResultCount ?? 0} />
+                <MetricSmall label="空结果率" value={ragBenchmark.emptyResultRate ?? 0} />
+                <MetricSmall label="初排拒答准确率" value={ragBenchmark.baselineNoAnswerAccuracy ?? 0} />
+                <MetricSmall label="最终拒答准确率" value={ragBenchmark.noAnswerAccuracy ?? 0} />
+                <MetricSmall label="无答案误召回率" value={ragBenchmark.falsePositiveRate ?? 0} />
+                <MetricSmall label="评测耗时" value={`${ragBenchmark.evaluationDurationMs ?? 0} ms`} />
               </div>
               <div className="admin-table-wrap">
                 <table className="admin-table">
                   <thead>
-                    <tr><th>问题</th><th>命中</th><th>首个相关排名</th><th>期望类别</th><th>类别命中</th><th>Top3 标题</th></tr>
+                    <tr><th>问题</th><th>类型</th><th>Hit@3</th><th>Hit@5</th><th>首个相关排名</th><th>nDCG@5</th><th>期望类别</th><th>类别/拒答命中</th><th>粗排/精排/最终分</th><th>候选/输出</th><th>阈值/去重过滤</th><th>Top5 标题</th></tr>
                   </thead>
                   <tbody>
                     {(ragBenchmark.cases || []).map(item => (
                       <tr key={item.question}>
                         <td>{item.question}</td>
-                        <td>{item.hitAt3 ? '是' : '否'}</td>
-                        <td>{item.firstRelevantRank || '-'}</td>
+                        <td>{item.expectNoAnswer ? '无答案' : '有答案'}</td>
+                        <td>{item.expectNoAnswer ? '-' : (item.hitAt3 ? '是' : '否')}</td>
+                        <td>{item.expectNoAnswer ? '-' : (item.hitAt5 ? '是' : '否')}</td>
+                        <td>{item.expectNoAnswer ? '-' : (item.firstRelevantRank || '-')}</td>
+                        <td>{item.expectNoAnswer ? '-' : (item.ndcgAt5 ?? 0)}</td>
                         <td>{categoryLabel(item.expectedCategory)}</td>
-                        <td>{item.categoryHitAt3 ? '是' : '否'}</td>
+                        <td>{item.expectNoAnswer ? (item.noAnswerCorrect ? '拒答正确' : '发生误召回') : (item.categoryHitAt3 ? '是' : '否')}</td>
+                        <td>{item.topRoughScore ?? 0}/{item.topRerankerRawScore ?? '-'}/{item.topFinalScore ?? 0}</td>
+                        <td>{item.candidateCount ?? 0}/{item.finalResultCount ?? 0}</td>
+                        <td>{item.thresholdFilteredCount ?? 0}/{item.duplicateFilteredCount ?? 0}</td>
                         <td>{(item.topTitles || []).join(' / ') || '-'}</td>
                       </tr>
                     ))}
@@ -693,12 +724,14 @@ export default function AdminPage({ onBack, onLogout }) {
                   <>
                     <div className="knowledge-card-head">
                       <h3>{chunk.title || `知识片段 ${chunk.id}`}</h3>
-                      <span>{chunk.contentLength ?? 0} 字</span>
+                      <span>{chunk.tokenCount ?? 0} Token · {chunk.contentLength ?? 0} 字</span>
                     </div>
                     <div className="knowledge-meta">
                       <span className={chunk.source === 'admin' ? 'source-tag admin' : 'source-tag'}>{chunk.source === 'admin' ? '管理员添加' : '系统 Markdown'}</span>
+                      <span>版本 {chunk.sourceVersion || 'v1'}</span>
                       <span>{categoryLabel(chunk.category)}</span>
                       <span>命中 {chunk.hitCount || 0} 次</span>
+                      <span>更新：{formatTime(chunk.updatedAt)}</span>
                       <span>最近引用：{formatTime(chunk.lastHitAt)}</span>
                     </div>
                     <p>{chunk.contentPreview || '暂无内容预览'}</p>
@@ -841,7 +874,7 @@ function KnowledgeModal({ chunk, onClose }) {
         <header className="modal-head">
           <div>
             <h2>{chunk.title || `知识片段 ${chunk.id}`}</h2>
-            <p>{chunk.source === 'admin' ? '管理员添加' : '系统 Markdown'} · {categoryLabel(chunk.category)} · 命中 {chunk.hitCount || 0} 次 · 最近引用：{formatTime(chunk.lastHitAt)}</p>
+            <p>{chunk.source === 'admin' ? '管理员添加' : '系统 Markdown'} · {categoryLabel(chunk.category)} · 版本 {chunk.sourceVersion || 'v1'} · {chunk.tokenCount ?? 0} Token · 更新：{formatTime(chunk.updatedAt)} · 命中 {chunk.hitCount || 0} 次 · 最近引用：{formatTime(chunk.lastHitAt)}</p>
           </div>
           <button className="secondary-btn" type="button" onClick={onClose}>关闭</button>
         </header>

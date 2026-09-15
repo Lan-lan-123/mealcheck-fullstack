@@ -1,11 +1,14 @@
 package com.example.mealcheck.dto;
 
+import java.io.Serializable;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.time.LocalDateTime;
 
-public class WeeklyReportResponse {
+public class WeeklyReportResponse implements Serializable {
+    private static final long serialVersionUID = 1L;
     private int days;
     private int totalMeals;
     private double averageScore;
@@ -16,6 +19,9 @@ public class WeeklyReportResponse {
     private List<String> nextWeekSuggestions;
     private String goalType;
     private LocalDateTime generatedAt;
+    private String generationMode = "RULE_BASED";
+    private String reviewStatus = "NOT_REQUIRED";
+    private List<String> agentTrace = List.of();
 
     public int getDays() { return days; }
     public void setDays(int days) { this.days = days; }
@@ -37,4 +43,10 @@ public class WeeklyReportResponse {
     public void setGoalType(String goalType) { this.goalType = goalType; }
     public LocalDateTime getGeneratedAt() { return generatedAt; }
     public void setGeneratedAt(LocalDateTime generatedAt) { this.generatedAt = generatedAt; }
+    public String getGenerationMode() { return generationMode; }
+    public void setGenerationMode(String generationMode) { this.generationMode = generationMode; }
+    public String getReviewStatus() { return reviewStatus; }
+    public void setReviewStatus(String reviewStatus) { this.reviewStatus = reviewStatus; }
+    public List<String> getAgentTrace() { return agentTrace; }
+    public void setAgentTrace(List<String> agentTrace) { this.agentTrace = agentTrace; }
 }

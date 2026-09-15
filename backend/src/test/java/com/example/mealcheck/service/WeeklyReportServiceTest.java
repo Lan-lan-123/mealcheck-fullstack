@@ -6,6 +6,7 @@ import com.example.mealcheck.entity.UserAccount;
 import com.example.mealcheck.repository.UserAccountRepository;
 import com.example.mealcheck.repository.WeeklyReportSnapshotRepository;
 import com.example.mealcheck.security.UserPrincipal;
+import com.example.mealcheck.service.weeklyagent.WeeklyReportMultiAgentOrchestrator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
@@ -24,12 +25,14 @@ class WeeklyReportServiceTest {
         MealAnalysisService mealAnalysisService = mock(MealAnalysisService.class);
         WeeklyReportSnapshotRepository snapshotRepository = mock(WeeklyReportSnapshotRepository.class);
         UserGoalService userGoalService = mock(UserGoalService.class);
+        WeeklyReportMultiAgentOrchestrator orchestrator = mock(WeeklyReportMultiAgentOrchestrator.class);
         WeeklyReportService service = new WeeklyReportService(
                 userRepository,
                 mealAnalysisService,
                 new ObjectMapper(),
                 snapshotRepository,
-                userGoalService
+                userGoalService,
+                orchestrator
         );
 
         UserAccount user = new UserAccount();
@@ -45,6 +48,8 @@ class WeeklyReportServiceTest {
         when(userRepository.findByUsername("demo")).thenReturn(Optional.of(user));
         when(mealAnalysisService.listSince(user, 7)).thenReturn(List.of(record));
         when(userGoalService.effectiveGoal(user, "current")).thenReturn("fat_loss");
+        when(orchestrator.generate(org.mockito.ArgumentMatchers.eq(user), org.mockito.ArgumentMatchers.any()))
+                .thenAnswer(invocation -> invocation.getArgument(1));
 
         WeeklyReportResponse response = service.generate(new UserPrincipal(user), 7);
 

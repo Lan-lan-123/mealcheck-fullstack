@@ -10,9 +10,12 @@ import com.example.mealcheck.repository.AssistantConversationMessageRepository;
 import com.example.mealcheck.repository.AssistantConversationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 
 @Service
 public class AssistantConversationService {
@@ -66,6 +69,34 @@ public class AssistantConversationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public MemoryHistory memoryHistory(AssistantConversation conversation,
+                                       int recentLimit,
+                                       int summaryBatchLimit) {
+        int safeRecentLimit = Math.max(2, Math.min(200, recentLimit));
+        int safeSummaryBatchLimit = Math.max(1, Math.min(500, summaryBatchLimit));
+        long totalCount = messageRepository.countByConversation(conversation);
+        int summaryTargetCount = (int) Math.max(0L, totalCount - safeRecentLimit);
+        int summarizedCount = Math.min(conversation.getSummarizedMessageCount(), summaryTargetCount);
+        int pendingSummaryCount = Math.max(0, summaryTargetCount - summarizedCount);
+        int summaryLimit = Math.min(safeSummaryBatchLimit, pendingSummaryCount);
+
+        List<AssistantChatMessage> summaryCandidates = summaryLimit == 0 ? List.of()
+                : toChatMessages(messageRepository.findWindow(
+                        conversation.getId(), summarizedCount, summaryLimit));
+        List<AssistantConversationMessage> recentEntities = new ArrayList<>(
+                messageRepository.findByConversationOrderByCreatedAtDesc(
+                        conversation, PageRequest.of(0, safeRecentLimit)));
+        Collections.reverse(recentEntities);
+        List<AssistantChatMessage> recentMessages = toChatMessages(recentEntities);
+
+        List<AssistantChatMessage> contextMessages = new ArrayList<>(summaryCandidates);
+        contextMessages.addAll(recentMessages);
+        return new MemoryHistory(
+                List.copyOf(contextMessages), summaryCandidates, recentMessages,
+                summarizedCount, summaryTargetCount, totalCount);
+    }
+
     @Transactional
     public void append(AssistantConversation conversation, String role, String text) {
         AssistantConversationMessage message = new AssistantConversationMessage();
@@ -74,6 +105,17 @@ public class AssistantConversationService {
         message.setText(text);
         messageRepository.save(message);
         conversation.setUpdatedAt(LocalDateTime.now());
+        conversationRepository.save(conversation);
+    }
+
+    @Transactional
+    public void updateMemory(AssistantConversation conversation,
+                             String summary,
+                             String state,
+                             int summarizedMessageCount) {
+        conversation.setMemorySummary(summary);
+        conversation.setMemoryState(state);
+        conversation.setSummarizedMessageCount(summarizedMessageCount);
         conversationRepository.save(conversation);
     }
 
@@ -90,5 +132,19 @@ public class AssistantConversationService {
             return "新对话";
         }
         return normalized.length() <= 24 ? normalized : normalized.substring(0, 24) + "...";
+    }
+
+    private List<AssistantChatMessage> toChatMessages(List<AssistantConversationMessage> messages) {
+        return messages.stream()
+                .map(message -> new AssistantChatMessage(message.getRole(), message.getText()))
+                .toList();
+    }
+
+    public record MemoryHistory(List<AssistantChatMessage> contextMessages,
+                                List<AssistantChatMessage> summaryCandidates,
+                                List<AssistantChatMessage> recentMessages,
+                                int summarizedCount,
+                                int summaryTargetCount,
+                                long totalMessageCount) {
     }
 }

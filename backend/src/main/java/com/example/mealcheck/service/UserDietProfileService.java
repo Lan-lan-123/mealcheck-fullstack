@@ -44,19 +44,25 @@ public class UserDietProfileService {
             return created;
         });
 
-        List<Integer> scores = records.stream()
-                .map(MealRecord::getScore)
-                .filter(Objects::nonNull)
-                .toList();
-        List<String> foods = topValues(records.stream().flatMap(record -> extractFoodNames(record).stream()).toList(), 8);
-        List<String> risks = topValues(records.stream().flatMap(record -> extractRiskTags(record).stream()).toList(), 8);
-        String preferredGoal = mostCommon(records.stream().map(MealRecord::getGoal).toList());
-        int averageScore = scores.isEmpty()
-                ? 0
-                : (int) Math.round(scores.stream().mapToInt(Integer::intValue).average().orElse(0));
+        long totalScore = records.stream().map(MealRecord::getScore).filter(Objects::nonNull)
+                .mapToLong(Integer::longValue).sum();
+        Map<String, Long> foodCounts = countValues(
+                records.stream().flatMap(record -> extractFoodNames(record).stream()).toList());
+        Map<String, Long> riskCounts = countValues(
+                records.stream().flatMap(record -> extractRiskTags(record).stream()).toList());
+        Map<String, Long> goalCounts = countValues(records.stream().map(MealRecord::getGoal).toList());
+        List<String> foods = topValues(foodCounts, 8);
+        List<String> risks = topValues(riskCounts, 8);
+        String preferredGoal = topValues(goalCounts, 1).stream().findFirst().orElse("");
+        int averageScore = averageScore(totalScore, records.size());
 
+        profile.setTotalScore(totalScore);
         profile.setTotalMeals(records.size());
         profile.setAverageScore(averageScore);
+        profile.setAggregateInitialized(true);
+        profile.setFoodCountsJson(Jsons.toJson(objectMapper, foodCounts));
+        profile.setRiskCountsJson(Jsons.toJson(objectMapper, riskCounts));
+        profile.setGoalCountsJson(Jsons.toJson(objectMapper, goalCounts));
         profile.setPreferredGoal(preferredGoal);
         profile.setCommonFoodsJson(Jsons.toJson(objectMapper, foods));
         profile.setCommonRisksJson(Jsons.toJson(objectMapper, risks));
@@ -66,8 +72,52 @@ public class UserDietProfileService {
     }
 
     @Transactional
+    public UserDietProfile applyMeal(UserAccount user, MealRecord record) {
+        UserDietProfile profile = profileRepository.findByUser(user).orElse(null);
+        if (profile != null && !profile.isAggregateInitialized()) {
+            return refresh(user);
+        }
+        if (profile == null) {
+            profile = new UserDietProfile();
+            profile.setUser(user);
+            profile.setAggregateInitialized(true);
+        }
+
+        long totalMeals = profile.getTotalMeals() + 1L;
+        long totalScore = profile.getTotalScore() + safeScore(record);
+        Map<String, Long> foodCounts = readCountMap(profile.getFoodCountsJson());
+        Map<String, Long> riskCounts = readCountMap(profile.getRiskCountsJson());
+        Map<String, Long> goalCounts = readCountMap(profile.getGoalCountsJson());
+        updateCounts(foodCounts, extractFoodNames(record), 1L);
+        updateCounts(riskCounts, extractRiskTags(record), 1L);
+        updateCounts(goalCounts, List.of(nullToEmpty(record.getGoal())), 1L);
+        return updateDerivedProfile(profile, totalMeals, totalScore, foodCounts, riskCounts, goalCounts);
+    }
+
+    @Transactional
+    public void removeMeal(UserAccount user, MealRecord record) {
+        profileRepository.findByUser(user).ifPresent(profile -> {
+            if (!profile.isAggregateInitialized()) {
+                profileRepository.delete(profile);
+                return;
+            }
+            long totalMeals = Math.max(0L, profile.getTotalMeals() - 1L);
+            long totalScore = Math.max(0L, profile.getTotalScore() - safeScore(record));
+            Map<String, Long> foodCounts = readCountMap(profile.getFoodCountsJson());
+            Map<String, Long> riskCounts = readCountMap(profile.getRiskCountsJson());
+            Map<String, Long> goalCounts = readCountMap(profile.getGoalCountsJson());
+            updateCounts(foodCounts, extractFoodNames(record), -1L);
+            updateCounts(riskCounts, extractRiskTags(record), -1L);
+            updateCounts(goalCounts, List.of(nullToEmpty(record.getGoal())), -1L);
+            updateDerivedProfile(profile, totalMeals, totalScore, foodCounts, riskCounts, goalCounts);
+        });
+    }
+
+    @Transactional
     public UserDietProfile getOrRefresh(UserAccount user) {
-        return profileRepository.findByUser(user).orElseGet(() -> refresh(user));
+        return profileRepository.findByUser(user)
+                .filter(UserDietProfile::isAggregateInitialized)
+                .orElseGet(() -> refresh(user));
     }
 
     public UserDietProfileResponse toResponse(UserDietProfile profile) {
@@ -121,10 +171,13 @@ public class UserDietProfileService {
         return tags == null ? List.of() : tags.stream().filter(tag -> tag != null && !tag.isBlank()).toList();
     }
 
-    private List<String> topValues(List<String> values, int limit) {
-        Map<String, Long> counts = values.stream()
+    private Map<String, Long> countValues(List<String> values) {
+        return values.stream()
                 .filter(value -> value != null && !value.isBlank())
                 .collect(Collectors.groupingBy(String::trim, LinkedHashMap::new, Collectors.counting()));
+    }
+
+    private List<String> topValues(Map<String, Long> counts, int limit) {
         return counts.entrySet().stream()
                 .sorted(Map.Entry.<String, Long>comparingByValue(Comparator.reverseOrder()))
                 .limit(limit)
@@ -132,8 +185,59 @@ public class UserDietProfileService {
                 .toList();
     }
 
-    private String mostCommon(List<String> values) {
-        return topValues(values, 1).stream().findFirst().orElse("");
+    private UserDietProfile updateDerivedProfile(UserDietProfile profile,
+                                                 long totalMeals,
+                                                 long totalScore,
+                                                 Map<String, Long> foodCounts,
+                                                 Map<String, Long> riskCounts,
+                                                 Map<String, Long> goalCounts) {
+        List<String> foods = topValues(foodCounts, 8);
+        List<String> risks = topValues(riskCounts, 8);
+        String preferredGoal = topValues(goalCounts, 1).stream().findFirst().orElse("");
+        int averageScore = averageScore(totalScore, totalMeals);
+        profile.setTotalMeals(totalMeals);
+        profile.setTotalScore(totalScore);
+        profile.setAverageScore(averageScore);
+        profile.setPreferredGoal(preferredGoal);
+        profile.setFoodCountsJson(Jsons.toJson(objectMapper, foodCounts));
+        profile.setRiskCountsJson(Jsons.toJson(objectMapper, riskCounts));
+        profile.setGoalCountsJson(Jsons.toJson(objectMapper, goalCounts));
+        profile.setCommonFoodsJson(Jsons.toJson(objectMapper, foods));
+        profile.setCommonRisksJson(Jsons.toJson(objectMapper, risks));
+        profile.setProfileSummary(buildSummary(totalMeals, averageScore, preferredGoal, foods, risks));
+        profile.setAggregateInitialized(true);
+        profile.setUpdatedAt(LocalDateTime.now());
+        return profileRepository.save(profile);
+    }
+
+    private Map<String, Long> readCountMap(String json) {
+        if (json == null || json.isBlank()) {
+            return new LinkedHashMap<>();
+        }
+        Map<String, Long> values = Jsons.fromJson(
+                objectMapper, json, new TypeReference<LinkedHashMap<String, Long>>() {});
+        return values == null ? new LinkedHashMap<>() : new LinkedHashMap<>(values);
+    }
+
+    private void updateCounts(Map<String, Long> counts, List<String> values, long delta) {
+        for (String raw : values) {
+            if (raw == null || raw.isBlank()) continue;
+            String value = raw.trim();
+            long next = counts.getOrDefault(value, 0L) + delta;
+            if (next <= 0L) {
+                counts.remove(value);
+            } else {
+                counts.put(value, next);
+            }
+        }
+    }
+
+    private long safeScore(MealRecord record) {
+        return record.getScore() == null ? 0L : Math.max(0, record.getScore());
+    }
+
+    private int averageScore(long totalScore, long totalMeals) {
+        return totalMeals <= 0L ? 0 : (int) Math.round((double) totalScore / totalMeals);
     }
 
     private List<String> readStringList(String json) {

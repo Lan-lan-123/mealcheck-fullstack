@@ -9,6 +9,14 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME:mealcheck}
     password: ${SPRING_DATASOURCE_PASSWORD:mealcheck123}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${MEALCHECK_DB_MAX_POOL_SIZE:12}
+      minimum-idle: ${MEALCHECK_DB_MIN_IDLE:2}
+      connection-timeout: ${MEALCHECK_DB_CONNECTION_TIMEOUT_MILLIS:2000}
+      validation-timeout: ${MEALCHECK_DB_VALIDATION_TIMEOUT_MILLIS:1000}
+  jdbc:
+    template:
+      query-timeout: ${MEALCHECK_DB_QUERY_TIMEOUT:3s}
   data:
     redis:
       host: ${SPRING_REDIS_HOST:localhost}
@@ -17,13 +25,22 @@ spring:
       timeout: ${SPRING_REDIS_TIMEOUT:2s}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     open-in-view: false
     properties:
+      jakarta:
+        persistence:
+          query:
+            timeout: ${MEALCHECK_DB_QUERY_TIMEOUT_MILLIS:3000}
       hibernate:
         format_sql: true
         jdbc:
           time_zone: UTC
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    locations: classpath:db/migration
   servlet:
     multipart:
       max-file-size: 10MB
@@ -36,17 +53,127 @@ mealcheck:
   cors:
     allowed-origins: ${MEALCHECK_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
   upload-dir: ${MEALCHECK_UPLOAD_DIR:./uploads}
+  upload:
+    max-input-bytes: ${MEALCHECK_UPLOAD_MAX_INPUT_BYTES:10485760}
+    max-width: ${MEALCHECK_UPLOAD_MAX_WIDTH:4096}
+    max-height: ${MEALCHECK_UPLOAD_MAX_HEIGHT:4096}
+    max-pixels: ${MEALCHECK_UPLOAD_MAX_PIXELS:16777216}
+    normalized-max-edge: ${MEALCHECK_UPLOAD_NORMALIZED_MAX_EDGE:2560}
+    jpeg-quality: ${MEALCHECK_UPLOAD_JPEG_QUALITY:0.90}
+    orphan-cleanup-enabled: ${MEALCHECK_UPLOAD_ORPHAN_CLEANUP_ENABLED:true}
+    orphan-cleanup-cron: ${MEALCHECK_UPLOAD_ORPHAN_CLEANUP_CRON:0 30 3 * * *}
+    orphan-grace-hours: ${MEALCHECK_UPLOAD_ORPHAN_GRACE_HOURS:24}
   ai:
-    api-key: ${MEALCHECK_AI_API_KEY:}
-    base-url: ${MEALCHECK_AI_BASE_URL:}
+    api-key: ${MEALCHECK_AI_API_KEY:sk-1bbe3ff11b46460f9b3b55040bd38cff}
+    base-url: ${MEALCHECK_AI_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
     model: ${MEALCHECK_AI_MODEL:qwen3-vl-30b-a3b-instruct}
     timeout-seconds: ${MEALCHECK_AI_TIMEOUT_SECONDS:60}
   knowledge:
     auto-index: ${MEALCHECK_KNOWLEDGE_AUTO_INDEX:true}
-    embedding-dim: 384
+    embedding-dim: ${MEALCHECK_KNOWLEDGE_EMBEDDING_DIM:512}
+    vector-storage: ${MEALCHECK_KNOWLEDGE_VECTOR_STORAGE:halfvec}
+    vector-weight: ${MEALCHECK_KNOWLEDGE_VECTOR_WEIGHT:0.65}
+    keyword-weight: ${MEALCHECK_KNOWLEDGE_KEYWORD_WEIGHT:0.25}
+    category-weight: ${MEALCHECK_KNOWLEDGE_CATEGORY_WEIGHT:0.10}
+    rrf-k: ${MEALCHECK_KNOWLEDGE_RRF_K:60}
+    rerank-candidate-multiplier: ${MEALCHECK_KNOWLEDGE_RERANK_CANDIDATE_MULTIPLIER:4}
+    rerank-enabled: ${MEALCHECK_KNOWLEDGE_RERANK_ENABLED:false}
+    rerank-url: ${MEALCHECK_KNOWLEDGE_RERANK_URL:}
+    rerank-api-key: ${MEALCHECK_KNOWLEDGE_RERANK_API_KEY:}
+    rerank-model: ${MEALCHECK_KNOWLEDGE_RERANK_MODEL:}
+    rerank-timeout-seconds: ${MEALCHECK_KNOWLEDGE_RERANK_TIMEOUT_SECONDS:10}
+    rerank-model-weight: ${MEALCHECK_KNOWLEDGE_RERANK_MODEL_WEIGHT:0.75}
+    reranker-min-score: ${MEALCHECK_KNOWLEDGE_RERANKER_MIN_SCORE:0.20}
+    result-filter-enabled: ${MEALCHECK_KNOWLEDGE_RESULT_FILTER_ENABLED:true}
+    result-min-score: ${MEALCHECK_KNOWLEDGE_RESULT_MIN_SCORE:0.35}
+    result-relative-score: ${MEALCHECK_KNOWLEDGE_RESULT_RELATIVE_SCORE:0.60}
+    result-dedup-similarity: ${MEALCHECK_KNOWLEDGE_RESULT_DEDUP_SIMILARITY:0.88}
+    result-candidate-multiplier: ${MEALCHECK_KNOWLEDGE_RESULT_CANDIDATE_MULTIPLIER:4}
+    chunk-min-tokens: ${MEALCHECK_KNOWLEDGE_CHUNK_MIN_TOKENS:300}
+    chunk-max-tokens: ${MEALCHECK_KNOWLEDGE_CHUNK_MAX_TOKENS:500}
+    chunk-overlap-tokens: ${MEALCHECK_KNOWLEDGE_CHUNK_OVERLAP_TOKENS:50}
+    splitter-strategy: ${MEALCHECK_KNOWLEDGE_SPLITTER_STRATEGY:recursive-markdown}
+    source-version: ${MEALCHECK_KNOWLEDGE_SOURCE_VERSION:v2-recursive}
+    benchmark-regression-tolerance: ${MEALCHECK_KNOWLEDGE_BENCHMARK_REGRESSION_TOLERANCE:0.02}
   upload-guard:
     non-food-window-minutes: ${MEALCHECK_NON_FOOD_WINDOW_MINUTES:5}
     non-food-limit: ${MEALCHECK_NON_FOOD_LIMIT:10}
     non-food-block-minutes: ${MEALCHECK_NON_FOOD_BLOCK_MINUTES:60}
+  rate-limit:
+    assistant:
+      capacity: ${MEALCHECK_RATE_LIMIT_ASSISTANT_CAPACITY:5}
+      refill-tokens: ${MEALCHECK_RATE_LIMIT_ASSISTANT_REFILL_TOKENS:1}
+      refill-period-seconds: ${MEALCHECK_RATE_LIMIT_ASSISTANT_REFILL_PERIOD_SECONDS:3}
+      request-cost: ${MEALCHECK_RATE_LIMIT_ASSISTANT_REQUEST_COST:1}
+    meal-analysis:
+      capacity: ${MEALCHECK_RATE_LIMIT_MEAL_CAPACITY:3}
+      refill-tokens: ${MEALCHECK_RATE_LIMIT_MEAL_REFILL_TOKENS:1}
+      refill-period-seconds: ${MEALCHECK_RATE_LIMIT_MEAL_REFILL_PERIOD_SECONDS:6}
+      request-cost: ${MEALCHECK_RATE_LIMIT_MEAL_REQUEST_COST:1}
   weekly-report:
     cron: ${MEALCHECK_WEEKLY_REPORT_CRON:0 0 6 * * MON}
+    batch-size: ${MEALCHECK_WEEKLY_REPORT_BATCH_SIZE:100}
+    executor-core-pool-size: ${MEALCHECK_WEEKLY_REPORT_EXECUTOR_CORE_POOL_SIZE:2}
+    executor-max-pool-size: ${MEALCHECK_WEEKLY_REPORT_EXECUTOR_MAX_POOL_SIZE:4}
+    executor-queue-capacity: ${MEALCHECK_WEEKLY_REPORT_EXECUTOR_QUEUE_CAPACITY:20}
+    agent-executor-core-pool-size: ${MEALCHECK_WEEKLY_REPORT_AGENT_EXECUTOR_CORE_POOL_SIZE:2}
+    agent-executor-max-pool-size: ${MEALCHECK_WEEKLY_REPORT_AGENT_EXECUTOR_MAX_POOL_SIZE:4}
+    agent-executor-queue-capacity: ${MEALCHECK_WEEKLY_REPORT_AGENT_EXECUTOR_QUEUE_CAPACITY:20}
+    worker-batch-size: ${MEALCHECK_WEEKLY_REPORT_WORKER_BATCH_SIZE:4}
+    max-attempts: ${MEALCHECK_WEEKLY_REPORT_MAX_ATTEMPTS:3}
+    stale-lease-seconds: ${MEALCHECK_WEEKLY_REPORT_STALE_LEASE_SECONDS:600}
+    worker-delay-millis: ${MEALCHECK_WEEKLY_REPORT_WORKER_DELAY_MILLIS:5000}
+    multi-agent-enabled: ${MEALCHECK_WEEKLY_REPORT_MULTI_AGENT_ENABLED:true}
+    max-review-revisions: ${MEALCHECK_WEEKLY_REPORT_MAX_REVIEW_REVISIONS:1}
+    rag-limit: ${MEALCHECK_WEEKLY_REPORT_RAG_LIMIT:5}
+    agent-timeout-seconds: ${MEALCHECK_WEEKLY_REPORT_AGENT_TIMEOUT_SECONDS:30}
+  mcp:
+    enabled: ${MEALCHECK_MCP_ENABLED:true}
+    endpoint: ${MEALCHECK_MCP_ENDPOINT:/mcp}
+    server-name: ${MEALCHECK_MCP_SERVER_NAME:mealcheck-mcp-server}
+    server-version: ${MEALCHECK_MCP_SERVER_VERSION:1.0.0}
+  assistant-function-calling:
+    enabled: ${MEALCHECK_ASSISTANT_FUNCTION_CALLING_ENABLED:false}
+    max-tool-rounds: ${MEALCHECK_ASSISTANT_FUNCTION_CALLING_MAX_TOOL_ROUNDS:3}
+    max-tool-calls: ${MEALCHECK_ASSISTANT_FUNCTION_CALLING_MAX_TOOL_CALLS:6}
+    total-timeout-seconds: ${MEALCHECK_ASSISTANT_FUNCTION_CALLING_TOTAL_TIMEOUT_SECONDS:30}
+  assistant-memory:
+    history-token-budget: ${MEALCHECK_ASSISTANT_MEMORY_HISTORY_TOKEN_BUDGET:1200}
+    recent-messages: ${MEALCHECK_ASSISTANT_MEMORY_RECENT_MESSAGES:6}
+    summary-max-tokens: ${MEALCHECK_ASSISTANT_MEMORY_SUMMARY_MAX_TOKENS:500}
+    relevant-history-messages: ${MEALCHECK_ASSISTANT_MEMORY_RELEVANT_MESSAGES:4}
+    recent-database-messages: ${MEALCHECK_ASSISTANT_MEMORY_RECENT_DATABASE_MESSAGES:40}
+    summary-batch-messages: ${MEALCHECK_ASSISTANT_MEMORY_SUMMARY_BATCH_MESSAGES:100}
+  assistant-tools:
+    http-pool-size: ${MEALCHECK_ASSISTANT_HTTP_POOL_SIZE:8}
+    http-queue-capacity: ${MEALCHECK_ASSISTANT_HTTP_QUEUE_CAPACITY:16}
+    db-pool-size: ${MEALCHECK_ASSISTANT_DB_POOL_SIZE:6}
+    db-queue-capacity: ${MEALCHECK_ASSISTANT_DB_QUEUE_CAPACITY:16}
+    rag-pool-size: ${MEALCHECK_ASSISTANT_RAG_POOL_SIZE:4}
+    rag-queue-capacity: ${MEALCHECK_ASSISTANT_RAG_QUEUE_CAPACITY:8}
+    background-pool-size: ${MEALCHECK_ASSISTANT_BACKGROUND_POOL_SIZE:2}
+    background-queue-capacity: ${MEALCHECK_ASSISTANT_BACKGROUND_QUEUE_CAPACITY:16}
+    timeout-millis: ${MEALCHECK_ASSISTANT_TOOLS_TIMEOUT_MILLIS:2500}
+    total-timeout-millis: ${MEALCHECK_ASSISTANT_TOOLS_TOTAL_TIMEOUT_MILLIS:3000}
+  remote-resilience:
+    max-attempts: ${MEALCHECK_REMOTE_MAX_ATTEMPTS:2}
+    initial-backoff-millis: ${MEALCHECK_REMOTE_INITIAL_BACKOFF_MILLIS:200}
+    failure-threshold: ${MEALCHECK_REMOTE_FAILURE_THRESHOLD:5}
+    open-duration-seconds: ${MEALCHECK_REMOTE_OPEN_DURATION_SECONDS:30}
+    max-concurrent-calls: ${MEALCHECK_REMOTE_MAX_CONCURRENT_CALLS:8}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [requestId=%X{requestId:-}] %logger{36} - %msg%n"

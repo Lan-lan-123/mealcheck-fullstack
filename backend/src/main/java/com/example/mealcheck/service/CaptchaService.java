@@ -5,24 +5,32 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.Duration;
-import java.time.Instant;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class CaptchaService {
     private static final Duration CAPTCHA_TTL = Duration.ofMinutes(5);
+    private static final String CAPTCHA_KEY_PREFIX = "captcha:";
 
     private final SecureRandom random = new SecureRandom();
-    private final Map<String, CaptchaChallenge> challenges = new ConcurrentHashMap<>();
+    private final RedisCacheService redisCacheService;
+
+    public CaptchaService(RedisCacheService redisCacheService) {
+        this.redisCacheService = redisCacheService;
+    }
 
     public AuthDtos.CaptchaResponse create() {
-        cleanupExpired();
         int left = random.nextInt(8) + 2;
         int right = random.nextInt(8) + 2;
         String id = UUID.randomUUID().toString();
-        challenges.put(id, new CaptchaChallenge(String.valueOf(left + right), Instant.now().plus(CAPTCHA_TTL)));
+        boolean stored = redisCacheService.set(
+                CAPTCHA_KEY_PREFIX + id,
+                String.valueOf(left + right),
+                CAPTCHA_TTL
+        );
+        if (!stored) {
+            throw new IllegalStateException("验证码服务暂时不可用，请稍后重试。");
+        }
         return new AuthDtos.CaptchaResponse(id, left + " + " + right + " = ?");
     }
 
@@ -30,18 +38,12 @@ public class CaptchaService {
         if (id == null || id.isBlank() || answer == null || answer.isBlank()) {
             return false;
         }
-        CaptchaChallenge challenge = challenges.remove(id);
-        if (challenge == null || challenge.expiresAt().isBefore(Instant.now())) {
-            return false;
+        try {
+            return redisCacheService.getAndDeleteRequired(CAPTCHA_KEY_PREFIX + id.trim())
+                    .map(expectedAnswer -> expectedAnswer.equals(answer.trim()))
+                    .orElse(false);
+        } catch (IllegalStateException e) {
+            throw new IllegalStateException("验证码服务暂时不可用，请稍后重试。", e);
         }
-        return challenge.answer().equals(answer.trim());
-    }
-
-    private void cleanupExpired() {
-        Instant now = Instant.now();
-        challenges.entrySet().removeIf(entry -> entry.getValue().expiresAt().isBefore(now));
-    }
-
-    private record CaptchaChallenge(String answer, Instant expiresAt) {
     }
 }

@@ -7,6 +7,7 @@ import com.example.mealcheck.entity.WeeklyReportSnapshot;
 import com.example.mealcheck.repository.UserAccountRepository;
 import com.example.mealcheck.repository.WeeklyReportSnapshotRepository;
 import com.example.mealcheck.security.UserPrincipal;
+import com.example.mealcheck.service.weeklyagent.WeeklyReportMultiAgentOrchestrator;
 import com.example.mealcheck.util.Jsons;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
@@ -26,24 +27,26 @@ public class WeeklyReportService {
     private final ObjectMapper objectMapper;
     private final WeeklyReportSnapshotRepository snapshotRepository;
     private final UserGoalService userGoalService;
+    private final WeeklyReportMultiAgentOrchestrator multiAgentOrchestrator;
 
     public WeeklyReportService(UserAccountRepository userRepository,
                                MealAnalysisService mealAnalysisService,
                                ObjectMapper objectMapper,
                                WeeklyReportSnapshotRepository snapshotRepository,
-                               UserGoalService userGoalService) {
+                               UserGoalService userGoalService,
+                               WeeklyReportMultiAgentOrchestrator multiAgentOrchestrator) {
         this.userRepository = userRepository;
         this.mealAnalysisService = mealAnalysisService;
         this.objectMapper = objectMapper;
         this.snapshotRepository = snapshotRepository;
         this.userGoalService = userGoalService;
+        this.multiAgentOrchestrator = multiAgentOrchestrator;
     }
 
-    @Transactional(readOnly = true)
     public WeeklyReportResponse generate(UserPrincipal principal, int days) {
         int safeDays = Math.max(1, Math.min(days, 30));
         UserAccount user = userRepository.findByUsername(principal.getUsername()).orElseThrow();
-        return generateForUser(user, safeDays);
+        return multiAgentOrchestrator.generate(user, generateForUser(user, safeDays));
     }
 
     @Transactional(readOnly = true)
@@ -59,17 +62,22 @@ public class WeeklyReportService {
                 .orElseGet(() -> generateForUser(user, 7));
     }
 
-    @Transactional
     public WeeklyReportResponse generateAndStore(UserAccount user, int days) {
-        WeeklyReportResponse response = generateForUser(user, days);
+        int safeDays = Math.max(1, Math.min(days, 30));
+        WeeklyReportResponse response = multiAgentOrchestrator.generate(user, generateForUser(user, safeDays));
         WeeklyReportSnapshot snapshot = new WeeklyReportSnapshot();
         snapshot.setUser(user);
-        snapshot.setDays(days);
+        snapshot.setDays(safeDays);
         snapshot.setPeriodEnd(LocalDate.now());
-        snapshot.setPeriodStart(LocalDate.now().minusDays(days - 1L));
+        snapshot.setPeriodStart(LocalDate.now().minusDays(safeDays - 1L));
         snapshot.setReportJson(Jsons.toJson(objectMapper, response));
         snapshotRepository.save(snapshot);
         return response;
+    }
+
+    public WeeklyReportResponse generateAndStore(Long userId, int days) {
+        UserAccount user = userRepository.findById(userId).orElseThrow();
+        return generateAndStore(user, days);
     }
 
     private WeeklyReportResponse generateForUser(UserAccount user, int safeDays) {

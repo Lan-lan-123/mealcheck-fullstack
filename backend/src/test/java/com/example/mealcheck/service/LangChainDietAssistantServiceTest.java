@@ -10,6 +10,8 @@ import com.example.mealcheck.entity.UserDietProfile;
 import com.example.mealcheck.repository.MealRecordRepository;
 import com.example.mealcheck.repository.UserAccountRepository;
 import com.example.mealcheck.security.UserPrincipal;
+import com.example.mealcheck.service.skill.AssistantSkillPlan;
+import com.example.mealcheck.service.skill.AssistantSkillRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
@@ -18,8 +20,12 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class LangChainDietAssistantServiceTest {
@@ -35,6 +41,9 @@ class LangChainDietAssistantServiceTest {
         UserDietProfileService profileService = mock(UserDietProfileService.class);
         AssistantToolOrchestrator toolOrchestrator = mock(AssistantToolOrchestrator.class);
         AssistantConversationService conversationService = mock(AssistantConversationService.class);
+        AssistantSkillRegistry skillRegistry = mock(AssistantSkillRegistry.class);
+        AssistantMemoryService memoryService = mock(AssistantMemoryService.class);
+        AssistantFunctionCallingService functionCallingService = mock(AssistantFunctionCallingService.class);
         LangChainDietAssistantService service = new LangChainDietAssistantService(
                 properties,
                 userRepository,
@@ -45,7 +54,12 @@ class LangChainDietAssistantServiceTest {
                 redisCacheService,
                 profileService,
                 toolOrchestrator,
-                conversationService
+                conversationService,
+                mock(ApplicationObservability.class),
+                skillRegistry,
+                memoryService,
+                mock(RemoteCallGuard.class),
+                functionCallingService
         );
 
         UserAccount user = new UserAccount();
@@ -58,6 +72,7 @@ class LangChainDietAssistantServiceTest {
         profile.setProfileSummary("最近记录显示你更关注减脂。");
 
         AssistantConversation conversation = new AssistantConversation();
+        conversation.setId(99L);
         conversation.setUser(user);
         conversation.setTitle("减脂");
         WeeklyReportResponse report = new WeeklyReportResponse();
@@ -69,11 +84,21 @@ class LangChainDietAssistantServiceTest {
         when(profileService.promptText(profile)).thenReturn("profile");
         when(redisCacheService.getJson(any(), any())).thenReturn(Optional.empty());
         when(conversationService.resolve(eq(user), eq(null), any())).thenReturn(conversation);
-        when(conversationService.history(conversation)).thenReturn(List.of());
-        when(toolOrchestrator.gather(eq(user), any())).thenReturn(new AssistantToolOrchestrator.AssistantToolContext(
+        when(conversationService.memoryHistory(eq(conversation), anyInt(), anyInt()))
+                .thenReturn(new AssistantConversationService.MemoryHistory(
+                        List.of(), List.of(), List.of(), 0, 0, 0));
+        when(memoryService.prepare(eq(conversation), any(), any(),
+                any(AssistantConversationService.MemoryHistory.class), anyList()))
+                .thenAnswer(invocation -> new AssistantMemoryService.MemoryContext(
+                        List.of(), "", "intent=FAT_LOSS", invocation.getArgument(1, String.class), 0));
+        when(memoryService.selectWorkingMessages(any(), any())).thenReturn(List.of());
+        when(skillRegistry.select(any())).thenReturn(new AssistantSkillPlan(
+                "fat-loss", "减脂建议", "FAT_LOSS", "减脂 蛋白质 蔬菜", "保持可持续减脂"));
+        when(toolOrchestrator.gather(eq(user), eq(conversation), any())).thenReturn(new AssistantToolOrchestrator.AssistantToolContext(
                 List.of(),
                 "fat_loss",
                 report,
+                List.of(),
                 List.of(),
                 new AssistantProactiveAdviceResponse(List.of())
         ));
@@ -83,5 +108,8 @@ class LangChainDietAssistantServiceTest {
         assertThat(response.getSuggestions()).anyMatch(text -> text.contains("米饭"));
         assertThat(response.getSuggestions()).anyMatch(text -> text.contains("高油"));
         assertThat(response.getSuggestions()).anyMatch(text -> text.contains("fat_loss"));
+        verify(redisCacheService).getJson(eq("assistant:history:demo:99"), any());
+        verify(redisCacheService).setJson(eq("assistant:history:demo:99"), any(), any());
+        verifyNoInteractions(functionCallingService);
     }
 }

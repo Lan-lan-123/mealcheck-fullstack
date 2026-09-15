@@ -1,3 +1,5 @@
+import { reportGenerationLabel, reportReviewLabel } from '../utils/mealLabels'
+
 export default function ReportView({ report, avgLabel, onOpenDetail }) {
   return (
     <div className="card">
@@ -18,6 +20,11 @@ export default function ReportView({ report, avgLabel, onOpenDetail }) {
 
       {report.generatedAt && (
         <p className="report-meta">自动生成于 {new Date(report.generatedAt).toLocaleString()}</p>
+      )}
+      {report.generationMode && (
+        <p className="report-meta">
+          {reportGenerationLabel(report.generationMode)} · {reportReviewLabel(report.reviewStatus)}
+        </p>
       )}
 
       {!!report.nextWeekSuggestions?.length && (
