@@ -147,6 +147,15 @@ class Verification:
         if ids:
             raise RuntimeError(f'Refusing to modify existing Compose project: {project}')
 
+    def record_dependency_images(self, compose):
+        for role in ('postgres', 'redis', 'rabbitmq'):
+            container = subprocess.check_output(compose + ['ps', '-q', role], cwd=self.source,
+                                                env=self.env, text=True).strip()
+            identity = json.loads(subprocess.check_output(['docker', 'inspect', container], text=True))[0]['Image']
+            info = json.loads(subprocess.check_output(['docker', 'image', 'inspect', identity], text=True))[0]
+            self.manifest.setdefault('dependencyImages', {})[role] = dict(imageId=identity, repoDigests=info.get('RepoDigests', []))
+        self.save()
+
     def containers(self, args):
         short = self.commit[:12]
         for role in ('backend', 'frontend'):
@@ -186,6 +195,7 @@ class Verification:
         self.run('production-compose', smoke + ['config', '--quiet'])
         try:
             self.run('production-start', smoke + ['up', '--no-build', '-d', '--wait', '--wait-timeout', '180'])
+            self.record_dependency_images(smoke)
             self.verify_running_image(smoke, 'backend')
             self.verify_running_image(smoke, 'frontend')
             self.run('http-smoke', [sys.executable, 'deploy/scripts/smoke.py', '--base-url', 'http://127.0.0.1:18080'])
@@ -260,8 +270,9 @@ def main():
         elif args.require_proxy:
             raise RuntimeError('Required Nginx executable unavailable')
         else:
-            verification.manifest['checks'].append(dict(name='trusted-proxy', status='NOT_RUN', required=False,
-                                                        reason='Nginx executable unavailable; enforced in Linux CI.'))
+            verification.run('trusted-proxy', ['docker', 'run', '--rm', '-v',
+                             f'{verification.source}:/workspace', '-w', '/workspace', 'python:3.12-alpine',
+                             'sh', '-c', 'apk add --no-cache nginx && python tools/test_proxy_headers.py --nginx /usr/sbin/nginx'])
         verification.containers(args)
         verification.finish('LOCAL_BASELINE_VERIFIED')
     except BaseException as error:

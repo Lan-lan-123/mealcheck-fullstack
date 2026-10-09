@@ -22,11 +22,12 @@ Linux CI 使用 `.github/workflows/release-baseline.yml` 的手动工作流，�
 
 - 从同一个提交的干净源码归档运行后端单元/HTTP 与 PostgreSQL/RabbitMQ 集成测试。
 - 周报协调监控测试分别在 UTC 与 Asia/Shanghai 时区执行；保留完整后端报告后再执行单项测试，避免覆盖完整结果。
+- 数据库回归覆盖 UTC、上海和洛杉矶 JVM 时区下的原生 SQL 时间参数、ORM 时间存取与任务到期领取。LocalDateTime 已由 AppTime 明确存储口径，不额外设置 Hibernate JDBC Calendar 时区。
 - `npm ci`、前端测试、生产构建、浏览器验收，以及运维、容量和模型桩的 Python 合约测试。
 - 用该归档构建一次后端与前端镜像，写入提交和版本 OCI 标签，保存镜像内容 ID 与镜像归档。
 - 容量/依赖故障测试和生产配置冒烟共用该后端镜像；生产配置冒烟使用该前端镜像。逐一核对运行容器的实际镜像内容 ID，禁止验收时重新构建。
 - 完整迁移库恢复、运行栈数据库与图片联合恢复、备份后 HTTP 冒烟、告警规则检查。
-- Nginx 可用时验证代理链；本机缺少 Nginx 会明确记录 NOT_RUN，Linux 候选 CI 强制执行。
+- 验证代理链：本机缺少 Nginx 时在隔离 Python/Alpine 容器安装 Nginx 并执行；Linux 候选 CI 使用预装 Nginx，强制执行。
 
 所有容器操作仅限新建隔离项目。发现容量验收同名项目已存在时拒绝操作。
 隔离项目在 finally 中清理其专用卷；原项目、原数据库和上传文件不受影响。

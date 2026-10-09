@@ -5,6 +5,7 @@ import com.example.mealcheck.dto.WeeklyReportResponse;
 import com.example.mealcheck.entity.*;
 import com.example.mealcheck.repository.*;
 import com.example.mealcheck.security.UserPrincipal;
+import com.example.mealcheck.util.AppTime;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -107,6 +108,33 @@ class WeeklyReportDatabaseIntegrationTest {
             jdbc.update("UPDATE weekly_report_jobs SET next_retry_at=(CURRENT_TIMESTAMP AT TIME ZONE 'UTC')-INTERVAL '1 minute' WHERE id=?",job.getId());
         }
         assertThat(workerJobs.claimBatch(1).get(0).getAttempts()).isEqualTo(1);
+    }
+
+    @Test void storageTimestampsAndNativeClaimsAgreeAcrossJvmTimezones() {
+        TimeZone original = TimeZone.getDefault();
+        try {
+            int week = 0;
+            for (String zone : List.of("UTC", "Asia/Shanghai", "America/Los_Angeles")) {
+                TimeZone.setDefault(TimeZone.getTimeZone(zone));
+                LocalDate reportWeek = LocalDate.of(2020, 1, 6).plusWeeks(week++);
+                workerJobs.enqueue(List.of(user.getId()), 7, reportWeek);
+                var job = jobs.findByUserIdAndReportWeekAndDays(user.getId(), reportWeek, 7).orElseThrow();
+                LocalDateTime stored = jdbc.queryForObject("SELECT next_retry_at FROM weekly_report_jobs WHERE id=?",
+                        (rs, row) -> rs.getObject(1, LocalDateTime.class), job.getId());
+                assertThat(Duration.between(AppTime.now(), stored).abs()).as(zone).isLessThan(Duration.ofSeconds(3));
+                assertThat(Duration.between(stored, job.getNextRetryAt()).abs()).as(zone).isLessThan(Duration.ofMillis(1));
+
+                LocalDateTime due = LocalDateTime.of(2020, 1, 1, 0, 0);
+                job.setNextRetryAt(due);
+                jobs.saveAndFlush(job);
+                LocalDateTime saved = jdbc.queryForObject("SELECT next_retry_at FROM weekly_report_jobs WHERE id=?",
+                        (rs, row) -> rs.getObject(1, LocalDateTime.class), job.getId());
+                assertThat(saved).as(zone).isEqualTo(due);
+                assertThat(workerJobs.claimBatch(1)).as(zone).extracting(WeeklyReportJob::getId).containsExactly(job.getId());
+            }
+        } finally {
+            TimeZone.setDefault(original);
+        }
     }
 
     @Test void expiredAttemptCannotPublishAndCurrentCompletionIsIdempotent() {

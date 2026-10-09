@@ -49,8 +49,8 @@ spring:
             timeout: ${MEALCHECK_DB_QUERY_TIMEOUT_MILLIS:3000}
       hibernate:
         format_sql: true
-        jdbc:
-          time_zone: ${MEALCHECK_TIMESTAMP_STORAGE_ZONE:UTC}
+        # LocalDateTime stores the explicit AppTime wall-clock value in TIMESTAMP.
+        # A JDBC Calendar override would shift that value when the JVM zone differs.
   flyway:
     enabled: true
     baseline-on-migrate: true
