@@ -1,0 +1,2048 @@
+{
+  "version": "synthetic-meals-100-v1",
+  "datasetKind": "synthetic",
+  "authorizedForEvaluation": true,
+  "independentlyAnnotated": false,
+  "cases": [
+    {
+      "id": "synth-001",
+      "image": "images/synth-001.png",
+      "source": "ai-generated",
+      "scene": "normal",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein"
+        },
+        {
+          "name": "清炒小白菜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-001. Create exactly one realistic casual smartphone photograph. Subject: steamed white rice, scrambled eggs with tomatoes, stir-fried bok choy. Scene and photography: top-down casual framing, natural window daylight, ordinary dining table. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-002",
+      "image": "images/synth-002.png",
+      "source": "ai-generated",
+      "scene": "low-light",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein"
+        },
+        {
+          "name": "清炒小白菜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-002. Create exactly one realistic casual smartphone photograph. Subject: steamed white rice, scrambled eggs with tomatoes, stir-fried bok choy. Scene and photography: 45-degree oblique phone view, dim warm room lighting with realistic mild sensor noise. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-003",
+      "image": "images/synth-003.png",
+      "source": "ai-generated",
+      "scene": "occlusion",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein"
+        },
+        {
+          "name": "清炒小白菜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-003. Create exactly one realistic casual smartphone photograph. Subject: steamed white rice, scrambled eggs with tomatoes, stir-fried bok choy. Scene and photography: oblique phone view, ordinary table clutter from a plain napkin and utensils, about 15 percent of the main subject partially occluded, every listed food still identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-004",
+      "image": "images/synth-004.png",
+      "source": "ai-generated",
+      "scene": "backlight",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein"
+        },
+        {
+          "name": "清炒小白菜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-004. Create exactly one realistic casual smartphone photograph. Subject: steamed white rice, scrambled eggs with tomatoes, stir-fried bok choy. Scene and photography: overhead phone view, strong daylight from behind, realistic shadows and slightly uneven exposure. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-005",
+      "image": "images/synth-005.png",
+      "source": "ai-generated",
+      "scene": "close-up",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein"
+        },
+        {
+          "name": "清炒小白菜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-005. Create exactly one realistic casual smartphone photograph. Subject: steamed white rice, scrambled eggs with tomatoes, stir-fried bok choy. Scene and photography: close 30-degree phone view, tight casual framing and shallow depth of field, all listed foods still present and identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-006",
+      "image": "images/synth-006.png",
+      "source": "ai-generated",
+      "scene": "normal",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "清蒸鱼",
+          "category": "protein"
+        },
+        {
+          "name": "西兰花",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-006. Create exactly one realistic casual smartphone photograph. Subject: steamed white rice, steamed fish fillet, steamed broccoli. Scene and photography: top-down casual framing, natural window daylight, ordinary dining table. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-007",
+      "image": "images/synth-007.png",
+      "source": "ai-generated",
+      "scene": "low-light",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "清蒸鱼",
+          "category": "protein"
+        },
+        {
+          "name": "西兰花",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-007. Create exactly one realistic casual smartphone photograph. Subject: steamed white rice, steamed fish fillet, steamed broccoli. Scene and photography: 45-degree oblique phone view, dim warm room lighting with realistic mild sensor noise. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-008",
+      "image": "images/synth-008.png",
+      "source": "ai-generated",
+      "scene": "occlusion",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "清蒸鱼",
+          "category": "protein"
+        },
+        {
+          "name": "西兰花",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-008. Create exactly one realistic casual smartphone photograph. Subject: steamed white rice, steamed fish fillet, steamed broccoli. Scene and photography: oblique phone view, ordinary table clutter from a plain napkin and utensils, about 15 percent of the main subject partially occluded, every listed food still identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-009",
+      "image": "images/synth-009.png",
+      "source": "ai-generated",
+      "scene": "backlight",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "清蒸鱼",
+          "category": "protein"
+        },
+        {
+          "name": "西兰花",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-009. Create exactly one realistic casual smartphone photograph. Subject: steamed white rice, steamed fish fillet, steamed broccoli. Scene and photography: overhead phone view, strong daylight from behind, realistic shadows and slightly uneven exposure. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-010",
+      "image": "images/synth-010.png",
+      "source": "ai-generated",
+      "scene": "close-up",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "清蒸鱼",
+          "category": "protein"
+        },
+        {
+          "name": "西兰花",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-010. Create exactly one realistic casual smartphone photograph. Subject: steamed white rice, steamed fish fillet, steamed broccoli. Scene and photography: close 30-degree phone view, tight casual framing and shallow depth of field, all listed foods still present and identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-011",
+      "image": "images/synth-011.png",
+      "source": "ai-generated",
+      "scene": "normal",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "糙米饭",
+          "category": "staple"
+        },
+        {
+          "name": "鸡胸肉",
+          "category": "protein"
+        },
+        {
+          "name": "胡萝卜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-011. Create exactly one realistic casual smartphone photograph. Subject: brown rice, chicken breast slices, cooked carrot slices. Scene and photography: top-down casual framing, natural window daylight, ordinary dining table. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-012",
+      "image": "images/synth-012.png",
+      "source": "ai-generated",
+      "scene": "low-light",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "糙米饭",
+          "category": "staple"
+        },
+        {
+          "name": "鸡胸肉",
+          "category": "protein"
+        },
+        {
+          "name": "胡萝卜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-012. Create exactly one realistic casual smartphone photograph. Subject: brown rice, chicken breast slices, cooked carrot slices. Scene and photography: 45-degree oblique phone view, dim warm room lighting with realistic mild sensor noise. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-013",
+      "image": "images/synth-013.png",
+      "source": "ai-generated",
+      "scene": "occlusion",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "糙米饭",
+          "category": "staple"
+        },
+        {
+          "name": "鸡胸肉",
+          "category": "protein"
+        },
+        {
+          "name": "胡萝卜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-013. Create exactly one realistic casual smartphone photograph. Subject: brown rice, chicken breast slices, cooked carrot slices. Scene and photography: oblique phone view, ordinary table clutter from a plain napkin and utensils, about 15 percent of the main subject partially occluded, every listed food still identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-014",
+      "image": "images/synth-014.png",
+      "source": "ai-generated",
+      "scene": "backlight",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "糙米饭",
+          "category": "staple"
+        },
+        {
+          "name": "鸡胸肉",
+          "category": "protein"
+        },
+        {
+          "name": "胡萝卜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-014. Create exactly one realistic casual smartphone photograph. Subject: brown rice, chicken breast slices, cooked carrot slices. Scene and photography: overhead phone view, strong daylight from behind, realistic shadows and slightly uneven exposure. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-015",
+      "image": "images/synth-015.png",
+      "source": "ai-generated",
+      "scene": "close-up",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "糙米饭",
+          "category": "staple"
+        },
+        {
+          "name": "鸡胸肉",
+          "category": "protein"
+        },
+        {
+          "name": "胡萝卜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-015. Create exactly one realistic casual smartphone photograph. Subject: brown rice, chicken breast slices, cooked carrot slices. Scene and photography: close 30-degree phone view, tight casual framing and shallow depth of field, all listed foods still present and identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-016",
+      "image": "images/synth-016.png",
+      "source": "ai-generated",
+      "scene": "normal",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "面条",
+          "category": "staple"
+        },
+        {
+          "name": "牛肉",
+          "category": "protein"
+        },
+        {
+          "name": "菠菜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-016. Create exactly one realistic casual smartphone photograph. Subject: plain wheat noodles, braised beef chunks, cooked spinach, all separately visible in one bowl. Scene and photography: top-down casual framing, natural window daylight, ordinary dining table. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-017",
+      "image": "images/synth-017.png",
+      "source": "ai-generated",
+      "scene": "low-light",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "面条",
+          "category": "staple"
+        },
+        {
+          "name": "牛肉",
+          "category": "protein"
+        },
+        {
+          "name": "菠菜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-017. Create exactly one realistic casual smartphone photograph. Subject: plain wheat noodles, braised beef chunks, cooked spinach, all separately visible in one bowl. Scene and photography: 45-degree oblique phone view, dim warm room lighting with realistic mild sensor noise. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-018",
+      "image": "images/synth-018.png",
+      "source": "ai-generated",
+      "scene": "occlusion",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "面条",
+          "category": "staple"
+        },
+        {
+          "name": "牛肉",
+          "category": "protein"
+        },
+        {
+          "name": "菠菜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-018. Create exactly one realistic casual smartphone photograph. Subject: plain wheat noodles, braised beef chunks, cooked spinach, all separately visible in one bowl. Scene and photography: oblique phone view, ordinary table clutter from a plain napkin and utensils, about 15 percent of the main subject partially occluded, every listed food still identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-019",
+      "image": "images/synth-019.png",
+      "source": "ai-generated",
+      "scene": "backlight",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "面条",
+          "category": "staple"
+        },
+        {
+          "name": "牛肉",
+          "category": "protein"
+        },
+        {
+          "name": "菠菜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-019. Create exactly one realistic casual smartphone photograph. Subject: plain wheat noodles, braised beef chunks, cooked spinach, all separately visible in one bowl. Scene and photography: overhead phone view, strong daylight from behind, realistic shadows and slightly uneven exposure. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-020",
+      "image": "images/synth-020.png",
+      "source": "ai-generated",
+      "scene": "close-up",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "面条",
+          "category": "staple"
+        },
+        {
+          "name": "牛肉",
+          "category": "protein"
+        },
+        {
+          "name": "菠菜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-020. Create exactly one realistic casual smartphone photograph. Subject: plain wheat noodles, braised beef chunks, cooked spinach, all separately visible in one bowl. Scene and photography: close 30-degree phone view, tight casual framing and shallow depth of field, all listed foods still present and identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-021",
+      "image": "images/synth-021.png",
+      "source": "ai-generated",
+      "scene": "normal",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "豆腐",
+          "category": "protein"
+        },
+        {
+          "name": "四季豆",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-021. Create exactly one realistic casual smartphone photograph. Subject: steamed white rice, firm tofu cubes, stir-fried green beans. Scene and photography: top-down casual framing, natural window daylight, ordinary dining table. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-022",
+      "image": "images/synth-022.png",
+      "source": "ai-generated",
+      "scene": "low-light",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "豆腐",
+          "category": "protein"
+        },
+        {
+          "name": "四季豆",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-022. Create exactly one realistic casual smartphone photograph. Subject: steamed white rice, firm tofu cubes, stir-fried green beans. Scene and photography: 45-degree oblique phone view, dim warm room lighting with realistic mild sensor noise. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-023",
+      "image": "images/synth-023.png",
+      "source": "ai-generated",
+      "scene": "occlusion",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "豆腐",
+          "category": "protein"
+        },
+        {
+          "name": "四季豆",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-023. Create exactly one realistic casual smartphone photograph. Subject: steamed white rice, firm tofu cubes, stir-fried green beans. Scene and photography: oblique phone view, ordinary table clutter from a plain napkin and utensils, about 15 percent of the main subject partially occluded, every listed food still identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-024",
+      "image": "images/synth-024.png",
+      "source": "ai-generated",
+      "scene": "backlight",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "豆腐",
+          "category": "protein"
+        },
+        {
+          "name": "四季豆",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-024. Create exactly one realistic casual smartphone photograph. Subject: steamed white rice, firm tofu cubes, stir-fried green beans. Scene and photography: overhead phone view, strong daylight from behind, realistic shadows and slightly uneven exposure. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-025",
+      "image": "images/synth-025.png",
+      "source": "ai-generated",
+      "scene": "close-up",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "豆腐",
+          "category": "protein"
+        },
+        {
+          "name": "四季豆",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-025. Create exactly one realistic casual smartphone photograph. Subject: steamed white rice, firm tofu cubes, stir-fried green beans. Scene and photography: close 30-degree phone view, tight casual framing and shallow depth of field, all listed foods still present and identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-026",
+      "image": "images/synth-026.png",
+      "source": "ai-generated",
+      "scene": "normal",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "馒头",
+          "category": "staple"
+        },
+        {
+          "name": "水煮蛋",
+          "category": "protein"
+        },
+        {
+          "name": "牛奶",
+          "category": "dairy"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-026. Create exactly one realistic casual smartphone photograph. Subject: one steamed bun, one boiled egg cut in half, a glass of plain milk. Scene and photography: top-down casual framing, natural window daylight, ordinary dining table. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-027",
+      "image": "images/synth-027.png",
+      "source": "ai-generated",
+      "scene": "low-light",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "馒头",
+          "category": "staple"
+        },
+        {
+          "name": "水煮蛋",
+          "category": "protein"
+        },
+        {
+          "name": "牛奶",
+          "category": "dairy"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-027. Create exactly one realistic casual smartphone photograph. Subject: one steamed bun, one boiled egg cut in half, a glass of plain milk. Scene and photography: 45-degree oblique phone view, dim warm room lighting with realistic mild sensor noise. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-028",
+      "image": "images/synth-028.png",
+      "source": "ai-generated",
+      "scene": "occlusion",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "馒头",
+          "category": "staple"
+        },
+        {
+          "name": "水煮蛋",
+          "category": "protein"
+        },
+        {
+          "name": "牛奶",
+          "category": "dairy"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-028. Create exactly one realistic casual smartphone photograph. Subject: one steamed bun, one boiled egg cut in half, a glass of plain milk. Scene and photography: oblique phone view, ordinary table clutter from a plain napkin and utensils, about 15 percent of the main subject partially occluded, every listed food still identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-029",
+      "image": "images/synth-029.png",
+      "source": "ai-generated",
+      "scene": "backlight",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "馒头",
+          "category": "staple"
+        },
+        {
+          "name": "水煮蛋",
+          "category": "protein"
+        },
+        {
+          "name": "牛奶",
+          "category": "dairy"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-029. Create exactly one realistic casual smartphone photograph. Subject: one steamed bun, one boiled egg cut in half, a glass of plain milk. Scene and photography: overhead phone view, strong daylight from behind, realistic shadows and slightly uneven exposure. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-030",
+      "image": "images/synth-030.png",
+      "source": "ai-generated",
+      "scene": "close-up",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "馒头",
+          "category": "staple"
+        },
+        {
+          "name": "水煮蛋",
+          "category": "protein"
+        },
+        {
+          "name": "牛奶",
+          "category": "dairy"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-030. Create exactly one realistic casual smartphone photograph. Subject: one steamed bun, one boiled egg cut in half, a glass of plain milk. Scene and photography: close 30-degree phone view, tight casual framing and shallow depth of field, all listed foods still present and identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-031",
+      "image": "images/synth-031.png",
+      "source": "ai-generated",
+      "scene": "normal",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "白粥",
+          "category": "staple"
+        },
+        {
+          "name": "蒸蛋",
+          "category": "protein"
+        },
+        {
+          "name": "黄瓜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-031. Create exactly one realistic casual smartphone photograph. Subject: white rice porridge, steamed egg custard, cucumber slices in separate bowls. Scene and photography: top-down casual framing, natural window daylight, ordinary dining table. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-032",
+      "image": "images/synth-032.png",
+      "source": "ai-generated",
+      "scene": "low-light",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "白粥",
+          "category": "staple"
+        },
+        {
+          "name": "蒸蛋",
+          "category": "protein"
+        },
+        {
+          "name": "黄瓜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-032. Create exactly one realistic casual smartphone photograph. Subject: white rice porridge, steamed egg custard, cucumber slices in separate bowls. Scene and photography: 45-degree oblique phone view, dim warm room lighting with realistic mild sensor noise. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-033",
+      "image": "images/synth-033.png",
+      "source": "ai-generated",
+      "scene": "occlusion",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "白粥",
+          "category": "staple"
+        },
+        {
+          "name": "蒸蛋",
+          "category": "protein"
+        },
+        {
+          "name": "黄瓜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-033. Create exactly one realistic casual smartphone photograph. Subject: white rice porridge, steamed egg custard, cucumber slices in separate bowls. Scene and photography: oblique phone view, ordinary table clutter from a plain napkin and utensils, about 15 percent of the main subject partially occluded, every listed food still identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-034",
+      "image": "images/synth-034.png",
+      "source": "ai-generated",
+      "scene": "backlight",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "白粥",
+          "category": "staple"
+        },
+        {
+          "name": "蒸蛋",
+          "category": "protein"
+        },
+        {
+          "name": "黄瓜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-034. Create exactly one realistic casual smartphone photograph. Subject: white rice porridge, steamed egg custard, cucumber slices in separate bowls. Scene and photography: overhead phone view, strong daylight from behind, realistic shadows and slightly uneven exposure. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-035",
+      "image": "images/synth-035.png",
+      "source": "ai-generated",
+      "scene": "close-up",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "白粥",
+          "category": "staple"
+        },
+        {
+          "name": "蒸蛋",
+          "category": "protein"
+        },
+        {
+          "name": "黄瓜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-035. Create exactly one realistic casual smartphone photograph. Subject: white rice porridge, steamed egg custard, cucumber slices in separate bowls. Scene and photography: close 30-degree phone view, tight casual framing and shallow depth of field, all listed foods still present and identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-036",
+      "image": "images/synth-036.png",
+      "source": "ai-generated",
+      "scene": "normal",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "红薯",
+          "category": "staple"
+        },
+        {
+          "name": "虾",
+          "category": "protein"
+        },
+        {
+          "name": "卷心菜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-036. Create exactly one realistic casual smartphone photograph. Subject: sweet potato chunks, boiled shrimp, stir-fried cabbage. Scene and photography: top-down casual framing, natural window daylight, ordinary dining table. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-037",
+      "image": "images/synth-037.png",
+      "source": "ai-generated",
+      "scene": "low-light",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "红薯",
+          "category": "staple"
+        },
+        {
+          "name": "虾",
+          "category": "protein"
+        },
+        {
+          "name": "卷心菜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-037. Create exactly one realistic casual smartphone photograph. Subject: sweet potato chunks, boiled shrimp, stir-fried cabbage. Scene and photography: 45-degree oblique phone view, dim warm room lighting with realistic mild sensor noise. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-038",
+      "image": "images/synth-038.png",
+      "source": "ai-generated",
+      "scene": "occlusion",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "红薯",
+          "category": "staple"
+        },
+        {
+          "name": "虾",
+          "category": "protein"
+        },
+        {
+          "name": "卷心菜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-038. Create exactly one realistic casual smartphone photograph. Subject: sweet potato chunks, boiled shrimp, stir-fried cabbage. Scene and photography: oblique phone view, ordinary table clutter from a plain napkin and utensils, about 15 percent of the main subject partially occluded, every listed food still identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-039",
+      "image": "images/synth-039.png",
+      "source": "ai-generated",
+      "scene": "backlight",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "红薯",
+          "category": "staple"
+        },
+        {
+          "name": "虾",
+          "category": "protein"
+        },
+        {
+          "name": "卷心菜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-039. Create exactly one realistic casual smartphone photograph. Subject: sweet potato chunks, boiled shrimp, stir-fried cabbage. Scene and photography: overhead phone view, strong daylight from behind, realistic shadows and slightly uneven exposure. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-040",
+      "image": "images/synth-040.png",
+      "source": "ai-generated",
+      "scene": "close-up",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "红薯",
+          "category": "staple"
+        },
+        {
+          "name": "虾",
+          "category": "protein"
+        },
+        {
+          "name": "卷心菜",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-040. Create exactly one realistic casual smartphone photograph. Subject: sweet potato chunks, boiled shrimp, stir-fried cabbage. Scene and photography: close 30-degree phone view, tight casual framing and shallow depth of field, all listed foods still present and identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-041",
+      "image": "images/synth-041.png",
+      "source": "ai-generated",
+      "scene": "normal",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "玉米",
+          "category": "staple"
+        },
+        {
+          "name": "炒鸡蛋",
+          "category": "protein"
+        },
+        {
+          "name": "蘑菇",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-041. Create exactly one realistic casual smartphone photograph. Subject: corn on the cob, scrambled eggs, cooked mushrooms. Scene and photography: top-down casual framing, natural window daylight, ordinary dining table. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-042",
+      "image": "images/synth-042.png",
+      "source": "ai-generated",
+      "scene": "low-light",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "玉米",
+          "category": "staple"
+        },
+        {
+          "name": "炒鸡蛋",
+          "category": "protein"
+        },
+        {
+          "name": "蘑菇",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-042. Create exactly one realistic casual smartphone photograph. Subject: corn on the cob, scrambled eggs, cooked mushrooms. Scene and photography: 45-degree oblique phone view, dim warm room lighting with realistic mild sensor noise. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-043",
+      "image": "images/synth-043.png",
+      "source": "ai-generated",
+      "scene": "occlusion",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "玉米",
+          "category": "staple"
+        },
+        {
+          "name": "炒鸡蛋",
+          "category": "protein"
+        },
+        {
+          "name": "蘑菇",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-043. Create exactly one realistic casual smartphone photograph. Subject: corn on the cob, scrambled eggs, cooked mushrooms. Scene and photography: oblique phone view, ordinary table clutter from a plain napkin and utensils, about 15 percent of the main subject partially occluded, every listed food still identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-044",
+      "image": "images/synth-044.png",
+      "source": "ai-generated",
+      "scene": "backlight",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "玉米",
+          "category": "staple"
+        },
+        {
+          "name": "炒鸡蛋",
+          "category": "protein"
+        },
+        {
+          "name": "蘑菇",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-044. Create exactly one realistic casual smartphone photograph. Subject: corn on the cob, scrambled eggs, cooked mushrooms. Scene and photography: overhead phone view, strong daylight from behind, realistic shadows and slightly uneven exposure. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-045",
+      "image": "images/synth-045.png",
+      "source": "ai-generated",
+      "scene": "close-up",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "玉米",
+          "category": "staple"
+        },
+        {
+          "name": "炒鸡蛋",
+          "category": "protein"
+        },
+        {
+          "name": "蘑菇",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-045. Create exactly one realistic casual smartphone photograph. Subject: corn on the cob, scrambled eggs, cooked mushrooms. Scene and photography: close 30-degree phone view, tight casual framing and shallow depth of field, all listed foods still present and identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-046",
+      "image": "images/synth-046.png",
+      "source": "ai-generated",
+      "scene": "normal",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "全麦面包",
+          "category": "staple"
+        },
+        {
+          "name": "原味酸奶",
+          "category": "dairy"
+        },
+        {
+          "name": "苹果",
+          "category": "fruit"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-046. Create exactly one realistic casual smartphone photograph. Subject: plain whole grain bread, plain yogurt in an unlabelled cup, apple slices. Scene and photography: top-down casual framing, natural window daylight, ordinary dining table. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-047",
+      "image": "images/synth-047.png",
+      "source": "ai-generated",
+      "scene": "low-light",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "全麦面包",
+          "category": "staple"
+        },
+        {
+          "name": "原味酸奶",
+          "category": "dairy"
+        },
+        {
+          "name": "苹果",
+          "category": "fruit"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-047. Create exactly one realistic casual smartphone photograph. Subject: plain whole grain bread, plain yogurt in an unlabelled cup, apple slices. Scene and photography: 45-degree oblique phone view, dim warm room lighting with realistic mild sensor noise. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-048",
+      "image": "images/synth-048.png",
+      "source": "ai-generated",
+      "scene": "occlusion",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "全麦面包",
+          "category": "staple"
+        },
+        {
+          "name": "原味酸奶",
+          "category": "dairy"
+        },
+        {
+          "name": "苹果",
+          "category": "fruit"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-048. Create exactly one realistic casual smartphone photograph. Subject: plain whole grain bread, plain yogurt in an unlabelled cup, apple slices. Scene and photography: oblique phone view, ordinary table clutter from a plain napkin and utensils, about 15 percent of the main subject partially occluded, every listed food still identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-049",
+      "image": "images/synth-049.png",
+      "source": "ai-generated",
+      "scene": "backlight",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "全麦面包",
+          "category": "staple"
+        },
+        {
+          "name": "原味酸奶",
+          "category": "dairy"
+        },
+        {
+          "name": "苹果",
+          "category": "fruit"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-049. Create exactly one realistic casual smartphone photograph. Subject: plain whole grain bread, plain yogurt in an unlabelled cup, apple slices. Scene and photography: overhead phone view, strong daylight from behind, realistic shadows and slightly uneven exposure. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-050",
+      "image": "images/synth-050.png",
+      "source": "ai-generated",
+      "scene": "close-up",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "全麦面包",
+          "category": "staple"
+        },
+        {
+          "name": "原味酸奶",
+          "category": "dairy"
+        },
+        {
+          "name": "苹果",
+          "category": "fruit"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-050. Create exactly one realistic casual smartphone photograph. Subject: plain whole grain bread, plain yogurt in an unlabelled cup, apple slices. Scene and photography: close 30-degree phone view, tight casual framing and shallow depth of field, all listed foods still present and identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-051",
+      "image": "images/synth-051.png",
+      "source": "ai-generated",
+      "scene": "normal",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "红烧肉",
+          "category": "oily"
+        },
+        {
+          "name": "菜花",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-051. Create exactly one realistic casual smartphone photograph. Subject: steamed white rice, braised pork chunks, stir-fried cauliflower. Scene and photography: top-down casual framing, natural window daylight, ordinary dining table. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-052",
+      "image": "images/synth-052.png",
+      "source": "ai-generated",
+      "scene": "low-light",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "红烧肉",
+          "category": "oily"
+        },
+        {
+          "name": "菜花",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-052. Create exactly one realistic casual smartphone photograph. Subject: steamed white rice, braised pork chunks, stir-fried cauliflower. Scene and photography: 45-degree oblique phone view, dim warm room lighting with realistic mild sensor noise. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-053",
+      "image": "images/synth-053.png",
+      "source": "ai-generated",
+      "scene": "occlusion",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "红烧肉",
+          "category": "oily"
+        },
+        {
+          "name": "菜花",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-053. Create exactly one realistic casual smartphone photograph. Subject: steamed white rice, braised pork chunks, stir-fried cauliflower. Scene and photography: oblique phone view, ordinary table clutter from a plain napkin and utensils, about 15 percent of the main subject partially occluded, every listed food still identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-054",
+      "image": "images/synth-054.png",
+      "source": "ai-generated",
+      "scene": "backlight",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "红烧肉",
+          "category": "oily"
+        },
+        {
+          "name": "菜花",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-054. Create exactly one realistic casual smartphone photograph. Subject: steamed white rice, braised pork chunks, stir-fried cauliflower. Scene and photography: overhead phone view, strong daylight from behind, realistic shadows and slightly uneven exposure. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-055",
+      "image": "images/synth-055.png",
+      "source": "ai-generated",
+      "scene": "close-up",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "红烧肉",
+          "category": "oily"
+        },
+        {
+          "name": "菜花",
+          "category": "vegetable"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-055. Create exactly one realistic casual smartphone photograph. Subject: steamed white rice, braised pork chunks, stir-fried cauliflower. Scene and photography: close 30-degree phone view, tight casual framing and shallow depth of field, all listed foods still present and identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-056",
+      "image": "images/synth-056.png",
+      "source": "ai-generated",
+      "scene": "normal",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "炸鸡",
+          "category": "fried"
+        },
+        {
+          "name": "薯条",
+          "category": "fried"
+        },
+        {
+          "name": "可乐",
+          "category": "drink"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-056. Create exactly one realistic casual smartphone photograph. Subject: fried chicken pieces, french fries, a clear glass of cola. Scene and photography: top-down casual framing, natural window daylight, ordinary dining table. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-057",
+      "image": "images/synth-057.png",
+      "source": "ai-generated",
+      "scene": "low-light",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "炸鸡",
+          "category": "fried"
+        },
+        {
+          "name": "薯条",
+          "category": "fried"
+        },
+        {
+          "name": "可乐",
+          "category": "drink"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-057. Create exactly one realistic casual smartphone photograph. Subject: fried chicken pieces, french fries, a clear glass of cola. Scene and photography: 45-degree oblique phone view, dim warm room lighting with realistic mild sensor noise. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-058",
+      "image": "images/synth-058.png",
+      "source": "ai-generated",
+      "scene": "occlusion",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "炸鸡",
+          "category": "fried"
+        },
+        {
+          "name": "薯条",
+          "category": "fried"
+        },
+        {
+          "name": "可乐",
+          "category": "drink"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-058. Create exactly one realistic casual smartphone photograph. Subject: fried chicken pieces, french fries, a clear glass of cola. Scene and photography: oblique phone view, ordinary table clutter from a plain napkin and utensils, about 15 percent of the main subject partially occluded, every listed food still identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-059",
+      "image": "images/synth-059.png",
+      "source": "ai-generated",
+      "scene": "backlight",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "炸鸡",
+          "category": "fried"
+        },
+        {
+          "name": "薯条",
+          "category": "fried"
+        },
+        {
+          "name": "可乐",
+          "category": "drink"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-059. Create exactly one realistic casual smartphone photograph. Subject: fried chicken pieces, french fries, a clear glass of cola. Scene and photography: overhead phone view, strong daylight from behind, realistic shadows and slightly uneven exposure. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-060",
+      "image": "images/synth-060.png",
+      "source": "ai-generated",
+      "scene": "close-up",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "炸鸡",
+          "category": "fried"
+        },
+        {
+          "name": "薯条",
+          "category": "fried"
+        },
+        {
+          "name": "可乐",
+          "category": "drink"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-060. Create exactly one realistic casual smartphone photograph. Subject: fried chicken pieces, french fries, a clear glass of cola. Scene and photography: close 30-degree phone view, tight casual framing and shallow depth of field, all listed foods still present and identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-061",
+      "image": "images/synth-061.png",
+      "source": "ai-generated",
+      "scene": "normal",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "黄瓜",
+          "category": "vegetable"
+        },
+        {
+          "name": "紫菜汤",
+          "category": "soup"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-061. Create exactly one realistic casual smartphone photograph. Subject: a bowl of white rice, cucumber slices, a separate bowl of clear seaweed soup. Scene and photography: top-down casual framing, natural window daylight, ordinary dining table. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-062",
+      "image": "images/synth-062.png",
+      "source": "ai-generated",
+      "scene": "low-light",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "黄瓜",
+          "category": "vegetable"
+        },
+        {
+          "name": "紫菜汤",
+          "category": "soup"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-062. Create exactly one realistic casual smartphone photograph. Subject: a bowl of white rice, cucumber slices, a separate bowl of clear seaweed soup. Scene and photography: 45-degree oblique phone view, dim warm room lighting with realistic mild sensor noise. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-063",
+      "image": "images/synth-063.png",
+      "source": "ai-generated",
+      "scene": "occlusion",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "黄瓜",
+          "category": "vegetable"
+        },
+        {
+          "name": "紫菜汤",
+          "category": "soup"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-063. Create exactly one realistic casual smartphone photograph. Subject: a bowl of white rice, cucumber slices, a separate bowl of clear seaweed soup. Scene and photography: oblique phone view, ordinary table clutter from a plain napkin and utensils, about 15 percent of the main subject partially occluded, every listed food still identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-064",
+      "image": "images/synth-064.png",
+      "source": "ai-generated",
+      "scene": "backlight",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "黄瓜",
+          "category": "vegetable"
+        },
+        {
+          "name": "紫菜汤",
+          "category": "soup"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-064. Create exactly one realistic casual smartphone photograph. Subject: a bowl of white rice, cucumber slices, a separate bowl of clear seaweed soup. Scene and photography: overhead phone view, strong daylight from behind, realistic shadows and slightly uneven exposure. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-065",
+      "image": "images/synth-065.png",
+      "source": "ai-generated",
+      "scene": "close-up",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "黄瓜",
+          "category": "vegetable"
+        },
+        {
+          "name": "紫菜汤",
+          "category": "soup"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-065. Create exactly one realistic casual smartphone photograph. Subject: a bowl of white rice, cucumber slices, a separate bowl of clear seaweed soup. Scene and photography: close 30-degree phone view, tight casual framing and shallow depth of field, all listed foods still present and identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-066",
+      "image": "images/synth-066.png",
+      "source": "ai-generated",
+      "scene": "normal",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "茄子",
+          "category": "vegetable"
+        },
+        {
+          "name": "豆浆",
+          "category": "drink"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-066. Create exactly one realistic casual smartphone photograph. Subject: one plain rice bowl, a plate of stir-fried eggplant, a glass of soy milk. Scene and photography: top-down casual framing, natural window daylight, ordinary dining table. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-067",
+      "image": "images/synth-067.png",
+      "source": "ai-generated",
+      "scene": "low-light",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "茄子",
+          "category": "vegetable"
+        },
+        {
+          "name": "豆浆",
+          "category": "drink"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-067. Create exactly one realistic casual smartphone photograph. Subject: one plain rice bowl, a plate of stir-fried eggplant, a glass of soy milk. Scene and photography: 45-degree oblique phone view, dim warm room lighting with realistic mild sensor noise. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-068",
+      "image": "images/synth-068.png",
+      "source": "ai-generated",
+      "scene": "occlusion",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "茄子",
+          "category": "vegetable"
+        },
+        {
+          "name": "豆浆",
+          "category": "drink"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-068. Create exactly one realistic casual smartphone photograph. Subject: one plain rice bowl, a plate of stir-fried eggplant, a glass of soy milk. Scene and photography: oblique phone view, ordinary table clutter from a plain napkin and utensils, about 15 percent of the main subject partially occluded, every listed food still identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-069",
+      "image": "images/synth-069.png",
+      "source": "ai-generated",
+      "scene": "backlight",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "茄子",
+          "category": "vegetable"
+        },
+        {
+          "name": "豆浆",
+          "category": "drink"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-069. Create exactly one realistic casual smartphone photograph. Subject: one plain rice bowl, a plate of stir-fried eggplant, a glass of soy milk. Scene and photography: overhead phone view, strong daylight from behind, realistic shadows and slightly uneven exposure. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-070",
+      "image": "images/synth-070.png",
+      "source": "ai-generated",
+      "scene": "close-up",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "米饭",
+          "category": "staple"
+        },
+        {
+          "name": "茄子",
+          "category": "vegetable"
+        },
+        {
+          "name": "豆浆",
+          "category": "drink"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-070. Create exactly one realistic casual smartphone photograph. Subject: one plain rice bowl, a plate of stir-fried eggplant, a glass of soy milk. Scene and photography: close 30-degree phone view, tight casual framing and shallow depth of field, all listed foods still present and identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-071",
+      "image": "images/synth-071.png",
+      "source": "ai-generated",
+      "scene": "normal",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "燕麦粥",
+          "category": "staple"
+        },
+        {
+          "name": "香蕉",
+          "category": "fruit"
+        },
+        {
+          "name": "水煮蛋",
+          "category": "protein"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-071. Create exactly one realistic casual smartphone photograph. Subject: plain oatmeal porridge, banana slices, a boiled egg. Scene and photography: top-down casual framing, natural window daylight, ordinary dining table. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-072",
+      "image": "images/synth-072.png",
+      "source": "ai-generated",
+      "scene": "low-light",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "燕麦粥",
+          "category": "staple"
+        },
+        {
+          "name": "香蕉",
+          "category": "fruit"
+        },
+        {
+          "name": "水煮蛋",
+          "category": "protein"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-072. Create exactly one realistic casual smartphone photograph. Subject: plain oatmeal porridge, banana slices, a boiled egg. Scene and photography: 45-degree oblique phone view, dim warm room lighting with realistic mild sensor noise. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-073",
+      "image": "images/synth-073.png",
+      "source": "ai-generated",
+      "scene": "occlusion",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "燕麦粥",
+          "category": "staple"
+        },
+        {
+          "name": "香蕉",
+          "category": "fruit"
+        },
+        {
+          "name": "水煮蛋",
+          "category": "protein"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-073. Create exactly one realistic casual smartphone photograph. Subject: plain oatmeal porridge, banana slices, a boiled egg. Scene and photography: oblique phone view, ordinary table clutter from a plain napkin and utensils, about 15 percent of the main subject partially occluded, every listed food still identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-074",
+      "image": "images/synth-074.png",
+      "source": "ai-generated",
+      "scene": "backlight",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "燕麦粥",
+          "category": "staple"
+        },
+        {
+          "name": "香蕉",
+          "category": "fruit"
+        },
+        {
+          "name": "水煮蛋",
+          "category": "protein"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-074. Create exactly one realistic casual smartphone photograph. Subject: plain oatmeal porridge, banana slices, a boiled egg. Scene and photography: overhead phone view, strong daylight from behind, realistic shadows and slightly uneven exposure. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-075",
+      "image": "images/synth-075.png",
+      "source": "ai-generated",
+      "scene": "close-up",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "燕麦粥",
+          "category": "staple"
+        },
+        {
+          "name": "香蕉",
+          "category": "fruit"
+        },
+        {
+          "name": "水煮蛋",
+          "category": "protein"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-075. Create exactly one realistic casual smartphone photograph. Subject: plain oatmeal porridge, banana slices, a boiled egg. Scene and photography: close 30-degree phone view, tight casual framing and shallow depth of field, all listed foods still present and identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-076",
+      "image": "images/synth-076.png",
+      "source": "ai-generated",
+      "scene": "normal",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "巧克力蛋糕",
+          "category": "dessert"
+        },
+        {
+          "name": "橙汁",
+          "category": "drink"
+        },
+        {
+          "name": "草莓",
+          "category": "fruit"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-076. Create exactly one realistic casual smartphone photograph. Subject: a small slice of chocolate cake, a clear cup of orange juice, strawberries. Scene and photography: top-down casual framing, natural window daylight, ordinary dining table. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-077",
+      "image": "images/synth-077.png",
+      "source": "ai-generated",
+      "scene": "low-light",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "巧克力蛋糕",
+          "category": "dessert"
+        },
+        {
+          "name": "橙汁",
+          "category": "drink"
+        },
+        {
+          "name": "草莓",
+          "category": "fruit"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-077. Create exactly one realistic casual smartphone photograph. Subject: a small slice of chocolate cake, a clear cup of orange juice, strawberries. Scene and photography: 45-degree oblique phone view, dim warm room lighting with realistic mild sensor noise. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-078",
+      "image": "images/synth-078.png",
+      "source": "ai-generated",
+      "scene": "occlusion",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "巧克力蛋糕",
+          "category": "dessert"
+        },
+        {
+          "name": "橙汁",
+          "category": "drink"
+        },
+        {
+          "name": "草莓",
+          "category": "fruit"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-078. Create exactly one realistic casual smartphone photograph. Subject: a small slice of chocolate cake, a clear cup of orange juice, strawberries. Scene and photography: oblique phone view, ordinary table clutter from a plain napkin and utensils, about 15 percent of the main subject partially occluded, every listed food still identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-079",
+      "image": "images/synth-079.png",
+      "source": "ai-generated",
+      "scene": "backlight",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "巧克力蛋糕",
+          "category": "dessert"
+        },
+        {
+          "name": "橙汁",
+          "category": "drink"
+        },
+        {
+          "name": "草莓",
+          "category": "fruit"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-079. Create exactly one realistic casual smartphone photograph. Subject: a small slice of chocolate cake, a clear cup of orange juice, strawberries. Scene and photography: overhead phone view, strong daylight from behind, realistic shadows and slightly uneven exposure. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-080",
+      "image": "images/synth-080.png",
+      "source": "ai-generated",
+      "scene": "close-up",
+      "foodImage": true,
+      "foods": [
+        {
+          "name": "巧克力蛋糕",
+          "category": "dessert"
+        },
+        {
+          "name": "橙汁",
+          "category": "drink"
+        },
+        {
+          "name": "草莓",
+          "category": "fruit"
+        }
+      ],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-080. Create exactly one realistic casual smartphone photograph. Subject: a small slice of chocolate cake, a clear cup of orange juice, strawberries. Scene and photography: close 30-degree phone view, tight casual framing and shallow depth of field, all listed foods still present and identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-081",
+      "image": "images/synth-081.png",
+      "source": "ai-generated",
+      "scene": "normal",
+      "foodImage": false,
+      "foods": [],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-081. Create exactly one realistic casual smartphone photograph. Subject: an empty clean stainless steel cafeteria tray with empty compartments. Scene and photography: top-down casual framing, natural window daylight, ordinary dining table. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-082",
+      "image": "images/synth-082.png",
+      "source": "ai-generated",
+      "scene": "low-light",
+      "foodImage": false,
+      "foods": [],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-082. Create exactly one realistic casual smartphone photograph. Subject: an empty clean stainless steel cafeteria tray with empty compartments. Scene and photography: 45-degree oblique phone view, dim warm room lighting with realistic mild sensor noise. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-083",
+      "image": "images/synth-083.png",
+      "source": "ai-generated",
+      "scene": "occlusion",
+      "foodImage": false,
+      "foods": [],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-083. Create exactly one realistic casual smartphone photograph. Subject: an empty clean stainless steel cafeteria tray with empty compartments. Scene and photography: oblique phone view, ordinary table clutter from a plain napkin and utensils, about 15 percent of the main subject partially occluded, every listed food still identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-084",
+      "image": "images/synth-084.png",
+      "source": "ai-generated",
+      "scene": "backlight",
+      "foodImage": false,
+      "foods": [],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-084. Create exactly one realistic casual smartphone photograph. Subject: an empty clean stainless steel cafeteria tray with empty compartments. Scene and photography: overhead phone view, strong daylight from behind, realistic shadows and slightly uneven exposure. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-085",
+      "image": "images/synth-085.png",
+      "source": "ai-generated",
+      "scene": "close-up",
+      "foodImage": false,
+      "foods": [],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-085. Create exactly one realistic casual smartphone photograph. Subject: an empty clean stainless steel cafeteria tray with empty compartments. Scene and photography: close 30-degree phone view, tight casual framing and shallow depth of field, all listed foods still present and identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-086",
+      "image": "images/synth-086.png",
+      "source": "ai-generated",
+      "scene": "normal",
+      "foodImage": false,
+      "foods": [],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-086. Create exactly one realistic casual smartphone photograph. Subject: a closed notebook, a ballpoint pen and a smartphone on a desk. Scene and photography: top-down casual framing, natural window daylight, ordinary dining table. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-087",
+      "image": "images/synth-087.png",
+      "source": "ai-generated",
+      "scene": "low-light",
+      "foodImage": false,
+      "foods": [],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-087. Create exactly one realistic casual smartphone photograph. Subject: a closed notebook, a ballpoint pen and a smartphone on a desk. Scene and photography: 45-degree oblique phone view, dim warm room lighting with realistic mild sensor noise. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-088",
+      "image": "images/synth-088.png",
+      "source": "ai-generated",
+      "scene": "occlusion",
+      "foodImage": false,
+      "foods": [],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-088. Create exactly one realistic casual smartphone photograph. Subject: a closed notebook, a ballpoint pen and a smartphone on a desk. Scene and photography: oblique phone view, ordinary table clutter from a plain napkin and utensils, about 15 percent of the main subject partially occluded, every listed food still identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-089",
+      "image": "images/synth-089.png",
+      "source": "ai-generated",
+      "scene": "backlight",
+      "foodImage": false,
+      "foods": [],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-089. Create exactly one realistic casual smartphone photograph. Subject: a closed notebook, a ballpoint pen and a smartphone on a desk. Scene and photography: overhead phone view, strong daylight from behind, realistic shadows and slightly uneven exposure. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-090",
+      "image": "images/synth-090.png",
+      "source": "ai-generated",
+      "scene": "close-up",
+      "foodImage": false,
+      "foods": [],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-090. Create exactly one realistic casual smartphone photograph. Subject: a closed notebook, a ballpoint pen and a smartphone on a desk. Scene and photography: close 30-degree phone view, tight casual framing and shallow depth of field, all listed foods still present and identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-091",
+      "image": "images/synth-091.png",
+      "source": "ai-generated",
+      "scene": "normal",
+      "foodImage": false,
+      "foods": [],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-091. Create exactly one realistic casual smartphone photograph. Subject: a pair of sneakers on an ordinary wooden floor. Scene and photography: top-down casual framing, natural window daylight, ordinary dining table. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-092",
+      "image": "images/synth-092.png",
+      "source": "ai-generated",
+      "scene": "low-light",
+      "foodImage": false,
+      "foods": [],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-092. Create exactly one realistic casual smartphone photograph. Subject: a pair of sneakers on an ordinary wooden floor. Scene and photography: 45-degree oblique phone view, dim warm room lighting with realistic mild sensor noise. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-093",
+      "image": "images/synth-093.png",
+      "source": "ai-generated",
+      "scene": "occlusion",
+      "foodImage": false,
+      "foods": [],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-093. Create exactly one realistic casual smartphone photograph. Subject: a pair of sneakers on an ordinary wooden floor. Scene and photography: oblique phone view, ordinary table clutter from a plain napkin and utensils, about 15 percent of the main subject partially occluded, every listed food still identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-094",
+      "image": "images/synth-094.png",
+      "source": "ai-generated",
+      "scene": "backlight",
+      "foodImage": false,
+      "foods": [],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-094. Create exactly one realistic casual smartphone photograph. Subject: a pair of sneakers on an ordinary wooden floor. Scene and photography: overhead phone view, strong daylight from behind, realistic shadows and slightly uneven exposure. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-095",
+      "image": "images/synth-095.png",
+      "source": "ai-generated",
+      "scene": "close-up",
+      "foodImage": false,
+      "foods": [],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-095. Create exactly one realistic casual smartphone photograph. Subject: a pair of sneakers on an ordinary wooden floor. Scene and photography: close 30-degree phone view, tight casual framing and shallow depth of field, all listed foods still present and identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-096",
+      "image": "images/synth-096.png",
+      "source": "ai-generated",
+      "scene": "normal",
+      "foodImage": false,
+      "foods": [],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-096. Create exactly one realistic casual smartphone photograph. Subject: a potted green houseplant on a windowsill. Scene and photography: top-down casual framing, natural window daylight, ordinary dining table. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-097",
+      "image": "images/synth-097.png",
+      "source": "ai-generated",
+      "scene": "low-light",
+      "foodImage": false,
+      "foods": [],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-097. Create exactly one realistic casual smartphone photograph. Subject: a potted green houseplant on a windowsill. Scene and photography: 45-degree oblique phone view, dim warm room lighting with realistic mild sensor noise. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-098",
+      "image": "images/synth-098.png",
+      "source": "ai-generated",
+      "scene": "occlusion",
+      "foodImage": false,
+      "foods": [],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-098. Create exactly one realistic casual smartphone photograph. Subject: a potted green houseplant on a windowsill. Scene and photography: oblique phone view, ordinary table clutter from a plain napkin and utensils, about 15 percent of the main subject partially occluded, every listed food still identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-099",
+      "image": "images/synth-099.png",
+      "source": "ai-generated",
+      "scene": "backlight",
+      "foodImage": false,
+      "foods": [],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-099. Create exactly one realistic casual smartphone photograph. Subject: a potted green houseplant on a windowsill. Scene and photography: overhead phone view, strong daylight from behind, realistic shadows and slightly uneven exposure. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    },
+    {
+      "id": "synth-100",
+      "image": "images/synth-100.png",
+      "source": "ai-generated",
+      "scene": "close-up",
+      "foodImage": false,
+      "foods": [],
+      "annotationStatus": "proposed-needs-human-review",
+      "prompt": "Use case: photorealistic-natural. Asset type: MealCheck synthetic vision evaluation image synth-100. Create exactly one realistic casual smartphone photograph. Subject: a potted green houseplant on a windowsill. Scene and photography: close 30-degree phone view, tight casual framing and shallow depth of field, all listed foods still present and identifiable. Realistic materials, natural imperfections, realistic food textures where applicable, household or cafeteria presentation. Only the listed foods or objects. No additional food or beverages. No text, labels, watermark, branding, illustration, collage, or split panels. Square composition. This image is a single independent test sample."
+    }
+  ]
+}

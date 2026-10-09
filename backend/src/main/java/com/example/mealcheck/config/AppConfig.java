@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import java.net.http.HttpClient;
 import java.time.Duration;
@@ -27,6 +28,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Configuration
 @EnableConfigurationProperties(AppProperties.class)
 public class AppConfig {
+    @Bean(name="mealAnalysisExecutor",destroyMethod="shutdown")
+    public ExecutorService mealAnalysisExecutor(MeterRegistry registry) {
+        return instrumentedFixedExecutor("meal-analysis",1,1,"meal-analysis-",registry);
+    }
     @Bean
     public HttpClient httpClient(AppProperties properties) {
         return HttpClient.newBuilder()
@@ -110,9 +115,46 @@ public class AppConfig {
         );
     }
 
+    @Bean(name = "assistantBenchmarkExecutor", destroyMethod = "shutdown")
+    public ExecutorService assistantBenchmarkExecutor(MeterRegistry registry) {
+        return instrumentedFixedExecutor(
+                "assistant-benchmark",
+                1,
+                1,
+                "assistant-benchmark-",
+                registry
+        );
+    }
+
     @Bean(name = "assistantTimeoutScheduler", destroyMethod = "shutdown")
     public ScheduledExecutorService assistantTimeoutScheduler() {
         return Executors.newSingleThreadScheduledExecutor(threadFactory("assistant-timeout-"));
+    }
+
+    @Bean(name = "taskScheduler")
+    public ThreadPoolTaskScheduler taskScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(3);
+        scheduler.setThreadNamePrefix("background-scheduler-");
+        scheduler.setRemoveOnCancelPolicy(true);
+        scheduler.setWaitForTasksToCompleteOnShutdown(false);
+        scheduler.setAwaitTerminationSeconds(10);
+        return scheduler;
+    }
+
+    @Bean(name = "maintenanceExecutor", destroyMethod = "shutdown")
+    public ExecutorService maintenanceExecutor(MeterRegistry registry) {
+        return instrumentedFixedExecutor("maintenance", 2, 4, "maintenance-", registry);
+    }
+
+    @Bean(name = "knowledgeMaintenanceExecutor", destroyMethod = "shutdown")
+    public ExecutorService knowledgeMaintenanceExecutor(MeterRegistry registry) {
+        return instrumentedFixedExecutor("knowledge-maintenance", 1, 1, "knowledge-maintenance-", registry);
+    }
+
+    @Bean(name = "assistantMemoryMaintenanceExecutor", destroyMethod = "shutdown")
+    public ExecutorService assistantMemoryMaintenanceExecutor(MeterRegistry registry) {
+        return instrumentedFixedExecutor("assistant-memory-maintenance", 1, 1, "assistant-memory-maintenance-", registry);
     }
 
     private ThreadPoolTaskExecutor instrumentedExecutor(String name,
@@ -191,6 +233,7 @@ public class AppConfig {
         return task -> {
             long submittedAt = System.nanoTime();
             Map<String, String> context = MDC.getCopyOfContextMap();
+            var aiContext = com.example.mealcheck.service.AiCallContext.capture();
             return () -> {
                 waitTimer.record(Math.max(0L, System.nanoTime() - submittedAt), TimeUnit.NANOSECONDS);
                 Map<String, String> previous = MDC.getCopyOfContextMap();
@@ -200,7 +243,7 @@ public class AppConfig {
                     MDC.setContextMap(context);
                 }
                 long startedAt = System.nanoTime();
-                try {
+                try (var ignored = com.example.mealcheck.service.AiCallContext.restore(aiContext)) {
                     task.run();
                 } finally {
                     durationTimer.record(Math.max(0L, System.nanoTime() - startedAt), TimeUnit.NANOSECONDS);

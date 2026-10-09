@@ -1,5 +1,7 @@
 package com.example.mealcheck.service;
 
+import com.example.mealcheck.util.AppTime;
+
 import com.example.mealcheck.dto.assistant.AssistantChatMessage;
 import com.example.mealcheck.dto.assistant.AssistantConversationDetailResponse;
 import com.example.mealcheck.dto.assistant.AssistantConversationSummary;
@@ -53,20 +55,47 @@ public class AssistantConversationService {
 
     @Transactional(readOnly = true)
     public AssistantConversationDetailResponse detail(UserAccount user, Long conversationId) {
-        AssistantConversation conversation = conversationRepository.findByIdAndUser(conversationId, user).orElseThrow();
-        return new AssistantConversationDetailResponse(
-                conversation.getId(),
-                conversation.getTitle(),
-                conversation.getUpdatedAt(),
-                history(conversation)
-        );
+        return detail(user, conversationId, 40, null);
     }
 
     @Transactional(readOnly = true)
-    public List<AssistantChatMessage> history(AssistantConversation conversation) {
-        return messageRepository.findByConversationOrderByCreatedAtAsc(conversation).stream()
-                .map(message -> new AssistantChatMessage(message.getRole(), message.getText()))
-                .toList();
+    public AssistantConversationDetailResponse detail(UserAccount user, Long conversationId, int limit, String before) {
+        if (limit < 1 || limit > 100) throw new IllegalArgumentException("每页消息数量必须为 1 到 100");
+        AssistantConversation conversation = conversationRepository.findByIdAndUser(conversationId, user).orElseThrow();
+        var pageable = PageRequest.of(0, limit + 1);
+        List<AssistantConversationMessage> rows;
+        if (before == null || before.isBlank()) rows = messageRepository.latestPage(conversation, pageable);
+        else {
+            var cursor = decodeCursor(before, conversationId);
+            rows = messageRepository.beforePage(conversation, cursor.time(), cursor.id(), pageable);
+        }
+        boolean hasMore = rows.size() > limit;
+        List<AssistantConversationMessage> page = new ArrayList<>(rows.subList(0, Math.min(limit, rows.size())));
+        String next = hasMore ? encodeCursor(conversationId, page.get(page.size() - 1)) : null;
+        Collections.reverse(page);
+        var response = new AssistantConversationDetailResponse(
+                conversation.getId(),
+                conversation.getTitle(),
+                conversation.getUpdatedAt(),
+                toChatMessages(page)
+        );
+        response.setPage(hasMore, next);
+        return response;
+    }
+
+    private record Cursor(LocalDateTime time, long id) { }
+    private Cursor decodeCursor(String value, long conversationId) {
+        try {
+            if (value.length() > 180) throw new IllegalArgumentException();
+            String[] parts = new String(java.util.Base64.getUrlDecoder().decode(value), java.nio.charset.StandardCharsets.UTF_8).split("\\|", -1);
+            if (parts.length != 3 || Long.parseLong(parts[0]) != conversationId || Long.parseLong(parts[2]) <= 0)
+                throw new IllegalArgumentException();
+            return new Cursor(LocalDateTime.parse(parts[1]), Long.parseLong(parts[2]));
+        } catch (RuntimeException invalid) { throw new IllegalArgumentException("会话分页游标无效"); }
+    }
+    private String encodeCursor(long conversationId, AssistantConversationMessage message) {
+        return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(
+                (conversationId + "|" + message.getCreatedAt() + "|" + message.getId()).getBytes(java.nio.charset.StandardCharsets.UTF_8));
     }
 
     @Transactional(readOnly = true)
@@ -104,7 +133,7 @@ public class AssistantConversationService {
         message.setRole(role);
         message.setText(text);
         messageRepository.save(message);
-        conversation.setUpdatedAt(LocalDateTime.now());
+        conversation.setUpdatedAt(AppTime.now());
         conversationRepository.save(conversation);
     }
 

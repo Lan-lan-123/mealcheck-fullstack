@@ -83,10 +83,10 @@ public class WeeklyTrendAgent {
                 .limit(3)
                 .map(Map.Entry::getKey)
                 .forEach(keywords::add);
-        if (report.getTotalMeals() > report.getCategoryTotals().getOrDefault("vegetable", 0)) {
+        if (report.getTotalMeals() > report.getCategoryMealCounts().getOrDefault("vegetable", 0)) {
             keywords.add("蔬菜摄入");
         }
-        if (report.getTotalMeals() > report.getCategoryTotals().getOrDefault("protein", 0)) {
+        if (report.getTotalMeals() > report.getCategoryMealCounts().getOrDefault("protein", 0)) {
             keywords.add("蛋白质摄入");
         }
         return new WeeklyTrendAnalysis(report.getReportText(), findings, keywords, false);

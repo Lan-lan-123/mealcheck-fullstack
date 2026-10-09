@@ -8,4 +8,6 @@ import java.util.Optional;
 
 public interface WeeklyReportSnapshotRepository extends JpaRepository<WeeklyReportSnapshot, Long> {
     Optional<WeeklyReportSnapshot> findFirstByUserOrderByGeneratedAtDesc(UserAccount user);
+    Optional<WeeklyReportSnapshot> findFirstByUserAndDaysOrderByGeneratedAtDesc(UserAccount user, int days);
+    Optional<WeeklyReportSnapshot> findByJobId(Long jobId);
 }

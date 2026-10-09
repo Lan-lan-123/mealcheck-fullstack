@@ -1,0 +1,12 @@
+:root {
+  --ink: #253c35;
+  --muted: #566c61;
+  --text-soft: #52665d;
+  --accent: #23765b;
+  --line: #e4ebe6;
+  --surface: #fff;
+  color: var(--ink);
+  background: #f6f8f7;
+  font-family: "Inter", "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+  font-synthesis: none;
+}

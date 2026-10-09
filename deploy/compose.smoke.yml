@@ -1,0 +1,14 @@
+# Combine with docker-compose.prod.yml, using a dedicated Compose project.
+# All data volumes belong to that scratch project; production env files are reset.
+services:
+  redis:
+    image: ${MEALCHECK_SMOKE_REDIS_IMAGE:-redis:7.4-alpine}
+  backend:
+    image: mealcheck-reliability-smoke-backend
+    env_file: !reset []
+    environment:
+      MEALCHECK_AI_API_KEY: ""
+      MEALCHECK_KNOWLEDGE_EMBEDDING_API_KEY: ""
+      MEALCHECK_KNOWLEDGE_RERANK_ENABLED: "false"
+  frontend:
+    image: mealcheck-reliability-smoke-frontend

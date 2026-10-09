@@ -1,5 +1,7 @@
 package com.example.mealcheck.service;
 
+import com.example.mealcheck.util.AppTime;
+
 import com.example.mealcheck.dto.UserGoalRequest;
 import com.example.mealcheck.dto.UserGoalResponse;
 import com.example.mealcheck.entity.UserAccount;
@@ -25,7 +27,7 @@ public class UserGoalService {
 
     @Transactional(readOnly = true)
     public UserGoalResponse current(UserPrincipal principal) {
-        UserAccount user = userRepository.findByUsername(principal.getUsername()).orElseThrow();
+        UserAccount user = userRepository.findById(principal.getId()).orElseThrow();
         return current(user);
     }
 
@@ -38,7 +40,7 @@ public class UserGoalService {
 
     @Transactional
     public UserGoalResponse update(UserPrincipal principal, UserGoalRequest request) {
-        UserAccount user = userRepository.findByUsername(principal.getUsername()).orElseThrow();
+        UserAccount user = userRepository.findById(principal.getId()).orElseThrow();
         goalRepository.findFirstByUserAndActiveTrueOrderByCreatedAtDesc(user)
                 .ifPresent(goal -> {
                     goal.setActive(false);
@@ -48,7 +50,7 @@ public class UserGoalService {
         UserGoal goal = new UserGoal();
         goal.setUser(user);
         goal.setGoalType(normalizeGoal(request.getGoalType()));
-        goal.setStartDate(request.getStartDate() == null ? LocalDate.now() : request.getStartDate());
+        goal.setStartDate(request.getStartDate() == null ? AppTime.today() : request.getStartDate());
         goal.setEndDate(request.getEndDate());
         goal.setNote(request.getNote());
         return toResponse(goalRepository.save(goal));
@@ -56,7 +58,7 @@ public class UserGoalService {
 
     @Transactional(readOnly = true)
     public List<UserGoalResponse> history(UserPrincipal principal) {
-        UserAccount user = userRepository.findByUsername(principal.getUsername()).orElseThrow();
+        UserAccount user = userRepository.findById(principal.getId()).orElseThrow();
         return goalRepository.findByUserOrderByCreatedAtDesc(user).stream().map(this::toResponse).toList();
     }
 

@@ -25,7 +25,7 @@ class WeeklyReportJobServiceTest {
     void enqueuesEachUserWithAnIdempotencyKey() {
         WeeklyReportJobRepository repository = mock(WeeklyReportJobRepository.class);
         when(repository.enqueue(anyLong(), any(), anyInt(), any())).thenReturn(1, 0);
-        WeeklyReportJobService service = new WeeklyReportJobService(repository, new AppProperties());
+        WeeklyReportJobService service = new WeeklyReportJobService(repository, new AppProperties(), mock(TaskFailureRecorder.class), mock(com.example.mealcheck.repository.UserAccountRepository.class));
         LocalDate reportWeek = LocalDate.of(2026, 8, 24);
 
         int inserted = service.enqueue(List.of(1L, 2L), 7, reportWeek);
@@ -42,30 +42,34 @@ class WeeklyReportJobServiceTest {
         properties.getWeeklyReport().setWorkerBatchSize(3);
         WeeklyReportJob job = new WeeklyReportJob();
         when(repository.findClaimable(any(), eq(3))).thenReturn(List.of(job));
-        WeeklyReportJobService service = new WeeklyReportJobService(repository, properties);
+        WeeklyReportJobService service = new WeeklyReportJobService(repository, properties, mock(TaskFailureRecorder.class), mock(com.example.mealcheck.repository.UserAccountRepository.class));
 
         List<WeeklyReportJob> claimed = service.claimBatch();
 
         assertThat(claimed).containsExactly(job);
         assertThat(job.getStatus()).isEqualTo(WeeklyReportJob.RUNNING);
         assertThat(job.getAttempts()).isEqualTo(1);
-        verify(repository).recoverStale(any(LocalDateTime.class), any(LocalDateTime.class));
+        verify(repository).recoverStale(any(LocalDateTime.class), any(LocalDateTime.class), eq(3));
     }
 
     @Test
     void failedJobRetriesUntilMaximumAttemptsThenMovesToDeadState() {
         WeeklyReportJobRepository repository = mock(WeeklyReportJobRepository.class);
-        when(repository.markFailed(any(), anyInt(), any(), any(), any(), any())).thenReturn(1);
+        when(repository.markFailed(any(), anyInt(), any(), any(), any(), any(), any())).thenReturn(1);
         AppProperties properties = new AppProperties();
         properties.getWeeklyReport().setMaxAttempts(3);
-        WeeklyReportJobService service = new WeeklyReportJobService(repository, properties);
+        var users = mock(com.example.mealcheck.repository.UserAccountRepository.class);
+        var job = new WeeklyReportJob(); job.setUserId(1L);
+        when(repository.findById(9L)).thenReturn(java.util.Optional.of(job));
+        when(users.findByIdForUpdate(1L)).thenReturn(java.util.Optional.of(new com.example.mealcheck.entity.UserAccount()));
+        WeeklyReportJobService service = new WeeklyReportJobService(repository, properties, mock(TaskFailureRecorder.class), users);
 
-        assertThat(service.markFailed(9L, 2, new IllegalStateException("temporary"))).isTrue();
-        assertThat(service.markFailed(9L, 3, new IllegalStateException("permanent"))).isTrue();
+        assertThat(service.markFailed(9L, 2, "token", new IllegalStateException("temporary"))).isTrue();
+        assertThat(service.markFailed(9L, 3, "token", new IllegalStateException("permanent"))).isTrue();
 
         ArgumentCaptor<String> status = ArgumentCaptor.forClass(String.class);
         verify(repository, org.mockito.Mockito.times(2)).markFailed(
-                eq(9L), anyInt(), status.capture(), any(), any(), any());
+                eq(9L), anyInt(), any(), status.capture(), any(), any(), any());
         assertThat(status.getAllValues()).containsExactly(WeeklyReportJob.RETRY, WeeklyReportJob.DEAD);
     }
 }

@@ -39,7 +39,7 @@ class UserGoalServiceTest {
         request.setEndDate(LocalDate.now().plusWeeks(4));
         request.setNote("prepare for summer");
 
-        when(userRepository.findByUsername("demo")).thenReturn(Optional.of(user));
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(goalRepository.findFirstByUserAndActiveTrueOrderByCreatedAtDesc(user)).thenReturn(Optional.of(previous));
         when(goalRepository.save(any(UserGoal.class))).thenAnswer(invocation -> invocation.getArgument(0));
 

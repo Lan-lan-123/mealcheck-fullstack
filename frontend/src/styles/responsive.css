@@ -1,0 +1,162 @@
+@media (max-width: 1100px) {
+  .admin-grid,
+  .admin-info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .knowledge-list {
+    grid-template-columns: 1fr;
+  }
+
+  .meal-analytics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .assistant-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .operations-grid,
+  .rag-evaluation-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rag-evaluation-grid .meal-chart-card.wide {
+    grid-column: span 2;
+  }
+
+  .filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filter-grid.compact {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 720px) {
+  .assistant-panel {
+    width: min(420px, calc(100vw - 24px));
+    height: min(640px, calc(100vh - 96px));
+  }
+
+  .assistant-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .assistant-sidebar {
+    border-right: none;
+    border-bottom: 1px solid #e3eedf;
+    grid-template-rows: auto;
+  }
+
+  .assistant-session-list {
+    display: flex;
+    overflow-x: auto;
+  }
+
+  .assistant-session-list > div {
+    min-width: 180px;
+  }
+}
+
+@media (max-width: 700px) {
+  .admin-page {
+    padding: 18px;
+  }
+
+  .admin-tabs {
+    justify-content: flex-start;
+  }
+
+  .admin-header,
+  .admin-section {
+    padding: 24px;
+    border-radius: 22px;
+  }
+
+  .admin-grid,
+  .admin-info-grid,
+  .meal-analytics-grid,
+  .operations-grid,
+  .rag-evaluation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .coordination-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .coordination-modal {
+    padding: 20px;
+  }
+
+  .coordination-step-head {
+    flex-direction: column;
+  }
+
+  .meal-chart-card.wide {
+    grid-column: auto;
+  }
+
+  .rag-evaluation-grid .meal-chart-card.wide {
+    grid-column: auto;
+  }
+
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-grid.compact {
+    grid-template-columns: 1fr;
+  }
+
+  .record-filter-form {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-tabs {
+    width: 100%;
+  }
+
+  .dashboard-tabs button {
+    flex: 1;
+  }
+
+  .upload-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .goal-form {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-header-actions,
+  .admin-section-head {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .admin-alert-list article {
+    grid-template-columns: 1fr;
+  }
+
+  .primary-btn,
+  .secondary-btn {
+    width: 100%;
+  }
+
+  .assistant-widget {
+    right: 16px;
+    bottom: 16px;
+  }
+
+  .assistant-panel {
+    height: min(540px, calc(100vh - 96px));
+  }
+}

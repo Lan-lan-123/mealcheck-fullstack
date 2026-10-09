@@ -17,6 +17,7 @@ public class RateLimitExceededException extends RuntimeException {
     public long getLimit() {
         return limit;
     }
+    public String getCode() { return "RATE_LIMIT_EXCEEDED"; }
 
     public long getRemaining() {
         return remaining;

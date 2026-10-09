@@ -38,18 +38,15 @@ public class AssistantFunctionCallingService {
     private final AppProperties properties;
     private final AssistantFunctionToolRegistry toolRegistry;
     private final AssistantChatModelFactory modelFactory;
-    private final RemoteCallGuard remoteCallGuard;
     private final ExecutorService httpExecutor;
 
     public AssistantFunctionCallingService(AppProperties properties,
                                            AssistantFunctionToolRegistry toolRegistry,
                                            AssistantChatModelFactory modelFactory,
-                                           RemoteCallGuard remoteCallGuard,
                                            @Qualifier("assistantHttpExecutor") ExecutorService httpExecutor) {
         this.properties = properties;
         this.toolRegistry = toolRegistry;
         this.modelFactory = modelFactory;
-        this.remoteCallGuard = remoteCallGuard;
         this.httpExecutor = httpExecutor;
     }
 
@@ -57,50 +54,107 @@ public class AssistantFunctionCallingService {
                                      String systemPrompt,
                                      List<AssistantChatMessage> history,
                                      String question) {
+        try (var scope=AiCallContext.open(user.getId(),Duration.ofSeconds(totalTimeoutSeconds()))) {
+            return run(user, systemPrompt, history, question, toolRegistry);
+        }
+    }
+
+    public FunctionCallingResult askWithRuntime(String systemPrompt,
+                                                List<AssistantChatMessage> history,
+                                                String question,
+                                                AssistantFunctionToolRuntime runtime) {
+        if (runtime == null) {
+            throw new IllegalArgumentException("Function Calling runtime is required");
+        }
+        return run(null, systemPrompt, history, question, runtime);
+    }
+
+    private FunctionCallingResult run(UserAccount user,
+                                      String systemPrompt,
+                                      List<AssistantChatMessage> history,
+                                      String question,
+                                      AssistantFunctionToolRuntime runtime) {
         long deadlineNanos = System.nanoTime()
                 + TimeUnit.SECONDS.toNanos(totalTimeoutSeconds());
+        var context=AiCallContext.capture();
+        if (context!=null) deadlineNanos=Math.min(deadlineNanos,context.deadlineNanos());
         List<ChatMessage> messages = initialMessages(systemPrompt, history, question);
         Map<Long, KnowledgeSnippet> references = new LinkedHashMap<>();
         List<String> calledTools = new ArrayList<>();
+        List<ToolCallTrace> toolTrace = new ArrayList<>();
         Set<String> executedRequests = new HashSet<>();
         int toolCallCount = 0;
 
         for (int round = 0; round <= maxToolRounds(); round++) {
-            ChatResponse response = callModel(messages, deadlineNanos);
+            ChatResponse response;
+            try {
+                response = callModel(messages, deadlineNanos, runtime);
+            } catch (FunctionCallingExecutionException e) {
+                throw e;
+            } catch (RuntimeException e) {
+                throw new FunctionCallingExecutionException(
+                        e.getMessage(), e, toolTrace, round);
+            }
             AiMessage aiMessage = response.aiMessage();
             if (aiMessage == null) {
-                throw new IllegalStateException("Function Calling model returned no assistant message");
+                throw new FunctionCallingExecutionException(
+                        "Function Calling model returned no assistant message", null, toolTrace, round);
             }
             messages.add(aiMessage);
 
             if (!aiMessage.hasToolExecutionRequests()) {
                 String text = aiMessage.text();
                 if (text == null || text.isBlank()) {
-                    throw new IllegalStateException("Function Calling model returned an empty answer");
+                    throw new FunctionCallingExecutionException(
+                            "Function Calling model returned an empty answer", null, toolTrace, round);
                 }
                 return new FunctionCallingResult(
                         text,
                         List.copyOf(references.values()),
                         List.copyOf(calledTools),
-                        round
+                        round,
+                        List.copyOf(toolTrace)
                 );
             }
             if (round >= maxToolRounds()) {
-                throw new IllegalStateException("Function Calling exceeded the maximum tool rounds");
+                throw new FunctionCallingExecutionException(
+                        "Function Calling exceeded the maximum tool rounds", null, toolTrace, round);
             }
 
             for (ToolExecutionRequest request : aiMessage.toolExecutionRequests()) {
                 toolCallCount++;
                 if (toolCallCount > maxToolCalls()) {
-                    throw new IllegalStateException("Function Calling exceeded the maximum tool calls");
+                    toolTrace.add(new ToolCallTrace(
+                            request.name(), safeArguments(request.arguments()), "REJECTED", round + 1,
+                            0L));
+                    throw new FunctionCallingExecutionException(
+                            "Function Calling exceeded the maximum tool calls", null, toolTrace, round + 1);
                 }
                 String signature = request.name() + "\n" + request.arguments();
                 if (!executedRequests.add(signature)) {
-                    throw new IllegalStateException("Function Calling repeated an equivalent tool request: "
-                            + request.name());
+                    toolTrace.add(new ToolCallTrace(
+                            request.name(), safeArguments(request.arguments()), "REJECTED", round + 1,
+                            0L));
+                    throw new FunctionCallingExecutionException(
+                            "Function Calling repeated an equivalent tool request: " + request.name(),
+                            null, toolTrace, round + 1);
                 }
-                AssistantFunctionToolRegistry.ToolResult result = toolRegistry.execute(
-                        user, request, deadlineNanos);
+                long toolStartedAt = System.nanoTime();
+                AssistantFunctionToolRuntime.ToolResult result;
+                try {
+                    result = runtime.execute(user, request, deadlineNanos);
+                    toolTrace.add(new ToolCallTrace(
+                            request.name(), safeArguments(request.arguments()), result.status(),
+                            round + 1,
+                            elapsedMs(toolStartedAt)));
+                } catch (RuntimeException e) {
+                    toolTrace.add(new ToolCallTrace(
+                            request.name(), safeArguments(request.arguments()), "ERROR",
+                            round + 1,
+                            elapsedMs(toolStartedAt)));
+                    throw new FunctionCallingExecutionException(
+                            "Assistant tool failed: " + request.name(), e, toolTrace, round + 1);
+                }
                 calledTools.add(request.name());
                 result.references().forEach(snippet -> {
                     if (snippet.getId() != null) {
@@ -115,10 +169,13 @@ public class AssistantFunctionCallingService {
                         .build());
             }
         }
-        throw new IllegalStateException("Function Calling did not produce a final answer");
+        throw new FunctionCallingExecutionException(
+                "Function Calling did not produce a final answer", null, toolTrace, maxToolRounds());
     }
 
-    private ChatResponse callModel(List<ChatMessage> messages, long deadlineNanos) {
+    private ChatResponse callModel(List<ChatMessage> messages,
+                                   long deadlineNanos,
+                                   AssistantFunctionToolRuntime runtime) {
         long remainingMillis = remainingMillis(deadlineNanos);
         if (remainingMillis <= 0L) {
             throw new IllegalStateException("Assistant Function Calling deadline exceeded");
@@ -126,13 +183,16 @@ public class AssistantFunctionCallingService {
         ChatModel model = modelFactory.create(Duration.ofMillis(remainingMillis));
         ChatRequest request = ChatRequest.builder()
                 .messages(List.copyOf(messages))
-                .toolSpecifications(toolRegistry.specifications())
+                .toolSpecifications(runtime.specifications())
                 .toolChoice(ToolChoice.AUTO)
                 .build();
         Future<ChatResponse> task;
+        var context=AiCallContext.capture();
+        var callContext=new AiCallContext.Context(context==null?null:context.userId(),deadlineNanos,context==null?null:context.dispatchGuard());
         try {
-            task = httpExecutor.submit(() -> remoteCallGuard.execute(
-                    "diet-assistant", () -> model.chat(request)));
+            task = httpExecutor.submit(() -> {
+                try (var scope=AiCallContext.restore(callContext)) { return model.chat(request); }
+            });
         } catch (RejectedExecutionException e) {
             throw new IllegalStateException("Assistant HTTP executor is saturated", e);
         }
@@ -202,6 +262,15 @@ public class AssistantFunctionCallingService {
         return remaining <= 0L ? 0L : Math.max(1L, TimeUnit.NANOSECONDS.toMillis(remaining));
     }
 
+    private long elapsedMs(long startedNanos) {
+        return Duration.ofNanos(System.nanoTime() - startedNanos).toMillis();
+    }
+
+    private String safeArguments(String arguments) {
+        String value = arguments == null || arguments.isBlank() ? "{}" : arguments.trim();
+        return value.length() <= 1_000 ? value : value.substring(0, 1_000) + "...";
+    }
+
     private void purgeHttpExecutor() {
         if (httpExecutor instanceof ThreadPoolExecutor threadPool) {
             threadPool.purge();
@@ -211,6 +280,41 @@ public class AssistantFunctionCallingService {
     public record FunctionCallingResult(String answer,
                                         List<KnowledgeSnippet> references,
                                         List<String> calledTools,
-                                        int toolRounds) {
+                                        int toolRounds,
+                                        List<ToolCallTrace> toolTrace) {
+        public FunctionCallingResult {
+            references = references == null ? List.of() : List.copyOf(references);
+            calledTools = calledTools == null ? List.of() : List.copyOf(calledTools);
+            toolTrace = toolTrace == null ? List.of() : List.copyOf(toolTrace);
+        }
+    }
+
+    public record ToolCallTrace(String name,
+                                String arguments,
+                                String status,
+                                int round,
+                                long durationMs) {
+    }
+
+    public static class FunctionCallingExecutionException extends IllegalStateException {
+        private final List<ToolCallTrace> toolTrace;
+        private final int toolRounds;
+
+        public FunctionCallingExecutionException(String message,
+                                                 Throwable cause,
+                                                 List<ToolCallTrace> toolTrace,
+                                                 int toolRounds) {
+            super(message, cause);
+            this.toolTrace = List.copyOf(toolTrace);
+            this.toolRounds = toolRounds;
+        }
+
+        public List<ToolCallTrace> getToolTrace() {
+            return toolTrace;
+        }
+
+        public int getToolRounds() {
+            return toolRounds;
+        }
     }
 }

@@ -8,6 +8,8 @@ public class AssistantConversationDetailResponse {
     private String title;
     private LocalDateTime updatedAt;
     private List<AssistantChatMessage> messages;
+    private boolean hasMore;
+    private String nextBefore;
 
     public AssistantConversationDetailResponse(Long id,
                                                String title,
@@ -23,4 +25,7 @@ public class AssistantConversationDetailResponse {
     public String getTitle() { return title; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public List<AssistantChatMessage> getMessages() { return messages; }
+    public boolean isHasMore() { return hasMore; }
+    public String getNextBefore() { return nextBefore; }
+    public void setPage(boolean hasMore, String nextBefore) { this.hasMore = hasMore; this.nextBefore = nextBefore; }
 }

@@ -1,0 +1,54 @@
+server:
+  shutdown: graceful
+  forward-headers-strategy: framework
+  compression:
+    enabled: true
+    mime-types: application/json,text/html,text/css,application/javascript
+
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST}
+      port: ${SPRING_REDIS_PORT:6379}
+      password: ${SPRING_REDIS_PASSWORD}
+  jpa:
+    properties:
+      hibernate:
+        format_sql: false
+  flyway:
+    baseline-on-migrate: false
+
+mealcheck:
+  jwt:
+    secret: ${MEALCHECK_JWT_SECRET}
+    expiration-minutes: ${MEALCHECK_JWT_EXPIRATION_MINUTES:60}
+  cors:
+    allowed-origins: ${MEALCHECK_CORS_ALLOWED_ORIGINS}
+  upload-dir: ${MEALCHECK_UPLOAD_DIR:/app/uploads}
+  ai:
+    api-key: ${MEALCHECK_AI_API_KEY:}
+    base-url: ${MEALCHECK_AI_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
+    model: ${MEALCHECK_AI_MODEL:qwen3-vl-30b-a3b-instruct}
+  mcp:
+    enabled: ${MEALCHECK_MCP_ENABLED:false}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+
+logging:
+  level:
+    root: INFO

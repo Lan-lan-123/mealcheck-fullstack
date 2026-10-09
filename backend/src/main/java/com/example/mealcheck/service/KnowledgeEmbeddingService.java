@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
@@ -18,24 +17,21 @@ import java.security.MessageDigest;
 @Service
 public class KnowledgeEmbeddingService {
     private final AppProperties properties;
-    private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
     private final HashEmbeddingService fallback;
     private final ApplicationObservability observability;
-    private final RemoteCallGuard remoteCallGuard;
+    private final AiHttpTransport transport;
 
     public KnowledgeEmbeddingService(AppProperties properties,
-                                     HttpClient httpClient,
-                                     ObjectMapper objectMapper,
+                                                  ObjectMapper objectMapper,
                                      HashEmbeddingService fallback,
                                      ApplicationObservability observability,
-                                     RemoteCallGuard remoteCallGuard) {
+                                     AiHttpTransport transport) {
         this.properties = properties;
-        this.httpClient = httpClient;
         this.objectMapper = objectMapper;
         this.fallback = fallback;
         this.observability = observability;
-        this.remoteCallGuard = remoteCallGuard;
+        this.transport = transport;
     }
 
     public float[] embed(String text) {
@@ -65,8 +61,7 @@ public class KnowledgeEmbeddingService {
                     .header("Authorization", "Bearer " + knowledge.getEmbeddingApiKey())
                     .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(body)))
                     .build();
-            HttpResponse<String> response = remoteCallGuard.execute(
-                    "embedding", () -> send(request));
+            HttpResponse<String> response = transport.send("embedding",request,objectMapper.writeValueAsString(body));
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
                 throw new IllegalStateException("Embedding request failed with HTTP " + response.statusCode());
             }
@@ -102,27 +97,6 @@ public class KnowledgeEmbeddingService {
         return notBlank(knowledge.getEmbeddingApiKey())
                 && notBlank(knowledge.getEmbeddingBaseUrl())
                 && notBlank(knowledge.getEmbeddingModel());
-    }
-
-    private HttpResponse<String> send(HttpRequest request) {
-        try {
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() >= 400 && response.statusCode() < 500 && response.statusCode() != 429) {
-                throw new RemoteCallGuard.NonRetryableRemoteCallException(
-                        "Embedding request rejected with HTTP " + response.statusCode());
-            }
-            if (response.statusCode() == 429 || response.statusCode() >= 500) {
-                throw new IllegalStateException("Embedding request failed with HTTP " + response.statusCode());
-            }
-            return response;
-        } catch (RemoteCallGuard.NonRetryableRemoteCallException e) {
-            throw e;
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Embedding request was interrupted", e);
-        } catch (Exception e) {
-            throw new IllegalStateException("Embedding request failed: " + e.getMessage(), e);
-        }
     }
 
     public String providerName() {

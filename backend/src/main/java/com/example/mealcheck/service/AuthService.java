@@ -38,6 +38,9 @@ public class AuthService {
 
     @Transactional
     public AuthDtos.AuthResponse register(AuthDtos.RegisterRequest request) {
+        if (!captchaService.verify(request.getCaptchaId(), request.getCaptchaAnswer())) {
+            throw new BadCredentialsException("验证码错误或已过期");
+        }
         String username = request.getUsername().trim();
         if (userRepository.existsByUsername(username)) {
             throw new IllegalArgumentException("用户名已存在");

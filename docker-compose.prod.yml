@@ -1,0 +1,202 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "20m"
+    max-file: "5"
+
+services:
+  rabbitmq:
+    image: rabbitmq:4.2-management-alpine
+    hostname: mealcheck-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${SPRING_RABBITMQ_USERNAME:-mealcheck}
+      RABBITMQ_DEFAULT_PASS: ${SPRING_RABBITMQ_PASSWORD:?Set SPRING_RABBITMQ_PASSWORD}
+    volumes:
+      - mealcheck_rabbitdata:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: ${RABBITMQ_MEMORY_LIMIT:-512m}
+    cpus: ${RABBITMQ_CPU_LIMIT:-0.50}
+    logging: *default-logging
+    networks:
+      - data
+
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${SPRING_REDIS_PASSWORD:?Set SPRING_REDIS_PASSWORD}
+    command: ["sh", "-c", "exec redis-server --appendonly yes --requirepass \"$${REDIS_PASSWORD}\""]
+    volumes:
+      - mealcheck_redisdata:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep -q PONG"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: ${REDIS_MEMORY_LIMIT:-256m}
+    cpus: ${REDIS_CPU_LIMIT:-0.50}
+    logging: *default-logging
+    networks:
+      - data
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mealcheck}
+      POSTGRES_USER: ${SPRING_DATASOURCE_USERNAME:-mealcheck}
+      POSTGRES_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:?Set SPRING_DATASOURCE_PASSWORD}
+    volumes:
+      - mealcheck_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: ${POSTGRES_MEMORY_LIMIT:-1g}
+    cpus: ${POSTGRES_CPU_LIMIT:-1.00}
+    logging: *default-logging
+    networks:
+      - data
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    env_file:
+      - path: .env.production
+        required: false
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: 8080
+      MANAGEMENT_SERVER_PORT: 9091
+      JAVA_TOOL_OPTIONS: ${BACKEND_JAVA_TOOL_OPTIONS:--XX:MaxRAMPercentage=45.0 -XX:+ExitOnOutOfMemoryError}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-mealcheck}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-mealcheck}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:?Set SPRING_DATASOURCE_PASSWORD}
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      SPRING_REDIS_PASSWORD: ${SPRING_REDIS_PASSWORD:?Set SPRING_REDIS_PASSWORD}
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_USERNAME: ${SPRING_RABBITMQ_USERNAME:-mealcheck}
+      SPRING_RABBITMQ_PASSWORD: ${SPRING_RABBITMQ_PASSWORD:?Set SPRING_RABBITMQ_PASSWORD}
+      MEALCHECK_ANALYSIS_DISPATCH: ${MEALCHECK_ANALYSIS_DISPATCH:-rabbitmq}
+      MEALCHECK_ANALYSIS_CONCURRENCY: ${MEALCHECK_ANALYSIS_CONCURRENCY:-2}
+      MEALCHECK_ANALYSIS_MAX_OUTSTANDING: ${MEALCHECK_ANALYSIS_MAX_OUTSTANDING:-8}
+      MEALCHECK_ANALYSIS_MAX_OUTSTANDING_PER_USER: ${MEALCHECK_ANALYSIS_MAX_OUTSTANDING_PER_USER:-2}
+      MEALCHECK_ANALYSIS_LEASE_SECONDS: ${MEALCHECK_ANALYSIS_LEASE_SECONDS:-90}
+      MEALCHECK_ANALYSIS_WORKER_ENABLED: ${MEALCHECK_ANALYSIS_WORKER_ENABLED:-true}
+      MEALCHECK_JWT_SECRET: ${MEALCHECK_JWT_SECRET:?Set MEALCHECK_JWT_SECRET}
+      MEALCHECK_CORS_ALLOWED_ORIGINS: ${MEALCHECK_CORS_ALLOWED_ORIGINS:?Set MEALCHECK_CORS_ALLOWED_ORIGINS}
+      MEALCHECK_UPLOAD_DIR: /app/uploads
+      MEALCHECK_TIMESTAMP_STORAGE_ZONE: ${MEALCHECK_TIMESTAMP_STORAGE_ZONE:-UTC}
+      MEALCHECK_BUSINESS_ZONE: ${MEALCHECK_BUSINESS_ZONE:-Asia/Shanghai}
+      MEALCHECK_ASSISTANT_EVALUATION_LEASE_SECONDS: ${MEALCHECK_ASSISTANT_EVALUATION_LEASE_SECONDS:-90}
+      MEALCHECK_UPLOAD_TMP_DIR: /app/upload-temp
+      MEALCHECK_UPLOAD_MAX_CONCURRENT_DECODES: ${MEALCHECK_UPLOAD_MAX_CONCURRENT_DECODES:-2}
+      MEALCHECK_UPLOAD_MAX_PENDING_DECODES: ${MEALCHECK_UPLOAD_MAX_PENDING_DECODES:-20}
+      MEALCHECK_UPLOAD_DECODE_WAIT_MILLIS: ${MEALCHECK_UPLOAD_DECODE_WAIT_MILLIS:-8000}
+      MEALCHECK_UPLOAD_TEMPORARY_MAX_BYTES: ${MEALCHECK_UPLOAD_TEMPORARY_MAX_BYTES:-1073741824}
+      MEALCHECK_AI_API_KEY: ${MEALCHECK_AI_API_KEY:-}
+      MEALCHECK_REMOTE_TOTAL_TIMEOUT_SECONDS: ${MEALCHECK_REMOTE_TOTAL_TIMEOUT_SECONDS:-60}
+      MEALCHECK_AI_OPERATION_TIMEOUT_SECONDS: ${MEALCHECK_AI_OPERATION_TIMEOUT_SECONDS:-120}
+      MEALCHECK_AI_MAX_OUTPUT_TOKENS: ${MEALCHECK_AI_MAX_OUTPUT_TOKENS:-2048}
+      MEALCHECK_AI_BUDGET_ENABLED: ${MEALCHECK_AI_BUDGET_ENABLED:-true}
+      MEALCHECK_AI_GLOBAL_DAILY_CALLS: ${MEALCHECK_AI_GLOBAL_DAILY_CALLS:-5000}
+      MEALCHECK_AI_GLOBAL_DAILY_COST: ${MEALCHECK_AI_GLOBAL_DAILY_COST:-0}
+      MEALCHECK_AI_GLOBAL_MAX_CONCURRENT_CALLS: ${MEALCHECK_AI_GLOBAL_MAX_CONCURRENT_CALLS:-10}
+      MEALCHECK_AI_GLOBAL_MAX_STARTS_PER_MINUTE: ${MEALCHECK_AI_GLOBAL_MAX_STARTS_PER_MINUTE:-120}
+      MEALCHECK_AI_DAILY_CALLS: ${MEALCHECK_AI_DAILY_CALLS:-100}
+      MEALCHECK_AI_SYSTEM_DAILY_CALLS: ${MEALCHECK_AI_SYSTEM_DAILY_CALLS:-5000}
+      MEALCHECK_AI_DAILY_COST: ${MEALCHECK_AI_DAILY_COST:-0}
+      MEALCHECK_AI_SYSTEM_DAILY_COST: ${MEALCHECK_AI_SYSTEM_DAILY_COST:-0}
+      MEALCHECK_AI_RESERVATION_COST: ${MEALCHECK_AI_RESERVATION_COST:-0.02}
+      MEALCHECK_AI_BUDGET_ZONE: ${MEALCHECK_AI_BUDGET_ZONE:-Asia/Shanghai}
+      MEALCHECK_AI_BASE_URL: ${MEALCHECK_AI_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}
+      MEALCHECK_AI_MODEL: ${MEALCHECK_AI_MODEL:-qwen3-vl-30b-a3b-instruct}
+      MEALCHECK_AI_INPUT_COST_PER_MILLION: ${MEALCHECK_AI_INPUT_COST_PER_MILLION:-0}
+      MEALCHECK_AI_OUTPUT_COST_PER_MILLION: ${MEALCHECK_AI_OUTPUT_COST_PER_MILLION:-0}
+      MEALCHECK_MCP_ENABLED: ${MEALCHECK_MCP_ENABLED:-false}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - mealcheck_uploads:/app/uploads
+      - mealcheck_upload_tmp:/app/upload-temp
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: ${BACKEND_MEMORY_LIMIT:-1g}
+    cpus: ${BACKEND_CPU_LIMIT:-1.50}
+    logging: *default-logging
+    networks:
+      - app
+      - data
+      - egress
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_BUSINESS_ZONE: ${MEALCHECK_BUSINESS_ZONE:-Asia/Shanghai}
+        VITE_LEGACY_TIMESTAMP_OFFSET: ${VITE_LEGACY_TIMESTAMP_OFFSET:-Z}
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${MEALCHECK_FRONTEND_PORT:-8080}:8080"
+    read_only: true
+    tmpfs:
+      # 20 requests at the 12 MiB ingress limit need up to 240 MiB of buffering.
+      - /tmp:size=${FRONTEND_REQUEST_TMPFS_SIZE:-256m},mode=1777,uid=101,gid=101
+      - /var/cache/nginx:size=32m,mode=0755,uid=101,gid=101
+      - /var/run:size=8m,mode=0755,uid=101,gid=101
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: ${FRONTEND_MEMORY_LIMIT:-512m}
+    cpus: ${FRONTEND_CPU_LIMIT:-0.50}
+    logging: *default-logging
+    networks:
+      - app
+      - edge
+
+networks:
+  app:
+    internal: true
+  data:
+    internal: true
+  egress:
+  edge:
+    ipam:
+      config:
+        - subnet: 10.203.0.0/24
+          gateway: 10.203.0.1
+
+volumes:
+  mealcheck_rabbitdata:
+  mealcheck_pgdata:
+  mealcheck_redisdata:
+  mealcheck_uploads:
+  mealcheck_upload_tmp:

@@ -4,6 +4,10 @@ import com.example.mealcheck.config.AppProperties;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 
 @Service
 public class RateLimitService {
@@ -27,10 +31,30 @@ public class RateLimitService {
         return consume("meal-analysis", username, properties.getRateLimit().getMealAnalysis());
     }
 
+    public RateLimitDecision consumeUploadIngress(String username) {
+        return consume("upload-ingress", username, properties.getRateLimit().getUploadIngress());
+    }
+
+    public RateLimitDecision consumeWeeklyReport(String userId) {
+        return consume("weekly-report", userId, properties.getRateLimit().getWeeklyReport());
+    }
+
+    public RateLimitDecision consumeLogin(String clientAddress, String username) {
+        return consume("login", clientAddress + ":" + normalize(username), properties.getRateLimit().getLogin());
+    }
+
+    public RateLimitDecision consumeRegistration(String clientAddress) {
+        return consume("registration", clientAddress, properties.getRateLimit().getRegistration());
+    }
+
+    public RateLimitDecision consumeCaptcha(String clientAddress) {
+        return consume("captcha", clientAddress, properties.getRateLimit().getCaptcha());
+    }
+
     private RateLimitDecision consume(String scope, String username, AppProperties.TokenBucket bucket) {
         TokenBucketPolicy policy = policy(bucket);
         RateLimitDecision decision = redisCacheService.consumeTokenBucket(
-                        "rate:bucket:" + scope + ":" + username,
+                        "rate:bucket:" + scope + ":" + hashIdentifier(username),
                         policy.capacity(),
                         policy.refillTokens(),
                         policy.refillPeriod(),
@@ -50,6 +74,20 @@ public class RateLimitService {
                 ));
         observability.recordRateLimit(scope, outcome(decision.status()));
         return decision;
+    }
+
+    private String normalize(String value) {
+        return value == null ? "" : value.trim().toLowerCase(java.util.Locale.ROOT);
+    }
+
+    private String hashIdentifier(String value) {
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256")
+                    .digest((value == null ? "" : value).getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(digest, 0, 16);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 is unavailable", e);
+        }
     }
 
     private String outcome(RateLimitStatus status) {

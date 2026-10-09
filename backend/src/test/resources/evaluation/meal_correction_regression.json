@@ -1,0 +1,10 @@
+{
+  "datasetVersion": "meal-corrections-curated-v1",
+  "cases": [
+    {"id":"missing-protein-and-vegetables","goal":"balanced","foods":[{"name":"米饭","category":"staple"}],"expectedScore":21},
+    {"id":"corrected-balanced-plate","goal":"balanced","foods":[{"name":"米饭","category":"staple"},{"name":"清蒸鱼","category":"protein"},{"name":"青菜","category":"vegetable"}],"expectedScore":90},
+    {"id":"corrected-fat-loss-plate","goal":"fat_loss","foods":[{"name":"米饭","category":"staple"},{"name":"清蒸鱼","category":"protein"},{"name":"青菜","category":"vegetable"}],"expectedScore":89},
+    {"id":"corrected-muscle-gain-plate","goal":"muscle_gain","foods":[{"name":"米饭","category":"staple"},{"name":"清蒸鱼","category":"protein"},{"name":"青菜","category":"vegetable"}],"expectedScore":92},
+    {"id":"corrected-light-plate","goal":"light","foods":[{"name":"米饭","category":"staple"},{"name":"清蒸鱼","category":"protein"},{"name":"青菜","category":"vegetable"}],"expectedScore":87}
+  ]
+}

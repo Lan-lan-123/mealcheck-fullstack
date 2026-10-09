@@ -11,6 +11,12 @@ public class MealAnalysisResponse {
     private StructureEvaluation evaluation;
     private List<KnowledgeSnippet> references = new ArrayList<>();
     private String advice;
+    private long revision;
+    private String scoringVersion;
+    public long getRevision() { return revision; }
+    public void setRevision(long value) { revision = value; }
+    public String getScoringVersion() { return scoringVersion; }
+    public void setScoringVersion(String value) { scoringVersion = value; }
 
     public Long getRecordId() { return recordId; }
     public void setRecordId(Long recordId) { this.recordId = recordId; }

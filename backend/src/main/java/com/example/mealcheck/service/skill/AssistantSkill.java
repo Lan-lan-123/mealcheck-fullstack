@@ -7,6 +7,14 @@ public interface AssistantSkill {
 
     int priority();
 
+    default boolean fallback() {
+        return false;
+    }
+
+    default int matchScore(AssistantSkillContext context) {
+        return supports(context) ? 1 : 0;
+    }
+
     boolean supports(AssistantSkillContext context);
 
     AssistantSkillPlan plan(AssistantSkillContext context);

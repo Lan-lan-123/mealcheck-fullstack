@@ -35,7 +35,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  * hops are not duplicated inside the monolith.</p>
  */
 @Service
-public class AssistantFunctionToolRegistry {
+public class AssistantFunctionToolRegistry implements AssistantFunctionToolRuntime {
     private static final int MAX_ARGUMENT_LENGTH = 4_000;
     private static final int MAX_RESULT_LENGTH = 24_000;
     private static final int MAX_KNOWLEDGE_LIMIT = 5;
@@ -73,13 +73,15 @@ public class AssistantFunctionToolRegistry {
         this.definitions = buildDefinitions();
     }
 
+    @Override
     public List<ToolSpecification> specifications() {
         return definitions.values().stream().map(ToolDefinition::specification).toList();
     }
 
-    public ToolResult execute(UserAccount user,
-                              ToolExecutionRequest request,
-                              long deadlineNanos) {
+    @Override
+    public AssistantFunctionToolRuntime.ToolResult execute(UserAccount user,
+                                                           ToolExecutionRequest request,
+                                                           long deadlineNanos) {
         if (request == null || request.name() == null) {
             throw new IllegalArgumentException("Tool request must include a name");
         }
@@ -96,7 +98,7 @@ public class AssistantFunctionToolRegistry {
         }
 
         long startedAt = observability.start();
-        Future<ToolResult> task;
+        Future<AssistantFunctionToolRuntime.ToolResult> task;
         try {
             task = definition.executor().submit(() -> definition.handler().execute(user, arguments));
         } catch (RejectedExecutionException e) {
@@ -105,7 +107,7 @@ public class AssistantFunctionToolRegistry {
         }
 
         try {
-            ToolResult result = task.get(timeoutMillis, TimeUnit.MILLISECONDS);
+            AssistantFunctionToolRuntime.ToolResult result = task.get(timeoutMillis, TimeUnit.MILLISECONDS);
             observability.recordAssistantTool(startedAt, request.name(), "success");
             return result;
         } catch (TimeoutException e) {
@@ -178,27 +180,29 @@ public class AssistantFunctionToolRegistry {
         return JsonObjectSchema.builder().additionalProperties(false).build();
     }
 
-    private ToolResult searchKnowledge(UserAccount user, JsonNode arguments) {
+    private AssistantFunctionToolRuntime.ToolResult searchKnowledge(UserAccount user, JsonNode arguments) {
         rejectUnknownArguments(arguments, List.of("query", "limit"));
         String query = requiredText(arguments, "query", 500);
         int limit = integer(arguments, "limit", 3, 1, MAX_KNOWLEDGE_LIMIT);
         List<KnowledgeSnippet> snippets = knowledgeIndexService.search(query, limit);
         knowledgeIndexService.recordHits(snippets.stream().map(KnowledgeSnippet::getId).toList());
         List<Map<String, Object>> results = snippets.stream().map(this::knowledgeView).toList();
-        return new ToolResult(toJson(Map.of("count", results.size(), "results", results)), snippets);
+        return new AssistantFunctionToolRuntime.ToolResult(
+                toJson(Map.of("count", results.size(), "results", results)), snippets);
     }
 
-    private ToolResult recentMeals(UserAccount user, JsonNode arguments) {
+    private AssistantFunctionToolRuntime.ToolResult recentMeals(UserAccount user, JsonNode arguments) {
         rejectUnknownArguments(arguments, List.of());
         List<Map<String, Object>> meals = mealAnalysisService.listSince(user, 30).stream()
                 .sorted(Comparator.comparing(MealRecord::getCreatedAt).reversed())
                 .limit(MAX_RECENT_MEALS)
                 .map(this::mealView)
                 .toList();
-        return new ToolResult(toJson(Map.of("count", meals.size(), "meals", meals)), List.of());
+        return new AssistantFunctionToolRuntime.ToolResult(
+                toJson(Map.of("count", meals.size(), "meals", meals)), List.of());
     }
 
-    private ToolResult weeklyReport(UserAccount user, JsonNode arguments) {
+    private AssistantFunctionToolRuntime.ToolResult weeklyReport(UserAccount user, JsonNode arguments) {
         rejectUnknownArguments(arguments, List.of());
         WeeklyReportResponse report = weeklyReportService.latest(user);
         Map<String, Object> value = new LinkedHashMap<>();
@@ -210,13 +214,15 @@ public class AssistantFunctionToolRegistry {
         value.put("riskTotals", report.getRiskTotals());
         value.put("nextWeekSuggestions", report.getNextWeekSuggestions());
         value.put("reportText", report.getReportText());
-        return new ToolResult(toJson(Map.of("report", value)), List.of());
+        return new AssistantFunctionToolRuntime.ToolResult(
+                toJson(Map.of("report", value)), List.of());
     }
 
-    private ToolResult currentGoal(UserAccount user, JsonNode arguments) {
+    private AssistantFunctionToolRuntime.ToolResult currentGoal(UserAccount user, JsonNode arguments) {
         rejectUnknownArguments(arguments, List.of());
         String goal = userGoalService.effectiveGoal(user, "current");
-        return new ToolResult(toJson(Map.of("goal", goal)), List.of());
+        return new AssistantFunctionToolRuntime.ToolResult(
+                toJson(Map.of("goal", goal)), List.of());
     }
 
     private Map<String, Object> knowledgeView(KnowledgeSnippet snippet) {
@@ -324,12 +330,6 @@ public class AssistantFunctionToolRegistry {
         return value.substring(0, maxLength) + "...";
     }
 
-    public record ToolResult(String content, List<KnowledgeSnippet> references) {
-        public ToolResult {
-            references = references == null ? List.of() : List.copyOf(references);
-        }
-    }
-
     private record ToolDefinition(ToolSpecification specification,
                                   ExecutorService executor,
                                   ToolHandler handler) {
@@ -337,6 +337,6 @@ public class AssistantFunctionToolRegistry {
 
     @FunctionalInterface
     private interface ToolHandler {
-        ToolResult execute(UserAccount user, JsonNode arguments);
+        AssistantFunctionToolRuntime.ToolResult execute(UserAccount user, JsonNode arguments);
     }
 }

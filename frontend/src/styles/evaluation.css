@@ -1,0 +1,298 @@
+.assistant-evaluation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.assistant-history-block {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.assistant-history-block h3 {
+  margin: 0;
+}
+
+.benchmark-progress {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 16px;
+  align-items: center;
+  padding: 16px 18px;
+  border: 1px solid #dfeade;
+  border-radius: 16px;
+  background: #f8fbf7;
+}
+
+.benchmark-progress div {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.benchmark-progress span {
+  color: #647064;
+}
+
+.benchmark-progress progress {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 10px;
+  accent-color: #448350;
+}
+
+.benchmark-pass {
+  color: #26723a;
+  font-weight: 700;
+}
+
+.benchmark-fail {
+  color: #ad3838;
+  font-weight: 700;
+}
+
+.assistant-benchmark-table {
+  min-width: 1650px;
+}
+
+.tool-trace-cell {
+  min-width: 240px;
+  line-height: 1.55;
+}
+
+.intent-result-cell {
+  min-width: 190px;
+  line-height: 1.55;
+}
+
+.tool-call-detail {
+  margin-top: 7px;
+  color: #4d594f;
+  font-weight: 500;
+}
+
+.tool-call-detail code {
+  display: block;
+  max-width: 320px;
+  margin-top: 2px;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  color: #5e675f;
+  font-size: 11px;
+}
+
+.benchmark-answer {
+  min-width: 320px;
+  white-space: pre-wrap;
+}
+
+.operations-grid.compact-five {
+  margin-top: 0;
+}
+
+.ai-metrics-table {
+  margin-top: 18px;
+}
+
+.assistant-stats-panel {
+  display: grid;
+  gap: 16px;
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid #e3eedf;
+}
+
+.compact-head {
+  margin-bottom: 0;
+}
+
+.assistant-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 18px;
+  border: 1px solid #e1eadf;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 16px 18px;
+  text-align: left;
+  border-bottom: 1px solid #e8efe5;
+  vertical-align: top;
+}
+
+.admin-table th {
+  background: #f4faf1;
+  color: #334334;
+  font-size: 15px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.admin-table td {
+  color: #273528;
+  font-size: 15px;
+}
+
+.admin-table tr:last-child td {
+  border-bottom: none;
+}
+
+.empty-cell,
+.empty-box {
+  text-align: center;
+  color: #7a857a;
+  padding: 28px;
+}
+
+.summary-cell {
+  min-width: 260px;
+  line-height: 1.6;
+}
+
+.role-tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 5px 12px;
+  background: #eef5ea;
+  color: #3f6847;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.role-tag.admin {
+  background: #eaf3ff;
+  color: #1f5ea8;
+}
+
+.table-danger-btn {
+  border: 1px solid #f0c6c6;
+  border-radius: 12px;
+  background: #fff5f5;
+  color: #b42318;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 8px 12px;
+}
+
+.table-danger-btn:hover {
+  background: #ffe9e9;
+}
+
+.table-danger-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.food-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 220px;
+}
+
+.food-tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 5px 10px;
+  background: #eff8ec;
+  color: #2f6f39;
+  font-size: 13px;
+}
+
+.muted-text {
+  color: #8a9489;
+}
+
+.meal-manager {
+  display: grid;
+  gap: 18px;
+  margin: 22px 0;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) auto auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.filter-grid.compact {
+  grid-template-columns: minmax(180px, 1fr) minmax(140px, 180px) minmax(140px, 180px) auto auto;
+  margin: 16px 0 20px;
+}
+
+.inline-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--text-soft);
+}
+
+.inline-check input {
+  width: 16px;
+  height: 16px;
+}
+
+.filter-grid input,
+.filter-grid select {
+  width: 100%;
+  border: 1px solid #dcebd8;
+  border-radius: 12px;
+  color: #213222;
+  font: inherit;
+  padding: 12px 14px;
+}
+
+.meal-analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.meal-stat-card,
+.meal-chart-card {
+  border: 1px solid #dcebd8;
+  border-radius: 18px;
+  background: #fbfdf9;
+  padding: 16px;
+}
+
+.meal-stat-card span {
+  color: #647264;
+  display: block;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.meal-stat-card strong {
+  color: #19321e;
+  font-size: 30px;
+}
+
+.meal-chart-card.wide {
+  grid-column: span 2;
+}
+
+.meal-chart-card h3 {
+  color: #172719;
+  font-size: 16px;
+  margin: 0 0 12px;
+}

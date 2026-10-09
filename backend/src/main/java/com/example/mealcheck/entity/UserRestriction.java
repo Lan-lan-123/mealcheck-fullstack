@@ -1,5 +1,7 @@
 package com.example.mealcheck.entity;
 
+import com.example.mealcheck.util.AppTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -41,10 +43,10 @@ public class UserRestriction {
     private String reason;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt = AppTime.now();
 
     @Column(nullable = false)
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    private LocalDateTime updatedAt = AppTime.now();
 
     @Version
     private long version;

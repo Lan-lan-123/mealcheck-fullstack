@@ -30,11 +30,11 @@ class KnowledgeEmbeddingServiceTest {
         when(response.statusCode()).thenReturn(200);
         when(response.body()).thenReturn("{\"data\":[{\"embedding\":[0.1,0.2,0.3]}]}");
         when(client.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn(response);
-        RemoteCallGuard guard = passThroughGuard();
+        AiHttpTransport transport = new AiHttpTransport(client, new RemoteCallGuard(properties), mock(AiBudgetService.class), properties, new ObjectMapper(), mock(ApplicationObservability.class), mock(AiCallConcurrency.class));
 
         KnowledgeEmbeddingService service = new KnowledgeEmbeddingService(
-                properties, client, new ObjectMapper(), new HashEmbeddingService(properties),
-                mock(ApplicationObservability.class), guard);
+                properties, new ObjectMapper(), new HashEmbeddingService(properties),
+                mock(ApplicationObservability.class), transport);
 
         assertThat(service.embed("蔬菜和蛋白质")).containsExactly(0.1f, 0.2f, 0.3f);
         assertThat(service.providerName()).contains("semantic-model");
@@ -46,18 +46,12 @@ class KnowledgeEmbeddingServiceTest {
         AppProperties properties = new AppProperties();
         HashEmbeddingService fallback = new HashEmbeddingService(properties);
         KnowledgeEmbeddingService service = new KnowledgeEmbeddingService(
-                properties, mock(HttpClient.class), new ObjectMapper(), fallback,
-                mock(ApplicationObservability.class), mock(RemoteCallGuard.class));
+                properties, new ObjectMapper(), fallback,
+                mock(ApplicationObservability.class), mock(AiHttpTransport.class));
 
         assertThat(service.embed("rice")).hasSize(512).containsExactly(fallback.embed("rice"));
         assertThat(service.providerName()).contains("fallback");
         assertThat(service.signature()).isEqualTo("hash-v1:512");
     }
 
-    private RemoteCallGuard passThroughGuard() {
-        RemoteCallGuard guard = mock(RemoteCallGuard.class);
-        when(guard.execute(any(), any())).thenAnswer(invocation ->
-                invocation.<Supplier<?>>getArgument(1).get());
-        return guard;
-    }
 }

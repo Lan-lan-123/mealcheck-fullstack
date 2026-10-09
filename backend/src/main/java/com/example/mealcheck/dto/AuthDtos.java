@@ -11,10 +11,17 @@ public class AuthDtos {
         private String username;
 
         @NotBlank
-        @Size(min = 6, max = 128)
+        @Size(min = 10, max = 128)
         private String password;
 
+        @Size(max = 64)
         private String displayName;
+
+        @NotBlank
+        private String captchaId;
+
+        @NotBlank
+        private String captchaAnswer;
 
         public String getUsername() {
             return username;
@@ -39,6 +46,11 @@ public class AuthDtos {
         public void setDisplayName(String displayName) {
             this.displayName = displayName;
         }
+
+        public String getCaptchaId() { return captchaId; }
+        public void setCaptchaId(String captchaId) { this.captchaId = captchaId; }
+        public String getCaptchaAnswer() { return captchaAnswer; }
+        public void setCaptchaAnswer(String captchaAnswer) { this.captchaAnswer = captchaAnswer; }
     }
 
     public static class LoginRequest {

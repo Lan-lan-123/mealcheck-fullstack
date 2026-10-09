@@ -15,7 +15,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,12 +28,56 @@ public class ImageUploadValidationService {
     };
 
     private final AppProperties properties;
+    private final java.util.concurrent.Semaphore decodeSlots;
+    private final java.util.concurrent.Semaphore admitted;
+    private final int capacity;
 
     public ImageUploadValidationService(AppProperties properties) {
         this.properties = properties;
+        int decodes = Math.max(1, properties.getUpload().getMaxConcurrentDecodes());
+        this.decodeSlots = new java.util.concurrent.Semaphore(decodes, true);
+        this.capacity = Math.addExact(decodes, Math.max(0, properties.getUpload().getMaxPendingDecodes()));
+        this.admitted = new java.util.concurrent.Semaphore(capacity);
     }
 
     public ValidatedImage validateAndNormalize(MultipartFile upload) {
+        if (!admitted.tryAcquire()) throw new UploadBusyException(capacity);
+        try {
+            if (!decodeSlots.tryAcquire(Math.max(0, properties.getUpload().getDecodeWaitMillis()),
+                    java.util.concurrent.TimeUnit.MILLISECONDS)) throw new UploadBusyException(capacity);
+            try { return normalize(upload); }
+            finally { decodeSlots.release(); }
+        } catch (InterruptedException error) {
+            Thread.currentThread().interrupt();
+            throw new UploadBusyException(capacity);
+        } finally {
+            admitted.release();
+        }
+    }
+
+    /** Hash the bounded input without decoding or retaining another full byte array. */
+    public String payloadHash(MultipartFile upload, String goal) {
+        if (upload == null || upload.isEmpty()) throw new IllegalArgumentException("请上传饭菜图片");
+        long maxBytes = Math.max(1024L, properties.getUpload().getMaxInputBytes());
+        if (upload.getSize() > maxBytes) throw new IllegalArgumentException("图片大小不能超过 " + readableMegabytes(maxBytes) + " MB");
+        try (InputStream stream = upload.getInputStream()) {
+            var digest = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] buffer = new byte[8192];
+            long total = 0;
+            int count;
+            while ((count = stream.read(buffer)) != -1) {
+                total += count;
+                if (total > maxBytes) throw new IllegalArgumentException("图片大小超过限制");
+                digest.update(buffer, 0, count);
+            }
+            digest.update(("\n" + goal).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            return java.util.HexFormat.of().formatHex(digest.digest());
+        } catch (IOException | java.security.NoSuchAlgorithmException error) {
+            throw new IllegalArgumentException("无法读取上传的图片", error);
+        }
+    }
+
+    private ValidatedImage normalize(MultipartFile upload) {
         if (upload == null || upload.isEmpty()) {
             throw new IllegalArgumentException("请上传饭菜图片");
         }
@@ -45,13 +88,7 @@ public class ImageUploadValidationService {
             throw new IllegalArgumentException("图片大小不能超过 " + readableMegabytes(maxBytes) + " MB");
         }
 
-        byte[] input = readBounded(upload, maxBytes);
-        ImageFormat signatureFormat = detectSignature(input);
-        if (signatureFormat == null) {
-            throw new IllegalArgumentException("仅支持 JPEG、PNG 或 WebP 图片");
-        }
-
-        BufferedImage decoded = decodeAndValidate(input, signatureFormat, policy);
+        BufferedImage decoded = readAndDecode(upload, maxBytes, policy);
         BufferedImage normalized = normalizeDimensions(decoded, policy.getNormalizedMaxEdge());
         byte[] encoded = encodeJpeg(normalized, policy.getJpegQuality());
         if (encoded.length > maxBytes) {
@@ -68,26 +105,53 @@ public class ImageUploadValidationService {
         );
     }
 
-    private byte[] readBounded(MultipartFile upload, long maxBytes) {
-        int readLimit = (int) Math.min(Integer.MAX_VALUE - 1L, maxBytes + 1L);
-        try (InputStream stream = upload.getInputStream()) {
-            byte[] bytes = stream.readNBytes(readLimit);
-            if (bytes.length > maxBytes) {
-                throw new IllegalArgumentException("图片大小不能超过 " + readableMegabytes(maxBytes) + " MB");
+    private BufferedImage readAndDecode(MultipartFile upload, long maxBytes, AppProperties.Upload policy) {
+        // Multipart data already resides on disk. Let ImageIO seek in its cache without
+        // retaining another complete compressed image (or readNBytes' temporary copies).
+        try (InputStream stream = upload.getInputStream();
+             InputStream bounded = new InputStream() {
+                 private long count;
+                 private void consumed(int n) {
+                     if (n > 0 && (count += n) > maxBytes) {
+                         throw new IllegalArgumentException("图片大小超过限制");
+                     }
+                 }
+                 @Override public int read() throws IOException {
+                     int value = stream.read();
+                     if (value >= 0) consumed(1);
+                     return value;
+                 }
+                 @Override public int read(byte[] bytes, int offset, int length) throws IOException {
+                     int n = stream.read(bytes, offset, (int) Math.min(length, maxBytes - count + 1));
+                     consumed(n);
+                     return n;
+                 }
+             };
+             ImageInputStream imageInput = ImageIO.createImageInputStream(bounded)) {
+            if (imageInput == null) throw new IllegalArgumentException("无法读取上传的图片");
+            byte[] signature = new byte[12];
+            int length = 0, n;
+            while (length < signature.length && (n = imageInput.read(signature, length, signature.length - length)) != -1) {
+                length += n;
             }
-            return bytes;
+            ImageFormat format = detectSignature(java.util.Arrays.copyOf(signature, length));
+            if (format == null) throw new IllegalArgumentException("仅支持 JPEG、PNG 或 WebP 图片");
+            imageInput.seek(0);
+            BufferedImage decoded = decodeAndValidate(imageInput, format, policy);
+            // Readers may stop at the image trailer. Validate the entire upload,
+            // including trailing bytes, even when MultipartFile.getSize() is wrong.
+            byte[] remainder = new byte[8192];
+            while (imageInput.read(remainder) != -1) { }
+            return decoded;
         } catch (IOException e) {
             throw new IllegalArgumentException("无法读取上传的图片", e);
         }
     }
 
-    private BufferedImage decodeAndValidate(byte[] input,
+    private BufferedImage decodeAndValidate(ImageInputStream imageInput,
                                             ImageFormat signatureFormat,
                                             AppProperties.Upload policy) {
-        try (ImageInputStream imageInput = ImageIO.createImageInputStream(new ByteArrayInputStream(input))) {
-            if (imageInput == null) {
-                throw new IllegalArgumentException("无法读取上传的图片");
-            }
+        try {
             Iterator<ImageReader> readers = ImageIO.getImageReaders(imageInput);
             if (!readers.hasNext()) {
                 throw new IllegalArgumentException("图片内容损坏或编码不受支持");
@@ -143,7 +207,12 @@ public class ImageUploadValidationService {
         int width = Math.max(1, (int) Math.round(source.getWidth() * scale));
         int height = Math.max(1, (int) Math.round(source.getHeight() * scale));
 
-        BufferedImage target = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        // Re-encoding below strips metadata regardless of whether pixels need copying.
+        if (width == source.getWidth() && height == source.getHeight()
+                && (source.getType() == BufferedImage.TYPE_3BYTE_BGR || source.getType() == BufferedImage.TYPE_INT_RGB)) {
+            return source;
+        }
+        BufferedImage target = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
         Graphics2D graphics = target.createGraphics();
         try {
             graphics.setColor(Color.WHITE);

@@ -12,9 +12,23 @@ import com.example.mealcheck.dto.AdminNonFoodUploadEventPageResponse;
 import com.example.mealcheck.dto.AdminStatsResponse;
 import com.example.mealcheck.dto.AdminUserPageResponse;
 import com.example.mealcheck.dto.AdminUserResponse;
+import com.example.mealcheck.dto.AssistantBenchmarkResponse;
+import com.example.mealcheck.dto.AssistantBenchmarkHistoryResponse;
+import com.example.mealcheck.dto.AssistantBenchmarkRequest;
+import com.example.mealcheck.dto.AssistantBenchmarkComparisonResponse;
+import com.example.mealcheck.dto.AssistantEvaluationReviewRequest;
+import com.example.mealcheck.dto.AssistantEvaluationReviewResponse;
+import com.example.mealcheck.dto.AssistantEvaluationCandidateRequest;
+import com.example.mealcheck.dto.AssistantEvaluationCandidateResponse;
+import com.example.mealcheck.dto.AssistantEvaluationCandidateStatusRequest;
 import com.example.mealcheck.dto.RagBenchmarkResponse;
 import com.example.mealcheck.security.UserPrincipal;
 import com.example.mealcheck.service.AdminService;
+import com.example.mealcheck.service.AdminAuditService;
+import com.example.mealcheck.service.AssistantBenchmarkService;
+import com.example.mealcheck.service.AssistantBenchmarkHistoryService;
+import com.example.mealcheck.service.AssistantEvaluationReviewService;
+import com.example.mealcheck.service.AssistantEvaluationCandidateService;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,9 +44,24 @@ import java.util.List;
 public class AdminController {
 
     private final AdminService adminService;
+    private final AdminAuditService adminAuditService;
+    private final AssistantBenchmarkService assistantBenchmarkService;
+    private final AssistantBenchmarkHistoryService assistantBenchmarkHistoryService;
+    private final AssistantEvaluationReviewService assistantEvaluationReviewService;
+    private final AssistantEvaluationCandidateService assistantEvaluationCandidateService;
 
-    public AdminController(AdminService adminService) {
+    public AdminController(AdminService adminService,
+                           AdminAuditService adminAuditService,
+                           AssistantBenchmarkService assistantBenchmarkService,
+                           AssistantBenchmarkHistoryService assistantBenchmarkHistoryService,
+                           AssistantEvaluationReviewService assistantEvaluationReviewService,
+                           AssistantEvaluationCandidateService assistantEvaluationCandidateService) {
         this.adminService = adminService;
+        this.adminAuditService = adminAuditService;
+        this.assistantBenchmarkService = assistantBenchmarkService;
+        this.assistantBenchmarkHistoryService = assistantBenchmarkHistoryService;
+        this.assistantEvaluationReviewService = assistantEvaluationReviewService;
+        this.assistantEvaluationCandidateService = assistantEvaluationCandidateService;
     }
 
     @GetMapping("/stats")
@@ -142,5 +171,89 @@ public class AdminController {
     @GetMapping("/knowledge/evaluation")
     public RagBenchmarkResponse ragEvaluation() {
         return adminService.ragBenchmark();
+    }
+
+    @PostMapping("/assistant/evaluation")
+    public AssistantBenchmarkResponse startAssistantEvaluation(
+            @RequestBody(required = false) AssistantBenchmarkRequest request,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        String mode = request == null ? "QUICK" : request.mode();
+        AssistantBenchmarkResponse response = assistantBenchmarkService.start(
+                mode, principal.getUsername());
+        adminAuditService.log(principal, "RUN_ASSISTANT_EVALUATION", "assistant_evaluation",
+                null, "runId=" + response.runId() + ", mode=" + response.mode()
+                        + ", cases=" + response.caseCount());
+        return response;
+    }
+
+    @GetMapping("/assistant/evaluation")
+    public AssistantBenchmarkResponse assistantEvaluationStatus() {
+        return assistantBenchmarkService.status();
+    }
+
+    @GetMapping("/assistant/evaluation/history")
+    public AssistantBenchmarkHistoryResponse assistantEvaluationHistory() {
+        return assistantBenchmarkHistoryService.recent();
+    }
+
+    @GetMapping("/assistant/evaluation/history/{runId}")
+    public AssistantBenchmarkResponse assistantEvaluationHistoryDetail(@PathVariable String runId) {
+        return assistantBenchmarkHistoryService.detail(runId);
+    }
+
+    @GetMapping("/assistant/evaluation/history/compare")
+    public AssistantBenchmarkComparisonResponse compareAssistantEvaluationHistory(
+            @RequestParam String baseRunId,
+            @RequestParam String candidateRunId) {
+        return assistantBenchmarkHistoryService.compare(baseRunId, candidateRunId);
+    }
+
+    @GetMapping("/assistant/evaluation/history/{runId}/reviews")
+    public AssistantEvaluationReviewResponse assistantEvaluationReviews(@PathVariable String runId) {
+        return assistantEvaluationReviewService.report(runId);
+    }
+
+    @PutMapping("/assistant/evaluation/history/{runId}/cases/{caseId}/review")
+    public AssistantEvaluationReviewResponse reviewAssistantEvaluationCase(
+            @PathVariable String runId,
+            @PathVariable String caseId,
+            @Valid @RequestBody AssistantEvaluationReviewRequest request,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        AssistantEvaluationReviewResponse response = assistantEvaluationReviewService.review(
+                runId, caseId, request, principal.getUsername());
+        adminAuditService.log(principal, "REVIEW_ASSISTANT_EVALUATION_CASE",
+                "assistant_evaluation_case", null,
+                "runId=" + runId + ", caseId=" + caseId + ", verdict=" + request.verdict());
+        return response;
+    }
+
+    @GetMapping("/assistant/evaluation/candidates")
+    public AssistantEvaluationCandidateResponse assistantEvaluationCandidates() {
+        return assistantEvaluationCandidateService.list();
+    }
+
+    @PostMapping("/assistant/evaluation/candidates")
+    public AssistantEvaluationCandidateResponse.Candidate addAssistantEvaluationCandidate(
+            @Valid @RequestBody AssistantEvaluationCandidateRequest request,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        AssistantEvaluationCandidateResponse.Candidate candidate =
+                assistantEvaluationCandidateService.create(request, principal.getUsername());
+        adminAuditService.log(principal, "ADD_ASSISTANT_EVALUATION_CANDIDATE",
+                "assistant_evaluation_candidate", candidate.id(),
+                "issueType=" + candidate.issueType() + ", sanitized=true");
+        return candidate;
+    }
+
+    @PutMapping("/assistant/evaluation/candidates/{id}/status")
+    public AssistantEvaluationCandidateResponse.Candidate updateAssistantEvaluationCandidateStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody AssistantEvaluationCandidateStatusRequest request,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        AssistantEvaluationCandidateResponse.Candidate candidate =
+                assistantEvaluationCandidateService.updateStatus(
+                        id, request.status(), principal.getUsername());
+        adminAuditService.log(principal, "REVIEW_ASSISTANT_EVALUATION_CANDIDATE",
+                "assistant_evaluation_candidate", id, "status=" + candidate.status());
+        return candidate;
     }
 }

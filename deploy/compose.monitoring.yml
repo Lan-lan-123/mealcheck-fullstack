@@ -1,0 +1,46 @@
+# Combine with docker-compose.prod.yml, in the same project. Only loopback ports.
+services:
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.retention.time=30d"]
+    volumes:
+      - ./deploy/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./deploy/monitoring/mealcheck-alerts.yml:/etc/prometheus/mealcheck-alerts.yml:ro
+      - mealcheck_prometheus:/prometheus
+    ports: ["127.0.0.1:19090:9090"]
+    restart: unless-stopped
+    networks: [app, monitoring, edge]
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    command: ["--config.file=/etc/alertmanager/alertmanager.yml"]
+    volumes:
+      - ./deploy/monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - mealcheck_alertmanager:/alertmanager
+    ports: ["127.0.0.1:19093:9093"]
+    restart: unless-stopped
+    networks: [monitoring, edge]
+  notification:
+    build: ./deploy/monitoring
+    environment:
+      MEALCHECK_ALERT_WEBHOOK: ${MEALCHECK_ALERT_WEBHOOK:?Set alert destination}
+      MEALCHECK_ALERT_PROVIDER: ${MEALCHECK_ALERT_PROVIDER:-generic}
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    networks: [monitoring, egress]
+  pushgateway:
+    image: prom/pushgateway:v1.11.1
+    command: ["--persistence.file=/pushgateway/metrics"]
+    # The official image creates /pushgateway owned by its unprivileged user.
+    volumes: [mealcheck_pushgateway:/pushgateway]
+    ports: ["127.0.0.1:19091:9091"]
+    restart: unless-stopped
+    networks: [monitoring, edge]
+networks:
+  monitoring:
+    internal: true
+volumes:
+  mealcheck_prometheus:
+  mealcheck_alertmanager:
+  mealcheck_pushgateway:

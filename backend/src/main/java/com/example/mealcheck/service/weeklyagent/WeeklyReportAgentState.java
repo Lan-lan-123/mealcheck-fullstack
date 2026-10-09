@@ -13,6 +13,7 @@ import java.util.Map;
 
 public class WeeklyReportAgentState extends AgentState {
     public static final String BASE_REPORT = "baseReport";
+    public static final String RUN_ID = "runId";
     public static final String PROFILE_CONTEXT = "profileContext";
     public static final String EVIDENCE = "evidence";
     public static final String TREND = "trend";
@@ -20,6 +21,7 @@ public class WeeklyReportAgentState extends AgentState {
     public static final String REVIEW = "review";
     public static final String REVISION_COUNT = "revisionCount";
     public static final String TRACE = "trace";
+    public static final String AI_CONTEXT = "aiContext";
 
     public static final Map<String, Channel<?>> SCHEMA = schema();
 
@@ -30,6 +32,13 @@ public class WeeklyReportAgentState extends AgentState {
     public WeeklyReportResponse baseReport() {
         return this.<WeeklyReportResponse>value(BASE_REPORT)
                 .orElseThrow(() -> new IllegalStateException("Weekly report graph is missing baseReport"));
+    }
+
+    public String runId() {
+        return value(RUN_ID, "");
+    }
+    public com.example.mealcheck.service.AiCallContext.Context aiContext() {
+        return this.<com.example.mealcheck.service.AiCallContext.Context>value(AI_CONTEXT).orElse(null);
     }
 
     public String profileContext() {
@@ -66,6 +75,8 @@ public class WeeklyReportAgentState extends AgentState {
     private static Map<String, Channel<?>> schema() {
         Map<String, Channel<?>> schema = new LinkedHashMap<>();
         schema.put(BASE_REPORT, Channels.base(WeeklyReportResponse::new));
+        schema.put(RUN_ID, Channels.base(() -> ""));
+        schema.put(AI_CONTEXT, Channels.base(() -> new com.example.mealcheck.service.AiCallContext.Context(null,Long.MAX_VALUE)));
         schema.put(PROFILE_CONTEXT, Channels.base(() -> ""));
         schema.put(EVIDENCE, Channels.base(() -> List.<KnowledgeSnippet>of()));
         schema.put(TREND, Channels.base(() -> new WeeklyTrendAnalysis("", List.of(), List.of(), false)));

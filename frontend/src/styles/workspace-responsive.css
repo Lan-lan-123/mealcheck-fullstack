@@ -1,0 +1,90 @@
+@media (min-width: 761px) and (max-height: 850px) {
+  .workspace-topbar { height: 64px; }
+  .workspace-content { padding-top: 22px; }
+  .workspace--admin .workspace-content { padding-bottom: 10px; }
+  .workspace .nav-group { min-height: 28px; padding-block: 4px 0; }
+  .workspace .nav-group button { padding-block: 3px; }
+  .workspace .workspace-nav-item { margin-block: 2px; padding-block: 9px; }
+  .workspace .sidebar-bottom { margin-top: 12px; }
+  .workspace-page-heading { margin-bottom: 18px; }
+  .workspace-page-heading h1 { font-size: 25px; margin: 5px 0; }
+  .workspace .admin-section { padding: 20px; margin-bottom: 16px; }
+  .workspace .admin-section h2 { margin-bottom: 12px; }
+  .workspace .admin-grid { margin-bottom: 16px; }
+  .workspace .admin-card { min-height: 94px; padding: 14px 18px; }
+  .overview-status-grid > div { padding: 10px 14px; }
+  .overview-status .admin-section-head { margin-bottom: 12px; }
+  .overview-alert-summary { margin-top: 12px; }
+  .overview-shortcuts button { padding: 12px 14px; }
+  .workspace .file-picker { min-height: 180px; }
+  .workspace .file-picker img { height: 180px; }
+  .workspace-footer { margin-top: 20px; padding-top: 14px; }
+}
+@media (max-height: 980px) { .workspace--admin .sidebar-note { display: none; } }
+@media (max-height: 640px) { .sidebar-note { display: none; } }
+@media (max-width: 1200px) {
+  .workspace { --sidebar-width: 220px; }
+  .workspace-content { padding: 26px; }
+  .workspace-topbar { padding-inline: 26px; }
+  .workspace .admin-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .workspace .analysis-layout { grid-template-columns: minmax(260px, 1fr) minmax(0, 1fr); gap: 16px; }
+  .workspace .insight-layout { grid-template-columns: 1fr; }
+  .workspace .card { padding: 20px; }
+  .overview-shortcuts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 761px) and (max-width: 1000px) {
+  .workspace .analysis-layout { grid-template-columns: 1fr; }
+  .workspace .filter-grid, .workspace .filter-grid.compact, .workspace .record-filter-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .workspace .admin-section { padding: 20px; }
+  .sidebar-note { display: none; }
+}
+@media (max-width: 760px) {
+  .workspace-frame { margin-left: 0; }
+  .workspace-sidebar { display: none; width: min(286px, calc(100vw - 44px)); padding-top: 22px; z-index: 1301; }
+  .workspace-sidebar.is-open { display: flex; }
+  .workspace-brand { padding-bottom: 20px; }
+  .workspace-brand strong { font-size: 19px; }
+  .workspace-brand small { font-size: 9px; }
+  .sidebar-close { margin-left: auto; width: 30px; }
+  .sidebar-backdrop { position: fixed; inset: 0; z-index: 1300; background: #172c2466; backdrop-filter: blur(3px); }
+  .workspace-topbar { height: 64px; padding: 0 16px; gap: 8px; }
+  .workspace-breadcrumb { gap: 8px; }
+  .workspace-breadcrumb > span, .workspace-breadcrumb > svg, .workspace-role { display: none; }
+  .workspace-topbar-actions { gap: 6px; }
+  .workspace-content { padding: 24px 16px 18px; }
+  .workspace-page-heading { margin-bottom: 22px; gap: 12px; }
+  .workspace-page-heading h1 { font-size: 24px; }
+  .workspace-page-heading p { font-size: 11px; }
+  .workspace-eyebrow { font-size: 8px; letter-spacing: 1.1px; }
+  .page-heading-icon { width: 46px; height: 46px; border-radius: 12px; }
+  .workspace .admin-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .workspace .admin-card { padding: 15px; min-height: 100px; }
+  .workspace .admin-card:last-child { grid-column: 1 / -1; }
+  .workspace .admin-number { font-size: 27px; }
+  .workspace .admin-section, .workspace .card { padding: 18px; }
+  .workspace .analysis-layout, .workspace .insight-layout { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .workspace .admin-info-grid, .workspace .filter-grid, .workspace .filter-grid.compact, .workspace .record-filter-form { grid-template-columns: minmax(0, 1fr); }
+  .workspace .admin-section-head { flex-direction: column; }
+  .workspace .admin-section-head > * { max-width: 100%; }
+  .workspace .upload-actions { grid-template-columns: minmax(0, 1fr); }
+  .workspace .goal-form { grid-template-columns: minmax(0, 1fr); }
+  .workspace .trend-head { gap: 10px; }
+  .daily-banner { padding: 20px; margin-bottom: 18px; }
+  .daily-banner h2 { font-size: 16px; }
+  .daily-banner-art { display: none; }
+  .daily-banner p { font-size: 11px; }
+  .analysis-empty { min-height: 320px; padding: 30px 0; }
+  .analysis-steps { gap: 12px; }
+  .workspace-footer { padding-bottom: 54px; }
+  .overview-status-grid { grid-template-columns: minmax(0, 1fr); }
+  .evaluation-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .overview-alert-summary { flex-wrap: wrap; }
+  .section-switcher { width: 100%; }
+  .section-switcher button { flex: 1 0 auto; }
+  .detail-drawer-head { padding: 18px; }
+  .detail-drawer-body { padding: 18px; }
+  .workspace .goal-settings .goal-form { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

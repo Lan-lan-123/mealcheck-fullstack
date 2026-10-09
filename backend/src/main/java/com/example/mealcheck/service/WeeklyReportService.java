@@ -1,5 +1,7 @@
 package com.example.mealcheck.service;
 
+import com.example.mealcheck.util.AppTime;
+
 import com.example.mealcheck.dto.WeeklyReportResponse;
 import com.example.mealcheck.entity.MealRecord;
 import com.example.mealcheck.entity.UserAccount;
@@ -45,68 +47,72 @@ public class WeeklyReportService {
 
     public WeeklyReportResponse generate(UserPrincipal principal, int days) {
         int safeDays = Math.max(1, Math.min(days, 30));
-        UserAccount user = userRepository.findByUsername(principal.getUsername()).orElseThrow();
-        return multiAgentOrchestrator.generate(user, generateForUser(user, safeDays));
+        UserAccount user = userRepository.findById(principal.getId()).orElseThrow();
+        return snapshotRepository.findFirstByUserAndDaysOrderByGeneratedAtDesc(user, safeDays)
+                .map(snapshot -> Jsons.fromJson(objectMapper, snapshot.getReportJson(), WeeklyReportResponse.class))
+                .orElseGet(() -> generateForUser(user, safeDays));
     }
 
     @Transactional(readOnly = true)
     public WeeklyReportResponse latest(UserPrincipal principal) {
-        UserAccount user = userRepository.findByUsername(principal.getUsername()).orElseThrow();
+        UserAccount user = userRepository.findById(principal.getId()).orElseThrow();
         return latest(user);
     }
 
     @Transactional(readOnly = true)
     public WeeklyReportResponse latest(UserAccount user) {
-        return snapshotRepository.findFirstByUserOrderByGeneratedAtDesc(user)
+        return snapshotRepository.findFirstByUserAndDaysOrderByGeneratedAtDesc(user, 7)
                 .map(snapshot -> Jsons.fromJson(objectMapper, snapshot.getReportJson(), WeeklyReportResponse.class))
                 .orElseGet(() -> generateForUser(user, 7));
     }
 
-    public WeeklyReportResponse generateAndStore(UserAccount user, int days) {
-        int safeDays = Math.max(1, Math.min(days, 30));
-        WeeklyReportResponse response = multiAgentOrchestrator.generate(user, generateForUser(user, safeDays));
-        WeeklyReportSnapshot snapshot = new WeeklyReportSnapshot();
-        snapshot.setUser(user);
-        snapshot.setDays(safeDays);
-        snapshot.setPeriodEnd(LocalDate.now());
-        snapshot.setPeriodStart(LocalDate.now().minusDays(safeDays - 1L));
-        snapshot.setReportJson(Jsons.toJson(objectMapper, response));
-        snapshotRepository.save(snapshot);
-        return response;
-    }
-
-    public WeeklyReportResponse generateAndStore(Long userId, int days) {
+    public WeeklyReportResponse generateForJob(Long userId, int days, Long jobId, LocalDate periodEnd) {
         UserAccount user = userRepository.findById(userId).orElseThrow();
-        return generateAndStore(user, days);
+        int safeDays = Math.max(1, Math.min(days, 30));
+        return multiAgentOrchestrator.generate(user, generateForUser(user, safeDays, periodEnd), jobId);
     }
 
     private WeeklyReportResponse generateForUser(UserAccount user, int safeDays) {
-        List<MealRecord> records = mealAnalysisService.listSince(user, safeDays);
+        return generateForUser(user, safeDays, AppTime.today());
+    }
+
+    private WeeklyReportResponse generateForUser(UserAccount user, int safeDays, LocalDate periodEnd) {
+        LocalDate periodStart = periodEnd.minusDays(safeDays - 1L);
+        List<MealRecord> records = mealAnalysisService.listPeriod(user, periodStart, periodEnd);
         WeeklyReportResponse response = new WeeklyReportResponse();
+        response.setPeriodStart(periodStart);
+        response.setPeriodEnd(periodEnd);
         response.setDays(safeDays);
         response.setTotalMeals(records.size());
 
         Map<String, Integer> categoryTotals = new LinkedHashMap<>();
+        Map<String, Integer> categoryMealCounts = new LinkedHashMap<>();
         Map<String, Integer> riskTotals = new LinkedHashMap<>();
         double scoreSum = 0.0;
         for (MealRecord record : records) {
             scoreSum += record.getScore();
             Jsons.readStringIntegerMap(objectMapper, record.getCategoryCountsJson())
-                    .forEach((key, value) -> categoryTotals.put(key, categoryTotals.getOrDefault(key, 0) + value));
+                    .forEach((key, value) -> {
+                        if (value != null && value > 0) {
+                            categoryTotals.merge(key, value, Integer::sum);
+                            categoryMealCounts.merge(key, 1, Integer::sum);
+                        }
+                    });
             List<?> risks = Jsons.readListOrEmpty(objectMapper, record.getRiskTagsJson());
-            for (Object risk : risks) {
+            for (Object risk : new java.util.LinkedHashSet<>(risks)) {
                 String key = String.valueOf(risk);
                 riskTotals.put(key, riskTotals.getOrDefault(key, 0) + 1);
             }
         }
 
         response.setCategoryTotals(categoryTotals);
+        response.setCategoryMealCounts(categoryMealCounts);
         response.setRiskTotals(riskTotals);
         response.setAverageScore(records.isEmpty() ? 0.0 : Math.round(scoreSum / records.size() * 10.0) / 10.0);
-        response.setHighlights(makeHighlights(records.size(), categoryTotals, riskTotals, response.getAverageScore()));
-        response.setNextWeekSuggestions(makeSuggestions(categoryTotals, riskTotals, records.size()));
+        response.setHighlights(makeHighlights(records.size(), categoryMealCounts, riskTotals, response.getAverageScore()));
+        response.setNextWeekSuggestions(makeSuggestions(categoryMealCounts, riskTotals, records.size()));
         response.setGoalType(userGoalService.effectiveGoal(user, "current"));
-        response.setGeneratedAt(LocalDateTime.now());
+        response.setGeneratedAt(AppTime.now());
         response.setReportText(makeReportText(response));
         return response;
     }

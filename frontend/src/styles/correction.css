@@ -1,0 +1,11 @@
+.correction-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(100px, 180px) auto; gap: 10px; margin: 12px 0; }
+@media (max-width: 600px) { .correction-row { grid-template-columns: minmax(0, 1fr); } }
+
+.evaluation-actions { display:flex; flex-wrap:wrap; gap:10px; margin:12px 0; }
+.evaluation-actions label { display:grid; gap:6px; }
+.evaluation-table { overflow:auto; max-width:100%; margin:16px 0; }
+.evaluation-table table { border-collapse:collapse; width:100%; }
+.evaluation-table th,.evaluation-table td { padding:10px; text-align:left; border-bottom:1px solid #dce6e2; white-space:nowrap; }
+.dataset-fingerprint { overflow-wrap:anywhere; font-size:12px; }
+.evaluation-review { display:grid; gap:14px; margin-top:20px; }
+@media(max-width:600px) { .evaluation-actions { flex-direction:column; } .evaluation-actions button { min-height:44px; } }

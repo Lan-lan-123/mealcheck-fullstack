@@ -1,5 +1,7 @@
 package com.example.mealcheck.service;
 
+import com.example.mealcheck.util.AppTime;
+
 import com.example.mealcheck.config.AppProperties;
 import com.example.mealcheck.dto.NonFoodUploadAlert;
 import com.example.mealcheck.entity.NonFoodUploadEvent;
@@ -48,7 +50,7 @@ public class NonFoodUploadGuardService {
         int limit = Math.max(1, properties.getUploadGuard().getNonFoodLimit());
         Duration ttl = Duration.ofMinutes(windowMinutes);
         String username = user.getUsername();
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = AppTime.now();
 
         long count = redisCacheService.increment(COUNT_KEY_PREFIX + username, ttl);
         boolean thresholdReached = count >= limit && count > 0;
@@ -116,7 +118,7 @@ public class NonFoodUploadGuardService {
         if (redisCacheService.get(ALLOW_KEY_PREFIX + username).isPresent()) {
             return false;
         }
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = AppTime.now();
         return restrictionRepository.findFirstByUsernameAndRestrictionTypeAndBlockedUntilAfter(
                         username, UserRestriction.NON_FOOD_UPLOAD, now)
                 .map(restriction -> {
@@ -135,7 +137,7 @@ public class NonFoodUploadGuardService {
             return Set.of();
         }
         return restrictionRepository.findActiveUsernames(
-                usernames, UserRestriction.NON_FOOD_UPLOAD, LocalDateTime.now());
+                usernames, UserRestriction.NON_FOOD_UPLOAD, AppTime.now());
     }
 
     public int blockMinutes() {
@@ -145,8 +147,8 @@ public class NonFoodUploadGuardService {
     public int remainingBlockMinutes(String username) {
         return redisCacheService.ttl(BLOCK_KEY_PREFIX + username)
                 .or(() -> restrictionRepository.findFirstByUsernameAndRestrictionTypeAndBlockedUntilAfter(
-                                username, UserRestriction.NON_FOOD_UPLOAD, LocalDateTime.now())
-                        .map(restriction -> Duration.between(LocalDateTime.now(), restriction.getBlockedUntil())))
+                                username, UserRestriction.NON_FOOD_UPLOAD, AppTime.now())
+                        .map(restriction -> Duration.between(AppTime.now(), restriction.getBlockedUntil())))
                 .map(duration -> Math.max(1, (int) Math.ceil(duration.getSeconds() / 60.0)))
                 .orElse(0);
     }

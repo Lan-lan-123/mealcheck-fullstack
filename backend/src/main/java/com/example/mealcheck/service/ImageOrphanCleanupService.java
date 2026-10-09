@@ -18,16 +18,22 @@ public class ImageOrphanCleanupService {
     private final MealRecordRepository mealRecordRepository;
     private final ImageStorageService imageStorageService;
     private final AppProperties properties;
+    private final BackgroundTaskDispatcher background;
 
     public ImageOrphanCleanupService(MealRecordRepository mealRecordRepository,
                                      ImageStorageService imageStorageService,
-                                     AppProperties properties) {
+                                     AppProperties properties, BackgroundTaskDispatcher background) {
         this.mealRecordRepository = mealRecordRepository;
         this.imageStorageService = imageStorageService;
         this.properties = properties;
+        this.background = background;
     }
 
     @Scheduled(cron = "${mealcheck.upload.orphan-cleanup-cron:0 30 3 * * *}")
+    public void tick() {
+        background.submit("image-orphan-cleanup", this::cleanup);
+    }
+
     public void cleanup() {
         if (!properties.getUpload().isOrphanCleanupEnabled()) {
             return;

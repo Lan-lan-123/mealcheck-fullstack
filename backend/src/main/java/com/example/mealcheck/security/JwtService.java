@@ -44,6 +44,19 @@ public class JwtService {
         return parseClaims(token).getSubject();
     }
 
+    public TokenIdentity extractIdentity(String token) {
+        Claims claims = parseClaims(token);
+        Long userId = claims.get("uid", Long.class);
+        String username = claims.getSubject();
+        if (userId == null || userId <= 0 || username == null || username.isBlank()
+                || claims.getExpiration() == null) {
+            throw new IllegalArgumentException("Token identity or expiration is missing");
+        }
+        return new TokenIdentity(userId, username);
+    }
+
+    public record TokenIdentity(Long userId, String username) {}
+
     public Duration remainingTtl(String token) {
         Date expiration = parseClaims(token).getExpiration();
         if (expiration == null) {

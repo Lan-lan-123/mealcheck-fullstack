@@ -1,12 +1,12 @@
 package com.example.mealcheck.service;
 
+import com.example.mealcheck.util.AppTime;
+
 import com.example.mealcheck.config.AppProperties;
 import com.example.mealcheck.dto.KnowledgeSnippet;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -63,15 +63,6 @@ public class KnowledgeIndexService {
         return vectorKnowledgeService.count();
     }
 
-    @EventListener(ApplicationReadyEvent.class)
-    public void autoIndex() {
-        clearSearchCache();
-        if (properties.getKnowledge().isAutoIndex()) {
-            reindex();
-            vectorKnowledgeService.refreshStaleEmbeddings();
-        }
-    }
-
     public int reindex() {
         long startedAt = observability.start();
         PgVectorKnowledgeService.SyncResult result = null;
@@ -82,7 +73,7 @@ public class KnowledgeIndexService {
             result = vectorKnowledgeService.syncSource(
                     SOURCE,
                     properties.getKnowledge().getSourceVersion(),
-                    LocalDateTime.now(),
+                    AppTime.now(),
                     chunks);
             clearSearchCache();
             observability.recordIndex(startedAt, "success", result);

@@ -58,8 +58,9 @@ class LangChainDietAssistantServiceTest {
                 mock(ApplicationObservability.class),
                 skillRegistry,
                 memoryService,
-                mock(RemoteCallGuard.class),
-                functionCallingService
+                mock(AssistantChatModelFactory.class),
+                functionCallingService,
+                new AssistantFunctionPromptFactory()
         );
 
         UserAccount user = new UserAccount();
@@ -77,7 +78,7 @@ class LangChainDietAssistantServiceTest {
         conversation.setTitle("减脂");
         WeeklyReportResponse report = new WeeklyReportResponse();
 
-        when(userRepository.findByUsername("demo")).thenReturn(Optional.of(user));
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(profileService.getOrRefresh(user)).thenReturn(profile);
         when(profileService.commonFoods(profile)).thenReturn(List.of("米饭", "鸡腿", "青菜"));
         when(profileService.commonRisks(profile)).thenReturn(List.of("高油"));
@@ -92,7 +93,7 @@ class LangChainDietAssistantServiceTest {
                 .thenAnswer(invocation -> new AssistantMemoryService.MemoryContext(
                         List.of(), "", "intent=FAT_LOSS", invocation.getArgument(1, String.class), 0));
         when(memoryService.selectWorkingMessages(any(), any())).thenReturn(List.of());
-        when(skillRegistry.select(any())).thenReturn(new AssistantSkillPlan(
+        when(skillRegistry.select(any(), anyList())).thenReturn(new AssistantSkillPlan(
                 "fat-loss", "减脂建议", "FAT_LOSS", "减脂 蛋白质 蔬菜", "保持可持续减脂"));
         when(toolOrchestrator.gather(eq(user), eq(conversation), any())).thenReturn(new AssistantToolOrchestrator.AssistantToolContext(
                 List.of(),

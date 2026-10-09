@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { createRequestScope } from '../utils/requestScope'
+import AiBudgetNotice from './AiBudgetNotice'
 import { Bot, MessageCircle, Plus, Send, Trash2, X } from 'lucide-react'
 import {
   askDietAssistant,
@@ -47,7 +49,31 @@ export default function AssistantCard({ onError }) {
   const [loading, setLoading] = useState(false)
   const [conversations, setConversations] = useState([])
   const [conversationId, setConversationId] = useState(null)
+  const [nextBefore, setNextBefore] = useState(null)
+  const [loadingOlder, setLoadingOlder] = useState(false)
+  const historyScope = useRef(createRequestScope())
+  const olderRequest = useRef(null)
+  const messageViewport = useRef(null)
+  const prependScroll = useRef(null)
   const [proactiveItems, setProactiveItems] = useState([])
+  const scope = useRef(createRequestScope())
+  const activeRequest = useRef(null)
+  const sidebarScope = useRef(createRequestScope())
+  useEffect(() => () => {
+    scope.current.invalidate()
+    sidebarScope.current.invalidate()
+    historyScope.current.invalidate()
+    olderRequest.current?.abort()
+    activeRequest.current?.abort()
+  }, [])
+
+  useLayoutEffect(() => {
+    if (prependScroll.current && messageViewport.current) {
+      const { height, top } = prependScroll.current
+      messageViewport.current.scrollTop = top + messageViewport.current.scrollHeight - height
+      prependScroll.current = null
+    }
+  }, [messages])
 
   const requestHistory = useMemo(
     () =>
@@ -64,18 +90,23 @@ export default function AssistantCard({ onError }) {
   }, [open])
 
   async function refreshSidebar() {
-    const [sessionData, proactiveData] = await Promise.all([
+    const current = sidebarScope.current.begin()
+    const [sessions, proactive] = await Promise.allSettled([
       assistantConversations(),
       assistantProactiveAdvice()
     ])
-    setConversations(sessionData || [])
-    setProactiveItems(proactiveData?.items || [])
+    if (!current()) return
+    if (sessions.status === 'fulfilled') setConversations(sessions.value || [])
+    if (proactive.status === 'fulfilled') setProactiveItems(proactive.value?.items || [])
   }
 
   async function submit(e, presetQuestion) {
     e?.preventDefault()
     const text = (presetQuestion || question).trim()
     if (!text || loading) return
+    const current = scope.current.begin()
+    const controller = new AbortController()
+    activeRequest.current = controller
 
     setLoading(true)
     setQuestion('')
@@ -83,7 +114,8 @@ export default function AssistantCard({ onError }) {
     setMessages(current => [...current, { role: 'user', text }])
 
     try {
-      const data = await askDietAssistant(text, requestHistory, conversationId)
+      const data = await askDietAssistant(text, requestHistory, conversationId, controller.signal)
+      if (!current()) return
       if (data.conversationId) {
         setConversationId(data.conversationId)
       }
@@ -101,29 +133,78 @@ export default function AssistantCard({ onError }) {
       ])
       await refreshSidebar()
     } catch (err) {
+      if (!current() || err.name === 'AbortError') return
       const message = err.message || '饮食助手暂时不可用，请稍后再试。'
       setMessages(current => [...current, { role: 'assistant', text: message }])
       onError?.(message)
     } finally {
-      setLoading(false)
+      if (current()) {
+        setLoading(false)
+        activeRequest.current = null
+      }
     }
   }
 
   async function openConversation(id) {
-    const data = await assistantConversation(id)
-    setConversationId(data.id)
-    setMessages(data.messages?.length ? data.messages : INITIAL_MESSAGES)
+    resetHistoryPage()
+    activeRequest.current?.abort()
+    const current = scope.current.begin()
+    setLoading(true)
+    try {
+      const data = await assistantConversation(id)
+      if (!current()) return
+      setConversationId(data.id)
+      setMessages(data.messages?.length ? data.messages : INITIAL_MESSAGES)
+      setNextBefore(data.hasMore ? data.nextBefore : null)
+    } catch (err) {
+      if (current()) onError?.(err.message)
+    } finally { if (current()) setLoading(false) }
+  }
+
+  function resetHistoryPage() {
+    historyScope.current.invalidate()
+    olderRequest.current?.abort()
+    olderRequest.current = null
+    prependScroll.current = null
+    setNextBefore(null)
+    setLoadingOlder(false)
+  }
+
+  async function loadOlderMessages() {
+    if (!conversationId || !nextBefore || loadingOlder || loading) return
+    const current = historyScope.current.begin()
+    const controller = new AbortController()
+    olderRequest.current = controller
+    setLoadingOlder(true)
+    try {
+      const data = await assistantConversation(conversationId, { before: nextBefore, signal: controller.signal })
+      if (!current()) return
+      if (messageViewport.current) prependScroll.current = {
+        height: messageViewport.current.scrollHeight, top: messageViewport.current.scrollTop
+      }
+      setMessages(messages => [...(data.messages || []), ...messages])
+      setNextBefore(data.hasMore ? data.nextBefore : null)
+    } catch (err) {
+      if (current() && err.name !== 'AbortError') onError?.(err.message)
+    } finally {
+      if (current()) { setLoadingOlder(false); olderRequest.current = null }
+    }
   }
 
   async function removeConversation(id) {
-    await deleteAssistantConversation(id)
-    if (conversationId === id) {
-      startNewConversation()
-    }
-    await refreshSidebar()
+    if (conversationId === id) startNewConversation()
+    try {
+      await deleteAssistantConversation(id)
+      await refreshSidebar()
+    } catch (err) { onError?.(err.message) }
   }
 
   function startNewConversation() {
+    resetHistoryPage()
+    scope.current.invalidate()
+    activeRequest.current?.abort()
+    activeRequest.current = null
+    setLoading(false)
     setConversationId(null)
     setMessages(INITIAL_MESSAGES)
   }
@@ -161,6 +242,7 @@ export default function AssistantCard({ onError }) {
             </aside>
 
             <div className="assistant-main">
+              <AiBudgetNotice revision={messages.length} />
               {!!proactiveItems.length && (
                 <div className="assistant-proactive">
                   <strong>主动建议</strong>
@@ -168,7 +250,10 @@ export default function AssistantCard({ onError }) {
                 </div>
               )}
 
-              <div className="assistant-messages">
+              <div className="assistant-messages" ref={messageViewport}>
+                {nextBefore && <button type="button" onClick={loadOlderMessages} disabled={loadingOlder || loading}>
+                  {loadingOlder ? '正在加载历史消息…' : '加载更早的消息'}
+                </button>}
                 {messages.map((message, index) => (
                   <div className={`assistant-message ${message.role}`} key={`${message.role}-${index}`}>
                     {message.riskLevel && (

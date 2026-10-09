@@ -1,0 +1,7 @@
+# Optional build-only mirror when Maven Central is unreachable.
+# docker compose -f docker-compose.yml -f docker-compose.mirror.yml --profile fullstack up --build -d
+services:
+  backend:
+    build:
+      args:
+        MAVEN_MIRROR_URL: https://maven.aliyun.com/repository/public

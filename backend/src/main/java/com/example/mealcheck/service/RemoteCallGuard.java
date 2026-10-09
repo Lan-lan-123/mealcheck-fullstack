@@ -20,10 +20,19 @@ public class RemoteCallGuard {
     }
 
     public <T> T execute(String name, Supplier<T> remoteCall) {
+        return execute(name, Duration.ofSeconds(Math.max(1, properties.getRemoteResilience().getTotalTimeoutSeconds())),
+                ignored -> remoteCall.get());
+    }
+
+    /** Each HTTP attempt receives the remaining budget, including prior attempts and backoff. */
+    public <T> T execute(String name, Duration attemptTimeout, java.util.function.Function<Duration,T> remoteCall) {
         String safeName = name == null || name.isBlank() ? "remote" : name.trim();
         CallState state = states.computeIfAbsent(safeName,
                 ignored -> new CallState(maxConcurrentCalls()));
         long now = System.nanoTime();
+        long deadline = now + Duration.ofSeconds(Math.max(1, properties.getRemoteResilience().getTotalTimeoutSeconds())).toNanos();
+        var context = AiCallContext.capture();
+        if (context != null) deadline = Math.min(deadline, context.deadlineNanos());
         if (state.openUntilNanos.get() > now) {
             throw new RemoteCallRejectedException("Remote circuit is open: " + safeName);
         }
@@ -34,8 +43,11 @@ public class RemoteCallGuard {
         try {
             RuntimeException lastFailure = null;
             for (int attempt = 1; attempt <= maxAttempts(); attempt++) {
+                checkInterrupted();
+                Duration remaining = remaining(deadline);
                 try {
-                    T result = remoteCall.get();
+                    T result = remoteCall.apply(remaining.compareTo(attemptTimeout) < 0 ? remaining : attemptTimeout);
+                    remaining(deadline);
                     state.consecutiveFailures.set(0);
                     state.openUntilNanos.set(0);
                     return result;
@@ -46,7 +58,7 @@ public class RemoteCallGuard {
                 } catch (RuntimeException e) {
                     lastFailure = e;
                     if (attempt < maxAttempts()) {
-                        backoff(attempt);
+                        backoff(attempt, e instanceof RetryableRemoteCallException retryable ? retryable.retryAfter() : null, deadline);
                     }
                 }
             }
@@ -63,13 +75,39 @@ public class RemoteCallGuard {
         }
     }
 
-    private void backoff(int attempt) {
-        long delay = Math.min(5000L, initialBackoffMillis() * (1L << Math.min(10, attempt - 1)));
+    private void backoff(int attempt, Duration retryAfter, long deadline) {
+        long cap = Math.min(5000L, initialBackoffMillis() * (1L << Math.min(10, attempt - 1)));
+        long delay = java.util.concurrent.ThreadLocalRandom.current().nextLong(cap + 1);
+        if (retryAfter!=null && retryAfter.compareTo(remaining(deadline))>=0)
+            throw new RemoteCallDeadlineException("Provider retry delay exceeds the remaining AI deadline");
+        if (retryAfter != null) delay = Math.max(delay, Math.max(0L, retryAfter.toMillis()));
+        if (Duration.ofMillis(delay).compareTo(remaining(deadline)) >= 0)
+            throw new RemoteCallDeadlineException("Provider retry delay exceeds the remaining AI deadline");
         try {
             Thread.sleep(delay);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RemoteCallRejectedException("Remote retry was interrupted");
+        }
+    }
+
+    private Duration remaining(long deadline) {
+        long nanos = deadline - System.nanoTime();
+        if (nanos <= 0) throw new RemoteCallDeadlineException("AI operation deadline exceeded");
+        return Duration.ofNanos(nanos);
+    }
+    private void checkInterrupted() {
+        if (Thread.currentThread().isInterrupted()) throw new RemoteCallRejectedException("AI operation was interrupted");
+    }
+    public static Duration parseRetryAfter(String value, java.time.Instant now) {
+        if (value == null || value.isBlank()) return null;
+        try { return Duration.ofSeconds(Math.max(0L, Long.parseLong(value.trim()))); }
+        catch (RuntimeException ignored) {
+            try {
+                var date = java.time.ZonedDateTime.parse(value.trim(), java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME).toInstant();
+                Duration delay = Duration.between(now, date);
+                return delay.isNegative() ? Duration.ZERO : delay;
+            } catch (RuntimeException invalid) { return null; }
         }
     }
 
@@ -114,5 +152,15 @@ public class RemoteCallGuard {
         public NonRetryableRemoteCallException(String message) {
             super(message);
         }
+    }
+    public static class RetryableRemoteCallException extends RuntimeException {
+        private final Duration retryAfter;
+        public RetryableRemoteCallException(int status, Duration retryAfter) {
+            super("AI provider returned HTTP " + status); this.retryAfter=retryAfter;
+        }
+        public Duration retryAfter() { return retryAfter; }
+    }
+    public static class RemoteCallDeadlineException extends RemoteCallRejectedException {
+        public RemoteCallDeadlineException(String message) { super(message); }
     }
 }

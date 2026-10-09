@@ -1,9 +1,13 @@
+import { formatTime } from '../utils/time'
 import { reportGenerationLabel, reportReviewLabel } from '../utils/mealLabels'
 
-export default function ReportView({ report, avgLabel, onOpenDetail }) {
+export default function ReportView({ report, avgLabel, onOpenDetail, onGenerate, jobStatus }) {
   return (
     <div className="card">
       <h2>本周饮食概览</h2>
+      {onGenerate && <button className="secondary-btn" type="button" onClick={onGenerate} disabled={!!jobStatus}>
+        {jobStatus === 'RETRY' ? '生成暂时失败，正在自动重试…' : jobStatus ? '周报生成中…' : '生成今日周报 / 查看进度'}
+      </button>}
       <div className="metrics">
         <div>
           <strong>{report.totalMeals}</strong>
@@ -16,10 +20,10 @@ export default function ReportView({ report, avgLabel, onOpenDetail }) {
         </div>
       </div>
 
-      <p>{report.reportText}</p>
+      <p className="report-summary">{report.reportText}</p>
 
       {report.generatedAt && (
-        <p className="report-meta">自动生成于 {new Date(report.generatedAt).toLocaleString()}</p>
+        <p className="report-meta">生成于 {formatTime(report.generatedAt)}</p>
       )}
       {report.generationMode && (
         <p className="report-meta">
@@ -27,33 +31,12 @@ export default function ReportView({ report, avgLabel, onOpenDetail }) {
         </p>
       )}
 
-      {!!report.nextWeekSuggestions?.length && (
-        <>
-          <h3>下周建议</h3>
-          <ul className="weekly-suggestions">
-            {report.nextWeekSuggestions.map(item => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </>
-      )}
+      <p className="hint">{report.periodStart} 至 {report.periodEnd} · 完整报告包含下周建议、风险统计和本期餐食明细。</p>
 
       <button className="ghost detail-report-btn" onClick={onOpenDetail} type="button">
         查看周报详情
       </button>
 
-      <h3>风险标签统计</h3>
-      <div className="chips risk">
-        {Object.entries(report.riskTotals || {}).length ? (
-          Object.entries(report.riskTotals).map(([k, v]) => (
-            <span key={k}>
-              {k} × {v}
-            </span>
-          ))
-        ) : (
-          <span>暂无风险标签</span>
-        )}
-      </div>
     </div>
   )
 }

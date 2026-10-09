@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
@@ -25,21 +24,18 @@ public class KnowledgeRerankerService {
     private static final int MAX_DOCUMENT_CHARS = 2400;
 
     private final AppProperties properties;
-    private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
     private final ApplicationObservability observability;
-    private final RemoteCallGuard remoteCallGuard;
+    private final AiHttpTransport transport;
 
     public KnowledgeRerankerService(AppProperties properties,
-                                    HttpClient httpClient,
-                                    ObjectMapper objectMapper,
+                                                ObjectMapper objectMapper,
                                     ApplicationObservability observability,
-                                    RemoteCallGuard remoteCallGuard) {
+                                    AiHttpTransport transport) {
         this.properties = properties;
-        this.httpClient = httpClient;
         this.objectMapper = objectMapper;
         this.observability = observability;
-        this.remoteCallGuard = remoteCallGuard;
+        this.transport = transport;
     }
 
     public List<KnowledgeSnippet> rerank(String query, List<KnowledgeSnippet> candidates, int limit) {
@@ -68,8 +64,7 @@ public class KnowledgeRerankerService {
                     .header("Authorization", "Bearer " + properties.getKnowledge().getRerankApiKey())
                     .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(body)))
                     .build();
-            HttpResponse<String> response = remoteCallGuard.execute(
-                    "reranker", () -> send(request));
+            HttpResponse<String> response = transport.send("reranker",request,objectMapper.writeValueAsString(body));
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
                 throw new IllegalStateException("rerank HTTP " + response.statusCode());
             }
@@ -217,27 +212,6 @@ public class KnowledgeRerankerService {
 
     private int safeTimeoutSeconds() {
         return Math.max(1, Math.min(60, properties.getKnowledge().getRerankTimeoutSeconds()));
-    }
-
-    private HttpResponse<String> send(HttpRequest request) {
-        try {
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() >= 400 && response.statusCode() < 500 && response.statusCode() != 429) {
-                throw new RemoteCallGuard.NonRetryableRemoteCallException(
-                        "Rerank request rejected with HTTP " + response.statusCode());
-            }
-            if (response.statusCode() == 429 || response.statusCode() >= 500) {
-                throw new IllegalStateException("Rerank request failed with HTTP " + response.statusCode());
-            }
-            return response;
-        } catch (RemoteCallGuard.NonRetryableRemoteCallException e) {
-            throw e;
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Rerank request was interrupted", e);
-        } catch (Exception e) {
-            throw new IllegalStateException("Rerank request failed: " + e.getMessage(), e);
-        }
     }
 
     private boolean hasText(String value) {

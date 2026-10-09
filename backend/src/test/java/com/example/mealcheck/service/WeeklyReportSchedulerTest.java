@@ -24,7 +24,7 @@ class WeeklyReportSchedulerTest {
         WeeklyReportJobService jobService = mock(WeeklyReportJobService.class);
         AppProperties properties = new AppProperties();
         properties.getWeeklyReport().setBatchSize(10);
-        WeeklyReportScheduler scheduler = new WeeklyReportScheduler(repository, jobService, properties);
+        WeeklyReportScheduler scheduler = new WeeklyReportScheduler(repository, jobService, properties,new BackgroundTaskDispatcher(Runnable::run));
 
         UserAccount first = user(1L);
         UserAccount second = user(2L);

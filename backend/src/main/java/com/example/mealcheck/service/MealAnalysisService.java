@@ -1,5 +1,7 @@
 package com.example.mealcheck.service;
 
+import com.example.mealcheck.util.AppTime;
+
 import com.example.mealcheck.dto.KnowledgeSnippet;
 import com.example.mealcheck.dto.FoodItem;
 import com.example.mealcheck.dto.MealAnalysisResponse;
@@ -39,6 +41,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class MealAnalysisService {
+    @org.springframework.beans.factory.annotation.Value("${mealcheck.ai.model:unknown}")
+    private String recognitionModel = "unknown";
 
     private final UserAccountRepository userRepository;
     private final MealRecordRepository mealRecordRepository;
@@ -52,6 +56,7 @@ public class MealAnalysisService {
     private final UserGoalService userGoalService;
     private final MealRecordPersistenceService persistenceService;
     private final ObjectMapper objectMapper;
+    private final com.example.mealcheck.config.AppProperties properties;
 
     public MealAnalysisService(UserAccountRepository userRepository,
                                MealRecordRepository mealRecordRepository,
@@ -64,7 +69,8 @@ public class MealAnalysisService {
                                NonFoodUploadGuardService nonFoodUploadGuardService,
                                UserGoalService userGoalService,
                                MealRecordPersistenceService persistenceService,
-                               ObjectMapper objectMapper) {
+                               ObjectMapper objectMapper,
+                               com.example.mealcheck.config.AppProperties properties) {
         this.userRepository = userRepository;
         this.mealRecordRepository = mealRecordRepository;
         this.recognitionService = recognitionService;
@@ -77,10 +83,27 @@ public class MealAnalysisService {
         this.userGoalService = userGoalService;
         this.persistenceService = persistenceService;
         this.objectMapper = objectMapper;
+        this.properties = properties;
     }
 
     public MealAnalysisResponse analyze(UserPrincipal principal, MultipartFile image, String goal) {
-        UserAccount user = userRepository.findByUsername(principal.getUsername()).orElseThrow();
+        PreparedMeal prepared = prepare(principal, image, goal);
+        persistenceService.saveWithImage(prepared.user(), prepared.record(), prepared.image());
+        return prepared.response();
+    }
+
+    PreparedMeal prepare(UserPrincipal principal, MultipartFile image, String goal) {
+        return prepareValidated(principal, imageUploadValidationService.validateAndNormalize(image), goal);
+    }
+
+    PreparedMeal prepareValidated(UserPrincipal principal, ValidatedImage validatedImage, String goal) {
+        try (var scope=AiCallContext.open(principal.getId(),java.time.Duration.ofSeconds(Math.max(1,properties.getAiBudget().getOperationTimeoutSeconds())))) {
+            return prepareValidatedWithinDeadline(principal,validatedImage,goal);
+        }
+    }
+
+    private PreparedMeal prepareValidatedWithinDeadline(UserPrincipal principal, ValidatedImage validatedImage, String goal) {
+        UserAccount user = userRepository.findById(principal.getId()).orElseThrow();
         if (nonFoodUploadGuardService.isBlocked(user.getUsername())) {
             throw new ResponseStatusException(
                     HttpStatus.TOO_MANY_REQUESTS,
@@ -89,7 +112,6 @@ public class MealAnalysisService {
             );
         }
 
-        ValidatedImage validatedImage = imageUploadValidationService.validateAndNormalize(image);
         RecognitionResult recognition = recognitionService.recognize(validatedImage);
         if (!recognition.isFoodImage()) {
             String reason = recognition.getRejectionReason() == null || recognition.getRejectionReason().isBlank()
@@ -109,6 +131,9 @@ public class MealAnalysisService {
         }
 
         String normalizedGoal = userGoalService.effectiveGoal(user, goal);
+        String originalFoods = Jsons.toJson(objectMapper, recognition.getFoods());
+        // Keep persisted foods and advice consistent with the facts used by scoring.
+        recognition.setFoods(scoringService.acceptedFoods(recognition));
         StructureEvaluation evaluation = scoringService.evaluate(recognition, normalizedGoal);
 
         String query = buildRagQuery(recognition, evaluation, normalizedGoal);
@@ -131,22 +156,30 @@ public class MealAnalysisService {
         record.setCategoryCountsJson(Jsons.toJson(objectMapper, evaluation.getCategoryCounts()));
         record.setRiskTagsJson(Jsons.toJson(objectMapper, evaluation.getRiskTags()));
         record.setAdvice(advice);
-        persistenceService.saveWithImage(user, record, validatedImage);
+        record.setOriginalFoodsJson(originalFoods);
+        record.setScoringVersion(MealScoringService.VERSION);
+        record.setRecognitionModel(recognitionModel);
 
         MealAnalysisResponse response = new MealAnalysisResponse();
-        response.setRecordId(record.getId());
         response.setCreatedAt(record.getCreatedAt());
         response.setRecognition(recognition);
         response.setEvaluation(evaluation);
         response.setReferences(snippets);
         response.setAdvice(advice);
+        response.setScoringVersion(record.getScoringVersion());
+        return new PreparedMeal(user, record, validatedImage, response);
+    }
 
-        return response;
+    record PreparedMeal(UserAccount user, MealRecord record, ValidatedImage image, MealAnalysisResponse draft) {
+        MealAnalysisResponse response() {
+            draft.setRecordId(record.getId());
+            return draft;
+        }
     }
 
     @Transactional(readOnly = true)
     public List<MealRecordResponse> listRecent(UserPrincipal principal) {
-        UserAccount user = userRepository.findByUsername(principal.getUsername()).orElseThrow();
+        UserAccount user = userRepository.findById(principal.getId()).orElseThrow();
 
         return mealRecordRepository.findTop30ByUserOrderByCreatedAtDesc(user).stream()
                 .map(this::toResponse)
@@ -162,13 +195,13 @@ public class MealAnalysisService {
                                                  LocalDate to,
                                                  Integer minScore,
                                                  Integer maxScore) {
-        UserAccount user = userRepository.findByUsername(principal.getUsername()).orElseThrow();
+        UserAccount user = userRepository.findById(principal.getId()).orElseThrow();
         int safePage = Math.max(0, page);
         int safeSize = Math.max(1, Math.min(size, 50));
 
         Page<MealRecord> records = mealRecordRepository.findAll(
                 userMealSpecification(user, goal, from, to, minScore, maxScore),
-                PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "createdAt"))
+                PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "createdAt", "id"))
         );
 
         return new MealRecordPageResponse(
@@ -194,10 +227,10 @@ public class MealAnalysisService {
                 predicates.add(cb.equal(root.get("goal"), goal.trim()));
             }
             if (from != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), from.atStartOfDay()));
+                predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), AppTime.startOfDay(from)));
             }
             if (to != null) {
-                predicates.add(cb.lessThan(root.get("createdAt"), to.plusDays(1).atStartOfDay()));
+                predicates.add(cb.lessThan(root.get("createdAt"), AppTime.startOfDay(to.plusDays(1))));
             }
             if (minScore != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("score"), minScore));
@@ -213,46 +246,51 @@ public class MealAnalysisService {
     public List<MealRecord> listSince(UserAccount user, int days) {
         return mealRecordRepository.findByUserAndCreatedAtAfterOrderByCreatedAtAsc(
                 user,
-                LocalDateTime.now().minusDays(days)
+                AppTime.now().minusDays(days)
         );
     }
 
     @Transactional(readOnly = true)
-    public UserMealTrendResponse trend(UserPrincipal principal, int days) {
-        UserAccount user = userRepository.findByUsername(principal.getUsername()).orElseThrow();
-        int safeDays = Math.max(7, Math.min(days, 90));
-        List<MealRecord> records = mealRecordRepository.findByUserAndCreatedAtAfterOrderByCreatedAtAsc(
-                user,
-                LocalDateTime.now().minusDays(safeDays)
-        );
+    public List<MealRecord> listPeriod(UserAccount user, LocalDate start, LocalDate end) {
+        return mealRecordRepository.findByUserAndCreatedAtGreaterThanEqualAndCreatedAtLessThanOrderByCreatedAtAsc(
+                user, AppTime.startOfDay(start), AppTime.startOfDay(end.plusDays(1)));
+    }
 
-        List<Integer> scores = records.stream()
-                .map(MealRecord::getScore)
-                .filter(Objects::nonNull)
+    @Transactional(readOnly = true, isolation = org.springframework.transaction.annotation.Isolation.REPEATABLE_READ)
+    public UserMealTrendResponse trend(UserPrincipal principal, int days) {
+        long userId = principal.getId();
+        int safeDays = Math.max(7, Math.min(days, 90));
+        LocalDateTime since = AppTime.now().minusDays(safeDays);
+        var summary = mealRecordRepository.trendSummary(userId, since);
+        int averageScore = summary.getAverage() == null ? 0 : (int) Math.round(summary.getAverage());
+        List<String> foods = new ArrayList<>(), risks = new ArrayList<>();
+        for (var fact : mealRecordRepository.trendFacts(userId, since)) {
+            List<FoodItem> parsedFoods = Jsons.fromJson(objectMapper, fact.getFoods(), new TypeReference<List<FoodItem>>() {});
+            if (parsedFoods != null) parsedFoods.stream().filter(Objects::nonNull).map(FoodItem::getName).forEach(foods::add);
+            List<String> parsedRisks = Jsons.fromJson(objectMapper, fact.getRisks(), new TypeReference<List<String>>() {});
+            if (parsedRisks != null) risks.addAll(parsedRisks);
+        }
+        var daily = mealRecordRepository.trendDailyScores(userId, since, AppTime.businessZone().getId()).stream()
+                .map(row -> new UserMealTrendResponse.MetricItem(row.getDay().toString(), (int) Math.round(row.getAverage())))
                 .toList();
-        int averageScore = scores.isEmpty()
-                ? 0
-                : (int) Math.round(scores.stream().mapToInt(Integer::intValue).average().orElse(0));
-        long lowScoreCount = scores.stream().filter(score -> score < 70).count();
-        long highScoreCount = scores.stream().filter(score -> score >= 80).count();
 
         return new UserMealTrendResponse(
                 safeDays,
-                records.size(),
+                summary.getTotal(),
                 averageScore,
-                lowScoreCount,
-                highScoreCount,
-                scoreTrend(records),
-                trendSuggestion(averageScore, lowScoreCount, records.size()),
-                dailyAverageScores(records),
-                topMetrics(records.stream().flatMap(record -> extractFoodNames(record).stream()).toList(), 8),
-                topMetrics(records.stream().flatMap(record -> extractRiskTags(record).stream()).toList(), 8)
+                summary.getLow(),
+                summary.getHigh(),
+                scoreTrend(summary),
+                trendSuggestion(averageScore, summary.getLow(), summary.getTotal()),
+                daily,
+                topMetrics(foods, 8),
+                topMetrics(risks, 8)
         );
     }
 
     @Transactional
     public void deleteMeal(UserPrincipal principal, Long id) {
-        UserAccount user = userRepository.findByUsername(principal.getUsername())
+        UserAccount user = userRepository.findByIdForUpdate(principal.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "用户不存在"));
 
         MealRecord record = mealRecordRepository.findById(id)
@@ -271,7 +309,7 @@ public class MealAnalysisService {
 
     @Transactional(readOnly = true)
     public Path getMealImagePath(UserPrincipal principal, Long id) {
-        UserAccount user = userRepository.findByUsername(principal.getUsername())
+        UserAccount user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "用户不存在"));
 
         MealRecord record = mealRecordRepository.findById(id)
@@ -316,41 +354,10 @@ public class MealAnalysisService {
         ));
 
         response.setAdvice(record.getAdvice());
+        response.setRevision(record.getRevision());
+        response.setScoringVersion(record.getScoringVersion());
 
         return response;
-    }
-
-    private List<String> extractFoodNames(MealRecord record) {
-        List<FoodItem> foods = Jsons.fromJson(
-                objectMapper,
-                record.getDetectedFoodsJson(),
-                new TypeReference<List<FoodItem>>() {}
-        );
-
-        if (foods == null) {
-            return List.of();
-        }
-
-        return foods.stream()
-                .map(FoodItem::getName)
-                .filter(name -> name != null && !name.isBlank())
-                .toList();
-    }
-
-    private List<String> extractRiskTags(MealRecord record) {
-        List<String> tags = Jsons.fromJson(
-                objectMapper,
-                record.getRiskTagsJson(),
-                new TypeReference<List<String>>() {}
-        );
-
-        if (tags == null) {
-            return List.of();
-        }
-
-        return tags.stream()
-                .filter(tag -> tag != null && !tag.isBlank())
-                .toList();
     }
 
     private List<UserMealTrendResponse.MetricItem> topMetrics(List<String> values, int limit) {
@@ -367,43 +374,14 @@ public class MealAnalysisService {
                 .toList();
     }
 
-    private List<UserMealTrendResponse.MetricItem> dailyAverageScores(List<MealRecord> records) {
-        return records.stream()
-                .filter(record -> record.getCreatedAt() != null && record.getScore() != null)
-                .collect(Collectors.groupingBy(
-                        record -> record.getCreatedAt().toLocalDate(),
-                        LinkedHashMap::new,
-                        Collectors.averagingInt(MealRecord::getScore)
-                ))
-                .entrySet()
-                .stream()
-                .sorted(Map.Entry.comparingByKey())
-                .map(entry -> new UserMealTrendResponse.MetricItem(
-                        entry.getKey().toString(),
-                        (int) Math.round(entry.getValue())
-                ))
-                .toList();
-    }
-
-    private String scoreTrend(List<MealRecord> records) {
-        List<MealRecord> scored = records.stream()
-                .filter(record -> record.getScore() != null)
-                .sorted(Comparator.comparing(MealRecord::getCreatedAt))
-                .toList();
-
-        if (scored.size() < 2) {
-            return "记录较少，趋势暂不明显";
-        }
-
-        int first = scored.get(0).getScore();
-        int last = scored.get(scored.size() - 1).getScore();
-        if (Math.abs(last - first) < 3) {
-            return "整体评分比较稳定";
-        }
+    private String scoreTrend(MealRecordRepository.TrendSummary summary) {
+        if (summary.getScored() < 2) return "记录较少，趋势暂不明显";
+        int first = summary.getFirstScore(), last = summary.getLastScore();
+        if (Math.abs(last - first) < 3) return "整体评分比较稳定";
         return last > first ? "最近评分有上升趋势" : "最近评分略有下降";
     }
 
-    private String trendSuggestion(int averageScore, long lowScoreCount, int total) {
+    private String trendSuggestion(int averageScore, long lowScoreCount, long total) {
         if (total == 0) {
             return "还没有足够记录。可以先上传几餐，系统会逐步生成更可靠的趋势判断。";
         }
@@ -447,18 +425,10 @@ public class MealAnalysisService {
             StructureEvaluation evaluation,
             String goal
     ) {
-        boolean hasSweetDrinkOrDessert = hasCategory(recognition, "drink")
-                || hasCategory(recognition, "dessert")
-                || containsFoodKeyword(
-                recognition,
-                List.of("可乐", "奶茶", "饮料", "果汁", "甜品", "蛋糕", "甜点")
-        );
-
-        boolean hasHighOilRisk = evaluation.getRiskTags().stream().anyMatch(tag -> tag.contains("高油"))
-                || containsFoodKeyword(
-                recognition,
-                List.of("炸", "油炸", "红烧", "肥肉", "五花肉", "干锅", "糖醋", "酱汁", "重油")
-        );
+        boolean hasSweetDrinkOrDessert = evaluation.getRiskTags().stream()
+                .anyMatch(tag -> tag.contains("含糖") || tag.contains("甜品"));
+        boolean hasHighOilRisk = evaluation.getRiskTags().stream()
+                .anyMatch(tag -> tag.contains("高油") || tag.contains("油炸"));
 
         boolean hasStaple = hasCategory(recognition, "staple");
         boolean hasProtein = hasCategory(recognition, "protein") || hasCategory(recognition, "dairy");
@@ -512,20 +482,6 @@ public class MealAnalysisService {
 
         return recognition.getFoods().stream()
                 .anyMatch(food -> category.equalsIgnoreCase(food.getCategory()));
-    }
-
-    private boolean containsFoodKeyword(RecognitionResult recognition, List<String> keywords) {
-        if (recognition == null || recognition.getFoods() == null) {
-            return false;
-        }
-
-        return recognition.getFoods().stream().anyMatch(food -> {
-            String name = food.getName() == null ? "" : food.getName();
-            String note = food.getNote() == null ? "" : food.getNote();
-            String text = name + " " + note;
-
-            return keywords.stream().anyMatch(text::contains);
-        });
     }
 
 }

@@ -1,0 +1,86 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Test backend
+        working-directory: backend
+        run: mvn --batch-mode --no-transfer-progress verify -Pintegration
+      - name: Build frontend
+        working-directory: frontend
+        run: npm ci && npm test && npm run build
+      - name: Browser acceptance
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium && npm run test:e2e
+      - name: Operations and recognition evaluation contracts
+        run: python -m unittest discover -s tools -p test_operations.py -v
+      - name: Capacity acceptance contracts
+        run: python -m unittest discover -s loadtests -p test_capacity_acceptance.py -v
+      - uses: grafana/setup-k6-action@v1
+      - name: Isolated capacity and dependency recovery acceptance
+        run: |
+          python -m pip install Pillow
+          docker compose -p mealcheck-capacity-acceptance -f deploy/compose.acceptance.yml up -d --wait --wait-timeout 90
+          python loadtests/capacity_acceptance.py --output loadtests/results/ci-acceptance --fault-checks
+      - name: Cleanup isolated capacity stack
+        if: always()
+        run: docker compose -p mealcheck-capacity-acceptance -f deploy/compose.acceptance.yml down --volumes
+      - name: Trusted proxy chain and forged header regression
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y nginx
+          python tools/test_proxy_headers.py --nginx /usr/sbin/nginx
+      - name: Validate analysis and backup alerts
+        run: docker run --rm --entrypoint promtool -v "$PWD/deploy/monitoring:/rules:ro" prom/prometheus:v3.5.0 check rules /rules/mealcheck-alerts.yml
+      - name: Isolated database and image restore drill
+        run: python deploy/scripts/recovery.py self-test --migrations backend/src/main/resources/db/migration --output deploy/recovery-results/ci-self-test
+      - name: Production profile startup and HTTP smoke
+        run: |
+          docker compose -p mealcheck-reliability-smoke --env-file deploy/smoke.env -f docker-compose.prod.yml -f deploy/compose.smoke.yml up --build -d --wait --wait-timeout 180
+          python deploy/scripts/smoke.py --base-url http://127.0.0.1:18080
+          python deploy/scripts/recovery.py backup --project mealcheck-reliability-smoke --compose docker-compose.prod.yml --compose deploy/compose.smoke.yml --env-file deploy/smoke.env --output deploy/recovery-results/ci-stack-backup
+          python deploy/scripts/recovery.py drill --backup deploy/recovery-results/ci-stack-backup --output deploy/recovery-results/ci-stack-restored
+      - name: Cleanup isolated smoke stack
+        if: always()
+        run: docker compose -p mealcheck-reliability-smoke --env-file deploy/smoke.env -f docker-compose.prod.yml -f deploy/compose.smoke.yml down --volumes
+      - name: Upload verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reliability-verification
+          path: |
+            backend/target/failsafe-reports/
+            backend/target/trend-query-plans.txt
+            loadtests/results/**/acceptance.json
+            loadtests/results/**/query-plans.txt
+            loadtests/results/**/*-metrics.prom
+            frontend/playwright-report/
+            deploy/recovery-results/**/verification.json
+      - name: Validate production compose file
+        env:
+          SPRING_DATASOURCE_PASSWORD: ci-database-password-not-for-production
+          SPRING_REDIS_PASSWORD: ci-redis-password-not-for-production
+          SPRING_RABBITMQ_PASSWORD: ci-rabbit-password-not-for-production
+          MEALCHECK_JWT_SECRET: ci-only-jwt-secret-that-is-longer-than-forty-eight-random-bytes
+          MEALCHECK_CORS_ALLOWED_ORIGINS: https://mealcheck.example.com
+        run: docker compose -f docker-compose.prod.yml config --quiet

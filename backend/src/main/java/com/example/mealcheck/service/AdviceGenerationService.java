@@ -39,6 +39,10 @@ public class AdviceGenerationService {
         }
     }
 
+    public String correctedAdvice(RecognitionResult recognition, StructureEvaluation evaluation, String goal) {
+        return localAdvice(recognition, evaluation, List.of(), goal) + "\n以上为用户纠正后重新计算的规则建议。";
+    }
+
     private List<Map<String, Object>> adviceMessages(RecognitionResult recognition,
                                                      StructureEvaluation evaluation,
                                                      List<KnowledgeSnippet> snippets,

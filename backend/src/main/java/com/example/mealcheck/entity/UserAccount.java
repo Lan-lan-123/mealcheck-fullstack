@@ -1,5 +1,7 @@
 package com.example.mealcheck.entity;
 
+import com.example.mealcheck.util.AppTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -30,7 +32,7 @@ public class UserAccount {
     private String role = "USER";
 
     @Column(nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt = AppTime.now();
 
     // 最后一次上传图片时间
     @Column(name = "last_upload_at")

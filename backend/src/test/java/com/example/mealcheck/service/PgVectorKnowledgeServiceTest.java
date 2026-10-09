@@ -28,6 +28,8 @@ class PgVectorKnowledgeServiceTest {
         JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
         KnowledgeEmbeddingService embeddingService = mock(KnowledgeEmbeddingService.class);
         AppProperties properties = new AppProperties();
+        when(jdbcTemplate.queryForObject(anyString(), eq(String.class))).thenReturn("halfvec(512)");
+        when(embeddingService.signature()).thenReturn("semantic-v1");
         when(embeddingService.embed("减脂晚餐")).thenReturn(new float[]{0.1f, 0.2f});
         when(embeddingService.toPgVector(any(float[].class))).thenReturn("[0.1,0.2]");
         PgVectorKnowledgeService service = new PgVectorKnowledgeService(
@@ -67,6 +69,7 @@ class PgVectorKnowledgeServiceTest {
                 .thenAnswer(invocation -> List.of(
                         ((RowMapper<?>) invocation.getArgument(1)).mapRow(resultSet, 0)));
         when(embeddingService.signature()).thenReturn("semantic-v1");
+        when(jdbcTemplate.queryForObject(anyString(), eq(String.class))).thenReturn("halfvec(512)");
 
         PgVectorKnowledgeService service = new PgVectorKnowledgeService(
                 jdbcTemplate, embeddingService, new AppProperties(), persistenceService, chunker,
@@ -84,43 +87,33 @@ class PgVectorKnowledgeServiceTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    void migratesExistingKnowledgeColumnToConfiguredDimension() {
-        JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
-        KnowledgeEmbeddingService embeddingService = mock(KnowledgeEmbeddingService.class);
-        KnowledgeVectorPersistenceService persistenceService = mock(KnowledgeVectorPersistenceService.class);
+    void beanStartupDoesNotMigrateOrCallEmbeddingProvider() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        KnowledgeEmbeddingService embedding = mock(KnowledgeEmbeddingService.class);
+        KnowledgeVectorPersistenceService persistence = mock(KnowledgeVectorPersistenceService.class);
         AppProperties properties = new AppProperties();
-        when(jdbcTemplate.queryForObject(any(String.class), eq(String.class))).thenReturn("vector(384)");
-        when(embeddingService.signature()).thenReturn("hash-v1:512");
-        when(embeddingService.providerName()).thenReturn("HashEmbeddingService / Development fallback");
-        doReturn(List.of()).when(jdbcTemplate).query(
-                eq("SELECT id, title, content FROM knowledge_chunks ORDER BY id"), any(RowMapper.class));
-
-        PgVectorKnowledgeService service = new PgVectorKnowledgeService(
-                jdbcTemplate, embeddingService, properties, persistenceService,
+        var service = new PgVectorKnowledgeService(jdbc, embedding, properties, persistence,
                 mock(MarkdownKnowledgeChunker.class), new VectorCompressionService(properties));
-
-        service.afterPropertiesSet();
-
-        verify(persistenceService).migrateStorage(512, false, List.of(), "hash-v1:512:halfvec-v1");
+        try (var context = new org.springframework.context.annotation.AnnotationConfigApplicationContext()) {
+            context.registerBean(PgVectorKnowledgeService.class, () -> service);
+            context.refresh();
+            org.mockito.Mockito.verifyNoInteractions(jdbc, embedding, persistence);
+        }
     }
 
     @Test
-    void convertsVectorToHalfvecWithoutRegeneratingSameDimensionEmbeddings() {
-        JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
-        KnowledgeEmbeddingService embeddingService = mock(KnowledgeEmbeddingService.class);
-        KnowledgeVectorPersistenceService persistenceService = mock(KnowledgeVectorPersistenceService.class);
+    void incompatibleVectorStorageKeepsKeywordSearchAvailableWithoutModelCalls() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        KnowledgeEmbeddingService embedding = mock(KnowledgeEmbeddingService.class);
         AppProperties properties = new AppProperties();
-        when(jdbcTemplate.queryForObject(any(String.class), eq(String.class))).thenReturn("vector(512)");
-        when(embeddingService.signature()).thenReturn("semantic-v1");
-
-        PgVectorKnowledgeService service = new PgVectorKnowledgeService(
-                jdbcTemplate, embeddingService, properties, persistenceService,
-                mock(MarkdownKnowledgeChunker.class), new VectorCompressionService(properties));
-
-        service.afterPropertiesSet();
-
-        verify(persistenceService).migrateStorage(512, true, List.of(), "semantic-v1:halfvec-v1");
-        verify(embeddingService, never()).embed(anyString());
+        when(jdbc.queryForObject(anyString(), eq(String.class))).thenReturn("vector(384)");
+        var service = new PgVectorKnowledgeService(jdbc, embedding, properties,
+                mock(KnowledgeVectorPersistenceService.class), mock(MarkdownKnowledgeChunker.class), new VectorCompressionService(properties));
+        service.search("晚餐", 5);
+        verify(embedding, never()).embed(anyString());
+        String sql = mockingDetails(jdbc).getInvocations().stream()
+                .filter(invocation -> "query".equals(invocation.getMethod().getName()))
+                .map(invocation -> invocation.getArgument(0, String.class)).findFirst().orElseThrow();
+        assertThat(sql).contains("keyword_title_candidates", "keyword_content_candidates").doesNotContain("<=>");
     }
 }

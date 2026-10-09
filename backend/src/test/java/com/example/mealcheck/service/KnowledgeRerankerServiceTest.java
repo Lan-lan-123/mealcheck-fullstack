@@ -36,9 +36,9 @@ class KnowledgeRerankerServiceTest {
                 ]}
                 """);
         when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn(response);
-        RemoteCallGuard guard = passThroughGuard();
+        AiHttpTransport transport = new AiHttpTransport(httpClient, new RemoteCallGuard(properties), mock(AiBudgetService.class), properties, new ObjectMapper(), mock(ApplicationObservability.class), mock(AiCallConcurrency.class));
         KnowledgeRerankerService service = new KnowledgeRerankerService(
-                properties, httpClient, new ObjectMapper(), observability, guard);
+                properties, new ObjectMapper(), observability, transport);
         List<KnowledgeSnippet> candidates = List.of(
                 new KnowledgeSnippet(1L, "通用建议", "内容", "general", 0.90),
                 new KnowledgeSnippet(2L, "减脂建议", "内容", "fat_loss", 0.80)
@@ -64,8 +64,8 @@ class KnowledgeRerankerServiceTest {
         AppProperties properties = new AppProperties();
         HttpClient httpClient = mock(HttpClient.class);
         KnowledgeRerankerService service = new KnowledgeRerankerService(
-                properties, httpClient, new ObjectMapper(), mock(ApplicationObservability.class),
-                mock(RemoteCallGuard.class));
+                properties, new ObjectMapper(), mock(ApplicationObservability.class),
+                mock(AiHttpTransport.class));
         List<KnowledgeSnippet> candidates = List.of(
                 new KnowledgeSnippet(1L, "first", "content", "general", 0.9),
                 new KnowledgeSnippet(2L, "second", "content", "general", 0.8)
@@ -91,10 +91,4 @@ class KnowledgeRerankerServiceTest {
         return properties;
     }
 
-    private RemoteCallGuard passThroughGuard() {
-        RemoteCallGuard guard = mock(RemoteCallGuard.class);
-        when(guard.execute(any(), any())).thenAnswer(invocation ->
-                invocation.<Supplier<?>>getArgument(1).get());
-        return guard;
-    }
 }

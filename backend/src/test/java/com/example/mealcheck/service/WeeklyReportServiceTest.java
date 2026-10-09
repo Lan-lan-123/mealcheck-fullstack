@@ -45,14 +45,14 @@ class WeeklyReportServiceTest {
         record.setCategoryCountsJson("{\"protein\":1}");
         record.setRiskTagsJson("[\"high_oil\"]");
 
-        when(userRepository.findByUsername("demo")).thenReturn(Optional.of(user));
-        when(mealAnalysisService.listSince(user, 7)).thenReturn(List.of(record));
+        when(userRepository.findById(9L)).thenReturn(Optional.of(user));
+        when(mealAnalysisService.listPeriod(org.mockito.ArgumentMatchers.eq(user), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any())).thenReturn(List.of(record));
         when(userGoalService.effectiveGoal(user, "current")).thenReturn("fat_loss");
-        when(orchestrator.generate(org.mockito.ArgumentMatchers.eq(user), org.mockito.ArgumentMatchers.any()))
-                .thenAnswer(invocation -> invocation.getArgument(1));
+
 
         WeeklyReportResponse response = service.generate(new UserPrincipal(user), 7);
 
+        org.mockito.Mockito.verifyNoInteractions(orchestrator);
         assertThat(response.getGoalType()).isEqualTo("fat_loss");
         assertThat(response.getNextWeekSuggestions()).isNotEmpty();
         assertThat(response.getGeneratedAt()).isNotNull();

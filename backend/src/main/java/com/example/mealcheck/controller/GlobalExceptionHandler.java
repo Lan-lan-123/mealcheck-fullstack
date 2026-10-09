@@ -1,5 +1,7 @@
 package com.example.mealcheck.controller;
 
+import com.example.mealcheck.util.AppTime;
+
 import com.example.mealcheck.dto.ApiErrorResponse;
 import com.example.mealcheck.service.AiChatClient;
 import com.example.mealcheck.service.RateLimitExceededException;
@@ -18,6 +20,31 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler(com.example.mealcheck.service.AnalysisAdmissionException.class)
+    public ResponseEntity<ApiErrorResponse> analysisBusy(com.example.mealcheck.service.AnalysisAdmissionException ex) {
+        return ResponseEntity.status(429).header("Retry-After", "3")
+                .body(new ApiErrorResponse(429,"Too Many Requests",ex.code(),ex.getMessage(),AppTime.now()));
+    }
+
+    @ExceptionHandler(com.example.mealcheck.service.AiBudgetService.BudgetExceededException.class)
+    public ResponseEntity<ApiErrorResponse> aiBudget(com.example.mealcheck.service.AiBudgetService.BudgetExceededException ex) {
+        return ResponseEntity.status(429).header("Retry-After",Long.toString(ex.retryAfter()))
+                .body(new ApiErrorResponse(429,"Too Many Requests","AI_BUDGET_EXCEEDED",ex.getMessage(),AppTime.now()));
+    }
+    @ExceptionHandler(com.example.mealcheck.service.AiBudgetService.BudgetUnavailableException.class)
+    public ResponseEntity<ApiErrorResponse> aiBudgetUnavailable(com.example.mealcheck.service.AiBudgetService.BudgetUnavailableException ex) {
+        return error(HttpStatus.SERVICE_UNAVAILABLE,"AI_BUDGET_UNAVAILABLE",ex.getMessage());
+    }
+    @ExceptionHandler(com.example.mealcheck.service.RemoteCallGuard.RemoteCallDeadlineException.class)
+    public ResponseEntity<ApiErrorResponse> aiDeadline(com.example.mealcheck.service.RemoteCallGuard.RemoteCallDeadlineException ex) {
+        return error(HttpStatus.GATEWAY_TIMEOUT,"AI_DEADLINE_EXCEEDED","AI 处理超时，请稍后重试。");
+    }
+
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> accessDenied(org.springframework.security.access.AccessDeniedException ex) {
+        return error(HttpStatus.FORBIDDEN, "ACCESS_DENIED", "没有权限执行此操作。");
+    }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiErrorResponse> badCredentials(BadCredentialsException ex) {
@@ -59,9 +86,9 @@ public class GlobalExceptionHandler {
         ApiErrorResponse body = new ApiErrorResponse(
                 HttpStatus.TOO_MANY_REQUESTS.value(),
                 HttpStatus.TOO_MANY_REQUESTS.getReasonPhrase(),
-                "RATE_LIMIT_EXCEEDED",
+                ex.getCode(),
                 safeMessage(ex, "请求太频繁，请稍后重试。"),
-                LocalDateTime.now()
+                AppTime.now()
         );
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                 .headers(RateLimitHttpHeaders.from(ex.getLimit(), ex.getRemaining(), ex.getRetryAfter()))
@@ -86,7 +113,7 @@ public class GlobalExceptionHandler {
                 status.getReasonPhrase(),
                 code,
                 message,
-                LocalDateTime.now()
+                AppTime.now()
         );
         return ResponseEntity.status(status).body(body);
     }

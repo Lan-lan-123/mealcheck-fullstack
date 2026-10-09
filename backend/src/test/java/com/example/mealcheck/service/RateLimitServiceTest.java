@@ -8,6 +8,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -19,7 +21,7 @@ class RateLimitServiceTest {
         ApplicationObservability observability = mock(ApplicationObservability.class);
         AppProperties properties = new AppProperties();
         when(redis.consumeTokenBucket(
-                "rate:bucket:assistant:demo", 5, 1, Duration.ofSeconds(3), 1
+                startsWith("rate:bucket:assistant:"), eq(5L), eq(1L), eq(Duration.ofSeconds(3)), eq(1L)
         )).thenReturn(Optional.of(new RedisCacheService.TokenBucketResult(true, 4, Duration.ZERO)));
         RateLimitService service = new RateLimitService(redis, properties, observability);
 
@@ -37,7 +39,7 @@ class RateLimitServiceTest {
         ApplicationObservability observability = mock(ApplicationObservability.class);
         AppProperties properties = new AppProperties();
         when(redis.consumeTokenBucket(
-                "rate:bucket:meal-analysis:demo", 3, 1, Duration.ofSeconds(6), 1
+                startsWith("rate:bucket:meal-analysis:"), eq(3L), eq(1L), eq(Duration.ofSeconds(6)), eq(1L)
         )).thenReturn(Optional.of(new RedisCacheService.TokenBucketResult(
                 false, 0, Duration.ofMillis(2500))));
         RateLimitService service = new RateLimitService(redis, properties, observability);
@@ -55,7 +57,7 @@ class RateLimitServiceTest {
         ApplicationObservability observability = mock(ApplicationObservability.class);
         AppProperties properties = new AppProperties();
         when(redis.consumeTokenBucket(
-                "rate:bucket:assistant:demo", 5, 1, Duration.ofSeconds(3), 1
+                startsWith("rate:bucket:assistant:"), eq(5L), eq(1L), eq(Duration.ofSeconds(3)), eq(1L)
         )).thenReturn(Optional.empty());
         RateLimitService service = new RateLimitService(redis, properties, observability);
 

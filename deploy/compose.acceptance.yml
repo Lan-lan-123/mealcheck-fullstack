@@ -1,0 +1,57 @@
+# Scratch acceptance only: no production env files, bind ports to loopback, no persistent volumes.
+name: mealcheck-capacity-acceptance
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment: {POSTGRES_DB: mealcheck, POSTGRES_USER: mealcheck, POSTGRES_PASSWORD: capacity-only-password}
+    healthcheck: {test: [CMD-SHELL, "pg_isready -U mealcheck -d mealcheck"], interval: 2s, timeout: 2s, retries: 30}
+  redis:
+    image: redis:7.4-alpine
+    healthcheck: {test: [CMD, redis-cli, ping], interval: 2s, timeout: 2s, retries: 30}
+  rabbitmq:
+    image: rabbitmq:4.2-management-alpine
+    environment: {RABBITMQ_DEFAULT_USER: mealcheck, RABBITMQ_DEFAULT_PASS: capacity-only-password}
+    healthcheck: {test: [CMD, rabbitmq-diagnostics, -q, ping], interval: 3s, timeout: 5s, retries: 30}
+  model-stub:
+    image: python:3.12-alpine
+    command: [python, /stub/model_stub.py]
+    volumes: ["./scripts/model_stub.py:/stub/model_stub.py:ro"]
+    ports: ["127.0.0.1:19082:9082"]
+    environment: {MODEL_STUB_DELAY_SECONDS: "0.05"}
+  backend:
+    image: eclipse-temurin:17-jre
+    user: "10001:10001"
+    command: [java, -Xms128m, -Xmx512m, -jar, /app/app.jar]
+    volumes: ["../backend/target/mealcheck-backend-0.3.0.jar:/app/app.jar:ro"]
+    tmpfs: [/tmp]
+    ports: ["127.0.0.1:18081:8080", "127.0.0.1:19091:9091"]
+    mem_limit: 768m
+    cpus: 2
+    environment:
+      SPRING_PROFILES_ACTIVE: capacity
+      SPRING_CONFIG_ADDITIONAL_LOCATION: classpath:/application-prod.yml
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/mealcheck
+      SPRING_DATASOURCE_USERNAME: mealcheck
+      SPRING_DATASOURCE_PASSWORD: capacity-only-password
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PASSWORD: ""
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_USERNAME: mealcheck
+      SPRING_RABBITMQ_PASSWORD: capacity-only-password
+      MEALCHECK_JWT_SECRET: capacity-only-jwt-secret-with-more-than-forty-eight-bytes
+      MEALCHECK_CORS_ALLOWED_ORIGINS: http://localhost:18081
+      MEALCHECK_UPLOAD_DIR: /tmp/uploads
+      MANAGEMENT_SERVER_PORT: 9091
+      MEALCHECK_AI_API_KEY: capacity-only
+      MEALCHECK_AI_BASE_URL: http://model-stub:9082/v1
+      MEALCHECK_AI_INPUT_COST_PER_MILLION: "1"
+      MEALCHECK_AI_OUTPUT_COST_PER_MILLION: "2"
+      MEALCHECK_AI_DAILY_CALLS: "1000"
+      MEALCHECK_RATE_LIMIT_REGISTRATION_CAPACITY: "100"
+      MEALCHECK_RATE_LIMIT_CAPTCHA_CAPACITY: "100"
+      MEALCHECK_REMOTE_INITIAL_BACKOFF_MILLIS: "50"
+      MEALCHECK_WEEKLY_REPORT_SCHEDULER_ENABLED: "false"
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      rabbitmq: {condition: service_healthy}

@@ -1,0 +1,11 @@
+[Unit]
+Description=MealCheck consistent database and image encrypted off-site backup
+After=docker.service network-online.target
+Requires=docker.service
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/mealcheck-fullstack
+EnvironmentFile=/opt/mealcheck-fullstack/.env.operations
+ExecStart=/usr/bin/python3 deploy/scripts/operations_backup.py --mode backup --output /var/lib/mealcheck-backups
+UMask=0077
+TimeoutStartSec=2h

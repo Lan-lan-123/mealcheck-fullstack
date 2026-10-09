@@ -10,17 +10,24 @@ import java.time.Duration;
 @Component
 public class AssistantChatModelFactory {
     private final AppProperties properties;
+    private final AiHttpTransport transport;
 
-    public AssistantChatModelFactory(AppProperties properties) {
+    public AssistantChatModelFactory(AppProperties properties,AiHttpTransport transport) {
         this.properties = properties;
+        this.transport = transport;
     }
 
     public ChatModel create(Duration timeout) {
+        return create(timeout,0.35,"diet-assistant");
+    }
+    public ChatModel create(Duration timeout,double temperature,String name) {
         return OpenAiChatModel.builder()
+                .httpClientBuilder(transport.langchainBuilder(name))
+                .maxRetries(0)
                 .apiKey(properties.getAi().getApiKey())
                 .baseUrl(properties.getAi().getBaseUrl())
                 .modelName(properties.getAi().getModel())
-                .temperature(0.35)
+                .temperature(temperature)
                 .timeout(timeout)
                 .build();
     }

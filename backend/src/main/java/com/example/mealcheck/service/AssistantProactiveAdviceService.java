@@ -1,5 +1,7 @@
 package com.example.mealcheck.service;
 
+import com.example.mealcheck.util.AppTime;
+
 import com.example.mealcheck.dto.assistant.AssistantProactiveAdviceResponse;
 import com.example.mealcheck.entity.MealRecord;
 import com.example.mealcheck.entity.UserAccount;
@@ -34,7 +36,7 @@ public class AssistantProactiveAdviceService {
     public AssistantProactiveAdviceResponse build(UserAccount user,
                                                    String goalType,
                                                    List<MealRecord> availableRecords) {
-        LocalDateTime cutoff = LocalDateTime.now().minusDays(7);
+        LocalDateTime cutoff = AppTime.now().minusDays(7);
         List<MealRecord> records = availableRecords == null ? List.of() : availableRecords.stream()
                 .filter(record -> record.getCreatedAt() != null && !record.getCreatedAt().isBefore(cutoff))
                 .toList();
@@ -55,7 +57,7 @@ public class AssistantProactiveAdviceService {
 
     private void addTodayBalanceAdvice(List<MealRecord> records, List<String> items) {
         List<MealRecord> todayRecords = records.stream()
-                .filter(record -> record.getCreatedAt() != null && record.getCreatedAt().toLocalDate().equals(LocalDate.now()))
+                .filter(record -> record.getCreatedAt() != null && AppTime.businessDate(record.getCreatedAt()).equals(AppTime.today()))
                 .toList();
         if (todayRecords.isEmpty()) {
             items.add("今天还没有饮食记录，先上传一餐，助手会更准确地判断今天是否失衡。");
@@ -73,10 +75,10 @@ public class AssistantProactiveAdviceService {
     private void addVegetableStreakAdvice(List<MealRecord> records, List<String> items) {
         Map<LocalDate, List<MealRecord>> byDay = records.stream()
                 .filter(record -> record.getCreatedAt() != null)
-                .collect(Collectors.groupingBy(record -> record.getCreatedAt().toLocalDate()));
+                .collect(Collectors.groupingBy(record -> AppTime.businessDate(record.getCreatedAt())));
         int streak = 0;
         for (int offset = 0; offset < 7; offset++) {
-            LocalDate day = LocalDate.now().minusDays(offset);
+            LocalDate day = AppTime.today().minusDays(offset);
             List<MealRecord> dayRecords = byDay.getOrDefault(day, List.of());
             if (dayRecords.isEmpty() || dayRecords.stream().noneMatch(record -> category(record).getOrDefault("vegetable", 0) > 0)) {
                 streak++;
@@ -90,7 +92,7 @@ public class AssistantProactiveAdviceService {
     }
 
     private void addHighOilTrendAdvice(List<MealRecord> records, List<String> items) {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = AppTime.now();
         long recent = records.stream()
                 .filter(record -> record.getCreatedAt() != null && record.getCreatedAt().isAfter(now.minusDays(3)))
                 .flatMap(record -> risks(record).stream())

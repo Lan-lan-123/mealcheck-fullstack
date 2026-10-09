@@ -1,19 +1,40 @@
+import { formatTime } from '../utils/time'
+import { useEffect, useRef, useState } from 'react'
+import { listMeals } from '../api/client'
+import { reportPeriod } from '../utils/reportPeriod'
 import AuthImage from './AuthImage'
 import Empty from './Empty'
 import { reportGenerationLabel, reportReviewLabel } from '../utils/mealLabels'
 
-export default function WeeklyReportModal({ report, avgLabel, records, onClose }) {
+export default function WeeklyReportDetail({ report, avgLabel, onClose }) {
+  const heading = useRef(null)
+  useEffect(() => { heading.current?.focus({ preventScroll: true }) }, [])
+  const [page, setPage] = useState(0)
+  const [data, setData] = useState(null)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(true)
+  useEffect(() => {
+    const controller = new AbortController()
+    setLoading(true)
+    setError('')
+    setData(null)
+    Promise.resolve().then(() => listMeals({ ...reportPeriod(report), page, size: 10 }, controller.signal))
+      .then(next => { if (!controller.signal.aborted) setData(next) })
+      .catch(err => { if (!controller.signal.aborted) setError(err.message) })
+      .finally(() => { if (!controller.signal.aborted) setLoading(false) })
+    return () => controller.abort()
+  }, [report.periodStart, report.periodEnd, page])
+  const records = data?.content || []
   return (
-    <div className="modal-backdrop">
-      <div className="weekly-modal">
+    <div className="weekly-report-detail card">
         <div className="modal-head">
           <div>
-            <h2>近 7 天饮食周报</h2>
-            <p>查看最近一周饮食记录、评分、风险标签和图片明细。</p>
+            <h2 tabIndex={-1} ref={heading}>完整饮食周报</h2>
+            <p>{report.periodStart} 至 {report.periodEnd} · 餐食明细按报告日期独立查询。</p>
           </div>
 
           <button className="modal-close" onClick={onClose} type="button">
-            关闭
+            返回周报概览
           </button>
         </div>
 
@@ -32,7 +53,7 @@ export default function WeeklyReportModal({ report, avgLabel, records, onClose }
         <section className="weekly-section">
           <h3>周报总结</h3>
           <p>{report?.reportText || '最近 7 天暂无可分析的饮食记录。'}</p>
-          {report?.generatedAt && <p className="report-meta">自动生成于 {new Date(report.generatedAt).toLocaleString()}</p>}
+          {report?.generatedAt && <p className="report-meta">自动生成于 {formatTime(report.generatedAt)}</p>}
           {report?.generationMode && (
             <p className="report-meta">
               {reportGenerationLabel(report.generationMode)} · {reportReviewLabel(report.reviewStatus)}
@@ -69,7 +90,9 @@ export default function WeeklyReportModal({ report, avgLabel, records, onClose }
         </section>
 
         <section className="weekly-section">
-          <h3>最近饮食图片</h3>
+          <h3>报告期间饮食图片</h3>
+          {loading && <p role="status">加载餐食明细中...</p>}
+          {error && <p role="alert" className="error">{error}</p>}
           {records.length ? (
             <div className="weekly-photo-grid">
               {records.map(record => (
@@ -77,7 +100,7 @@ export default function WeeklyReportModal({ report, avgLabel, records, onClose }
                   <AuthImage url={record.imageUrl} alt="饮食图片" />
                   <div className="weekly-photo-info">
                     <strong>{record.score} 分</strong>
-                    <span>{new Date(record.createdAt).toLocaleString()}</span>
+                    <span>{formatTime(record.createdAt)}</span>
                   </div>
                   <p>{record.summary}</p>
                   <div className="chips small">
@@ -89,10 +112,14 @@ export default function WeeklyReportModal({ report, avgLabel, records, onClose }
               ))}
             </div>
           ) : (
-            <Empty text="最近 7 天暂无饮食图片记录" />
+            !loading && !error && <Empty text="报告期间暂无饮食图片记录" />
           )}
+          {!!data?.totalPages && <div className="record-pagination">
+            <button type="button" disabled={loading || page === 0} onClick={() => setPage(page - 1)}>上一页</button>
+            <span>第 {page + 1} / {data.totalPages} 页 · 共 {data.totalElements} 条</span>
+            <button type="button" disabled={loading || page + 1 >= data.totalPages} onClick={() => setPage(page + 1)}>下一页</button>
+          </div>}
         </section>
-      </div>
     </div>
   )
 }

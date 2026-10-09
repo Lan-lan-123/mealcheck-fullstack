@@ -1,5 +1,7 @@
 package com.example.mealcheck.service;
 
+import com.example.mealcheck.util.AppTime;
+
 import com.example.mealcheck.config.AppProperties;
 import com.example.mealcheck.dto.HealthResponse;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -48,7 +50,7 @@ public class HealthService {
                 chunkCount,
                 uploadWritable,
                 aiStatusService.recentCalls(),
-                LocalDateTime.now()
+                AppTime.now()
         );
     }
 

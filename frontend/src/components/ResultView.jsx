@@ -1,6 +1,6 @@
 import { categoryName } from '../utils/mealLabels'
 
-export default function ResultView({ result }) {
+export default function ResultView({ result, compact = false, onViewDetails }) {
   const evaluation = result?.evaluation || {}
   const recognition = result?.recognition || {}
   const foods = Array.isArray(recognition.foods) ? recognition.foods : []
@@ -8,7 +8,7 @@ export default function ResultView({ result }) {
   const references = Array.isArray(result?.references) ? result.references : []
 
   return (
-    <div>
+    <div className={compact ? 'result-summary' : 'result-detail'}>
       <div className="score-circle">
         <strong>{evaluation.score ?? '--'}</strong>
         <span>分</span>
@@ -20,22 +20,25 @@ export default function ResultView({ result }) {
 
       <h3>识别食物</h3>
       <div className="chips">
-        {foods.map((f, i) => (
+        {(compact ? foods.slice(0, 4) : foods).map((f, i) => (
           <span key={i}>
             {f.name} · {categoryName(f.category)}
           </span>
         ))}
+        {compact && foods.length > 4 && <span>另有 {foods.length - 4} 项</span>}
       </div>
 
       <h3>风险标签</h3>
       <div className="chips risk">
         {riskTags.length ? (
-          riskTags.map(x => <span key={x}>{x}</span>)
+          (compact ? riskTags.slice(0, 3) : riskTags).map(x => <span key={x}>{x}</span>)
         ) : (
           <span>暂无明显风险</span>
         )}
       </div>
 
+      {compact && <><h3>饮食建议摘要</h3><p className="advice-summary">{result?.advice || '暂无建议'}</p></>}
+      {!compact && <>
       <h3>RAG 饮食建议</h3>
       <pre className="advice">{result?.advice || '暂无建议'}</pre>
 
@@ -48,6 +51,8 @@ export default function ResultView({ result }) {
           <p>{ref.content}</p>
         </details>
       ))}
+      </>}
+      {compact && <button className="secondary-btn" type="button" onClick={onViewDetails}>查看完整分析与建议</button>}
     </div>
   )
 }

@@ -1,5 +1,7 @@
 package com.example.mealcheck.entity;
 
+import com.example.mealcheck.util.AppTime;
+
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,6 +28,8 @@ public class WeeklyReportSnapshot {
     private UserAccount user;
 
     private int days;
+    @Column(unique = true)
+    private Long jobId;
     private LocalDate periodStart;
     private LocalDate periodEnd;
 
@@ -33,9 +37,11 @@ public class WeeklyReportSnapshot {
     @Column(columnDefinition = "TEXT")
     private String reportJson;
 
-    private LocalDateTime generatedAt = LocalDateTime.now();
+    private LocalDateTime generatedAt = AppTime.now();
 
     public Long getId() { return id; }
+    public Long getJobId() { return jobId; }
+    public void setJobId(Long jobId) { this.jobId = jobId; }
     public UserAccount getUser() { return user; }
     public void setUser(UserAccount user) { this.user = user; }
     public int getDays() { return days; }

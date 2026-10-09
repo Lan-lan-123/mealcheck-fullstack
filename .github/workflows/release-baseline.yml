@@ -1,0 +1,57 @@
+name: release-baseline
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Candidate version recorded in the manifest (does not publish a release)
+        required: true
+        default: baseline-rc
+
+permissions:
+  contents: read
+
+jobs:
+  candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: grafana/setup-k6-action@v1
+      - name: Install fixture and proxy dependencies
+        run: |
+          python -m pip install Pillow
+          sudo apt-get update
+          sudo apt-get install -y nginx
+      - name: Verify the committed candidate and retain its images
+        env:
+          CANDIDATE_VERSION: ${{ inputs.version }}
+        run: python deploy/scripts/release_baseline.py --version "$CANDIDATE_VERSION" --install-browser --require-proxy
+      - name: Retain candidate identity and verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-baseline-${{ github.sha }}
+          retention-days: 14
+          path: |
+            deploy/release-results/*/manifest.json*
+            deploy/release-results/*/source.zip
+            deploy/release-results/*/images.tar
+            deploy/release-results/*/logs/
+            deploy/release-results/*/reports/
+            deploy/release-results/*/capacity/acceptance.json
+            deploy/release-results/*/stack-restored/verification.json
+            deploy/release-results/*/full-schema/restored/verification.json

@@ -15,6 +15,12 @@ public class MealRecordResponse {
     private List<String> riskTags;
     private String advice;
     private String imageUrl;
+    private long revision;
+    private String scoringVersion;
+    public long getRevision() { return revision; }
+    public void setRevision(long value) { revision = value; }
+    public String getScoringVersion() { return scoringVersion; }
+    public void setScoringVersion(String value) { scoringVersion = value; }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
