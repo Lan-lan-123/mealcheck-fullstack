@@ -109,6 +109,17 @@ def scrape():
         return response.read().decode()
 
 
+def bind_plan_parameters(query, uid):
+    values = {'userId': str(uid), 'since': "(CURRENT_TIMESTAMP AT TIME ZONE 'UTC')-INTERVAL '90 days'",
+              'storageZone': "'UTC'", 'zone': "'Asia/Shanghai'"}
+    def bind(match):
+        name = match.group(1)
+        if name not in values:
+            raise RuntimeError(f'Unbound diagnostic SQL parameter: {name}')
+        return values[name]
+    return re.sub(r'(?<!:):([A-Za-z][A-Za-z0-9_]*)', bind, query)
+
+
 def capture_query_plans(accounts, output):
     # Read the actual repository SQL so acceptance evidence follows future query changes.
     payload = accounts[0]['token'].split('.')[1]
@@ -121,7 +132,7 @@ def capture_query_plans(accounts, output):
     plans = ['Sequential diagnostic EXPLAIN (ANALYZE, BUFFERS) on synthetic fixture data; cache is not reset between statements. Not a controlled before/after benchmark.']
     queries.insert(0, (f'SELECT * FROM meal_records WHERE user_id={uid} AND created_at>CURRENT_TIMESTAMP-INTERVAL \'90 days\' ORDER BY created_at', 'legacyFullEntityRead'))
     for query, name in queries:
-        query = query.replace(':userId', str(uid)).replace(':since', "CURRENT_TIMESTAMP-INTERVAL '90 days'").replace(':zone', "'UTC'")
+        query = bind_plan_parameters(query, uid)
         plans.append(name + '\n' + sql('EXPLAIN (ANALYZE, BUFFERS) ' + query + ';'))
     (output / 'query-plans.txt').write_text('\n\n'.join(plans) + '\n', encoding='utf-8')
 
@@ -227,8 +238,14 @@ def main():
     report = {'passed':all(case['passed'] for case in cases.values()),'fixture':{'accounts':args.accounts,'meals':args.accounts*args.meals_per_user,
               'messages':args.accounts*args.messages_per_user,'imageDimensions':[4096,4096],'imageBytes':image.stat().st_size,'backendHeapLimitMiB':512,'backendCpuLimit':2},
               'cases':cases,'limitations':'Local synthetic data, bounded short runs and a model substitute. Heap/container values are sampled; queue P95 is a histogram bucket upper bound. This does not establish provider capacity or recognition accuracy.'}
-    capture_query_plans(accounts, output)
-    (output / 'acceptance.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+    report['queryPlansCaptured'] = False
+    try:
+        capture_query_plans(accounts, output)
+        report['queryPlansCaptured'] = True
+    finally:
+        # Preserve completed phases even if a later evidence query fails.
+        report['passed'] = report['passed'] and report['queryPlansCaptured']
+        (output / 'acceptance.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
     print(json.dumps({'passed':report['passed'],'cases':{k:v['passed'] for k,v in cases.items()},'evidence':str(output / 'acceptance.json')}))
     if not report['passed']: raise SystemExit(1)
 

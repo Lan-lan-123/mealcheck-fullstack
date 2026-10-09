@@ -4,6 +4,8 @@ from pathlib import Path
 from unittest.mock import patch
 from types import SimpleNamespace
 import json
+import base64
+import tempfile
 
 spec = importlib.util.spec_from_file_location('acceptance', Path(__file__).with_name('capacity_acceptance.py'))
 acceptance = importlib.util.module_from_spec(spec)
@@ -28,6 +30,24 @@ class AcceptanceSafetyTest(unittest.TestCase):
         after = 'mealcheck_analysis_queue_wait_seconds_bucket{le="1.0"} 100\nmealcheck_analysis_queue_wait_seconds_bucket{le="2.0"} 120\nmealcheck_analysis_queue_wait_seconds_bucket{le="+Inf"} 120'
         self.assertEqual(acceptance.queue_p95(before, after), 2)
         self.assertIsNone(acceptance.queue_p95(before, before))
+
+    def test_actual_repository_queries_have_all_timezone_parameters_bound(self):
+        payload = base64.urlsafe_b64encode(json.dumps({'uid': 1}).encode()).decode().rstrip('=')
+        statements = []
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(acceptance, 'sql', side_effect=lambda statement: statements.append(statement) or 'fixture plan'):
+                acceptance.capture_query_plans([{'token': f'fixture.{payload}.signature'}], Path(directory))
+            self.assertEqual(len(statements), 4)
+            daily = next(statement for statement in statements if 'AT TIME ZONE' in statement and 'GROUP BY' in statement)
+            self.assertIn("AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai'", daily)
+            for statement in statements:
+                self.assertNotRegex(statement, r'(?<!:):[A-Za-z]')
+            self.assertIn('trendDailyScores', (Path(directory) / 'query-plans.txt').read_text(encoding='utf-8'))
+
+    def test_unknown_parameters_fail_before_sql_execution_and_casts_are_preserved(self):
+        with self.assertRaisesRegex(RuntimeError, 'Unbound diagnostic SQL parameter'):
+            acceptance.bind_plan_parameters('SELECT :newParameter', 1)
+        self.assertEqual(acceptance.bind_plan_parameters('SELECT :userId::integer', 1), 'SELECT 1::integer')
 
 
 if __name__ == '__main__': unittest.main()
