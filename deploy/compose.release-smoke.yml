@@ -6,3 +6,9 @@ services:
   frontend:
     image: ${MEALCHECK_RELEASE_FRONTEND_IMAGE:?Set candidate frontend image}
     build: !reset null
+
+# Scratch stacks must coexist with retained production/capacity networks.
+networks:
+  edge:
+    ipam:
+      config: !reset []

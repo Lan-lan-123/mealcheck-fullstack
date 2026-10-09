@@ -63,6 +63,8 @@ class Verification:
         self.output.mkdir(parents=True, exist_ok=False)
         self.source = self.output / 'source'
         self.env = os.environ.copy()
+        # Playwright must launch the archived source, never reuse another dev server.
+        self.env['CI'] = 'true'
         # Scratch fixtures have explicit public test configuration. Do not inherit real keys.
         for key in ('MEALCHECK_AI_API_KEY', 'MEALCHECK_ASSISTANT_API_KEY',
                     'MEALCHECK_KNOWLEDGE_EMBEDDING_API_KEY', 'MEALCHECK_KNOWLEDGE_RERANK_API_KEY'):
@@ -187,6 +189,7 @@ class Verification:
             self.run('capacity-faults', [sys.executable, 'loadtests/capacity_acceptance.py', '--output',
                                        str(self.output / 'capacity'), '--fault-checks'])
         finally:
+            self.run('capacity-service-logs', capacity + ['logs', '--no-color', '--tail', '200'], required=False)
             self.run('capacity-cleanup', capacity + ['down', '--volumes'])
         smoke_project = f'mealcheck-baseline-{short}'
         self.ensure_fresh_project(smoke_project)
@@ -205,8 +208,11 @@ class Verification:
                                      '--output', str(self.output / 'stack-backup')])
             self.run('stack-restore', [sys.executable, 'deploy/scripts/recovery.py', 'drill', '--backup',
                                       str(self.output / 'stack-backup'), '--output', str(self.output / 'stack-restored')])
+            self.run('post-backup-ready', smoke + ['up', '--no-build', '-d', '--wait', '--wait-timeout', '180'])
+            self.verify_running_image(smoke, 'backend')
             self.run('http-smoke-after-backup', [sys.executable, 'deploy/scripts/smoke.py', '--base-url', 'http://127.0.0.1:18080'])
         finally:
+            self.run('production-service-logs', smoke + ['logs', '--no-color', '--tail', '200'], required=False)
             self.run('production-cleanup', smoke + ['down', '--volumes'])
         self.run('full-schema-restore', [sys.executable, 'deploy/scripts/recovery.py', 'self-test', '--migrations',
                                         'backend/src/main/resources/db/migration', '--output', str(self.output / 'full-schema')])
