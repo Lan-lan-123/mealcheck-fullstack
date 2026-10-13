@@ -32,6 +32,7 @@ public class WeeklyReportJobCompletionService {
 
     @Transactional
     public boolean complete(Long jobId, int attempt, String token, WeeklyReportResponse report) {
+        AiCallContext.guardTransactionCommit();
         // The conditional UPDATE locks the job until the snapshot and status commit together.
         // A recovered, deleted or already completed attempt must never publish a snapshot.
         var candidate = jobs.findById(jobId);
@@ -56,6 +57,7 @@ public class WeeklyReportJobCompletionService {
         }
         snapshots.saveAndFlush(snapshot);
         failures.recovered("WEEKLY_REPORT", job.getUserId(), jobId.toString());
+        AiCallContext.checkExecution();
         return true;
     }
 }

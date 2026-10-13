@@ -142,6 +142,23 @@ class TaskFailureManagementDatabaseIntegrationTest {
         assertThat(onlyOpen().errorSummary()).doesNotContain("secret-password-model-body");
         assertThat(onlyOpen().errorCode()).isEqualTo("DATABASE_UNAVAILABLE");
     }
+    @Test void failurePagesKeepOrderingAndEnrichmentWithMalformedWeeklyKeys() {
+        failedMeal();
+        long mealFailure = onlyOpen().id();
+        jdbc.update("INSERT INTO task_failure_events(dedupe_key,task_type,user_id,task_key,phase,error_code,error_summary,recoverable,failed_at) VALUES ('malformed-weekly','WEEKLY_REPORT',?,'9223372036854775808','WORKER','TEST','test',true,CURRENT_TIMESTAMP+INTERVAL '1 second')", user.getId());
+        var first = failures.list("ALL", "OPEN", null, null, null, null, 0, 1);
+        assertThat(first.totalElements()).isEqualTo(2);
+        assertThat(first.content()).hasSize(1);
+        assertThat(first.content().get(0).taskType()).isEqualTo("WEEKLY_REPORT");
+        assertThat(first.content().get(0).retryable()).isFalse();
+        assertThat(first.content().get(0).retryBlockedReason()).contains("任务已清理");
+        var second = failures.list("ALL", "OPEN", null, null, null, null, 1, 1);
+        assertThat(second.content()).hasSize(1);
+        assertThat(second.content().get(0).id()).isEqualTo(mealFailure);
+        assertThat(second.content().get(0).taskStatus()).isEqualTo("FAILED");
+        assertThat(second.content().get(0).retryable()).isTrue();
+    }
+
     private void enqueue() { store.enqueue(user,key,"hash","balanced",new ValidatedImage(new byte[]{1},"image/jpeg",".jpg",1,1,"meal.jpg")); }
     private MealAnalysisRequestStore.Work failedMeal() {
         enqueue();var work=store.takeMessage(currentEvent());store.fail(user.getId(),key,work.token(),"ANALYZE",new IllegalStateException("secret"));return work;

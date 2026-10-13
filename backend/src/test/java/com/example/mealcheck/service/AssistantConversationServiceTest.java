@@ -21,7 +21,7 @@ class AssistantConversationServiceTest {
     void loadsOnlyPendingSummaryBatchAndRecentWindow() {
         AssistantConversationRepository conversations = mock(AssistantConversationRepository.class);
         AssistantConversationMessageRepository messages = mock(AssistantConversationMessageRepository.class);
-        AssistantConversationService service = new AssistantConversationService(conversations, messages);
+        AssistantConversationService service = new AssistantConversationService(conversations, messages, mock(com.example.mealcheck.repository.UserAccountRepository.class));
         AssistantConversation conversation = new AssistantConversation();
         conversation.setId(7L);
         conversation.setSummarizedMessageCount(120);

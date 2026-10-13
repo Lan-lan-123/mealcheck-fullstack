@@ -15,13 +15,13 @@ import java.util.*;
 @Service
 public class TaskFailureManagementService {
     private static final String SELECT = """
-        SELECT f.*,m.status AS meal_status,m.attempt_token AS meal_token,m.input_image IS NOT NULL AS image_present,
+        SELECT f.*,m.status AS meal_status,m.attempt_token AS meal_token,(m.input_image IS NOT NULL OR m.input_image_ref IS NOT NULL) AS image_present,
                m.manual_retry_count AS meal_retries,o.event_id AS current_event,
                j.status AS weekly_status,j.execution_token AS weekly_token,j.manual_retry_count AS weekly_retries
         FROM task_failure_events f
         LEFT JOIN meal_analysis_requests m ON f.task_type='MEAL_ANALYSIS' AND m.user_id=f.user_id AND m.request_key=f.task_key
         LEFT JOIN meal_analysis_outbox o ON o.user_id=m.user_id AND o.request_key=m.request_key
-        LEFT JOIN weekly_report_jobs j ON f.task_type='WEEKLY_REPORT' AND j.user_id=f.user_id AND j.id::text=f.task_key
+        LEFT JOIN weekly_report_jobs j ON j.id=f.weekly_report_job_id AND j.user_id=f.user_id
         """;
     private final JdbcTemplate jdbc;
     private final TaskFailureRecorder recorder;
@@ -47,7 +47,11 @@ public class TaskFailureManagementService {
         if (to != null) { where.append(" AND f.failed_at<=?"); args.add(to); }
         long count = jdbc.queryForObject("SELECT count(*) FROM task_failure_events f" + where, Long.class, args.toArray());
         args.add(size); args.add((long)page * size);
-        var rows = jdbc.queryForList(SELECT + where + " ORDER BY f.failed_at DESC,f.id DESC LIMIT ? OFFSET ?", args.toArray());
+        // Bound failures before enriching them with live task state.
+        var rows = jdbc.queryForList("WITH failure_page AS MATERIALIZED (SELECT * FROM task_failure_events f"
+                + where + " ORDER BY f.failed_at DESC,f.id DESC LIMIT ? OFFSET ?) "
+                + SELECT.replace("FROM task_failure_events f", "FROM failure_page f")
+                + " ORDER BY f.failed_at DESC,f.id DESC", args.toArray());
         return new Page(rows.stream().map(this::item).toList(), count, (int)((count + size - 1) / size), page, size);
     }
 
@@ -88,7 +92,7 @@ public class TaskFailureManagementService {
         if (jdbc.queryForList("SELECT id FROM users WHERE id=? FOR UPDATE",initial.get("user_id")).isEmpty()) throw conflict("账号已删除");
         if ("MEAL_ANALYSIS".equals(initial.get("task_type")))
             jdbc.queryForList("SELECT user_id FROM meal_analysis_requests WHERE user_id=? AND request_key=? FOR UPDATE",initial.get("user_id"),initial.get("task_key"));
-        else jdbc.queryForList("SELECT id FROM weekly_report_jobs WHERE id::text=? AND user_id=? FOR UPDATE",initial.get("task_key"),initial.get("user_id"));
+        else jdbc.queryForList("SELECT id FROM weekly_report_jobs WHERE id=? AND user_id=? FOR UPDATE",initial.get("weekly_report_job_id"),initial.get("user_id"));
         jdbc.queryForList("SELECT id FROM task_failure_events WHERE id=? FOR UPDATE", id);
         if (existingOperation(id,action,admin,"RETRY")) return detail(id);
         var row = load(id);
@@ -116,8 +120,8 @@ public class TaskFailureManagementService {
             jdbc.update("""
                 UPDATE weekly_report_jobs SET status='PENDING',attempts=0,execution_token=?,last_error=NULL,
                     next_retry_at=created_at,manual_retry_count=manual_retry_count+1,updated_at=CURRENT_TIMESTAMP,version=version+1
-                WHERE id::text=? AND user_id=?
-                """,UUID.randomUUID().toString(),key,userId);
+                WHERE id=? AND user_id=?
+                """,UUID.randomUUID().toString(),row.get("weekly_report_job_id"),userId);
             // created_at was written by JPA and is already in the past. Reuse it as the due time,
             // avoiding a session-timezone conversion difference between JDBC NOW() and Hibernate.
         }

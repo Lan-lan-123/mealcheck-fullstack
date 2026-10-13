@@ -9,6 +9,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RemoteCallGuardTest {
+    @Test void expiredOuterOperationCannotDispatchOrRenewItsDeadline() {
+        var guard = new RemoteCallGuard(new AppProperties());
+        var calls = new AtomicInteger();
+        var expired = new AiCallContext.Context(1L, System.nanoTime() - 1);
+        try (var outer = AiCallContext.restore(expired);
+             var nested = AiCallContext.open(1L, java.time.Duration.ofSeconds(120))) {
+            assertThat(AiCallContext.capture().deadlineNanos()).isEqualTo(expired.deadlineNanos());
+            assertThatThrownBy(() -> guard.execute("expired", calls::incrementAndGet))
+                    .isInstanceOf(RemoteCallGuard.RemoteCallDeadlineException.class);
+            assertThat(calls).hasValue(0);
+        }
+        assertThat(AiCallContext.capture()).isNull();
+    }
     @Test
     void remainingDeadlineShrinksAcrossAttemptsAndRetryAfterDoesNotRetryEarly() {
         AppProperties properties=new AppProperties();

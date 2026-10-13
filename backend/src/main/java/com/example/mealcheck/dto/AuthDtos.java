@@ -2,6 +2,7 @@ package com.example.mealcheck.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import com.example.mealcheck.validation.PasswordByteLength;
 
 public class AuthDtos {
 
@@ -11,7 +12,8 @@ public class AuthDtos {
         private String username;
 
         @NotBlank
-        @Size(min = 10, max = 128)
+        @Size(min = 10, max = 72)
+        @PasswordByteLength
         private String password;
 
         @Size(max = 64)
@@ -58,6 +60,7 @@ public class AuthDtos {
         private String username;
 
         @NotBlank
+        @PasswordByteLength
         private String password;
 
         @NotBlank

@@ -87,4 +87,15 @@ public interface WeeklyReportJobRepository extends JpaRepository<WeeklyReportJob
                    @Param("error") String error,
                    @Param("nextRetryAt") LocalDateTime nextRetryAt,
                    @Param("now") LocalDateTime now);
+
+    @Modifying
+    @Query("""
+            update WeeklyReportJob job set job.status='RETRY', job.attempts=job.attempts-1,
+                job.lastError=:error, job.nextRetryAt=:nextRetryAt, job.updatedAt=:now, job.version=job.version+1
+            where job.id=:jobId and job.status='RUNNING' and job.attempts=:attempt
+                and job.executionToken=:token and job.attempts>0
+            """)
+    int deferAdmission(@Param("jobId") Long jobId, @Param("attempt") int attempt, @Param("token") String token,
+                       @Param("error") String error, @Param("nextRetryAt") LocalDateTime nextRetryAt,
+                       @Param("now") LocalDateTime now);
 }

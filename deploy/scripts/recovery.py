@@ -87,6 +87,13 @@ def validate_image_paths(paths, files):
 
 
 def capture(postgres, uploads_source, directory, *, copy_container=None):
+    # This workflow verifies local files. Never report a complete restore when
+    # object-store data lives outside its archive.
+    if any(name.startswith("oss://") for name in image_paths(postgres)):
+        raise RuntimeError("OSS images require an object-store backup and restore workflow")
+    has_refs = query(postgres, "SELECT count(*) FROM information_schema.columns WHERE table_name='meal_analysis_requests' AND column_name='input_image_ref'")
+    if has_refs != '0' and query(postgres, "SELECT count(*) FROM meal_analysis_requests WHERE input_image_ref IS NOT NULL") != '0':
+        raise RuntimeError("Referenced queued images require a storage-aware backup workflow")
     directory.mkdir(parents=True, exist_ok=False)
     if os.name != "nt":
         directory.chmod(0o700)

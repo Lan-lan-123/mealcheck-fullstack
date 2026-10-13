@@ -77,6 +77,26 @@ public class MealRecord {
     @Column(nullable = false)
     private LocalDateTime createdAt = AppTime.now();
 
+    private LocalDateTime occurredAt;
+    @Column(nullable=false, length=16) private String mealType = "UNSPECIFIED";
+    @Column(nullable=false, length=16) private String recordSource = "PHOTO";
+    @Column(nullable=false) private boolean timeConfirmed;
+    @Column(nullable=false) private long metadataVersion;
+    @Column(length=500) private String note;
+    @jakarta.persistence.PrePersist void defaultMealTime() { if (occurredAt == null) occurredAt = createdAt; }
+    public LocalDateTime getOccurredAt() { return occurredAt == null ? createdAt : occurredAt; }
+    public void setOccurredAt(LocalDateTime value) { occurredAt = value; }
+    public String getMealType() { return mealType; }
+    public void setMealType(String value) { mealType = value; }
+    public String getRecordSource() { return recordSource; }
+    public void setRecordSource(String value) { recordSource = value; }
+    public boolean isTimeConfirmed() { return timeConfirmed; }
+    public void setTimeConfirmed(boolean value) { timeConfirmed = value; }
+    public long getMetadataVersion() { return metadataVersion; }
+    public void setMetadataVersion(long value) { metadataVersion = value; }
+    public String getNote() { return note; }
+    public void setNote(String value) { note = value; }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public UserAccount getUser() { return user; }

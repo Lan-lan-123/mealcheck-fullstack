@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
 @DataJpaTest(properties={"spring.jpa.hibernate.ddl-auto=validate","spring.flyway.baseline-on-migrate=false"})
 @AutoConfigureTestDatabase(replace=AutoConfigureTestDatabase.Replace.NONE)
 @Transactional(propagation=Propagation.NOT_SUPPORTED)
-@Import({TaskFailureRecorder.class, MealAnalysisLeaseService.class, MealAnalysisService.class, MealAnalysisRequestStore.class, MealAnalysisRequestService.class,
+@Import({TaskFailureRecorder.class, MealAnalysisLeaseService.class, MealAnalysisService.class, BehaviorTrackingService.class, MealAnalysisRequestStore.class, MealAnalysisRequestService.class,
         MealCorrectionService.class, MealCorrectionEvaluationService.class, MealScoringService.class,
         AdviceGenerationService.class, MealRecordPersistenceService.class, MealReportInvalidationService.class,
         UserDietProfileService.class, ImageStorageService.class, ImageUploadValidationService.class,
@@ -66,6 +66,9 @@ class MealAnalysisDatabaseIntegrationTest {
     @Autowired JdbcTemplate jdbc;
     @Autowired MealAnalysisLeaseService leases;
     @Autowired ObjectMapper mapper;
+    @Autowired MealRecordPersistenceService persistence;
+    @Autowired ImageStorageService storage;
+    @Autowired org.springframework.transaction.PlatformTransactionManager transactions;
     @MockBean RateLimitService limits;
     @MockBean UserGoalService goals;
     @MockBean NonFoodUploadGuardService guard;
@@ -78,7 +81,41 @@ class MealAnalysisDatabaseIntegrationTest {
     MockMultipartFile image;
     static final String KEY="meal-request-key-0001";
 
+    @Test void referencedPayloadLoadsOutsideClaimAndTransfersOwnershipWithoutAnotherUpload() throws Exception {
+        var validated=new ValidatedImage(new byte[]{1,2,3},"image/jpeg",".jpg",1,1,"meal.jpg");
+        var claim=store.claimUpload(principal,KEY,"hash","balanced");
+        String reference=storage.store(user.getId(),validated);
+        store.enqueueClaimedReference(principal,KEY,claim.token(),validated,reference);
+        assertThat(jdbc.queryForObject("SELECT input_image IS NULL FROM meal_analysis_requests",Boolean.class)).isTrue();
+        var work=store.next();assertThat(work.image().size()).isZero();
+        assertThat(store.loadImage(work).bytes()).containsExactly(1,2,3);
+        java.nio.file.Files.setLastModifiedTime(storage.resolve(reference),java.nio.file.attribute.FileTime.from(Instant.now().minusSeconds(172800)));
+        String orphan=storage.store(user.getId(),validated);
+        java.nio.file.Files.setLastModifiedTime(storage.resolve(orphan),java.nio.file.attribute.FileTime.from(Instant.now().minusSeconds(172800)));
+        var cleanup=new ImageOrphanCleanupService(jdbc,storage,properties,mock(BackgroundTaskDispatcher.class));
+        cleanup.cleanup();
+        assertThat(storage.resolve(reference)).exists();assertThat(storage.resolve(orphan)).doesNotExist();
+        var prepared=analysis.prepareValidated(work.user(),store.loadImage(work),work.goal());
+        assertThat(store.complete(work.user(),work.key(),work.token(),prepared).status()).isEqualTo("SUCCEEDED");
+        assertThat(meals.findAll().get(0).getStoredImagePath()).isEqualTo(reference);
+        assertThat(jdbc.queryForObject("SELECT input_image_ref IS NULL FROM meal_analysis_requests",Boolean.class)).isTrue();
+        assertThat(storage.resolve(reference)).exists();
+    }
+    @Test void referencedPayloadSurvivesRolledBackCompletionForRetry() {
+        var validated=new ValidatedImage(new byte[]{1},"image/jpeg",".jpg",1,1,"meal.jpg");
+        var claim=store.claimUpload(principal,KEY,"hash","balanced");
+        String reference=storage.store(user.getId(),validated);
+        store.enqueueClaimedReference(principal,KEY,claim.token(),validated,reference);
+        var work=store.next();var prepared=analysis.prepareValidated(work.user(),store.loadImage(work),work.goal());
+        var transaction=new org.springframework.transaction.support.TransactionTemplate(transactions);
+        assertThatThrownBy(()->transaction.execute(status->{store.complete(work.user(),work.key(),work.token(),prepared);throw new IllegalStateException("rollback");}))
+                .isInstanceOf(IllegalStateException.class);
+        assertThat(meals.count()).isZero();assertThat(storage.resolve(reference)).exists();
+        assertThat(jdbc.queryForObject("SELECT input_image_ref FROM meal_analysis_requests",String.class)).isEqualTo(reference);
+    }
+
     @BeforeEach void setup() throws Exception {
+        properties.getAiBudget().setOperationTimeoutSeconds(120);
         org.springframework.test.util.ReflectionTestUtils.setField(store,"maxOutstanding",32);
         org.springframework.test.util.ReflectionTestUtils.setField(store,"maxOutstandingPerUser",2);
         jdbc.execute("TRUNCATE meal_evaluation_runs,meal_evaluation_datasets CASCADE");
@@ -100,6 +137,39 @@ class MealAnalysisDatabaseIntegrationTest {
     private RecognitionResult recognition() {
         var result=new RecognitionResult(); result.setFoods(List.of(new FoodItem("米饭","staple",.9,null)));
         return result;
+    }
+    @Test void synchronousLateAdviceReturnsDeadlineErrorWithoutSavingMealOrImage() throws Exception {
+        properties.getAiBudget().setOperationTimeoutSeconds(1);
+        when(ai.isConfigured()).thenReturn(true);
+        when(ai.complete(anyString(), anyList(), anyDouble())).thenAnswer(call -> {
+            Thread.sleep(1100);
+            return "late advice";
+        });
+        assertThatThrownBy(() -> analysis.analyze(principal, image, "balanced"))
+                .isInstanceOf(RemoteCallGuard.RemoteCallDeadlineException.class);
+        verify(ai, times(1)).complete(anyString(), anyList(), anyDouble());
+        assertThat(meals.count()).isZero();
+        try (var files = java.nio.file.Files.walk(uploadDir)) {
+            assertThat(files.filter(java.nio.file.Files::isRegularFile).count()).isZero();
+        }
+        assertThat(AiCallContext.capture()).isNull();
+    }
+
+    @Test void deadlineExpiredBeforeCommitRollsBackMealAndDeletesStagedImage() {
+        var prepared = analysis.prepare(principal, image, "balanced");
+        try (var scope = AiCallContext.open(user.getId(), Duration.ofSeconds(1))) {
+            assertThatThrownBy(() -> new org.springframework.transaction.support.TransactionTemplate(transactions)
+                    .execute(ignored -> {
+                        persistence.saveWithImage(user, prepared.record(), prepared.image());
+                        try { Thread.sleep(1100); }
+                        catch (InterruptedException error) { Thread.currentThread().interrupt(); throw new IllegalStateException(error); }
+                        return null;
+                    })).isInstanceOf(RemoteCallGuard.RemoteCallDeadlineException.class);
+        }
+        assertThat(meals.count()).isZero();
+        try (var files = java.nio.file.Files.walk(uploadDir)) {
+            assertThat(files.filter(java.nio.file.Files::isRegularFile).count()).isZero();
+        } catch (java.io.IOException error) { throw new java.io.UncheckedIOException(error); }
     }
     @Test void outstandingLimitIncludesUnpublishedAndPreparationButReplaysStillWork() {
         requests.enqueue(principal,KEY,image,"balanced");

@@ -24,6 +24,7 @@ import com.example.mealcheck.dto.AssistantEvaluationCandidateStatusRequest;
 import com.example.mealcheck.dto.RagBenchmarkResponse;
 import com.example.mealcheck.security.UserPrincipal;
 import com.example.mealcheck.service.AdminService;
+import com.example.mealcheck.service.AdminMealQueryService;
 import com.example.mealcheck.service.AdminAuditService;
 import com.example.mealcheck.service.AssistantBenchmarkService;
 import com.example.mealcheck.service.AssistantBenchmarkHistoryService;
@@ -112,6 +113,20 @@ public class AdminController {
                                        @RequestParam(value = "minScore", required = false) Integer minScore,
                                        @RequestParam(value = "maxScore", required = false) Integer maxScore) {
         return adminService.meals(page, size, username, from, to, minScore, maxScore);
+    }
+
+    @GetMapping("/meals/cursor")
+    public AdminMealQueryService.CursorPage mealsCursor(
+            @RequestParam(value = "size", defaultValue = "20") int size,
+            @RequestParam(value = "username", required = false) String username,
+            @RequestParam(value = "from", required = false) LocalDate from,
+            @RequestParam(value = "to", required = false) LocalDate to,
+            @RequestParam(value = "minScore", required = false) Integer minScore,
+            @RequestParam(value = "maxScore", required = false) Integer maxScore,
+            @RequestParam(value = "beforeTime", required = false) String beforeTime,
+            @RequestParam(value = "beforeId", required = false) Long beforeId) {
+        return adminService.mealsCursor(size, username, from, to, minScore, maxScore,
+                AdminMealQueryService.parseCursorTime(beforeTime), beforeId);
     }
 
     @GetMapping("/meals/analytics")

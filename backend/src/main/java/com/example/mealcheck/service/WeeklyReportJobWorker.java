@@ -23,6 +23,8 @@ public class WeeklyReportJobWorker {
     private final Executor executor;
     private final ApplicationObservability observability;
     private final WeeklyReportJobCompletionService completionService;
+    @org.springframework.beans.factory.annotation.Value("${mealcheck.ai-budget.operation-timeout-seconds:120}")
+    private int operationTimeoutSeconds = 120;
 
     public WeeklyReportJobWorker(WeeklyReportJobService jobService,
                                  WeeklyReportService weeklyReportService,
@@ -63,9 +65,12 @@ public class WeeklyReportJobWorker {
         Long userId = job.getUserId();
         int attempt = job.getAttempts();
         String token = job.getExecutionToken();
-        try {
+        try (var deadline = AiCallContext.open(userId, java.time.Duration.ofSeconds(operationTimeoutSeconds));
+             var background = AiCallContext.background()) {
             WeeklyReportResponse response = weeklyReportService.generateForJob(
-                    userId, job.getDays(), jobId, AppTime.businessDate(job.getCreatedAt()));
+                    userId, job.getDays(), jobId, job.getReportWeek() == null
+                            ? AppTime.businessDate(job.getCreatedAt()) : job.getReportWeek());
+            AiCallContext.checkExecution();
             boolean updated = completionService.complete(jobId, attempt, token, response);
             String outcome = coordinationOutcome(response);
             observability.recordWeeklyReport(updated ? outcome : "stale", 1);

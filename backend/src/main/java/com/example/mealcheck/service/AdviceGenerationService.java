@@ -33,9 +33,9 @@ public class AdviceGenerationService {
         try {
             return aiChatClient.complete("meal-advice", adviceMessages(recognition, evaluation, snippets, goal), 0.2);
         } catch (Exception e) {
-            log.warn("Meal advice AI call failed, local advice will be used: {}", e.getMessage());
+            log.warn("Meal advice AI call failed, local advice will be used type={}", e.getClass().getSimpleName());
             return localAdvice(recognition, evaluation, snippets, goal)
-                    + "\n\n提示：AI 建议生成失败，当前展示的是本地规则建议。原因：" + e.getMessage();
+                    + "\n\n提示：AI 建议暂时不可用，当前展示的是本地规则建议。";
         }
     }
 

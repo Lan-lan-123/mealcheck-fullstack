@@ -16,8 +16,8 @@ import java.util.Set;
 public class MealAnalysisRequestStore {
     @org.springframework.beans.factory.annotation.Value("${mealcheck.analysis.lease-seconds:90}")
     private int workerLeaseSeconds = 90;
-    @org.springframework.beans.factory.annotation.Value("${mealcheck.analysis.max-outstanding:8}")
-    private int maxOutstanding = 8;
+    @org.springframework.beans.factory.annotation.Value("${mealcheck.analysis.max-outstanding:32}")
+    private int maxOutstanding = 32;
     @org.springframework.beans.factory.annotation.Value("${mealcheck.analysis.max-outstanding-per-user:2}")
     private int maxOutstandingPerUser = 2;
     @jakarta.annotation.PostConstruct
@@ -32,6 +32,8 @@ public class MealAnalysisRequestStore {
     private final MealRecordPersistenceService persistence;
     private final ObjectMapper mapper;
     private final TaskFailureRecorder failures;
+    @org.springframework.beans.factory.annotation.Autowired(required=false)
+    private ImageStorageService images;
     public MealAnalysisRequestStore(JdbcTemplate jdbc, UserAccountRepository users, UserGoalService goals,
             RateLimitService limits, MealRecordPersistenceService persistence, ObjectMapper mapper, TaskFailureRecorder failures) {
         this.jdbc = jdbc; this.users = users; this.goals = goals; this.limits = limits;
@@ -53,7 +55,7 @@ public class MealAnalysisRequestStore {
     @Transactional
     public void releaseLegacy(UserPrincipal principal,String key) {
         if (users.findByIdForUpdate(principal.getId()).isEmpty()) return;
-        jdbc.update("DELETE FROM meal_analysis_requests WHERE user_id=? AND request_key=? AND input_image IS NULL",principal.getId(),key);
+        jdbc.update("DELETE FROM meal_analysis_requests WHERE user_id=? AND request_key=? AND input_image IS NULL AND input_image_ref IS NULL",principal.getId(),key);
     }
     @Transactional
     public Claim claim(UserPrincipal principal, String key, String hash, String goal) {
@@ -96,9 +98,11 @@ public class MealAnalysisRequestStore {
         users.findByIdForUpdate(principal.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "用户不存在"));
         var row = jdbc.queryForMap("SELECT status,attempt_token,lease_until > CURRENT_TIMESTAMP AS live FROM meal_analysis_requests WHERE user_id=? AND request_key=? FOR UPDATE", principal.getId(), key);
         if (!"PROCESSING".equals(row.get("status")) || !token.equals(row.get("attempt_token")) || !Boolean.TRUE.equals(row.get("live"))) return status(principal, key);
-        persistence.saveWithImage(prepared.user(), prepared.record(), prepared.image());
+        String inputReference=jdbc.queryForObject("SELECT input_image_ref FROM meal_analysis_requests WHERE user_id=? AND request_key=?",String.class,principal.getId(),key);
+        if(inputReference==null)persistence.saveWithImage(prepared.user(), prepared.record(), prepared.image());
+        else persistence.saveWithStoredImage(prepared.user(),prepared.record(),inputReference);
         var result = prepared.response();
-        jdbc.update("UPDATE meal_analysis_requests SET status='SUCCEEDED',record_id=?,response_json=?,input_image=NULL,last_error=NULL,updated_at=CURRENT_TIMESTAMP WHERE user_id=? AND request_key=?",
+        jdbc.update("UPDATE meal_analysis_requests SET status='SUCCEEDED',record_id=?,response_json=?,input_image=NULL,input_image_ref=NULL,last_error=NULL,updated_at=CURRENT_TIMESTAMP WHERE user_id=? AND request_key=?",
                 result.getRecordId(), json(result), principal.getId(), key);
         deleteDispatch(principal.getId(), key);
         failures.recovered("MEAL_ANALYSIS", principal.getId(), key);
@@ -154,7 +158,7 @@ public class MealAnalysisRequestStore {
               input_image,input_content_type,input_extension,input_filename,input_width,input_height)
             VALUES (?,?,?,?,'PENDING',?,CURRENT_TIMESTAMP,?,?,?,?,?,?)
             ON CONFLICT(user_id,request_key) DO UPDATE SET status='PENDING',attempt_token=EXCLUDED.attempt_token,
-              input_image=EXCLUDED.input_image,input_content_type=EXCLUDED.input_content_type,input_extension=EXCLUDED.input_extension,
+              input_image=EXCLUDED.input_image,input_image_ref=NULL,input_content_type=EXCLUDED.input_content_type,input_extension=EXCLUDED.input_extension,
               input_filename=EXCLUDED.input_filename,input_width=EXCLUDED.input_width,input_height=EXCLUDED.input_height,
               attempts=0,next_attempt_at=CURRENT_TIMESTAMP,last_error=NULL,updated_at=CURRENT_TIMESTAMP
             """,user.getId(),key,hash,goal,UUID.randomUUID().toString(),image.bytes(),image.contentType(),image.extension(),image.originalFilename(),image.width(),image.height());
@@ -168,14 +172,42 @@ public class MealAnalysisRequestStore {
         return new MealAnalysisRequestResponse(key,"PENDING",null,3);
     }
 
-    public record Work(UserPrincipal user,String key,String token,String goal,ValidatedImage image,long queueWaitMillis) {
-        public Work(UserPrincipal user,String key,String token,String goal,ValidatedImage image) { this(user,key,token,goal,image,0); }
+    public record Work(UserPrincipal user,String key,String token,String goal,ValidatedImage image,long queueWaitMillis,String imageReference) {
+        public Work(UserPrincipal user,String key,String token,String goal,ValidatedImage image) { this(user,key,token,goal,image,0,null); }
+        public Work(UserPrincipal user,String key,String token,String goal,ValidatedImage image,long queueWaitMillis) { this(user,key,token,goal,image,queueWaitMillis,null); }
+    }
+    public ValidatedImage loadImage(Work work) {
+        if(work.imageReference()==null)return work.image();
+        if(images==null)throw new IllegalStateException("Image storage is unavailable");
+        AiCallContext.checkExecution();
+        var metadata=work.image();
+        byte[] bytes=images.read(work.imageReference());
+        AiCallContext.checkExecution();
+        return new ValidatedImage(bytes,metadata.contentType(),metadata.extension(),metadata.width(),metadata.height(),metadata.originalFilename());
+    }
+    @Transactional
+    public MealAnalysisRequestResponse enqueueClaimedReference(UserPrincipal principal,String key,String token,ValidatedImage image,String reference) {
+        users.findByIdForUpdate(principal.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,"用户不存在"));
+        int changed=jdbc.update("""
+                UPDATE meal_analysis_requests SET status='PENDING',input_image=NULL,input_image_ref=?,input_content_type=?,input_extension=?,
+                  input_filename=?,input_width=?,input_height=?,attempts=0,next_attempt_at=CURRENT_TIMESTAMP,
+                  lease_until=CURRENT_TIMESTAMP,last_error=NULL,updated_at=CURRENT_TIMESTAMP
+                WHERE user_id=? AND request_key=? AND attempt_token=? AND status='PROCESSING' AND lease_until>CURRENT_TIMESTAMP
+                """,reference,image.contentType(),image.extension(),image.originalFilename(),image.width(),image.height(),principal.getId(),key,token);
+        if(changed==0)return status(principal,key);
+        if(images != null)images.deleteOnRollback(reference);
+        jdbc.update("""
+                INSERT INTO meal_analysis_outbox(event_id,user_id,request_key) VALUES (?,?,?)
+                ON CONFLICT(user_id,request_key) DO UPDATE SET event_id=EXCLUDED.event_id,next_publish_at=CURRENT_TIMESTAMP,
+                  publish_token=NULL,published_at=NULL,publish_attempts=0,created_at=CURRENT_TIMESTAMP
+                """,UUID.randomUUID(),principal.getId(),key);
+        return new MealAnalysisRequestResponse(key,"PENDING",null,3);
     }
     @Transactional
     public MealAnalysisRequestResponse enqueueClaimed(UserPrincipal principal, String key, String token, ValidatedImage image) {
         users.findByIdForUpdate(principal.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "用户不存在"));
         int changed = jdbc.update("""
-                UPDATE meal_analysis_requests SET status='PENDING',input_image=?,input_content_type=?,input_extension=?,
+                UPDATE meal_analysis_requests SET status='PENDING',input_image=?,input_image_ref=NULL,input_content_type=?,input_extension=?,
                   input_filename=?,input_width=?,input_height=?,attempts=0,next_attempt_at=CURRENT_TIMESTAMP,
                   lease_until=CURRENT_TIMESTAMP,last_error=NULL,updated_at=CURRENT_TIMESTAMP
                 WHERE user_id=? AND request_key=? AND attempt_token=? AND status='PROCESSING' AND lease_until > CURRENT_TIMESTAMP
@@ -193,7 +225,7 @@ public class MealAnalysisRequestStore {
     public Work next() {
         // Always acquire account before request row, as completion/deletion do.
         var ids = jdbc.queryForList("""
-            SELECT user_id,request_key FROM meal_analysis_requests WHERE input_image IS NOT NULL
+            SELECT user_id,request_key FROM meal_analysis_requests WHERE (input_image IS NOT NULL OR input_image_ref IS NOT NULL)
               AND next_attempt_at <= CURRENT_TIMESTAMP
               AND (status='PENDING' OR (status='PROCESSING' AND lease_until <= CURRENT_TIMESTAMP))
             ORDER BY next_attempt_at,created_at LIMIT 1
@@ -220,7 +252,7 @@ public class MealAnalysisRequestStore {
         var rows=jdbc.queryForList("""
             SELECT r.*,GREATEST(0,EXTRACT(EPOCH FROM (clock_timestamp()-coalesce(
                 (SELECT o.created_at FROM meal_analysis_outbox o WHERE o.user_id=r.user_id AND o.request_key=r.request_key),r.next_attempt_at)))) AS queue_wait_seconds
-            FROM meal_analysis_requests r WHERE user_id=? AND request_key=? AND input_image IS NOT NULL
+            FROM meal_analysis_requests r WHERE user_id=? AND request_key=? AND (input_image IS NOT NULL OR input_image_ref IS NOT NULL)
               AND next_attempt_at <= CURRENT_TIMESTAMP
               AND (status='PENDING' OR (status='PROCESSING' AND lease_until <= CURRENT_TIMESTAMP)) FOR UPDATE
             """,userId,key);
@@ -237,9 +269,9 @@ public class MealAnalysisRequestStore {
         jdbc.update("UPDATE meal_analysis_requests SET status='PROCESSING',attempt_token=?,attempts=attempts+1,lease_until=CURRENT_TIMESTAMP + (? * INTERVAL '1 second'),updated_at=CURRENT_TIMESTAMP WHERE user_id=? AND request_key=?",
                 token,MealAnalysisLeaseService.boundedSeconds(workerLeaseSeconds),userId,key);
         return new Work(new UserPrincipal(user),key,token,row.get("effective_goal").toString(),new ValidatedImage(
-            (byte[])row.get("input_image"),row.get("input_content_type").toString(),row.get("input_extension").toString(),
+            row.get("input_image")==null?new byte[0]:(byte[])row.get("input_image"),row.get("input_content_type").toString(),row.get("input_extension").toString(),
             ((Number)row.get("input_width")).intValue(),((Number)row.get("input_height")).intValue(),row.get("input_filename").toString()),
-            Math.round(((Number)row.get("queue_wait_seconds")).doubleValue()*1000));
+            Math.round(((Number)row.get("queue_wait_seconds")).doubleValue()*1000),(String)row.get("input_image_ref"));
     }
     private void deleteDispatch(Long userId, String key) {
         jdbc.update("DELETE FROM meal_analysis_outbox WHERE user_id=? AND request_key=?", userId, key);
@@ -251,7 +283,7 @@ public class MealAnalysisRequestStore {
         var counts = jdbc.queryForMap("""
                 SELECT count(*) AS total, count(*) FILTER (WHERE user_id=?) AS owned
                 FROM meal_analysis_requests WHERE (status='PENDING' OR (status='PROCESSING'
-                  AND (input_image IS NOT NULL OR lease_until > CURRENT_TIMESTAMP)))
+                  AND (input_image IS NOT NULL OR input_image_ref IS NOT NULL OR lease_until > CURRENT_TIMESTAMP)))
                   AND NOT (user_id=? AND request_key=?)
                 """, userId, userId, key);
         if (((Number) counts.get("owned")).longValue() >= Math.max(1, maxOutstandingPerUser))

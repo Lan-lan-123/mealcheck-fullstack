@@ -49,7 +49,7 @@ import static org.mockito.Mockito.*;
 @ImportAutoConfiguration(RabbitAutoConfiguration.class)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @Import({TaskFailureRecorder.class, MealAnalysisLeaseService.class, MealAnalysisRabbitConfiguration.class, MealAnalysisRabbitConsumer.class, MealAnalysisOutboxStore.class,
-        MealAnalysisOutboxPublisher.class, MealAnalysisService.class, MealAnalysisRequestStore.class,
+        MealAnalysisOutboxPublisher.class, MealAnalysisService.class, BehaviorTrackingService.class, MealAnalysisRequestStore.class,
         MealAnalysisRequestService.class, MealScoringService.class, AdviceGenerationService.class,
         MealRecordPersistenceService.class, MealReportInvalidationService.class, UserDietProfileService.class,
         ImageStorageService.class, ImageUploadValidationService.class,

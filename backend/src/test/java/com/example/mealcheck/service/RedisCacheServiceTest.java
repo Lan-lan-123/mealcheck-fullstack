@@ -24,6 +24,23 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class RedisCacheServiceTest {
+    @org.junit.jupiter.api.Test
+    void followerDeadlineDoesNotCancelSharedProducer() throws Exception {
+        var service=new RedisCacheService(org.mockito.Mockito.mock(org.springframework.data.redis.core.StringRedisTemplate.class),new com.fasterxml.jackson.databind.ObjectMapper());
+        var started=new java.util.concurrent.CountDownLatch(1);var release=new java.util.concurrent.CountDownLatch(1);
+        var executor=java.util.concurrent.Executors.newSingleThreadExecutor();
+        try {
+            var producer=executor.submit(()->service.singleFlight("bounded",()->{
+                started.countDown();try {release.await();}catch(InterruptedException e){throw new IllegalStateException(e);}return "done";
+            },java.util.Optional.empty()));
+            started.await(2,java.util.concurrent.TimeUnit.SECONDS);
+            try(var scope=AiCallContext.open(7L,java.time.Duration.ofMillis(20))) {
+                org.assertj.core.api.Assertions.assertThatThrownBy(()->service.singleFlight("bounded",()->"duplicate",java.util.Optional.empty()))
+                        .isInstanceOf(RemoteCallGuard.RemoteCallDeadlineException.class);
+            }
+            release.countDown();org.assertj.core.api.Assertions.assertThat(producer.get(2,java.util.concurrent.TimeUnit.SECONDS)).isEqualTo("done");
+        } finally {release.countDown();executor.shutdownNow();}
+    }
 
     @Test
     void jitteredJsonTtlStaysInsideConfiguredWindow() {

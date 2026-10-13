@@ -13,6 +13,29 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class WeeklyReportJobWorkerTest {
+    @Test void expiredGenerationCannotPublishAndMarksTheSameJobFailed() {
+        var jobs = mock(WeeklyReportJobService.class);
+        var reports = mock(WeeklyReportService.class);
+        var completion = mock(WeeklyReportJobCompletionService.class);
+        var observability = mock(ApplicationObservability.class);
+        var job = job(13L, 23L, 7, 1);
+        when(jobs.claimBatch(1)).thenReturn(List.of(job));
+        when(reports.generateForJob(org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.anyInt(),
+                org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.any())).thenAnswer(call -> {
+            org.assertj.core.api.Assertions.assertThat(AiCallContext.capture().userId()).isEqualTo(23L);
+            Thread.sleep(1100);
+            return new WeeklyReportResponse();
+        });
+        var worker = new WeeklyReportJobWorker(jobs, reports, Runnable::run, observability, completion);
+        org.springframework.test.util.ReflectionTestUtils.setField(worker, "operationTimeoutSeconds", 1);
+        worker.poll();
+        org.mockito.Mockito.verifyNoInteractions(completion);
+        String executionToken = job.getExecutionToken();
+        verify(jobs).markFailed(org.mockito.ArgumentMatchers.eq(13L), org.mockito.ArgumentMatchers.eq(1),
+                org.mockito.ArgumentMatchers.eq(executionToken),
+                org.mockito.ArgumentMatchers.isA(RemoteCallGuard.RemoteCallDeadlineException.class));
+        org.assertj.core.api.Assertions.assertThat(AiCallContext.capture()).isNull();
+    }
 
     @Test
     void completesClaimedJobOnConfiguredExecutor() {
@@ -55,6 +78,22 @@ class WeeklyReportJobWorkerTest {
         verify(jobService).releaseUndispatched(12L, 1, job.getExecutionToken());
         verify(reportService, org.mockito.Mockito.never()).generateForJob(org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.anyInt(), org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.any());
         verify(observability).recordWeeklyReportJob("rejected");
+    }
+
+    @Test void resumedDispatchKeepsTheOriginalReportPeriod() {
+        var jobs = mock(WeeklyReportJobService.class);
+        var reports = mock(WeeklyReportService.class);
+        var job = job(14L, 24L, 7, 1);
+        var week = java.time.LocalDate.of(2026, 9, 21);
+        when(job.getReportWeek()).thenReturn(week);
+        when(jobs.claimBatch(1)).thenReturn(List.of(job));
+        when(reports.generateForJob(24L, 7, 14L, week)).thenAnswer(call -> {
+            org.assertj.core.api.Assertions.assertThat(AiCallContext.capture().background()).isTrue();
+            return new WeeklyReportResponse();
+        });
+        new WeeklyReportJobWorker(jobs, reports, Runnable::run, mock(ApplicationObservability.class),
+                mock(WeeklyReportJobCompletionService.class)).poll();
+        verify(reports).generateForJob(24L, 7, 14L, week);
     }
 
     private WeeklyReportJob job(Long id, Long userId, int days, int attempts) {

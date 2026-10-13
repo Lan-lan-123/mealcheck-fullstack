@@ -18,6 +18,9 @@
 @import './forms.css';
 @import './dialogs.css';
 @import './chart-details.css';
+@import './progress.css';
+@import './nutrition.css';
+@import './journal.css';
  .ai-budget-notice {
    display: flex;
    flex-wrap: wrap;

@@ -1,5 +1,5 @@
 export const workspaceSections = {
-  user: ['overview', 'records', 'trends', 'reports', 'goals'],
+  user: ['overview', 'records', 'trends', 'reports', 'goals', 'plans'],
   admin: ['overview', 'users', 'meals', 'nonfood', 'knowledge', 'assistant-stats', 'rag-evaluation', 'assistant-evaluation', 'meal-corrections', 'monitor', 'agent-coordination', 'task-failures', 'audit']
 }
 

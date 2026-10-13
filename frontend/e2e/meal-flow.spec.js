@@ -46,7 +46,7 @@ async function fixture(page, options = {}) {
     if (path === '/api/meals/trends') return send({ totalMeals: 1, averageScore: 21, dailyScores: [], commonFoods: [], commonRisks: [] })
     if (path === '/api/assistant/conversations') return send([])
     if (path === '/api/assistant/proactive') return send({ items: [] })
-    if (path === '/api/assistant/ask') {
+    if (['/api/assistant/ask', '/api/assistant/stream'].includes(path)) {
       if (options.ask) return options.ask(route)
       return send({ conversationId: 1, answer: '固定测试回答' })
     }
@@ -128,7 +128,7 @@ test('mobile queued upload automatically completes and correction dialog keeps k
   const state = await fixture(page, { pending: true })
   await page.locator('input[type=file]').setInputFiles({ name: 'meal.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('fixture') })
   await page.getByRole('button', { name: '开始分析', exact: true }).click()
-  await expect(page.getByText('图片已接收，正在排队；可以刷新页面继续跟踪。')).toBeVisible()
+  await expect(page.getByRole('region', { name: '餐食分析进度' }).getByText('图片已接收，正在排队', { exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: '纠正识别结果', exact: true })).toBeVisible({ timeout: 10000 })
   expect(state.posts()).toBe(1)
   await page.getByRole('button', { name: '纠正识别结果', exact: true }).click()

@@ -17,10 +17,12 @@ import java.util.List;
 
 @Service
 public class UserGoalService {
+    private final MealReportInvalidationService invalidation;
     private final UserGoalRepository goalRepository;
     private final UserAccountRepository userRepository;
 
-    public UserGoalService(UserGoalRepository goalRepository, UserAccountRepository userRepository) {
+    public UserGoalService(UserGoalRepository goalRepository, UserAccountRepository userRepository, MealReportInvalidationService invalidation) {
+        this.invalidation = invalidation;
         this.goalRepository = goalRepository;
         this.userRepository = userRepository;
     }
@@ -40,7 +42,7 @@ public class UserGoalService {
 
     @Transactional
     public UserGoalResponse update(UserPrincipal principal, UserGoalRequest request) {
-        UserAccount user = userRepository.findById(principal.getId()).orElseThrow();
+        UserAccount user = userRepository.findByIdForUpdate(principal.getId()).orElseThrow();
         goalRepository.findFirstByUserAndActiveTrueOrderByCreatedAtDesc(user)
                 .ifPresent(goal -> {
                     goal.setActive(false);
@@ -53,7 +55,9 @@ public class UserGoalService {
         goal.setStartDate(request.getStartDate() == null ? AppTime.today() : request.getStartDate());
         goal.setEndDate(request.getEndDate());
         goal.setNote(request.getNote());
-        return toResponse(goalRepository.save(goal));
+        var saved=toResponse(goalRepository.save(goal));
+        invalidation.invalidate(user.getId());
+        return saved;
     }
 
     @Transactional(readOnly = true)

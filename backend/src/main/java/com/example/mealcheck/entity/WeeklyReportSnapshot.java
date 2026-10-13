@@ -38,6 +38,11 @@ public class WeeklyReportSnapshot {
     private String reportJson;
 
     private LocalDateTime generatedAt = AppTime.now();
+    @Column(nullable = false)
+    private boolean stale;
+    private LocalDateTime invalidatedAt;
+    public boolean isStale() { return stale; }
+    public LocalDateTime getInvalidatedAt() { return invalidatedAt; }
 
     public Long getId() { return id; }
     public Long getJobId() { return jobId; }

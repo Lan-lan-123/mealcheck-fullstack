@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 
 @Service
 public class WeeklyReportRequestService {
+    private final BehaviorTrackingService tracking;
     private final UserAccountRepository users;
     private final WeeklyReportJobRepository jobs;
     private final WeeklyReportSnapshotRepository snapshots;
@@ -27,7 +28,8 @@ public class WeeklyReportRequestService {
     private final ObjectMapper mapper;
 
     public WeeklyReportRequestService(UserAccountRepository users, WeeklyReportJobRepository jobs,
-            WeeklyReportSnapshotRepository snapshots, RateLimitService rateLimits, ObjectMapper mapper) {
+            WeeklyReportSnapshotRepository snapshots, RateLimitService rateLimits, ObjectMapper mapper, BehaviorTrackingService tracking) {
+        this.tracking = tracking;
         this.users = users;
         this.jobs = jobs;
         this.snapshots = snapshots;
@@ -65,6 +67,7 @@ public class WeeklyReportRequestService {
                     .map(snapshot -> Jsons.fromJson(mapper, snapshot.getReportJson(), WeeklyReportResponse.class))
                     .orElseThrow(() -> new IllegalStateException("周报结果暂时不可用"))
                 : null;
+        if(report!=null && tracking!=null && report.getPeriodStart()!=null && report.getPeriodEnd()!=null) report.setTracking(tracking.summary(job.getUserId(),report.getPeriodStart(),report.getPeriodEnd()));
         return new WeeklyReportJobResponse(job.getId(), job.getStatus(), job.getDays(), job.getAttempts(),
                 WeeklyReportJob.RETRY.equals(job.getStatus()) ? job.getNextRetryAt() : null, report);
     }

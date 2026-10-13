@@ -1,0 +1,10 @@
+# Optional PostgreSQL query statistics. Enabling this requires a PostgreSQL restart.
+# Apply only during an approved deployment/maintenance window, then initialize the extension.
+services:
+  postgres:
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - pg_stat_statements.track=top

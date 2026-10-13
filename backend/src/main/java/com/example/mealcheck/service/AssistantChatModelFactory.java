@@ -31,4 +31,17 @@ public class AssistantChatModelFactory {
                 .timeout(timeout)
                 .build();
     }
+    public String stream(String prompt,AssistantStreamDelivery delivery) {
+        try {
+            var mapper=new com.fasterxml.jackson.databind.ObjectMapper();
+            var body=mapper.createObjectNode();body.put("model",properties.getAi().getModel());body.put("stream",true);
+            body.put("temperature",0.35);body.putObject("stream_options").put("include_usage",true);
+            body.putArray("messages").addObject().put("role","user").put("content",prompt);
+            var request=java.net.http.HttpRequest.newBuilder(AiEndpointResolver.chatCompletions(properties.getAi().getBaseUrl()))
+                .timeout(Duration.ofSeconds(120)).header("Authorization","Bearer "+properties.getAi().getApiKey())
+                .header("Content-Type","application/json").header("Accept","text/event-stream")
+                .POST(java.net.http.HttpRequest.BodyPublishers.ofString(body.toString())).build();
+            return transport.stream("diet-assistant",request,body.toString(),delivery);
+        } catch(RuntimeException failure) { throw failure; }
+    }
 }

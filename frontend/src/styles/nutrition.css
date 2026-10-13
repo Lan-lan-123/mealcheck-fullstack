@@ -1,0 +1,17 @@
+.nutrition-panel { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+.nutrition-panel h3 { margin-top: 0; }
+.nutrition-warning { padding: 0.75rem; background: #fff7e8; border: 1px solid #ead4a4; border-radius: 8px; color: #77521d; line-height: 1.65; }
+.nutrition-toggle { display: flex; align-items: center; gap: 0.6rem; margin: 1rem 0; font-weight: 600; }
+.nutrition-panel .nutrition-toggle input { width: auto; margin: 0; }
+.nutrition-food { min-width: 0; border: 1px solid var(--line); border-radius: 8px; margin: 1rem 0; padding: 0.85rem; }
+.nutrition-food legend { font-weight: 600; padding: 0 0.35rem; }
+.nutrition-food label { display: grid; gap: 0.4rem; margin: 0.6rem 0; font-size: 0.875rem; }
+.nutrition-food input { box-sizing: border-box; width: 100%; min-width: 0; padding: 0.6rem; border: 1px solid var(--line); border-radius: 6px; }
+.nutrition-food summary { cursor: pointer; padding: 0.5rem 0; }
+.nutrition-inputs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
+.nutrition-estimate { border: 1px solid var(--line); border-radius: 8px; padding: 0.85rem; margin: 1rem 0; }
+.nutrition-estimate dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
+.nutrition-estimate dt { color: var(--muted); font-size: 0.8rem; }
+.nutrition-estimate dd { margin: 0.25rem 0; font-weight: 600; }
+.nutrition-panel .error button { margin: 0.5rem; }
+@media (max-width: 480px) { .nutrition-inputs { grid-template-columns: minmax(0, 1fr); } }

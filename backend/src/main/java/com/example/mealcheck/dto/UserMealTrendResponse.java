@@ -3,6 +3,9 @@ package com.example.mealcheck.dto;
 import java.util.List;
 
 public class UserMealTrendResponse {
+    private TrackingDtos.Summary tracking;
+    public TrackingDtos.Summary getTracking() { return tracking; }
+    public void setTracking(TrackingDtos.Summary value) { tracking=value; }
     private int days;
     private long total;
     private int averageScore;

@@ -1,4 +1,6 @@
+import PlanSaveButton from "./PlanSaveButton"
 import { categoryName } from '../utils/mealLabels'
+import MealNutritionPanel from './MealNutritionPanel'
 
 export default function ResultView({ result, compact = false, onViewDetails }) {
   const evaluation = result?.evaluation || {}
@@ -41,6 +43,7 @@ export default function ResultView({ result, compact = false, onViewDetails }) {
       {!compact && <>
       <h3>RAG 饮食建议</h3>
       <pre className="advice">{result?.advice || '暂无建议'}</pre>
+      {result?.recordId && <PlanSaveButton key={result.recordId} text={result.advice} sourceType="MEAL" sourceRecordId={result.recordId} />}
 
       <h3>参考知识片段</h3>
       {references.map(ref => (
@@ -53,6 +56,8 @@ export default function ResultView({ result, compact = false, onViewDetails }) {
       ))}
       </>}
       {compact && <button className="secondary-btn" type="button" onClick={onViewDetails}>查看完整分析与建议</button>}
+      {compact && result?.recordId && <button className="secondary-btn" type="button" onClick={onViewDetails}>可选份量与营养估算</button>}
+      {!compact && result?.recordId && <MealNutritionPanel key={`${result.recordId}:${result.revision || 0}`} recordId={result.recordId} />}
     </div>
   )
 }

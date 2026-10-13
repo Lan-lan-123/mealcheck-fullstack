@@ -91,8 +91,7 @@ public class AiChatClient {
             body.put("temperature", temperature);
             body.put("messages", messages);
 
-            log.info("Calling AI chat completion. operation={}, endpoint={}, model={}",
-                    operation, endpoint, model);
+            log.info("Calling AI chat completion. operation={}", operation);
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(endpoint)
@@ -104,8 +103,7 @@ public class AiChatClient {
 
             HttpResponse<String> response = transport.send(operation,guardName,request,objectMapper.writeValueAsString(body));
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
-                throw new AiClientException("AI request failed: HTTP " + response.statusCode()
-                        + " - " + truncate(response.body(), 500));
+                throw new AiClientException("AI 服务调用失败，请稍后重试。");
             }
 
             String content = extractMessageContent(response.body());
@@ -127,7 +125,7 @@ public class AiChatClient {
         } catch (Exception e) {
             aiStatusService.recordFailure(operation, e.getMessage(), elapsedMs(startedAt));
             observability.recordAiCall(startedAt, operation, "failure");
-            throw new AiClientException("AI request failed: " + e.getMessage(), e);
+            throw new AiClientException("AI 服务调用失败，请稍后重试。", e);
         }
     }
 
@@ -139,20 +137,9 @@ public class AiChatClient {
         JsonNode root = objectMapper.readTree(responseBody);
         String content = root.path("choices").path(0).path("message").path("content").asText("");
         if (content.isBlank()) {
-            throw new AiClientException("AI response missing choices[0].message.content: "
-                    + truncate(responseBody, 500));
+            throw new AiClientException("AI 服务返回结果无效，请稍后重试。");
         }
         return content;
-    }
-
-    private String truncate(String text, int maxLength) {
-        if (text == null) {
-            return "";
-        }
-        if (text.length() <= maxLength) {
-            return text;
-        }
-        return text.substring(0, maxLength) + "...";
     }
 
     public static class AiClientException extends RuntimeException {

@@ -35,8 +35,8 @@ public class MealAnalysisWorker {
         if (work==null) return;
         long start=System.nanoTime();String outcome="failure";
         String phase="ANALYZE";
-        try (var lease=leases.track(work)) {
-            var prepared=analysis.prepareValidated(work.user(),work.image(),work.goal());
+        try (var deadline=analysis.analysisDeadline(work.user()); var lease=leases.track(work)) {
+            var prepared=analysis.prepareValidated(work.user(),work.imageReference()==null?work.image():store.loadImage(work),work.goal());
             phase="SAVE";
             var result=store.complete(work.user(),work.key(),work.token(),prepared);
             outcome="SUCCEEDED".equals(result.status())?"success":"fenced";

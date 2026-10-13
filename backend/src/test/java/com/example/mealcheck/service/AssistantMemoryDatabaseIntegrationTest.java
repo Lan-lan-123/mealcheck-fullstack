@@ -96,7 +96,7 @@ class AssistantMemoryDatabaseIntegrationTest {
         String url=POSTGRES.getJdbcUrl().replace("/"+POSTGRES.getDatabaseName(),"/"+name);
         var source=new org.springframework.jdbc.datasource.DriverManagerDataSource(url,POSTGRES.getUsername(),POSTGRES.getPassword());
         var old=new JdbcTemplate(source);
-        org.flywaydb.core.Flyway.configure().dataSource(source).target("21").load().migrate();
+        org.flywaydb.core.Flyway.configure().configuration(java.util.Map.of("flyway.postgresql.transactional.lock", "false")).dataSource(source).target("21").load().migrate();
         old.execute("""
                 CREATE TABLE assistant_memory_facts(id BIGSERIAL PRIMARY KEY,user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
                   conversation_id BIGINT REFERENCES assistant_conversations(id) ON DELETE CASCADE,fact_type VARCHAR(32) NOT NULL,
@@ -105,7 +105,7 @@ class AssistantMemoryDatabaseIntegrationTest {
                 """);
         old.execute("INSERT INTO users(username,password_hash) VALUES ('legacy','hash')");
         old.execute("INSERT INTO assistant_memory_facts(user_id,fact_type,fact_text,fact_hash,embedding,embedding_signature) VALUES (1,'restriction','我对花生过敏',repeat('a',64),'[1,0,0]','old:3')");
-        org.flywaydb.core.Flyway.configure().dataSource(source).load().migrate();
+        org.flywaydb.core.Flyway.configure().configuration(java.util.Map.of("flyway.postgresql.transactional.lock", "false")).dataSource(source).load().migrate();
         assertThat(old.queryForObject("SELECT fact_text FROM assistant_memory_facts",String.class)).isEqualTo("我对花生过敏");
         assertThat(old.queryForObject("SELECT embedding_half::text FROM assistant_memory_vectors",String.class)).isEqualTo("[1,0,0]");
         assertThat(old.queryForObject("SELECT signature FROM assistant_memory_version",String.class)).isEqualTo("old:3:halfvec-v1");

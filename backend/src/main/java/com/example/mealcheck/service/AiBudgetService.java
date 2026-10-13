@@ -16,6 +16,9 @@ public class AiBudgetService {
     private final AiBudgetStore store;
     private final MeterRegistry metrics;
     private final BackgroundTaskDispatcher background;
+    @org.springframework.beans.factory.annotation.Autowired(required=false)
+    private ModelPriceCatalog priceCatalog;
+    private final java.util.concurrent.atomic.AtomicReference<java.util.Map<String,Object>> globalSnapshot=new java.util.concurrent.atomic.AtomicReference<>(java.util.Map.of());
     private final java.util.concurrent.atomic.AtomicReference<java.util.Map<String,Object>> recoverySnapshot=new java.util.concurrent.atomic.AtomicReference<>(java.util.Map.of());
     private final java.util.concurrent.atomic.AtomicInteger monitorHealthy=new java.util.concurrent.atomic.AtomicInteger();
     public AiBudgetService(AppProperties properties,AiBudgetStore store,MeterRegistry metrics,BackgroundTaskDispatcher background) {
@@ -27,6 +30,9 @@ public class AiBudgetService {
         io.micrometer.core.instrument.Gauge.builder("mealcheck.ai.budget.monitor.healthy",monitorHealthy,java.util.concurrent.atomic.AtomicInteger::get).register(metrics);
         for (String field:java.util.List.of("unsettled","stale","oldest_seconds"))
             io.micrometer.core.instrument.Gauge.builder("mealcheck.ai.budget.recovery."+field,recoverySnapshot,
+                    state->((Number)state.get().getOrDefault(field,0)).doubleValue()).register(metrics);
+        for(String field:java.util.List.of("attempts","callLimit","remainingCalls","spent","reserved"))
+            io.micrometer.core.instrument.Gauge.builder("mealcheck.ai.budget.global."+(field.equals("callLimit")?"limit":field.equals("remainingCalls")?"remaining":field),globalSnapshot,
                     state->((Number)state.get().getOrDefault(field,0)).doubleValue()).register(metrics);
     }
     @jakarta.annotation.PostConstruct
@@ -88,9 +94,13 @@ public class AiBudgetService {
         result.put("rejected",metrics.counter("mealcheck.ai.budget.rejected").count());
         result.put("settlementDeferred",metrics.counter("mealcheck.ai.budget.settlement.deferred").count());
         result.put("unavailable",metrics.counter("mealcheck.ai.budget.unavailable").count());
+        if(priceCatalog!=null)result.put("pricing",priceCatalog.summary());
         if (properties.getAiBudget().isEnabled()) {
-            var day=ZonedDateTime.now(ZoneId.of(properties.getAiBudget().getZone())).toLocalDate();
-            result.put("globalUsage",store.usage("global",day));
+            var now=ZonedDateTime.now(ZoneId.of(properties.getAiBudget().getZone()));
+            var global=new java.util.LinkedHashMap<String,Object>(store.globalUsage(now.toLocalDate()));
+            global.put("day",now.toLocalDate());
+            global.put("resetAt",now.toLocalDate().plusDays(1).atStartOfDay(now.getZone()).toInstant());
+            result.put("globalUsage",global);
         }
         return result;
     }
@@ -99,7 +109,9 @@ public class AiBudgetService {
         if (properties.getAiBudget().isEnabled()) background.submit("ai-budget-recovery",()->{
             try {
                 store.stale().forEach(store::recover);store.retain();
-                recoverySnapshot.set(store.recoveryStats());monitorHealthy.set(1);
+                recoverySnapshot.set(store.recoveryStats());
+                globalSnapshot.set(store.globalUsage(ZonedDateTime.now(ZoneId.of(properties.getAiBudget().getZone())).toLocalDate()));
+                monitorHealthy.set(1);
             } catch (RuntimeException unavailable) { monitorHealthy.set(0);throw unavailable; }
         });
     }

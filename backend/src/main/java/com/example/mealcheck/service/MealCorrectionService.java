@@ -55,7 +55,7 @@ public class MealCorrectionService {
         record.setAdvice(advice.correctedAdvice(recognition, evaluation, record.getGoal()));
         meals.saveAndFlush(record);
         profiles.refresh(user);
-        invalidation.invalidate(user.getId());
+        invalidation.mealDates(user.getId(),com.example.mealcheck.util.AppTime.businessDate(record.getOccurredAt()));
         jdbc.update("INSERT INTO meal_corrections(user_id,record_id,revision,before_foods_json,after_foods_json,reason,scoring_version) VALUES (?,?,?,?,?,?,?)",
                 user.getId(), id, record.getRevision(), before, after, request.reason().trim(), MealScoringService.VERSION);
         var response = new MealAnalysisResponse();

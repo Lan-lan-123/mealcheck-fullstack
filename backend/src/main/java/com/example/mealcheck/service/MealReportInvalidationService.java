@@ -11,8 +11,24 @@ public class MealReportInvalidationService {
     public MealReportInvalidationService(JdbcTemplate jdbc) { this.jdbc = jdbc; }
     @Transactional(propagation = Propagation.MANDATORY)
     public void invalidate(Long userId) {
-        // Caller holds the account lock. Preserve history and fence active attempts.
+        // A change to dietary direction affects all narratives, but keeps their archived versions.
         jdbc.update("UPDATE weekly_report_jobs SET status='STALE',version=version+1,updated_at=CURRENT_TIMESTAMP WHERE user_id=? AND status <> 'STALE'", userId);
-        jdbc.update("DELETE FROM weekly_report_snapshots WHERE user_id=?", userId);
+        jdbc.update("UPDATE weekly_report_snapshots SET stale=true,invalidated_at=CURRENT_TIMESTAMP WHERE user_id=? AND stale=false", userId);
+    }
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void mealDates(Long userId, java.time.LocalDate... dates) {
+        for (var day : new java.util.HashSet<>(java.util.Arrays.asList(dates))) {
+            jdbc.update("""
+                UPDATE weekly_report_jobs SET status='STALE',version=version+1,updated_at=CURRENT_TIMESTAMP
+                WHERE user_id=? AND status<>'STALE'
+                  AND CAST(created_at AT TIME ZONE ? AT TIME ZONE ? AS date)>=?
+                  AND CAST(created_at AT TIME ZONE ? AT TIME ZONE ? AS date)-(days-1)<=?
+                """, userId, com.example.mealcheck.util.AppTime.storageZone().getId(), com.example.mealcheck.util.AppTime.businessZone().getId(), day,
+                com.example.mealcheck.util.AppTime.storageZone().getId(), com.example.mealcheck.util.AppTime.businessZone().getId(), day);
+            jdbc.update("""
+                UPDATE weekly_report_snapshots SET stale=true,invalidated_at=CURRENT_TIMESTAMP
+                WHERE user_id=? AND stale=false AND (period_start IS NULL OR period_end IS NULL OR (period_start<=? AND period_end>=?))
+                """, userId, day, day);
+        }
     }
 }

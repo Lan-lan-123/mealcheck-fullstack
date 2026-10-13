@@ -11,6 +11,8 @@ public class MealAnalysisRequestService {
     private final MealAnalysisService analysis;
     private final ImageUploadValidationService validation;
     private final RateLimitService limits;
+    @org.springframework.beans.factory.annotation.Autowired(required=false)
+    private ImageStorageService images;
     public MealAnalysisRequestService(MealAnalysisRequestStore store, MealAnalysisService analysis,
             ImageUploadValidationService validation, RateLimitService limits) {
         this.store = store; this.analysis = analysis; this.validation = validation; this.limits = limits;
@@ -22,9 +24,10 @@ public class MealAnalysisRequestService {
         var claim = store.claim(principal, key, hash, goal);
         if (claim.existing() != null) return claim.existing();
         String phase = "ANALYZE";
-        try {
+        try (var deadline = analysis.analysisDeadline(principal)) {
             var prepared = analysis.prepare(principal, image, claim.goal());
             phase = "SAVE";
+            AiCallContext.checkExecution();
             return store.complete(principal, key, claim.token(), prepared);
         }
         catch (RuntimeException error) { store.fail(principal.getId(), key, claim.token(), phase, error); throw error; }
@@ -36,10 +39,19 @@ public class MealAnalysisRequestService {
         String hash = validation.payloadHash(image, goal);
         var claim = store.claimUpload(principal, key, hash, goal);
         if (claim.existing() != null) return claim.existing();
+        String reference=null;
         try {
             var validated = validation.validateAndNormalize(image);
+            if(images != null && images.usesObjectStorage()) {
+                reference=images.store(principal.getId(),validated);
+                var result=store.enqueueClaimedReference(principal,key,claim.token(),validated,reference);
+                if(!"PENDING".equals(result.status()))images.deleteSafely(reference);
+                return result;
+            }
             return store.enqueueClaimed(principal, key, claim.token(), validated);
         } catch (RuntimeException error) {
+            // A commit failure can be ambiguous. Transaction rollback hooks or the
+            // reference-aware orphan scan reclaim storage; never delete a possibly accepted payload here.
             store.fail(principal.getId(), key, claim.token(), "VALIDATE", error);
             throw error;
         }

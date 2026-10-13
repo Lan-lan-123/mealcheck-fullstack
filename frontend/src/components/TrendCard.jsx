@@ -1,3 +1,4 @@
+import TrackingSummary from "./TrackingSummary"
 import MiniBars from './MiniBars'
 import ScoreTrend from './ScoreTrend'
 import { useState } from 'react'
@@ -34,6 +35,7 @@ export default function TrendCard({ trend }) {
 
       <p className="trend-summary">{trend.scoreTrend || '趋势暂不明显'}。{trend.suggestion || ''}</p>
 
+      <TrackingSummary summary={trend.tracking} />
       <SectionSwitcher label="饮食趋势分类" value={section} onChange={setSection} items={[["scores", "评分趋势"], ["foods", "常见食物"], ["risks", "常见风险"]]} />
       <div className="trend-chart"><h3>{active.title}</h3>{section === 'scores' ? <ScoreTrend items={previewItems} emptyText={active.empty} /> : <MiniBars items={previewItems} emptyText={active.empty} />}</div>
       <div className="detail-entry"><span>{active.items.length > 7 ? (section === 'scores' ? '当前展示最近 7 个日期' : '当前展示前 7 项') : '当前展示全部项目'}</span><button className="secondary-btn" type="button" onClick={() => setShowDetails(true)}>查看全部趋势指标</button></div>

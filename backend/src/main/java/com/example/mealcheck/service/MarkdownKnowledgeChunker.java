@@ -16,6 +16,8 @@ import java.util.regex.Pattern;
 
 @Component
 public class MarkdownKnowledgeChunker {
+    // Curated entries have their own context; do not merge or prepend unrelated topics.
+    private static final String INDEPENDENT_TOPICS = "<!-- mealcheck:independent-topics -->";
     private static final Pattern HEADING = Pattern.compile("(?m)^#{2,6}\\s+(.+?)\\s*$");
     private static final Pattern TOKEN = Pattern.compile(
             "[\\p{IsHan}\\p{IsHiragana}\\p{IsKatakana}\\p{IsHangul}]|[\\p{L}\\p{N}]+(?:[-_'’][\\p{L}\\p{N}]+)*|[^\\s]");
@@ -74,7 +76,10 @@ public class MarkdownKnowledgeChunker {
             }
         }
 
-        List<List<DraftChunk>> groups = mergeShortDrafts(drafts);
+        boolean independentTopics = markdown.stripLeading().startsWith(INDEPENDENT_TOPICS);
+        List<List<DraftChunk>> groups = independentTopics
+                ? drafts.stream().map(List::of).toList()
+                : mergeShortDrafts(drafts);
         List<PgVectorKnowledgeService.KnowledgeChunk> result = new ArrayList<>(groups.size());
         int chunkIndex = 0;
         String previousContent = null;
@@ -87,7 +92,7 @@ public class MarkdownKnowledgeChunker {
                     && previousGroup.size() == 1
                     && group.size() == 1
                     && previousGroup.get(0).title().equals(group.get(0).title());
-            String content = previousContent != null && overlap > 0 && !alreadyOverlaps
+            String content = !independentTopics && previousContent != null && overlap > 0 && !alreadyOverlaps
                     ? suffixTokens(previousContent, overlap) + "\n\n" + baseContent
                     : baseContent;
             String chunkKey = group.get(0).key() + "--" + group.get(group.size() - 1).key();

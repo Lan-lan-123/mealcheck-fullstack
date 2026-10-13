@@ -34,6 +34,15 @@ public class AssistantConversationMessage {
     @Column(nullable = false)
     private LocalDateTime createdAt = AppTime.now();
 
+    @Column(length=64)
+    private String requestId;
+    @Column(nullable=false,length=16)
+    private String deliveryStatus="COMPLETE";
+    public String getRequestId() { return requestId; }
+    public void setRequestId(String v) { requestId=v; }
+    public String getDeliveryStatus() { return deliveryStatus; }
+    public void setDeliveryStatus(String v) { deliveryStatus=v; }
+
     public Long getId() { return id; }
     public AssistantConversation getConversation() { return conversation; }
     public void setConversation(AssistantConversation conversation) { this.conversation = conversation; }

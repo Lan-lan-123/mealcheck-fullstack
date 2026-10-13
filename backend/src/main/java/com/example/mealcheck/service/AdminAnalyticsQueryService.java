@@ -68,31 +68,29 @@ public class AdminAnalyticsQueryService {
     public AdminUploadTrendResponse uploadTrends(LocalDate start, LocalDate end) {
         List<UploadTrendRow> rows = jdbcTemplate.query("""
                 WITH days AS (
-                    SELECT day, (day::timestamp AT TIME ZONE '%s' AT TIME ZONE '%s') AS start_at,
-                           ((day+1)::timestamp AT TIME ZONE '%s' AT TIME ZONE '%s') AS end_at
-                    FROM (SELECT generate_series(CAST(? AS date), CAST(? AS date), INTERVAL '1 day')::date AS day) dates
+                    SELECT generate_series(CAST(? AS date), CAST(? AS date), INTERVAL '1 day')::date AS day
+                ), normal AS (
+                    SELECT %s AS day,COUNT(*) AS total
+                    FROM meal_records m WHERE m.created_at>=? AND m.created_at<? GROUP BY 1
+                ), abnormal AS (
+                    SELECT %s AS day,COUNT(*) AS total,
+                           COUNT(*) FILTER (WHERE e.threshold_reached=true) AS alerts,
+                           COUNT(DISTINCT e.username) FILTER (WHERE e.threshold_reached=true) AS blocked
+                    FROM non_food_upload_events e WHERE e.created_at>=? AND e.created_at<? GROUP BY 1
                 )
-                SELECT d.day,
-                       (SELECT COUNT(*) FROM meal_records m
-                        WHERE m.created_at >= d.start_at AND m.created_at < d.end_at) AS normal_count,
-                       (SELECT COUNT(*) FROM non_food_upload_events e
-                        WHERE e.created_at >= d.start_at AND e.created_at < d.end_at) AS abnormal_count,
-                       (SELECT COUNT(*) FROM non_food_upload_events e
-                        WHERE e.threshold_reached = true
-                          AND e.created_at >= d.start_at AND e.created_at < d.end_at) AS alert_count,
-                       (SELECT COUNT(DISTINCT e.username) FROM non_food_upload_events e
-                        WHERE e.threshold_reached = true
-                          AND e.created_at >= d.start_at AND e.created_at < d.end_at) AS blocked_users
+                SELECT d.day,COALESCE(n.total,0) AS normal_count,COALESCE(a.total,0) AS abnormal_count,
+                       COALESCE(a.alerts,0) AS alert_count,COALESCE(a.blocked,0) AS blocked_users
                 FROM days d
+                LEFT JOIN normal n ON n.day=d.day LEFT JOIN abnormal a ON a.day=d.day
                 ORDER BY d.day
-                """.formatted(AppTime.businessZone(), AppTime.storageZone(),
-                        AppTime.businessZone(), AppTime.storageZone()), (rs, rowNum) -> new UploadTrendRow(
+                """.formatted(businessDaySql("m.created_at"), businessDaySql("e.created_at")), (rs, rowNum) -> new UploadTrendRow(
                 rs.getDate("day").toLocalDate(),
                 rs.getInt("normal_count"),
                 rs.getInt("abnormal_count"),
                 rs.getInt("alert_count"),
                 rs.getInt("blocked_users")
-        ), Date.valueOf(start), Date.valueOf(end));
+        ), Date.valueOf(start), Date.valueOf(end), AppTime.startOfDay(start), AppTime.startOfDay(end.plusDays(1)),
+                AppTime.startOfDay(start), AppTime.startOfDay(end.plusDays(1)));
 
         return new AdminUploadTrendResponse(
                 rows.stream().map(row -> metric(row.day(), row.normalCount())).toList(),

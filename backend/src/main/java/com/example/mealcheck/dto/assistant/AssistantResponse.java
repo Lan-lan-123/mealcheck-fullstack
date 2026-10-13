@@ -3,6 +3,15 @@ package com.example.mealcheck.dto.assistant;
 import java.util.List;
 
 public class AssistantResponse {
+    private Long messageId;
+    private String requestId;
+    private String deliveryStatus="COMPLETE";
+    public Long getMessageId() { return messageId; }
+    public void setMessageId(Long v) { messageId=v; }
+    public String getRequestId() { return requestId; }
+    public void setRequestId(String v) { requestId=v; }
+    public String getDeliveryStatus() { return deliveryStatus; }
+    public void setDeliveryStatus(String v) { deliveryStatus=v; }
     private final String answer;
     private final String summary;
     private final List<String> suggestions;

@@ -76,11 +76,16 @@ public class WeeklyReportJobService {
         var candidate = repository.findById(jobId);
         if (candidate.isEmpty() || users.findByIdForUpdate(candidate.get().getUserId()).isEmpty()) return false;
         LocalDateTime now = AppTime.now();
-        boolean dead = attempt >= maxAttempts();
-        String status = dead ? WeeklyReportJob.DEAD : WeeklyReportJob.RETRY;
-        LocalDateTime nextRetryAt = dead ? now : now.plusSeconds(retryDelaySeconds(attempt));
         var failure = TaskFailureClassifier.classify(error, "GENERATE");
-        boolean changed = repository.markFailed(
+        Long admissionDelay = admissionRetryDelay(error);
+        boolean budgetWait="AI_BUDGET_EXCEEDED".equals(failure.code());
+        boolean dead = !failure.recoverable() || "REMOTE_CONFIGURATION".equals(failure.code())
+                || (!budgetWait && attempt >= maxAttempts());
+        String status = dead ? WeeklyReportJob.DEAD : WeeklyReportJob.RETRY;
+        LocalDateTime nextRetryAt = dead ? now : now.plusSeconds(admissionDelay == null ? retryDelaySeconds(attempt) : admissionDelay);
+        boolean changed = budgetWait
+                ? repository.deferAdmission(jobId, attempt, token, failure.code(), nextRetryAt, now) == 1
+                : repository.markFailed(
                 jobId,
                 attempt,
                 token,
@@ -92,6 +97,23 @@ public class WeeklyReportJobService {
         if (changed) failures.record("WEEKLY_REPORT", candidate.get().getUserId(), jobId.toString(), null,
                 token, attempt, "GENERATE", failure, dead);
         return changed;
+    }
+
+    private Long admissionRetryDelay(Throwable error) {
+        for (Throwable cause = error; cause != null; cause = cause.getCause()) {
+            if (cause instanceof AiBudgetService.BudgetExceededException budget)
+                return Math.max(1, budget.retryAfter());
+            if (cause instanceof RemoteCallGuard.RemoteCallDeadlineException deadline && deadline.retryAfter()!=null)
+                return Math.max(1,deadline.retryAfter().toSeconds()+(deadline.retryAfter().toNanosPart()>0?1:0));
+            if (cause instanceof RemoteCallGuard.RetryableRemoteCallException remote && remote.retryAfter() != null)
+                return Math.max(1, remote.retryAfter().toSeconds() + (remote.retryAfter().toNanosPart() > 0 ? 1 : 0));
+            if (cause instanceof org.springframework.web.server.ResponseStatusException response
+                    && response.getStatusCode().value() == 429) {
+                try { return Math.max(1, Long.parseLong(response.getHeaders().getFirst("Retry-After"))); }
+                catch (RuntimeException ignored) { return 60L; }
+            }
+        }
+        return null;
     }
 
     private int workerBatchSize() {

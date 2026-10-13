@@ -3,14 +3,15 @@ import Empty from '../../components/Empty'
 import RecordItem from '../../components/RecordItem'
 import { goals } from '../userWorkspaceConfig'
 
-export default function DietRecordsPanel({ recordPageData, recordFiltersDraft, setRecordFiltersDraft, applyRecordFilters, resetRecordFilters, records, handleDeleteRecord, setCorrectionRecord, setViewingRecord, recordSize, setRecordPage, setRecordSize, loading, recordsLoading }) {
+export default function DietRecordsPanel({ onNew, onEdit, recordPageData, recordFiltersDraft, setRecordFiltersDraft, applyRecordFilters, resetRecordFilters, records, handleDeleteRecord, setCorrectionRecord, setViewingRecord, recordSize, setRecordPage, setRecordSize, loading, recordsLoading }) {
   return (
           <div className="card history-card records-page">
             <div className="section-title-row">
               <div>
                 <h2>最近饮食记录</h2>
-                <p>按目标、日期和评分筛选历史记录。</p>
+                <p>按目标、实际用餐日期和评分筛选历史记录。</p>
               </div>
+              <button className="secondary-btn" type="button" onClick={onNew}>手动记录 / 补记</button>
               <span>{recordPageData.totalElements || 0} 条</span>
             </div>
             <FilterDisclosure activeCount={Object.values(recordFiltersDraft).filter(Boolean).length}><form className="record-filter-form" onSubmit={applyRecordFilters}>
@@ -31,7 +32,7 @@ export default function DietRecordsPanel({ recordPageData, recordFiltersDraft, s
             </form></FilterDisclosure>
 
             <div className="record-list">
-              {records.length ? records.map(r => <RecordItem key={r.id} record={r} onDelete={handleDeleteRecord} onCorrect={setCorrectionRecord} onView={setViewingRecord} />) : <Empty text="暂无饮食记录" />}
+              {records.length ? records.map(r => <RecordItem key={r.id} record={r} onEdit={onEdit} onDelete={handleDeleteRecord} onCorrect={setCorrectionRecord} onView={setViewingRecord} />) : <Empty text="暂无饮食记录" />}
             </div>
             <RecordPagination pageData={recordPageData} pageSize={recordSize} setPage={setRecordPage} setPageSize={setRecordSize} loading={loading || recordsLoading} />
           </div>

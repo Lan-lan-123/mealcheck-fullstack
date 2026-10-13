@@ -82,6 +82,16 @@ class ImageStorageServiceTest {
     }
 
     @Test
+    void ambiguousCommitKeepsTheImageForReferenceAwareCleanup() {
+        var service = new ImageStorageService(properties(uploadDir));
+        String reference = service.store(1L, image());
+        beginSynchronizedTransaction();
+        assertThat(service.deleteOnRollback(reference)).isTrue();
+        complete(TransactionSynchronization.STATUS_UNKNOWN);
+        assertThat(uploadDir.resolve(reference)).exists();
+    }
+
+    @Test
     void orphanCleanupKeepsReferencedFilesAndHonorsGracePeriod() throws Exception {
         ImageStorageService service = new ImageStorageService(properties(uploadDir));
         String referenced = service.store(1L, image());

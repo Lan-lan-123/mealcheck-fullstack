@@ -8,7 +8,7 @@
 2. Outbox 发布器每秒领取最多 20 条到期事件。领取使用短事务、`FOR UPDATE SKIP LOCKED` 和 30 秒发布租约；等待 Broker 确认时不持有数据库事务。
 3. 发布器发送持久消息，消息正文仅为 36 字符的随机事件 UUID，不含图片、用户名、JWT 或模型输出。消息发到 `mealcheck.analysis` exchange，再路由到 `mealcheck.analysis.jobs` quorum queue。
 4. 发布必须同时满足 publisher confirm ACK 与未发生 mandatory return 才标为已发送。发送失败、NACK、无法路由或确认超时，30 秒租约到期后重试。允许重复投递。
-5. 消费者默认每实例并行执行 2 个任务，每消费者 prefetch 为 1。根据事件 UUID 在数据库查找请求，再用账户锁、任务状态与执行令牌领取。实际模型调用不放在数据库事务中。
+5. 消费者默认每实例并行执行 8 个任务，每消费者 prefetch 为 1。根据事件 UUID 在数据库查找请求，再用账户锁、任务状态与执行令牌领取。实际模型调用不放在数据库事务中。
 6. 餐食、画像与任务成功状态提交后，监听方法才返回。Spring `AcknowledgeMode.AUTO` 在方法成功返回后发送 ACK；它不是 RabbitMQ 的“投递即确认”模式。
 7. 成功后删除对应 Outbox；失败时保留事件关联供死信排查，直到用户重试、删除或请求保留期清理。发布器不会发送 `FAILED` 任务。重复、已完成、已删除或已被手动重试替换的事件直接忽略。前端继续通过原有 GET 接口查询任务状态。
 
@@ -39,7 +39,7 @@ docker compose --profile fullstack ps
 | `SPRING_RABBITMQ_USERNAME` / `SPRING_RABBITMQ_PASSWORD` | 开发账号 | 生产必须改为独立凭据 |
 | `SPRING_RABBITMQ_VIRTUAL_HOST` | `/` | 应用连接的 vhost；使用其他 vhost 时需预先创建并授权 |
 | `MEALCHECK_ANALYSIS_DISPATCH` | `rabbitmq` | `database` 可切回旧数据库轮询 Worker |
-| `MEALCHECK_ANALYSIS_CONCURRENCY` | `2` | 每实例 RabbitMQ 消费者并发数，建议用正整数 |
+| `MEALCHECK_ANALYSIS_CONCURRENCY` | `8` | 每实例 RabbitMQ 消费者并发数，建议用正整数 |
 | `MEALCHECK_ANALYSIS_WORKER_ENABLED` | `true` | 设为 `false` 可关闭该实例消费，仍允许 API 入队和 Outbox 发布 |
 | `MEALCHECK_ANALYSIS_OUTBOX_POLL_MS` | `1000` | Outbox 发布间隔（毫秒） |
 

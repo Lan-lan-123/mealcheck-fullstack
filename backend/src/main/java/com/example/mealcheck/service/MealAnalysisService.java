@@ -44,6 +44,8 @@ public class MealAnalysisService {
     @org.springframework.beans.factory.annotation.Value("${mealcheck.ai.model:unknown}")
     private String recognitionModel = "unknown";
 
+    private final BehaviorTrackingService tracking;
+
     private final UserAccountRepository userRepository;
     private final MealRecordRepository mealRecordRepository;
     private final VisionFoodRecognitionService recognitionService;
@@ -70,7 +72,8 @@ public class MealAnalysisService {
                                UserGoalService userGoalService,
                                MealRecordPersistenceService persistenceService,
                                ObjectMapper objectMapper,
-                               com.example.mealcheck.config.AppProperties properties) {
+                               com.example.mealcheck.config.AppProperties properties, BehaviorTrackingService tracking) {
+        this.tracking = tracking;
         this.userRepository = userRepository;
         this.mealRecordRepository = mealRecordRepository;
         this.recognitionService = recognitionService;
@@ -87,13 +90,26 @@ public class MealAnalysisService {
     }
 
     public MealAnalysisResponse analyze(UserPrincipal principal, MultipartFile image, String goal) {
-        PreparedMeal prepared = prepare(principal, image, goal);
-        persistenceService.saveWithImage(prepared.user(), prepared.record(), prepared.image());
-        return prepared.response();
+        try (var scope = analysisDeadline(principal)) {
+            PreparedMeal prepared = prepare(principal, image, goal);
+            AiCallContext.checkExecution();
+            persistenceService.saveWithImage(prepared.user(), prepared.record(), prepared.image());
+            return prepared.response();
+        }
     }
 
     PreparedMeal prepare(UserPrincipal principal, MultipartFile image, String goal) {
-        return prepareValidated(principal, imageUploadValidationService.validateAndNormalize(image), goal);
+        try (var scope = analysisDeadline(principal)) {
+            AiCallContext.checkExecution();
+            var validated = imageUploadValidationService.validateAndNormalize(image);
+            AiCallContext.checkExecution();
+            return prepareValidated(principal, validated, goal);
+        }
+    }
+
+    AiCallContext.Scope analysisDeadline(UserPrincipal principal) {
+        return AiCallContext.open(principal.getId(), java.time.Duration.ofSeconds(
+                Math.max(1, properties.getAiBudget().getOperationTimeoutSeconds())));
     }
 
     PreparedMeal prepareValidated(UserPrincipal principal, ValidatedImage validatedImage, String goal) {
@@ -103,6 +119,7 @@ public class MealAnalysisService {
     }
 
     private PreparedMeal prepareValidatedWithinDeadline(UserPrincipal principal, ValidatedImage validatedImage, String goal) {
+        AiCallContext.checkExecution();
         UserAccount user = userRepository.findById(principal.getId()).orElseThrow();
         if (nonFoodUploadGuardService.isBlocked(user.getUsername())) {
             throw new ResponseStatusException(
@@ -112,7 +129,9 @@ public class MealAnalysisService {
             );
         }
 
+        AiCallContext.checkExecution();
         RecognitionResult recognition = recognitionService.recognize(validatedImage);
+        AiCallContext.checkExecution();
         if (!recognition.isFoodImage()) {
             String reason = recognition.getRejectionReason() == null || recognition.getRejectionReason().isBlank()
                     ? "上传的图片不是饮食图片，请上传包含餐食的照片。"
@@ -137,6 +156,7 @@ public class MealAnalysisService {
         StructureEvaluation evaluation = scoringService.evaluate(recognition, normalizedGoal);
 
         String query = buildRagQuery(recognition, evaluation, normalizedGoal);
+        AiCallContext.checkExecution();
         List<KnowledgeSnippet> snippets = filterRelevantSnippets(
                 knowledgeIndexService.search(query, 10),
                 recognition,
@@ -144,7 +164,9 @@ public class MealAnalysisService {
                 normalizedGoal
         ).stream().limit(4).collect(Collectors.toList());
 
+        AiCallContext.checkExecution();
         String advice = adviceGenerationService.generate(recognition, evaluation, snippets, normalizedGoal);
+        AiCallContext.checkExecution();
 
         MealRecord record = new MealRecord();
         record.setUser(user);
@@ -162,6 +184,9 @@ public class MealAnalysisService {
 
         MealAnalysisResponse response = new MealAnalysisResponse();
         response.setCreatedAt(record.getCreatedAt());
+        response.setOccurredAt(record.getOccurredAt()); response.setMealType(record.getMealType());
+        response.setRecordSource(record.getRecordSource()); response.setTimeConfirmed(record.isTimeConfirmed());
+        response.setMetadataVersion(record.getMetadataVersion()); response.setNote(record.getNote());
         response.setRecognition(recognition);
         response.setEvaluation(evaluation);
         response.setReferences(snippets);
@@ -201,7 +226,7 @@ public class MealAnalysisService {
 
         Page<MealRecord> records = mealRecordRepository.findAll(
                 userMealSpecification(user, goal, from, to, minScore, maxScore),
-                PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "createdAt", "id"))
+                PageRequest.of(safePage, safeSize, Sort.unsorted())
         );
 
         return new MealRecordPageResponse(
@@ -226,11 +251,13 @@ public class MealAnalysisService {
             if (goal != null && !goal.isBlank() && !"all".equalsIgnoreCase(goal)) {
                 predicates.add(cb.equal(root.get("goal"), goal.trim()));
             }
+            var mealTime = cb.<LocalDateTime>coalesce(root.get("occurredAt"),root.get("createdAt"));
+            if (query.getResultType()!=Long.class && query.getResultType()!=long.class) query.orderBy(cb.desc(mealTime),cb.desc(root.get("id")));
             if (from != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), AppTime.startOfDay(from)));
+                predicates.add(cb.greaterThanOrEqualTo(mealTime, AppTime.startOfDay(from)));
             }
             if (to != null) {
-                predicates.add(cb.lessThan(root.get("createdAt"), AppTime.startOfDay(to.plusDays(1))));
+                predicates.add(cb.lessThan(mealTime, AppTime.startOfDay(to.plusDays(1))));
             }
             if (minScore != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("score"), minScore));
@@ -260,7 +287,7 @@ public class MealAnalysisService {
     public UserMealTrendResponse trend(UserPrincipal principal, int days) {
         long userId = principal.getId();
         int safeDays = Math.max(7, Math.min(days, 90));
-        LocalDateTime since = AppTime.now().minusDays(safeDays);
+        LocalDateTime since = AppTime.startOfDay(AppTime.today().minusDays(safeDays-1L));
         var summary = mealRecordRepository.trendSummary(userId, since);
         int averageScore = summary.getAverage() == null ? 0 : (int) Math.round(summary.getAverage());
         List<String> foods = new ArrayList<>(), risks = new ArrayList<>();
@@ -274,7 +301,7 @@ public class MealAnalysisService {
                 .map(row -> new UserMealTrendResponse.MetricItem(row.getDay().toString(), (int) Math.round(row.getAverage())))
                 .toList();
 
-        return new UserMealTrendResponse(
+        var response = new UserMealTrendResponse(
                 safeDays,
                 summary.getTotal(),
                 averageScore,
@@ -286,6 +313,8 @@ public class MealAnalysisService {
                 topMetrics(foods, 8),
                 topMetrics(risks, 8)
         );
+        if (tracking!=null) response.setTracking(tracking.summary(userId,AppTime.today().minusDays(safeDays-1L),AppTime.today()));
+        return response;
     }
 
     @Transactional
@@ -309,6 +338,13 @@ public class MealAnalysisService {
 
     @Transactional(readOnly = true)
     public Path getMealImagePath(UserPrincipal principal, Long id) {
+        return imageStorageService.resolve(authorizedImageReference(principal,id));
+    }
+    @Transactional(readOnly = true)
+    public org.springframework.core.io.Resource getMealImageResource(UserPrincipal principal, Long id) {
+        return imageStorageService.resource(authorizedImageReference(principal,id));
+    }
+    private String authorizedImageReference(UserPrincipal principal,Long id) {
         UserAccount user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "用户不存在"));
 
@@ -323,7 +359,7 @@ public class MealAnalysisService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "图片不存在");
         }
 
-        return imageStorageService.resolve(record.getStoredImagePath());
+        return record.getStoredImagePath();
     }
 
     public MealRecordResponse toResponse(MealRecord record) {
@@ -331,10 +367,13 @@ public class MealAnalysisService {
 
         response.setId(record.getId());
         response.setCreatedAt(record.getCreatedAt());
+        response.setOccurredAt(record.getOccurredAt()); response.setMealType(record.getMealType());
+        response.setRecordSource(record.getRecordSource()); response.setTimeConfirmed(record.isTimeConfirmed());
+        response.setMetadataVersion(record.getMetadataVersion()); response.setNote(record.getNote());
         response.setGoal(record.getGoal());
         response.setScore(record.getScore());
         response.setSummary(record.getSummary());
-        response.setImageUrl("/api/meals/" + record.getId() + "/image");
+        response.setImageUrl(record.getStoredImagePath()==null ? null : "/api/meals/" + record.getId() + "/image");
 
         response.setFoods(Jsons.fromJson(
                 objectMapper,

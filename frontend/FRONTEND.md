@@ -6,6 +6,7 @@
 
 ## 维护入口
 
+- `src/components/TaskProgress.jsx` 与 `src/styles/progress.css`：餐食分析、周报和助手的阶段提示、动态条及等待时间。阶段跟随已有任务接口；AI 处理中不显示估算百分比。刷新后餐食任务按原请求标识恢复查询，等待计时从本次查询开始。动画尊重系统的减少动态效果设置。
 - `src/hooks/useWorkspaceNavigation.jsx` 与 `src/utils/workspaceRoute.js`：页面地址、栏目白名单和角色默认页。
 - `src/components/DialogProvider.jsx`：统一确认、输入和消息弹窗；支持取消、Escape、焦点恢复和排队。密码输入保留原始字符。
 - `src/components/FilterDisclosure.jsx`：手机默认折叠、桌面默认展开的筛选容器；草稿保存在父组件。
@@ -16,6 +17,8 @@
 - `src/styles/index.css`：唯一样式入口。按功能拆分样式，并通过 `tokens.css` 集中维护基础色彩与字体。加载顺序说明见 `src/styles/README.md`。
 
 ## 验证
+
+API 等待时间由 `src/api/client.js` 管理：助手、同步图片分析、兼容周报读取和管理端单图识别为 180 秒；其他请求包括异步提交及轮询为 75 秒。图片分析和 AI 周报继续使用异步任务接口，查询超时后按原请求标识或任务 ID 恢复，不自动重提。离开页面的 AbortSignal 用于停止当前等待，不代表后台任务已取消。完整链路和部署要求见 [超时说明](../deploy/TIMEOUTS.md)。
 
 在 `frontend` 目录执行 `npm test`、`npm run build` 和 `npm run test:e2e`。Windows 可通过环境变量 `PLAYWRIGHT_CHROMIUM_EXECUTABLE` 指定本机 Chrome，例如 `C:/Program Files/Google/Chrome/Application/chrome.exe`。
 

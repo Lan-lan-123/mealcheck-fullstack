@@ -51,7 +51,7 @@ public class AssistantController {
 
     @PostMapping({"/assistant/ask", "/chat"})
     public ResponseEntity<AssistantResponse> ask(@AuthenticationPrincipal UserPrincipal principal,
-                                                 @RequestBody AssistantRequest request) {
+                                                 @jakarta.validation.Valid @RequestBody AssistantRequest request) {
         String question = request.questionText();
         if (question.isBlank()) {
             throw new IllegalArgumentException("Question cannot be empty.");

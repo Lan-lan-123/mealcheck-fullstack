@@ -1,4 +1,11 @@
-const API_BASE = import.meta.env.VITE_API_BASE || ''
+import { publishDietChange } from '../utils/dietDataChanges.js'
+const API_BASE = import.meta.env?.VITE_API_BASE || ''
+const REQUEST_TIMEOUT_MS = 75_000
+const LONG_REQUEST_TIMEOUT_MS = 180_000
+const LONG_REQUEST_PATHS = new Set([
+  '/api/assistant/ask', '/api/meals/analyze', '/api/reports/weekly',
+  '/api/admin/vision-evaluation/recognize'
+])
 export class ApiError extends Error {
   constructor(message, status, code, retryAfter, requestId) {
     super(message)
@@ -16,6 +23,73 @@ export function adminAiBudget() { return request('/api/admin/ai-budget') }
 
 export function getToken() {
   return localStorage.getItem('mealcheck_token')
+}
+
+async function mutateDiet(path, options, kind) { const result = await request(path, options); publishDietChange(kind); return result }
+
+const jsonOptions = (method, body) => ({ method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+export function createManualMeal(body) { return mutateDiet('/api/meals/manual', jsonOptions('POST', body), 'meals') }
+export function updateMealMetadata(id, body) { return mutateDiet(`/api/meals/${id}/metadata`, jsonOptions('PUT', body), 'meals') }
+export function declareSkippedMeal(body, undo = false) { return mutateDiet('/api/meals/skipped', jsonOptions(undo ? 'DELETE' : 'PUT', body), 'meals') }
+export function mealCoverage(from, to, signal) { return request(`/api/meals/coverage?from=${from}&to=${to}`, { signal }) }
+export function behaviorGoals({ page = 0, size = 20 } = {}) { return request(`/api/profile/behavior-goals?page=${page}&size=${size}`) }
+export function saveBehaviorGoal(body, id) { return mutateDiet(`/api/profile/behavior-goals${id ? `/${id}` : ''}`, jsonOptions(id ? 'PUT' : 'POST', body), 'behavior-goals') }
+export function actionPlans({ from, to, page = 0, size = 20 } = {}) { return request(`/api/plans?page=${page}&size=${size}${from && to ? `&from=${from}&to=${to}` : ''}`) }
+export function saveActionPlan(body, id) { return mutateDiet(`/api/plans${id ? `/${id}` : ''}`, jsonOptions(id ? 'PUT' : 'POST', body), 'plans') }
+export function answerFeedback(id, body) { return request(`/api/assistant/messages/${id}/feedback`, jsonOptions('PUT', body)) }
+export function getAnswerFeedback(id) { return request(`/api/assistant/messages/${id}/feedback`) }
+export function cancelAssistantRequest(id) { return request(`/api/assistant/requests/${id}`, { method: 'DELETE' }) }
+export function weeklyReportHistory(page, signal) { return request(`/api/reports/weekly/history?page=${page}&size=20`, { signal }) }
+export function archivedWeeklyReport(id) { return request(`/api/reports/weekly/history/${id}`) }
+
+export async function streamDietAssistant(question, history, conversationId, signal, onEvent) {
+  const controller = new AbortController()
+  const abort = () => controller.abort()
+  if (signal?.aborted) abort()
+  signal?.addEventListener('abort', abort, { once: true })
+  let requestId, timedOut = false
+  const timeout = setTimeout(() => { timedOut = true; controller.abort() }, LONG_REQUEST_TIMEOUT_MS)
+  const cancel = () => { if (requestId) cancelAssistantRequest(requestId).catch(() => {}) }
+  controller.signal.addEventListener('abort', cancel, { once: true })
+  try {
+    const response = await fetch(`${API_BASE}/api/assistant/stream`, { ...jsonOptions('POST', { question, history, conversationId }), headers: authHeaders({ 'Content-Type': 'application/json', Accept: 'text/event-stream' }), signal: controller.signal })
+    requestId = response.headers.get('X-Assistant-Request-ID')
+    if (requestId) onEvent('request', { requestId })
+    if ([404, 405].includes(response.status)) return askDietAssistant(question, history, conversationId, signal)
+    if (!response.ok) {
+      let data; try { data = await response.json() } catch { }
+      if (response.status === 401) { clearSession(); window.dispatchEvent(new Event('mealcheck:session-expired')) }
+      throw new ApiError(data?.message || '助手请求失败', response.status, data?.code, 0, requestId)
+    }
+    if (!response.headers.get('Content-Type')?.includes('text/event-stream')) return response.json()
+    const reader = response.body.getReader(), decoder = new TextDecoder()
+    let buffer = '', completed = null, failure = null
+    const consume = () => {
+      let end
+      while ((end = buffer.indexOf('\n\n')) !== -1) {
+        const block = buffer.slice(0, end); buffer = buffer.slice(end + 2)
+        let event = 'message'; const data = []
+        for (const line of block.split('\n')) { if (line.startsWith('event:')) event = line.slice(6).trim(); if (line.startsWith('data:')) data.push(line.slice(5).trimStart()) }
+        if (!data.length) continue
+        const value = JSON.parse(data.join('\n'))
+        if (value.requestId) requestId = value.requestId
+        onEvent(event, value)
+        if (event === 'complete') completed = value
+        if (event === 'error') failure = new ApiError(value.message, 502, 'STREAM_FAILED', 0, value.requestId)
+      }
+    }
+    try {
+      while (true) { const { done, value } = await reader.read(); if (done) break; buffer += decoder.decode(value, { stream: true }); buffer = buffer.replace(/\r\n/g, '\n'); consume() }
+      buffer += decoder.decode(); consume()
+      if (failure) throw failure
+      if (!completed) throw new ApiError('连接中断，回复未完成。请查看会话历史后再重试。', 502, 'STREAM_INTERRUPTED', 0, requestId)
+      return completed
+    } finally { reader.releaseLock() }
+  } catch (err) {
+    cancel()
+    if (timedOut) throw new ApiError('回复超时，已取消等待。', 408, 'CLIENT_TIMEOUT', 0, requestId)
+    throw err
+  } finally { clearTimeout(timeout); signal?.removeEventListener('abort', abort); controller.signal.removeEventListener('abort', cancel) }
 }
 
 export function setSession(auth) {
@@ -56,9 +130,11 @@ async function request(path, options = {}) {
   if (options.signal?.aborted) abort()
   else options.signal?.addEventListener('abort', abort, { once: true })
   let timedOut = false
-  const timeout = setTimeout(() => { timedOut = true; controller.abort() }, options.timeoutMs || 75_000)
+  const { timeoutMs, ...fetchOptions } = options
+  const requestTimeout = timeoutMs ?? (LONG_REQUEST_PATHS.has(path.split('?')[0]) ? LONG_REQUEST_TIMEOUT_MS : REQUEST_TIMEOUT_MS)
+  const timeout = setTimeout(() => { timedOut = true; controller.abort() }, requestTimeout)
   try {
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers, signal: controller.signal })
+  const res = await fetch(`${API_BASE}${path}`, { ...fetchOptions, headers, signal: controller.signal })
 
   const text = await res.text()
   let data = null
@@ -82,7 +158,7 @@ async function request(path, options = {}) {
 
   return data
   } catch (error) {
-    if (timedOut) throw new ApiError('请求超时。分析结果可能已保存，请查询结果后再重试。', 408, 'CLIENT_TIMEOUT', 0, null)
+    if (timedOut) throw new ApiError('请求超时，请先查询已有结果或任务状态，确认后再重试。', 408, 'CLIENT_TIMEOUT', 0, null)
     throw error
   } finally {
     clearTimeout(timeout)
@@ -169,11 +245,11 @@ export function currentGoal() {
 }
 
 export function updateCurrentGoal(payload) {
-  return request('/api/profile/goals/current', {
+  return mutateDiet('/api/profile/goals/current', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
-  })
+  }, 'diet-goal')
 }
 
 export function mealTrends(days = 30) {
@@ -187,6 +263,16 @@ export function healthCheck() {
 export function deleteMeal(id) {
   return request(`/api/meals/${id}`, {
     method: 'DELETE'
+  })
+}
+
+export function mealNutrition(id, signal) {
+  return request(`/api/meals/${id}/nutrition`, { signal })
+}
+
+export function updateMealNutrition(id, payload, signal) {
+  return request(`/api/meals/${id}/nutrition`, {
+    method: 'PUT', signal, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
   })
 }
 

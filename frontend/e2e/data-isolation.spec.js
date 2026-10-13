@@ -93,7 +93,7 @@ test('record filters and pagination preserve an unsaved goal and fetch only reco
   await expect.poll(() => reads(state).filter(item => item.query.minScore === '80').length).toBe(1)
   await page.getByRole('button', { name: '下一页', exact: true }).click()
   await expect(page.locator('.pagination')).toContainText('第 2 / 3 页')
-  expect(reads(state).slice(before).every(item => item.path === '/api/meals')).toBe(true)
+  expect(reads(state).slice(before).every(item => ['/api/meals', '/api/meals/coverage', '/api/profile/behavior-goals'].includes(item.path))).toBe(true)
   await page.getByRole('button', { name: '饮食目标', exact: true }).click()
   await expect(note).toHaveValue('尚未保存：每天增加蔬菜')
   await expect(page.getByRole('combobox', { name: '当前饮食目标' })).toHaveValue('light')

@@ -30,7 +30,7 @@ public class MealAnalysisRabbitConsumer {
     }
 
     @RabbitListener(queues = MealAnalysisRabbitConfiguration.QUEUE, containerFactory = "mealAnalysisListenerFactory",
-            concurrency = "${mealcheck.analysis.concurrency:2}")
+            concurrency = "${mealcheck.analysis.concurrency:8}")
     public void consume(Message message) {
         UUID eventId;
         try {
@@ -51,8 +51,8 @@ public class MealAnalysisRabbitConsumer {
                 .record(work.queueWaitMillis(),TimeUnit.MILLISECONDS);
         String outcome = "failure";
         String phase = "ANALYZE";
-        try (var lease = leases.track(work)) {
-            var prepared = analysis.prepareValidated(work.user(), work.image(), work.goal());
+        try (var deadline = analysis.analysisDeadline(work.user()); var lease = leases.track(work)) {
+            var prepared = analysis.prepareValidated(work.user(), work.imageReference()==null?work.image():store.loadImage(work), work.goal());
             phase = "SAVE";
             var result = store.complete(work.user(), work.key(), work.token(), prepared);
             outcome = "SUCCEEDED".equals(result.status()) ? "success" : "fenced";

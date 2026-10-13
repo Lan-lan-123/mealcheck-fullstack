@@ -25,7 +25,7 @@ public interface MealRecordRepository extends JpaRepository<MealRecord, Long>, J
 
     @Query(value = """
             WITH selected AS (
-              SELECT id,score,created_at FROM meal_records WHERE user_id=:userId AND created_at>:since
+              SELECT id,score,coalesce(occurred_at,created_at) AS created_at FROM meal_records WHERE user_id=:userId AND coalesce(occurred_at,created_at)>=:since
             )
             SELECT count(*) AS total,avg(score) AS average,count(score) AS scored,
               count(*) FILTER(WHERE score<70) AS low,count(*) FILTER(WHERE score>=80) AS high,
@@ -36,8 +36,8 @@ public interface MealRecordRepository extends JpaRepository<MealRecord, Long>, J
     TrendSummary trendSummary(long userId, LocalDateTime since);
 
     @Query(value = """
-            SELECT CAST(created_at AT TIME ZONE :storageZone AT TIME ZONE :zone AS date) AS day,avg(score) AS average FROM meal_records
-            WHERE user_id=:userId AND created_at>:since AND score IS NOT NULL
+            SELECT CAST(coalesce(occurred_at,created_at) AT TIME ZONE :storageZone AT TIME ZONE :zone AS date) AS day,avg(score) AS average FROM meal_records
+            WHERE user_id=:userId AND coalesce(occurred_at,created_at)>=:since AND score IS NOT NULL
             GROUP BY 1 ORDER BY day
             """, nativeQuery = true)
     List<DailyScore> trendDailyScores(long userId, LocalDateTime since, String zone, String storageZone);
@@ -48,17 +48,20 @@ public interface MealRecordRepository extends JpaRepository<MealRecord, Long>, J
 
     @Query(value = """
             SELECT detected_foods_json AS foods,risk_tags_json AS risks FROM meal_records
-            WHERE user_id=:userId AND created_at>:since ORDER BY created_at,id
+            WHERE user_id=:userId AND coalesce(occurred_at,created_at)>=:since ORDER BY coalesce(occurred_at,created_at),id
             """, nativeQuery = true)
     List<TrendFacts> trendFacts(long userId, LocalDateTime since);
 
+    @Query("select m from MealRecord m where m.user=:user order by coalesce(m.occurredAt,m.createdAt) desc,m.id desc limit 30")
     List<MealRecord> findTop30ByUserOrderByCreatedAtDesc(UserAccount user);
 
     Page<MealRecord> findByUser(UserAccount user, Pageable pageable);
 
     List<MealRecord> findByUser(UserAccount user);
 
+    @Query("select m from MealRecord m where m.user=:user and coalesce(m.occurredAt,m.createdAt)>=:since order by coalesce(m.occurredAt,m.createdAt),m.id")
     List<MealRecord> findByUserAndCreatedAtAfterOrderByCreatedAtAsc(UserAccount user, LocalDateTime since);
+    @Query("select m from MealRecord m where m.user=:user and coalesce(m.occurredAt,m.createdAt)>=:start and coalesce(m.occurredAt,m.createdAt)<:end order by coalesce(m.occurredAt,m.createdAt),m.id")
     List<MealRecord> findByUserAndCreatedAtGreaterThanEqualAndCreatedAtLessThanOrderByCreatedAtAsc(
             UserAccount user, LocalDateTime start, LocalDateTime end);
     List<MealRecord> findByCreatedAtAfterOrderByCreatedAtAsc(LocalDateTime since);

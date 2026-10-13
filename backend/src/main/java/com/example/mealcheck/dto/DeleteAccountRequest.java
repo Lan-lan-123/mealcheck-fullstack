@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 
 public class DeleteAccountRequest {
     @NotBlank
+    @com.example.mealcheck.validation.PasswordByteLength
     private String password;
 
     public String getPassword() {

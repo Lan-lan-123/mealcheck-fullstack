@@ -1,3 +1,5 @@
+import PlanSaveButton from "./PlanSaveButton"
+import TrackingSummary from "./TrackingSummary"
 import { formatTime } from '../utils/time'
 import { useEffect, useRef, useState } from 'react'
 import { listMeals } from '../api/client'
@@ -50,6 +52,7 @@ export default function WeeklyReportDetail({ report, avgLabel, onClose }) {
           </div>
         </div>
 
+        <TrackingSummary summary={report.tracking} />
         <section className="weekly-section">
           <h3>周报总结</h3>
           <p>{report?.reportText || '最近 7 天暂无可分析的饮食记录。'}</p>
@@ -66,7 +69,7 @@ export default function WeeklyReportDetail({ report, avgLabel, onClose }) {
           {report?.nextWeekSuggestions?.length ? (
             <ul className="weekly-suggestions">
               {report.nextWeekSuggestions.map(item => (
-                <li key={item}>{item}</li>
+                <li key={item}>{item}<PlanSaveButton text={item} sourceType="REPORT" sourcePeriodStart={report.periodStart} sourcePeriodEnd={report.periodEnd} /></li>
               ))}
             </ul>
           ) : (
@@ -100,7 +103,7 @@ export default function WeeklyReportDetail({ report, avgLabel, onClose }) {
                   <AuthImage url={record.imageUrl} alt="饮食图片" />
                   <div className="weekly-photo-info">
                     <strong>{record.score} 分</strong>
-                    <span>{formatTime(record.createdAt)}</span>
+                    <span>{formatTime(record.occurredAt || record.createdAt)}</span>
                   </div>
                   <p>{record.summary}</p>
                   <div className="chips small">

@@ -28,6 +28,8 @@ async function fixture(page, role) {
     }
     if (path === '/api/meals/analysis-requests') return send({ status: 'SUCCEEDED', result: { recordId: 1, evaluation: { score: 88, summary: meal.summary, riskTags: meal.riskTags }, recognition: { foods }, advice, references: [{ id: 1, title: '均衡搭配知识', score: .9, content: '知识片段原文完整保留' }] } })
     if (path === '/api/meals') return send({ content: [meal], totalPages: 1, totalElements: 1, page: 0 })
+    if (path === '/api/meals/1/nutrition') return send({ recordId: 1, recordRevision: 0, version: 0, enabled: false,
+      status: 'DISABLED', totals: null, items: foods.map((food, foodIndex) => ({ ...food, foodIndex })) })
     if (path === '/api/reports/weekly/latest') return send(report)
     if (path === '/api/meals/trends') return send(trend)
     if (path === '/api/admin/dashboard') return send({ overview: { userCount: 12 }, operations: { activeUsers7d: 9, aiSuccessCount: 18 }, system: { aiMetrics: [{ operation: '餐食识别', calls: 20, successCount: 18, failureCount: 2, averageLatencyMs: 300 }] },
@@ -101,7 +103,13 @@ test('meal detail drawer preserves the current filters and keyboard focus on mob
   expect((await drawer.boundingBox()).width).toBeLessThanOrEqual(390)
   await expect(drawer.locator('.advice')).toContainText('建议末尾仍然保留')
   await page.keyboard.press('Tab')
-  await expect(drawer.getByRole('region')).toBeFocused()
+  await expect(drawer.getByRole('region', { name: '餐食记录详情内容', exact: true })).toBeFocused()
+  await page.keyboard.press('Tab')
+  await expect(drawer.getByRole('button', { name: '修改用餐信息' })).toBeFocused()
+  await page.keyboard.press('Tab')
+  await expect(drawer.getByRole('button', { name: '加入计划' })).toBeFocused()
+  await page.keyboard.press('Tab')
+  await expect(drawer.getByRole('checkbox', { name: '开启本餐可选份量与估算' })).toBeFocused()
   await page.keyboard.press('Tab')
   await expect(drawer.getByRole('button', { name: '关闭详情' })).toBeFocused()
   await page.keyboard.press('Escape')

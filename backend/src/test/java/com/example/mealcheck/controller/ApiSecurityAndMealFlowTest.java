@@ -36,6 +36,7 @@ class ApiSecurityAndMealFlowTest {
     @Autowired MockMvc http;
     @Autowired JwtService jwt;
     @Autowired AppProperties properties;
+    @MockBean BehaviorTrackingService tracking;
     @MockBean UserAccountRepository users;
     @MockBean MealRecordRepository meals;
     @MockBean WeeklyReportJobRepository jobs;
@@ -63,6 +64,27 @@ class ApiSecurityAndMealFlowTest {
     @MockBean AssistantEvaluationCandidateService candidates;
     UserAccount user;
     String token;
+
+    @Test void cursorMealListingRequiresAdministratorAndPreservesCursorParameters() throws Exception {
+        http.perform(get("/api/admin/meals/cursor").header("Authorization", "Bearer " + token))
+                .andExpect(status().isForbidden());
+        var manager = new UserAccount();
+        manager.setId(20L); manager.setUsername("cursor-admin"); manager.setPasswordHash("hash"); manager.setRole("ADMIN");
+        when(users.findByUsername("cursor-admin")).thenReturn(Optional.of(manager));
+        when(users.findById(20L)).thenReturn(Optional.of(manager));
+        String adminToken = jwt.generateToken(new UserPrincipal(manager));
+        var time = java.time.LocalDateTime.of(2026, 10, 9, 12, 0);
+        when(admin.mealsCursor(20, "alice", null, null, null, null, time, 42L))
+                .thenReturn(new AdminMealQueryService.CursorPage(List.of(), false, null, null, 20));
+        http.perform(get("/api/admin/meals/cursor").param("username", "alice")
+                        .param("beforeTime", time.atZone(com.example.mealcheck.util.AppTime.storageZone())
+                                .withZoneSameInstant(java.time.ZoneId.of("Asia/Shanghai")).toOffsetDateTime().toString())
+                        .param("beforeId", "42")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.hasMore").value(false))
+                .andExpect(jsonPath("$.size").value(20));
+        verify(admin).mealsCursor(20, "alice", null, null, null, null, time, 42L);
+    }
 
     @Test void ordinaryUsersCannotReadBudgetMonitoringOrRunMemoryRebuilds() throws Exception {
         http.perform(get("/api/admin/ai-budget").header("Authorization","Bearer "+token)).andExpect(status().isForbidden());

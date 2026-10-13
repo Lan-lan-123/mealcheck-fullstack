@@ -13,6 +13,21 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.assertj.core.api.Assertions.*;
 
 class MealAnalysisRequestServiceTest {
+    @Test void keyedSynchronousDeadlineSurvivesPreparationAndPreventsLateCompletion() {
+        var analysis=mock(MealAnalysisService.class);
+        var keyed=new MealAnalysisRequestService(store,analysis,validation,limits);
+        when(store.claim(user,key,"hash","current")).thenReturn(new MealAnalysisRequestStore.Claim("token","balanced",null));
+        when(analysis.analysisDeadline(user)).thenAnswer(call->AiCallContext.open(user.getId(),Duration.ofMillis(100)));
+        var prepared=mock(MealAnalysisService.PreparedMeal.class);
+        when(analysis.prepare(user,image,"balanced")).thenReturn(prepared);
+        when(store.complete(user,key,"token",prepared)).thenAnswer(call->{
+            assertThat(AiCallContext.capture().userId()).isEqualTo(user.getId());
+            Thread.sleep(150);AiCallContext.checkExecution();return null;
+        });
+        assertThatThrownBy(()->keyed.submit(user,key,image,"current")).isInstanceOf(RemoteCallGuard.RemoteCallDeadlineException.class);
+        verify(store).fail(eq(user.getId()),eq(key),eq("token"),eq("SAVE"),isA(RemoteCallGuard.RemoteCallDeadlineException.class));
+        assertThat(AiCallContext.capture()).isNull();
+    }
     final MealAnalysisRequestStore store = mock(MealAnalysisRequestStore.class);
     final ImageUploadValidationService validation = mock(ImageUploadValidationService.class);
     final RateLimitService limits = mock(RateLimitService.class);

@@ -74,8 +74,8 @@ public class KnowledgeRerankerService {
             return result;
         } catch (Exception e) {
             observability.recordRerank(startedAt, providerName(), "fallback", candidates.size());
-            log.warn("Knowledge rerank failed; keeping hybrid retrieval order. provider={}, reason={}",
-                    providerName(), e.getMessage());
+            log.warn("Knowledge rerank failed; keeping hybrid retrieval order. provider={}, type={}",
+                    providerName(), e.getClass().getSimpleName());
             return withRoughRanks(candidates).stream().limit(safeLimit).toList();
         }
     }

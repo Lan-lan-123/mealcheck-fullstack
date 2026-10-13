@@ -5,6 +5,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MealAnalysisResponse {
+    private java.time.LocalDateTime occurredAt;
+    private String mealType,recordSource,note;
+    private boolean timeConfirmed;
+    private long metadataVersion;
+    public java.time.LocalDateTime getOccurredAt() { return occurredAt; }
+    public void setOccurredAt(java.time.LocalDateTime v) { occurredAt=v; }
+    public String getMealType() { return mealType; }
+    public void setMealType(String v) { mealType=v; }
+    public String getRecordSource() { return recordSource; }
+    public void setRecordSource(String v) { recordSource=v; }
+    public String getNote() { return note; }
+    public void setNote(String v) { note=v; }
+    public boolean isTimeConfirmed() { return timeConfirmed; }
+    public void setTimeConfirmed(boolean v) { timeConfirmed=v; }
+    public long getMetadataVersion() { return metadataVersion; }
+    public void setMetadataVersion(long v) { metadataVersion=v; }
+
     private Long recordId;
     private LocalDateTime createdAt;
     private RecognitionResult recognition;

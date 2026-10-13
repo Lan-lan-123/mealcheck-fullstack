@@ -1,6 +1,11 @@
 groups:
   - name: mealcheck-ai-budget
     rules:
+      - alert: MealCheckGlobalAiBudgetNearLimit
+        expr: max(mealcheck_ai_budget_global_attempts) / clamp_min(max(mealcheck_ai_budget_global_limit), 1) >= 0.8 and max(mealcheck_ai_budget_monitor_healthy) == 1 and max(mealcheck_ai_budget_enabled) == 1
+        for: 5m
+        labels: {severity: warning, service: mealcheck}
+        annotations: {summary: "全站 AI 日额度已使用至少 80%，请检查消耗与剩余额度"}
       - alert: MealCheckAiBudgetRejected
         expr: sum(increase(mealcheck_ai_budget_rejected_total[15m])) >= 20
         for: 5m

@@ -44,7 +44,8 @@ export async function resolveMealAnalysis(initial, { load, signal, onUpdate = ()
     try { state = await load(state.key, signal); networkFailures = 0 }
     catch (error) {
       if (error.name === 'AbortError' || [401, 403, 404, 410].includes(error.status) || ++networkFailures >= 5) throw error
-      onUpdate({ ...state, connectionInterrupted: true })
+      // Keep the interruption visible during the next polling delay.
+      state = { ...state, connectionInterrupted: true }
     }
   }
 }

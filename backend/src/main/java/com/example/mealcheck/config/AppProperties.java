@@ -150,7 +150,7 @@ public class AppProperties {
         private int chunkMaxTokens = 500;
         private int chunkOverlapTokens = 50;
         private String splitterStrategy = "recursive-markdown";
-        private String sourceVersion = "v2-recursive";
+        private String sourceVersion = "v3-curated-100";
         private String vectorStorage = "halfvec";
         private double benchmarkRegressionTolerance = 0.02;
         public boolean isAutoIndex() { return autoIndex; }

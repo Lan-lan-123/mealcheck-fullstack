@@ -26,6 +26,7 @@ public class RemoteCallGuard {
 
     /** Each HTTP attempt receives the remaining budget, including prior attempts and backoff. */
     public <T> T execute(String name, Duration attemptTimeout, java.util.function.Function<Duration,T> remoteCall) {
+        AiCallContext.checkExecution();
         String safeName = name == null || name.isBlank() ? "remote" : name.trim();
         CallState state = states.computeIfAbsent(safeName,
                 ignored -> new CallState(maxConcurrentCalls()));
@@ -53,6 +54,8 @@ public class RemoteCallGuard {
                     return result;
                 } catch (RemoteCallRejectedException e) {
                     throw e;
+                } catch (java.util.concurrent.CancellationException e) {
+                    throw e;
                 } catch (NonRetryableRemoteCallException e) {
                     throw e;
                 } catch (RuntimeException e) {
@@ -79,10 +82,10 @@ public class RemoteCallGuard {
         long cap = Math.min(5000L, initialBackoffMillis() * (1L << Math.min(10, attempt - 1)));
         long delay = java.util.concurrent.ThreadLocalRandom.current().nextLong(cap + 1);
         if (retryAfter!=null && retryAfter.compareTo(remaining(deadline))>=0)
-            throw new RemoteCallDeadlineException("Provider retry delay exceeds the remaining AI deadline");
+            throw new RemoteCallDeadlineException("Provider retry delay exceeds the remaining AI deadline",retryAfter);
         if (retryAfter != null) delay = Math.max(delay, Math.max(0L, retryAfter.toMillis()));
         if (Duration.ofMillis(delay).compareTo(remaining(deadline)) >= 0)
-            throw new RemoteCallDeadlineException("Provider retry delay exceeds the remaining AI deadline");
+            throw new RemoteCallDeadlineException("Provider retry delay exceeds the remaining AI deadline",retryAfter);
         try {
             Thread.sleep(delay);
         } catch (InterruptedException e) {
@@ -161,6 +164,9 @@ public class RemoteCallGuard {
         public Duration retryAfter() { return retryAfter; }
     }
     public static class RemoteCallDeadlineException extends RemoteCallRejectedException {
-        public RemoteCallDeadlineException(String message) { super(message); }
+        private final Duration retryAfter;
+        public RemoteCallDeadlineException(String message) { this(message,null); }
+        public RemoteCallDeadlineException(String message,Duration retryAfter) { super(message);this.retryAfter=retryAfter; }
+        public Duration retryAfter() { return retryAfter; }
     }
 }

@@ -36,8 +36,8 @@ public class AiStatusService {
     public void recordFailure(String operation, String message, long latencyMs) {
         failureCount.incrementAndGet();
         metrics.computeIfAbsent(operation, ignored -> new MutableMetrics()).record(false, latencyMs);
-        String safeMessage = message == null || message.isBlank() ? "最近调用失败" : message;
-        statuses.put(operation, new AiCallStatusResponse(operation, false, safeMessage, AppTime.now()));
+        // This snapshot is shared through /api/health: never store provider or user content.
+        statuses.put(operation, new AiCallStatusResponse(operation, false, "最近调用失败", AppTime.now()));
     }
 
     public List<AiCallStatusResponse> recentCalls() {

@@ -21,7 +21,7 @@ class UserDeletionDatabaseIntegrationTest {
 
     @BeforeAll
     static void migrate() {
-        Flyway.configure()
+        Flyway.configure().configuration(java.util.Map.of("flyway.postgresql.transactional.lock", "false"))
                 .dataSource(POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())
                 .load()
                 .migrate();
@@ -29,14 +29,14 @@ class UserDeletionDatabaseIntegrationTest {
 
     @Test
     void upgradingExistingReportsPreservesLegacySnapshots() throws Exception {
-        Flyway.configure().dataSource(POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())
+        Flyway.configure().configuration(java.util.Map.of("flyway.postgresql.transactional.lock", "false")).dataSource(POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())
                 .schemas("upgrade_test").target("14").load().migrate();
         try (Connection connection = POSTGRES.createConnection(""); Statement statement = connection.createStatement()) {
             statement.execute("INSERT INTO upgrade_test.users(username, password_hash) VALUES ('legacy', 'hash')");
             statement.execute("INSERT INTO upgrade_test.weekly_report_snapshots(user_id, days, report_json) "
                     + "SELECT id, 7, '{\"totalMeals\":12}' FROM upgrade_test.users");
         }
-        Flyway.configure().dataSource(POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())
+        Flyway.configure().configuration(java.util.Map.of("flyway.postgresql.transactional.lock", "false")).dataSource(POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())
                 .schemas("upgrade_test").load().migrate();
         try (Connection connection = POSTGRES.createConnection(""); Statement statement = connection.createStatement();
              ResultSet result = statement.executeQuery("SELECT report_json, job_id FROM upgrade_test.weekly_report_snapshots")) {

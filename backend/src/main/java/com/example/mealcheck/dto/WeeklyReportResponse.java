@@ -8,6 +8,9 @@ import java.util.Map;
 import java.time.LocalDateTime;
 
 public class WeeklyReportResponse implements Serializable {
+    private TrackingDtos.Summary tracking;
+    public TrackingDtos.Summary getTracking() { return tracking; }
+    public void setTracking(TrackingDtos.Summary v) { tracking=v; }
     private static final long serialVersionUID = 1L;
     private int days;
     private int totalMeals;

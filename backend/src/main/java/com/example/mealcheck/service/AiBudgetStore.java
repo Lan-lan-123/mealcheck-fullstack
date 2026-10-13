@@ -11,8 +11,8 @@ import java.util.UUID;
 @Service
 public class AiBudgetStore {
     private final JdbcTemplate jdbc;
-    @org.springframework.beans.factory.annotation.Value("${mealcheck.ai-budget.global-daily-calls:5000}")
-    private int globalDailyCalls = 5000;
+    @org.springframework.beans.factory.annotation.Value("${mealcheck.ai-budget.global-daily-calls:100000}")
+    private int globalDailyCalls = 100000;
     @org.springframework.beans.factory.annotation.Value("${mealcheck.ai-budget.global-daily-cost:0}")
     private BigDecimal globalDailyCost = BigDecimal.ZERO;
     @jakarta.annotation.PostConstruct
@@ -89,7 +89,27 @@ public class AiBudgetStore {
                 """);
     }
     @Transactional(propagation=Propagation.REQUIRES_NEW, timeout=3)
-    public void retain() { jdbc.update("DELETE FROM ai_budget_daily WHERE usage_day<CURRENT_DATE-30"); }
+    public void retain() {
+        // Drain settled rows first: deleting a daily parent could cascade millions of children.
+        jdbc.update("""
+                DELETE FROM ai_budget_reservations WHERE id IN (
+                  SELECT r.id FROM ai_budget_reservations r
+                  WHERE r.usage_day<CURRENT_DATE-30 AND r.status IN ('SETTLED','RELEASED')
+                  ORDER BY r.created_at,r.id LIMIT 1000)
+                """);
+        jdbc.update("""
+                DELETE FROM ai_budget_daily d WHERE (quota_key,usage_day) IN (
+                  SELECT quota_key,usage_day FROM ai_budget_daily old WHERE usage_day<CURRENT_DATE-30
+                    AND NOT EXISTS(SELECT 1 FROM ai_budget_reservations r WHERE r.quota_key=old.quota_key AND r.usage_day=old.usage_day)
+                  ORDER BY usage_day,quota_key LIMIT 100)
+                """);
+    }
+    public java.util.Map<String,Object> globalUsage(LocalDate day) {
+        var result=new java.util.LinkedHashMap<String,Object>(usage("global",day));
+        result.put("callLimit",globalDailyCalls);result.put("costLimit",globalDailyCost);
+        result.put("remainingCalls",Math.max(0,globalDailyCalls-((Number)result.get("attempts")).longValue()));
+        return result;
+    }
     public java.util.Map<String,Object> usage(String key, LocalDate day) {
         var rows=jdbc.queryForList("SELECT attempts,spent,reserved FROM ai_budget_daily WHERE quota_key=? AND usage_day=?",key,day);
         return rows.isEmpty() ? java.util.Map.of("attempts",0,"spent",BigDecimal.ZERO,"reserved",BigDecimal.ZERO) : rows.get(0);

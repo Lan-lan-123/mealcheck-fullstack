@@ -21,7 +21,7 @@ public class MealAnalysisOutboxStore {
             SELECT o.event_id FROM meal_analysis_outbox o
             JOIN meal_analysis_requests r USING (user_id,request_key)
             WHERE o.next_publish_at <= CURRENT_TIMESTAMP AND r.next_attempt_at <= CURRENT_TIMESTAMP
-              AND r.input_image IS NOT NULL
+              AND (r.input_image IS NOT NULL OR r.input_image_ref IS NOT NULL)
               AND ((r.status='PENDING' AND o.published_at IS NULL)
                    OR (r.status='PROCESSING' AND r.lease_until <= CURRENT_TIMESTAMP))
             ORDER BY o.next_publish_at,o.created_at

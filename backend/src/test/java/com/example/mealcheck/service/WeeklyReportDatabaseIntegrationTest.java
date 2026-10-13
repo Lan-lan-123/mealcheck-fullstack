@@ -37,7 +37,7 @@ import static org.mockito.Mockito.*;
 @DataJpaTest(properties = {"spring.jpa.hibernate.ddl-auto=validate", "spring.flyway.baseline-on-migrate=false"})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-@Import({TaskFailureRecorder.class, WeeklyReportJobService.class, WeeklyReportJobCompletionService.class, WeeklyReportRequestService.class,
+@Import({WeeklyReportDispatchService.class, TaskFailureRecorder.class, WeeklyReportJobService.class, WeeklyReportJobCompletionService.class, WeeklyReportRequestService.class,
         MealRecordPersistenceService.class, MealReportInvalidationService.class, UserDietProfileService.class, ImageStorageService.class,
         WeeklyReportDatabaseIntegrationTest.Config.class})
 @Testcontainers
@@ -49,11 +49,15 @@ class WeeklyReportDatabaseIntegrationTest {
         registry.add("spring.datasource.username", POSTGRES::getUsername);
         registry.add("spring.datasource.password", POSTGRES::getPassword);
     }
-    @TestConfiguration static class Config {
+    @TestConfiguration
+    @Import({BehaviorTrackingService.class, BehaviorGoalService.class, ActionPlanService.class, TrackingStatisticsService.class,
+             BehaviorGoalRepository.class, ActionPlanRepository.class, TrackingQueryRepository.class})
+    static class Config {
         @Bean AppProperties appProperties() { return new AppProperties(); }
         @Bean ObjectMapper objectMapper() { return new ObjectMapper().findAndRegisterModules(); }
     }
     @Autowired WeeklyReportJobService workerJobs;
+    @Autowired WeeklyReportDispatchService dispatch;
     @Autowired WeeklyReportJobCompletionService completion;
     @Autowired WeeklyReportRequestService requests;
     @Autowired WeeklyReportJobRepository jobs;
@@ -64,6 +68,30 @@ class WeeklyReportDatabaseIntegrationTest {
     @Autowired ImageStorageService images;
     @Autowired AppProperties properties;
     @Autowired JdbcTemplate jdbc;
+
+    @Test void dispatchCursorIsDurableSkipsInactiveAccountsAndPreventsDuplicateEnqueue() {
+        jdbc.execute("TRUNCATE weekly_report_dispatch");
+        LocalDate week=AppTime.today();
+        var inactive=new UserAccount();inactive.setUsername("inactive-weekly-user");inactive.setPasswordHash("hash");users.saveAndFlush(inactive);
+        var record=new MealRecord();record.setUser(user);record.setGoal("balanced");record.setScore(70);
+        record.setDetectedFoodsJson("[]");record.setCategoryCountsJson("{}");record.setRiskTagsJson("[]");record.setAdvice("test");
+        meals.saveAndFlush(record);
+        dispatch.start(week);dispatch.start(week);
+        assertThat(dispatch.dispatchBatch()).isEqualTo(1);
+        assertThat(dispatch.dispatchBatch()).isZero();
+        assertThat(jdbc.queryForObject("SELECT status FROM weekly_report_dispatch WHERE report_week=?",String.class,week)).isEqualTo("DONE");
+        assertThat(jobs.count()).isEqualTo(1);
+    }
+    @Test void budgetDeferralKeepsJobRecoverableAtTheLastAttemptAndFencesOldToken() {
+        workerJobs.enqueue(List.of(user.getId()),7,AppTime.today());
+        var job=workerJobs.claimBatch(1).get(0);
+        jdbc.update("UPDATE weekly_report_jobs SET attempts=3 WHERE id=?",job.getId());
+        assertThat(workerJobs.markFailed(job.getId(),3,job.getExecutionToken(),new AiBudgetService.BudgetExceededException(100,3600))).isTrue();
+        var deferred=jobs.findById(job.getId()).orElseThrow();
+        assertThat(deferred.getStatus()).isEqualTo(WeeklyReportJob.RETRY);assertThat(deferred.getAttempts()).isEqualTo(2);
+        assertThat(deferred.getNextRetryAt()).isAfter(AppTime.now().plusMinutes(59));
+        assertThat(workerJobs.markFailed(job.getId(),3,job.getExecutionToken(),new IllegalStateException("late"))).isFalse();
+    }
     @MockBean RateLimitService limits;
     @SpyBean UserDietProfileService profiles;
     @TempDir Path uploadDir;

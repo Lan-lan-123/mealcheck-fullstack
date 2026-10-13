@@ -47,9 +47,11 @@ public class AssistantMemoryService {
         boolean summaryUpdated = !summaryCandidates.isEmpty();
         if (summaryUpdated) {
             summary = appendSummary(summary, summaryCandidates);
-            summarizedCount = Math.min(
-                    memoryHistory.summaryTargetCount(), summarizedCount + summaryCandidates.size());
         }
+        // The cursor counts database rows, including incomplete answers we deliberately omit.
+        // Otherwise a cancelled answer can pin the cursor and repeat later summary input.
+        summarizedCount = Math.min(memoryHistory.summaryTargetCount(),
+                summarizedCount + memoryHistory.summaryCandidates().size());
 
         String activeTopic = activeTopic(question, deduplicated);
         String state = "intent=" + safeIntent(intentCode) + "; activeTopic=" + activeTopic;
@@ -283,6 +285,7 @@ public class AssistantMemoryService {
         return messages.stream()
                 .filter(Objects::nonNull)
                 .filter(message -> message.getText() != null && !message.getText().isBlank())
+                .filter(message -> !"assistant".equalsIgnoreCase(message.getRole()) || message.getDeliveryStatus()==null || "COMPLETE".equals(message.getDeliveryStatus()))
                 .toList();
     }
 

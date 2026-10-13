@@ -24,6 +24,7 @@ import java.util.Map;
 
 @Service
 public class WeeklyReportService {
+    private final BehaviorTrackingService tracking;
     private final UserAccountRepository userRepository;
     private final MealAnalysisService mealAnalysisService;
     private final ObjectMapper objectMapper;
@@ -36,7 +37,8 @@ public class WeeklyReportService {
                                ObjectMapper objectMapper,
                                WeeklyReportSnapshotRepository snapshotRepository,
                                UserGoalService userGoalService,
-                               WeeklyReportMultiAgentOrchestrator multiAgentOrchestrator) {
+                               WeeklyReportMultiAgentOrchestrator multiAgentOrchestrator, BehaviorTrackingService tracking) {
+        this.tracking = tracking;
         this.userRepository = userRepository;
         this.mealAnalysisService = mealAnalysisService;
         this.objectMapper = objectMapper;
@@ -49,7 +51,8 @@ public class WeeklyReportService {
         int safeDays = Math.max(1, Math.min(days, 30));
         UserAccount user = userRepository.findById(principal.getId()).orElseThrow();
         return snapshotRepository.findFirstByUserAndDaysOrderByGeneratedAtDesc(user, safeDays)
-                .map(snapshot -> Jsons.fromJson(objectMapper, snapshot.getReportJson(), WeeklyReportResponse.class))
+                .filter(snapshot -> AppTime.today().equals(snapshot.getPeriodEnd()))
+                .map(snapshot -> withTracking(user,Jsons.fromJson(objectMapper, snapshot.getReportJson(), WeeklyReportResponse.class)))
                 .orElseGet(() -> generateForUser(user, safeDays));
     }
 
@@ -62,7 +65,8 @@ public class WeeklyReportService {
     @Transactional(readOnly = true)
     public WeeklyReportResponse latest(UserAccount user) {
         return snapshotRepository.findFirstByUserAndDaysOrderByGeneratedAtDesc(user, 7)
-                .map(snapshot -> Jsons.fromJson(objectMapper, snapshot.getReportJson(), WeeklyReportResponse.class))
+                .filter(snapshot -> AppTime.today().equals(snapshot.getPeriodEnd()))
+                .map(snapshot -> withTracking(user,Jsons.fromJson(objectMapper, snapshot.getReportJson(), WeeklyReportResponse.class)))
                 .orElseGet(() -> generateForUser(user, 7));
     }
 
@@ -114,6 +118,12 @@ public class WeeklyReportService {
         response.setGoalType(userGoalService.effectiveGoal(user, "current"));
         response.setGeneratedAt(AppTime.now());
         response.setReportText(makeReportText(response));
+        withTracking(user,response);
+        return response;
+    }
+
+    private WeeklyReportResponse withTracking(UserAccount user,WeeklyReportResponse response) {
+        if(tracking!=null && response.getPeriodStart()!=null && response.getPeriodEnd()!=null) response.setTracking(tracking.summary(user.getId(),response.getPeriodStart(),response.getPeriodEnd()));
         return response;
     }
 
@@ -123,7 +133,7 @@ public class WeeklyReportService {
                                         double averageScore) {
         List<String> highlights = new ArrayList<>();
         if (totalMeals == 0) {
-            highlights.add("本周还没有饮食记录，建议先连续上传几餐，建立可分析的基线。");
+            highlights.add("本周还没有饮食记录，建议先记录几餐，建立可分析的基线。");
             return highlights;
         }
         highlights.add("本周共记录 " + totalMeals + " 餐，平均评分为 " + averageScore + "。");
@@ -160,7 +170,7 @@ public class WeeklyReportService {
 
     private String makeReportText(WeeklyReportResponse response) {
         if (response.getTotalMeals() == 0) {
-            return "最近 " + response.getDays() + " 天还没有足够记录，先连续上传几餐，再查看趋势会更有参考价值。";
+            return "最近 " + response.getDays() + " 天还没有足够记录，先记录几餐，再查看趋势会更有参考价值。";
         }
         return "最近 " + response.getDays() + " 天共记录 " + response.getTotalMeals()
                 + " 餐，平均评分为 " + response.getAverageScore()

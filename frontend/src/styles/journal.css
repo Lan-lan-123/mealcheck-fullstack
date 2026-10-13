@@ -1,0 +1,19 @@
+.journal-form { display: grid; gap: 14px; margin: 16px 0; }
+.journal-form label, .journal-form .form-field { display: grid; gap: 6px; }
+.journal-form input:not([type=checkbox]), .journal-form select, .journal-form textarea { width: 100%; min-width: 0; padding: 10px; border: 1px solid var(--border, #ddd); border-radius: 8px; background: var(--surface, #fff); color: inherit; }
+.journal-form textarea { min-height: 80px; resize: vertical; }
+.journal-form fieldset { min-width: 0; border: 1px solid var(--border, #ddd); border-radius: 10px; padding: 12px; }
+.journal-modal { max-height: 90vh; overflow-y: auto; }
+.meal-slots { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
+.meal-slots > div { display: grid; align-content: start; gap: 10px; padding: 12px; border: 1px solid var(--border, #ddd); border-radius: 10px; }
+.tracking-summary { padding: 16px 0; border-top: 1px solid var(--border, #ddd); margin: 16px 0; }
+.tracking-summary ul { padding-left: 20px; }
+.tracking-summary li { margin: 8px 0; }
+.behavior-goal-list { list-style: none; padding: 0; }
+.behavior-goal-list li, .journal-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 12px 0; }
+.plan-save, .answer-feedback { margin: 12px 0; }
+.plan-list { display: grid; gap: 12px; margin-top: 20px; }
+.plan-list p, .answer-feedback p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.answer-feedback span[role=status] { display: block; margin-top: 8px; }
+.assistant-message .journal-form { white-space: normal; }
+@media (max-width: 700px) { .meal-slots { grid-template-columns: repeat(2, minmax(0, 1fr)); } .records-page .section-title-row { flex-wrap: wrap; } .record-head { flex-wrap: wrap; } }

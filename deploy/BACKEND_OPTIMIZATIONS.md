@@ -1,5 +1,7 @@
 # Backend reliability and resource isolation (2026-10-04)
 
+The [2026-10-10 implementation](BACKEND_IMPROVEMENTS.md) adds bounded cache/admission waits, classified weekly retries, private object storage, batched retention, interactive AI permit reservation, durable active-user dispatch and model-specific accounting. Its documented behavior supersedes the corresponding earlier sections below.
+
 ## Scheduling
 
 `taskScheduler` uses three `background-scheduler-*` threads. The independent `assistantTimeoutScheduler` only runs assistant timeout callbacks. Blocking outbox publishing, image cleanup, retention, and weekly enqueueing use a maintenance executor with two workers and a four-task queue. Repeated ticks for a still-running task are coalesced; executor rejection does not run work on the scheduling thread. Knowledge maintenance has its own one-worker, one-task-queue executor.

@@ -33,7 +33,7 @@ class WeeklyReportServiceTest {
                 snapshotRepository,
                 userGoalService,
                 orchestrator
-        );
+        , null);
 
         UserAccount user = new UserAccount();
         user.setId(9L);

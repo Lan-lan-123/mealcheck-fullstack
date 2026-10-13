@@ -58,6 +58,21 @@ test('network interruptions retry status reads without another submission', asyn
   })
   assert.equal(reads, 3); assert.equal(result, 1)
 })
+
+test('connection interruption persists during backoff and clears after a successful status read', async () => {
+  let reads = 0, latest
+  const waitingStates = []
+  await resolveMealAnalysis({ key: 'key', status: 'PROCESSING' }, {
+    load: async () => {
+      if (++reads === 1) throw new Error('offline')
+      if (reads === 2) return { key: 'key', status: 'PROCESSING' }
+      return { status: 'SUCCEEDED', result: 1 }
+    },
+    onUpdate: state => { latest = state },
+    wait: async () => waitingStates.push(!!latest.connectionInterrupted)
+  })
+  assert.deepEqual(waitingStates, [false, true, false])
+})
 test('failed, unknown, expired and excessively long tasks stop polling with retry guidance', async () => {
   for (const status of ['FAILED', 'RETRYABLE', 'unknown']) await assert.rejects(resolveMealAnalysis({ status }, { load: async () => {} }))
   await assert.rejects(resolveMealAnalysis({ key: 'key', status: 'PENDING' }, { load: async () => {}, maxPolls: 0 }), /后台/)

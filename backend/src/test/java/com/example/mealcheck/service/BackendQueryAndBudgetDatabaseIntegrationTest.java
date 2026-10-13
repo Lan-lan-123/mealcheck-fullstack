@@ -24,6 +24,19 @@ import static org.assertj.core.api.Assertions.*;
 @Import({AiBudgetStore.class,AiCallPermitStore.class,AssistantConversationService.class})
 @Testcontainers
 class BackendQueryAndBudgetDatabaseIntegrationTest {
+    @Test void backgroundCallsLeaveInteractivePermitsAndSettledRetentionIsBounded() {
+        var background=permits.tryAcquire(3,60000,true);
+        assertThat(background.permit()).isNotNull();
+        assertThat(permits.tryAcquire(3,60000,true).reason()).isEqualTo("background");
+        assertThat(permits.tryAcquire(3,60000,false).permit()).isNotNull();
+        assertThat(permits.tryAcquire(3,60000,false).permit()).isNotNull();
+        assertThat(permits.tryAcquire(3,60000,false).permit()).isNull();
+        jdbc.update("INSERT INTO ai_budget_daily(quota_key,usage_day) VALUES ('old',CURRENT_DATE-40)");
+        jdbc.update("INSERT INTO ai_budget_reservations(id,quota_key,usage_day,amount,status) SELECT md5(i::text)::uuid,'old',CURRENT_DATE-40,0,'SETTLED' FROM generate_series(1,1200) i");
+        budgets.retain();assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_budget_reservations WHERE quota_key='old'",Long.class)).isEqualTo(200);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_budget_daily WHERE quota_key='old'",Long.class)).isEqualTo(1);
+        budgets.retain();assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_budget_daily WHERE quota_key='old'",Long.class)).isZero();
+    }
     @Container static final PostgreSQLContainer<?> POSTGRES=new PostgreSQLContainer<>(org.testcontainers.utility.DockerImageName.parse("pgvector/pgvector:pg16").asCompatibleSubstituteFor("postgres"));
     @DynamicPropertySource static void database(DynamicPropertyRegistry r) {
         r.add("spring.datasource.url",POSTGRES::getJdbcUrl);r.add("spring.datasource.username",POSTGRES::getUsername);r.add("spring.datasource.password",POSTGRES::getPassword);
@@ -37,7 +50,7 @@ class BackendQueryAndBudgetDatabaseIntegrationTest {
     UserAccount user,other;
     final LocalDate day=LocalDate.of(2026,10,4);
     @BeforeEach void setup() {
-        org.springframework.test.util.ReflectionTestUtils.setField(budgets,"globalDailyCalls",5000);
+        org.springframework.test.util.ReflectionTestUtils.setField(budgets,"globalDailyCalls",100000);
         jdbc.execute("TRUNCATE ai_call_permits");
         jdbc.execute("TRUNCATE ai_call_starts");
         org.springframework.test.util.ReflectionTestUtils.setField(permits,"maxStartsPerMinute",120);
@@ -171,7 +184,7 @@ class BackendQueryAndBudgetDatabaseIntegrationTest {
         assertThatThrownBy(()->conversations.detail(user,id,101,null)).isInstanceOf(IllegalArgumentException.class);
     }
     void meal(UserAccount owner,int score,LocalDateTime time) {
-        var record=new com.example.mealcheck.entity.MealRecord();record.setUser(owner);record.setScore(score);record.setCreatedAt(time);
+        var record=new com.example.mealcheck.entity.MealRecord();record.setUser(owner);record.setScore(score);record.setCreatedAt(time.plusDays(20));record.setOccurredAt(time);
         record.setDetectedFoodsJson("[{\"name\":\"rice\"}]");record.setRiskTagsJson("[\"risk\"]");record.setAdvice("large advice".repeat(1000));
         meals.saveAndFlush(record);
     }
@@ -179,12 +192,13 @@ class BackendQueryAndBudgetDatabaseIntegrationTest {
         var since=LocalDateTime.of(2026,10,1,0,0);
         meal(user,0,since);meal(user,69,since.plusHours(1));meal(user,80,since.plusHours(1));meal(user,100,since.plusDays(1));meal(other,0,since.plusHours(2));
         var summary=meals.trendSummary(user.getId(),since);
-        assertThat(summary.getTotal()).isEqualTo(3);assertThat(summary.getLow()).isEqualTo(1);assertThat(summary.getHigh()).isEqualTo(2);
-        assertThat(summary.getAverage()).isCloseTo(83.0,within(0.00001));
-        assertThat(summary.getFirstScore()).isEqualTo(69);assertThat(summary.getLastScore()).isEqualTo(100);
+        // Inclusive calendar start and actual meal time, regardless of creation time.
+        assertThat(summary.getTotal()).isEqualTo(4);assertThat(summary.getLow()).isEqualTo(2);assertThat(summary.getHigh()).isEqualTo(2);
+        assertThat(summary.getAverage()).isCloseTo(62.25,within(0.00001));
+        assertThat(summary.getFirstScore()).isEqualTo(0);assertThat(summary.getLastScore()).isEqualTo(100);
         var daily=meals.trendDailyScores(user.getId(),since,ZoneId.systemDefault().getId());
-        assertThat(daily).hasSize(2);assertThat(daily.get(0).getAverage()).isEqualTo(74.5);
-        assertThat(meals.trendFacts(user.getId(),since)).hasSize(3).allSatisfy(f->{assertThat(f.getFoods()).contains("rice");assertThat(f.getRisks()).contains("risk");});
+        assertThat(daily).hasSize(2);assertThat(daily.get(0).getAverage()).isCloseTo(149.0/3,within(0.00001));
+        assertThat(meals.trendFacts(user.getId(),since)).hasSize(4).allSatisfy(f->{assertThat(f.getFoods()).contains("rice");assertThat(f.getRisks()).contains("risk");});
         assertThat(meals.trendSummary(other.getId(),since.plusYears(1)).getTotal()).isZero();
         assertThat(meals.trendSummary(other.getId(),since.plusYears(1)).getAverage()).isNull();
     }

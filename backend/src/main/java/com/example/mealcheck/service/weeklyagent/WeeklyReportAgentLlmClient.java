@@ -55,7 +55,7 @@ public class WeeklyReportAgentLlmClient {
             long latencyMs = Duration.ofNanos(System.nanoTime() - startedAt).toMillis();
             aiStatusService.recordFailure(operation, error.getMessage(), latencyMs);
             observability.recordAiCall(startedAt, operation, "failure");
-            log.warn("Weekly report agent degraded. operation={}, reason={}", operation, error.getMessage());
+            log.warn("Weekly report agent degraded. operation={}, type={}", operation, error.getClass().getSimpleName());
             return Optional.empty();
         }
     }

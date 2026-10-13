@@ -21,11 +21,13 @@ import java.util.Collections;
 
 @Service
 public class AssistantConversationService {
+    private final com.example.mealcheck.repository.UserAccountRepository users;
     private final AssistantConversationRepository conversationRepository;
     private final AssistantConversationMessageRepository messageRepository;
 
     public AssistantConversationService(AssistantConversationRepository conversationRepository,
-                                        AssistantConversationMessageRepository messageRepository) {
+                                        AssistantConversationMessageRepository messageRepository, com.example.mealcheck.repository.UserAccountRepository users) {
+        this.users = users;
         this.conversationRepository = conversationRepository;
         this.messageRepository = messageRepository;
     }
@@ -127,14 +129,29 @@ public class AssistantConversationService {
     }
 
     @Transactional
-    public void append(AssistantConversation conversation, String role, String text) {
+    public Long append(AssistantConversation conversation, String role, String text) {
+        return append(conversation,role,text,null,"COMPLETE");
+    }
+
+    @Transactional
+    public Long append(AssistantConversation conversation,String role,String text,String requestId,String status) {
         AssistantConversationMessage message = new AssistantConversationMessage();
         message.setConversation(conversation);
         message.setRole(role);
         message.setText(text);
+        message.setRequestId(requestId); message.setDeliveryStatus(status);
         messageRepository.save(message);
         conversation.setUpdatedAt(AppTime.now());
         conversationRepository.save(conversation);
+        return message.getId();
+    }
+
+    @Transactional
+    public Long appendTurn(AssistantConversation conversation,String question,String answer,String requestId,String status) {
+        var owner=users.findByIdForUpdate(conversation.getUser().getId()).orElseThrow(()->new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED));
+        var current=conversationRepository.findByIdAndUser(conversation.getId(),owner).orElseThrow(()->new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND,"会话已删除"));
+        append(current,"user",question,requestId,"COMPLETE");
+        return append(current,"assistant",answer,requestId,status);
     }
 
     @Transactional
@@ -165,7 +182,8 @@ public class AssistantConversationService {
 
     private List<AssistantChatMessage> toChatMessages(List<AssistantConversationMessage> messages) {
         return messages.stream()
-                .map(message -> new AssistantChatMessage(message.getRole(), message.getText()))
+                .map(message -> { var dto=new AssistantChatMessage(message.getRole(),message.getText());
+                    dto.setMessageId(message.getId()); dto.setRequestId(message.getRequestId()); dto.setDeliveryStatus(message.getDeliveryStatus()); return dto; })
                 .toList();
     }
 

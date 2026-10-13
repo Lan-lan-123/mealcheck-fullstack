@@ -23,13 +23,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
 
 import java.util.List;
 import java.time.LocalDate;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 @RestController
 @RequestMapping("/api")
@@ -141,17 +138,15 @@ public class MealController {
     @GetMapping("/meals/{id}/image")
     public ResponseEntity<Resource> getMealImage(@AuthenticationPrincipal UserPrincipal principal,
                                                  @PathVariable Long id) throws Exception {
-        Path imagePath = mealAnalysisService.getMealImagePath(principal, id);
-        Resource resource = new UrlResource(imagePath.toUri());
+        Resource resource = mealAnalysisService.getMealImageResource(principal, id);
 
         if (!resource.exists()) {
             return ResponseEntity.notFound().build();
         }
 
-        String contentType = Files.probeContentType(imagePath);
-        if (contentType == null) {
-            contentType = "image/jpeg";
-        }
+        String filename=resource.getFilename();
+        String contentType=filename != null && filename.endsWith(".png") ? "image/png"
+                : filename != null && filename.endsWith(".webp") ? "image/webp" : "image/jpeg";
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))

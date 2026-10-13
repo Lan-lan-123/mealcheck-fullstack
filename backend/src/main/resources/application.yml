@@ -53,6 +53,9 @@ spring:
         # A JDBC Calendar override would shift that value when the JVM zone differs.
   flyway:
     enabled: true
+    # Concurrent index migrations require session advisory locks instead of transaction locks.
+    postgresql:
+      transactional-lock: false
     baseline-on-migrate: true
     baseline-version: 0
     locations: classpath:db/migration
@@ -74,6 +77,18 @@ mealcheck:
   cors:
     allowed-origins: ${MEALCHECK_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
   upload-dir: ${MEALCHECK_UPLOAD_DIR:./uploads}
+  storage:
+    provider: ${MEALCHECK_IMAGE_STORAGE_PROVIDER:local}
+    oss:
+      endpoint: ${MEALCHECK_OSS_ENDPOINT:}
+      region: ${MEALCHECK_OSS_REGION:}
+      bucket: ${MEALCHECK_OSS_BUCKET:}
+      prefix: ${MEALCHECK_OSS_PREFIX:mealcheck/}
+      access-key-id: ${MEALCHECK_OSS_ACCESS_KEY_ID:}
+      access-key-secret: ${MEALCHECK_OSS_ACCESS_KEY_SECRET:}
+  ai-pricing:
+    currency: ${MEALCHECK_AI_COST_CURRENCY:CNY}
+    catalog-json: ${MEALCHECK_AI_PRICE_CATALOG_JSON:[]}
   upload:
     max-concurrent-decodes: ${MEALCHECK_UPLOAD_MAX_CONCURRENT_DECODES:2}
     max-pending-decodes: ${MEALCHECK_UPLOAD_MAX_PENDING_DECODES:20}
@@ -89,10 +104,10 @@ mealcheck:
     orphan-cleanup-cron: ${MEALCHECK_UPLOAD_ORPHAN_CLEANUP_CRON:0 30 3 * * *}
     orphan-grace-hours: ${MEALCHECK_UPLOAD_ORPHAN_GRACE_HOURS:24}
   analysis:
-    max-outstanding: ${MEALCHECK_ANALYSIS_MAX_OUTSTANDING:8}
+    max-outstanding: ${MEALCHECK_ANALYSIS_MAX_OUTSTANDING:32}
     max-outstanding-per-user: ${MEALCHECK_ANALYSIS_MAX_OUTSTANDING_PER_USER:2}
     dispatch: ${MEALCHECK_ANALYSIS_DISPATCH:rabbitmq}
-    concurrency: ${MEALCHECK_ANALYSIS_CONCURRENCY:2}
+    concurrency: ${MEALCHECK_ANALYSIS_CONCURRENCY:8}
     lease-seconds: ${MEALCHECK_ANALYSIS_LEASE_SECONDS:90}
     outbox-poll-ms: ${MEALCHECK_ANALYSIS_OUTBOX_POLL_MS:1000}
     worker-enabled: ${MEALCHECK_ANALYSIS_WORKER_ENABLED:true}
@@ -100,6 +115,7 @@ mealcheck:
     metrics-ms: ${MEALCHECK_ANALYSIS_METRICS_MS:15000}
   retention:
     enabled: ${MEALCHECK_RETENTION_ENABLED:true}
+    resume-ms: ${MEALCHECK_RETENTION_RESUME_MS:60000}
     failed-image-days: ${MEALCHECK_RETENTION_FAILED_IMAGE_DAYS:7}
     failed-request-days: ${MEALCHECK_RETENTION_FAILED_REQUEST_DAYS:90}
     stale-report-days: ${MEALCHECK_RETENTION_STALE_REPORT_DAYS:30}
@@ -136,7 +152,7 @@ mealcheck:
     chunk-max-tokens: ${MEALCHECK_KNOWLEDGE_CHUNK_MAX_TOKENS:500}
     chunk-overlap-tokens: ${MEALCHECK_KNOWLEDGE_CHUNK_OVERLAP_TOKENS:50}
     splitter-strategy: ${MEALCHECK_KNOWLEDGE_SPLITTER_STRATEGY:recursive-markdown}
-    source-version: ${MEALCHECK_KNOWLEDGE_SOURCE_VERSION:v2-recursive}
+    source-version: ${MEALCHECK_KNOWLEDGE_SOURCE_VERSION:v3-curated-100}
     benchmark-regression-tolerance: ${MEALCHECK_KNOWLEDGE_BENCHMARK_REGRESSION_TOLERANCE:0.02}
   upload-guard:
     non-food-window-minutes: ${MEALCHECK_NON_FOOD_WINDOW_MINUTES:5}
@@ -181,6 +197,8 @@ mealcheck:
   weekly-report:
     cron: ${MEALCHECK_WEEKLY_REPORT_CRON:0 0 6 * * MON}
     batch-size: ${MEALCHECK_WEEKLY_REPORT_BATCH_SIZE:100}
+    active-days: ${MEALCHECK_WEEKLY_REPORT_ACTIVE_DAYS:30}
+    enqueue-resume-ms: ${MEALCHECK_WEEKLY_REPORT_ENQUEUE_RESUME_MS:60000}
     executor-core-pool-size: ${MEALCHECK_WEEKLY_REPORT_EXECUTOR_CORE_POOL_SIZE:2}
     executor-max-pool-size: ${MEALCHECK_WEEKLY_REPORT_EXECUTOR_MAX_POOL_SIZE:4}
     executor-queue-capacity: ${MEALCHECK_WEEKLY_REPORT_EXECUTOR_QUEUE_CAPACITY:20}
@@ -240,7 +258,8 @@ mealcheck:
     open-duration-seconds: ${MEALCHECK_REMOTE_OPEN_DURATION_SECONDS:30}
     max-concurrent-calls: ${MEALCHECK_REMOTE_MAX_CONCURRENT_CALLS:8}
   ai-budget:
-    global-daily-calls: ${MEALCHECK_AI_GLOBAL_DAILY_CALLS:5000}
+    interactive-reserved-permits: ${MEALCHECK_AI_INTERACTIVE_RESERVED_PERMITS:2}
+    global-daily-calls: ${MEALCHECK_AI_GLOBAL_DAILY_CALLS:100000}
     global-daily-cost: ${MEALCHECK_AI_GLOBAL_DAILY_COST:0}
     max-concurrent-calls: ${MEALCHECK_AI_GLOBAL_MAX_CONCURRENT_CALLS:10}
     max-starts-per-minute: ${MEALCHECK_AI_GLOBAL_MAX_STARTS_PER_MINUTE:120}

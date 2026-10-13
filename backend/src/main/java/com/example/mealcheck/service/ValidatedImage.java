@@ -30,6 +30,10 @@ public final class ValidatedImage {
     public byte[] bytes() {
         return Arrays.copyOf(bytes, bytes.length);
     }
+    public int size() { return bytes.length; }
+    public java.io.InputStream openStream() { return new java.io.ByteArrayInputStream(bytes); }
+    public void writeTo(java.io.OutputStream output) throws java.io.IOException { output.write(bytes); }
+    public String base64() { return java.util.Base64.getEncoder().encodeToString(bytes); }
 
     public String contentType() { return contentType; }
     public String extension() { return extension; }

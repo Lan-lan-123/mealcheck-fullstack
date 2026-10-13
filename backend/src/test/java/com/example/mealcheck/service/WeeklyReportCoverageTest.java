@@ -21,7 +21,7 @@ class WeeklyReportCoverageTest {
         var goals = mock(UserGoalService.class);
         var graph = mock(WeeklyReportMultiAgentOrchestrator.class);
         var service = new WeeklyReportService(users, meals, new ObjectMapper(),
-                mock(WeeklyReportSnapshotRepository.class), goals, graph);
+                mock(WeeklyReportSnapshotRepository.class), goals, graph, null);
         var user = new UserAccount(); user.setId(7L); user.setUsername("test"); user.setPasswordHash("hash");
         when(users.findById(7L)).thenReturn(Optional.of(user));
         var first = new MealRecord(); first.setScore(90);

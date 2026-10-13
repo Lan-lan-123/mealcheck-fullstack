@@ -23,7 +23,7 @@ def port():
         return sock.getsockname()[1]
 
 
-def run(nginx):
+def run(nginx, slow_seconds=0):
     root = Path(__file__).resolve().parents[1]
     scratch = root / "backend" / "target" / "proxy-validation"
     scratch.mkdir(parents=True, exist_ok=True)
@@ -34,6 +34,19 @@ def run(nginx):
             pass
 
         def do_GET(self):
+            if self.path == "/api/test/slow":
+                time.sleep(slow_seconds)
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(b'{"completed":true}')
+                return
+            if self.path == "/api/test/deadline":
+                self.send_response(504)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(b'{"code":"AI_DEADLINE_EXCEEDED"}')
+                return
             address = self.headers.get("X-Forwarded-For", "").split(",")[0].strip()
             counts[address] = counts.get(address, 0) + 1
             self.send_response(200 if counts[address] <= 2 else 429)
@@ -110,7 +123,20 @@ def run(nginx):
                     body = json.loads(response.read())
                     assert body["address"] == "127.0.0.2" and body["protocol"] == "http", body
                     conn.close()
-                    return {"passed": True, "twoProxyLayers": True, "quotaStatuses": observed, "untrustedInnerClientVerified": True}
+                    conn = http.client.HTTPConnection("127.0.0.1", outer_port, timeout=180)
+                    conn.request("GET", "/api/test/deadline")
+                    response = conn.getresponse()
+                    assert response.status == 504 and json.loads(response.read())["code"] == "AI_DEADLINE_EXCEEDED"
+                    conn.close()
+                    if slow_seconds:
+                        conn = http.client.HTTPConnection("127.0.0.1", outer_port, timeout=180)
+                        conn.request("GET", "/api/test/slow")
+                        response = conn.getresponse()
+                        assert response.status == 200 and json.loads(response.read())["completed"] is True
+                        conn.close()
+                    return {"passed": True, "twoProxyLayers": True, "quotaStatuses": observed,
+                            "untrustedInnerClientVerified": True, "backendDeadline504Preserved": True,
+                            "slowResponseSeconds": slow_seconds}
                 finally:
                     subprocess.run(args + ["-s", "quit"], capture_output=True, creationflags=hidden)
                     try:
@@ -127,4 +153,7 @@ def run(nginx):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--nginx", type=Path, required=True)
-    print(json.dumps(run(parser.parse_args().nginx.resolve())))
+    parser.add_argument("--slow-seconds", type=float, default=0)
+    args = parser.parse_args()
+    if not 0 <= args.slow_seconds <= 120: parser.error("slow-seconds must be between 0 and 120")
+    print(json.dumps(run(args.nginx.resolve(), args.slow_seconds)))

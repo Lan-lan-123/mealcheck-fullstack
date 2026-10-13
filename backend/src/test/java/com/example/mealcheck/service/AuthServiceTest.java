@@ -15,6 +15,30 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class AuthServiceTest {
+    @Test void existingUsernameHasAnExplicitConflict() {
+        UserAccountRepository users = mock(UserAccountRepository.class);
+        CaptchaService captcha = mock(CaptchaService.class);
+        when(captcha.verify("id", "4")).thenReturn(true);
+        when(users.existsByUsername("alice")).thenReturn(true);
+        var service = new AuthService(users, mock(PasswordEncoder.class), mock(AuthenticationManager.class), mock(JwtService.class), captcha);
+        var request = new AuthDtos.RegisterRequest(); request.setUsername("alice"); request.setCaptchaId("id"); request.setCaptchaAnswer("4");
+        assertThatThrownBy(() -> service.register(request)).isInstanceOf(UsernameConflictException.class);
+        verify(users, never()).saveAndFlush(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test void unrelatedDatabaseConstraintsAreNotMisreportedAsUsernameConflicts() {
+        UserAccountRepository users = mock(UserAccountRepository.class);
+        CaptchaService captcha = mock(CaptchaService.class);
+        when(captcha.verify("id", "4")).thenReturn(true);
+        var violation = new org.springframework.dao.DataIntegrityViolationException("private",
+                new org.hibernate.exception.ConstraintViolationException("private", new java.sql.SQLException(), "other_constraint"));
+        org.mockito.Mockito.doThrow(violation).when(users).saveAndFlush(org.mockito.ArgumentMatchers.any());
+        var service = new AuthService(users, mock(PasswordEncoder.class), mock(AuthenticationManager.class), mock(JwtService.class), captcha);
+        var request = new AuthDtos.RegisterRequest(); request.setUsername("alice"); request.setPassword("long-password");
+        request.setCaptchaId("id"); request.setCaptchaAnswer("4");
+        assertThatThrownBy(() -> service.register(request)).isSameAs(violation);
+    }
+
     @Test
     void registrationRequiresAValidCaptchaBeforeCheckingTheUsername() {
         UserAccountRepository users = mock(UserAccountRepository.class);

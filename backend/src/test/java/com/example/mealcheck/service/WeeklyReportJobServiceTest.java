@@ -12,6 +12,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -20,6 +21,25 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class WeeklyReportJobServiceTest {
+    @Test void admissionFailuresWaitWithoutSpendingAttemptsAndConfigurationErrorsStopAutomaticRetry() {
+        var repository=mock(WeeklyReportJobRepository.class);
+        var users=mock(com.example.mealcheck.repository.UserAccountRepository.class);
+        var failure=mock(TaskFailureRecorder.class);var job=new WeeklyReportJob();job.setUserId(7L);
+        when(repository.findById(9L)).thenReturn(java.util.Optional.of(job));
+        when(users.findByIdForUpdate(7L)).thenReturn(java.util.Optional.of(new com.example.mealcheck.entity.UserAccount()));
+        when(repository.deferAdmission(any(),anyInt(),any(),any(),any(),any())).thenReturn(1);
+        when(repository.markFailed(any(),anyInt(),any(),any(),any(),any(),any())).thenReturn(1);
+        var service=new WeeklyReportJobService(repository,new AppProperties(),failure,users);
+        var before=com.example.mealcheck.util.AppTime.now();
+        assertThat(service.markFailed(9L,3,"token",new AiBudgetService.BudgetExceededException(100,3600))).isTrue();
+        verify(repository).deferAdmission(eq(9L),eq(3),eq("token"),eq("AI_BUDGET_EXCEEDED"),argThat(next->!next.isBefore(before.plusSeconds(3600))),any());
+        service.markFailed(9L,1,"token",new RemoteCallGuard.RetryableRemoteCallException(429,java.time.Duration.ofSeconds(500)));
+        verify(repository).markFailed(eq(9L),eq(1),eq("token"),eq(WeeklyReportJob.RETRY),any(),argThat(next->!next.isBefore(before.plusSeconds(500))),any());
+        service.markFailed(9L,2,"token",new RemoteCallGuard.RemoteCallDeadlineException("provider delay",java.time.Duration.ofSeconds(1000)));
+        verify(repository).markFailed(eq(9L),eq(2),eq("token"),eq(WeeklyReportJob.RETRY),any(),argThat(next->!next.isBefore(before.plusSeconds(1000))),any());
+        service.markFailed(9L,1,"token",new RemoteCallGuard.NonRetryableRemoteCallException("invalid key"));
+        verify(repository).markFailed(eq(9L),eq(1),eq("token"),eq(WeeklyReportJob.DEAD),eq("REMOTE_CONFIGURATION"),any(),any());
+    }
 
     @Test
     void enqueuesEachUserWithAnIdempotencyKey() {

@@ -23,7 +23,7 @@ class UserGoalServiceTest {
     void updateDeactivatesPreviousGoalAndCreatesNewCurrentGoal() {
         UserGoalRepository goalRepository = mock(UserGoalRepository.class);
         UserAccountRepository userRepository = mock(UserAccountRepository.class);
-        UserGoalService service = new UserGoalService(goalRepository, userRepository);
+        UserGoalService service = new UserGoalService(goalRepository, userRepository, mock(MealReportInvalidationService.class));
 
         UserAccount user = new UserAccount();
         user.setId(1L);
@@ -40,6 +40,7 @@ class UserGoalServiceTest {
         request.setNote("prepare for summer");
 
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdForUpdate(user.getId())).thenReturn(Optional.of(user));
         when(goalRepository.findFirstByUserAndActiveTrueOrderByCreatedAtDesc(user)).thenReturn(Optional.of(previous));
         when(goalRepository.save(any(UserGoal.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -55,7 +56,7 @@ class UserGoalServiceTest {
     void effectiveGoalUsesStoredGoalWhenRequestIsCurrent() {
         UserGoalRepository goalRepository = mock(UserGoalRepository.class);
         UserAccountRepository userRepository = mock(UserAccountRepository.class);
-        UserGoalService service = new UserGoalService(goalRepository, userRepository);
+        UserGoalService service = new UserGoalService(goalRepository, userRepository, mock(MealReportInvalidationService.class));
 
         UserAccount user = new UserAccount();
         UserGoal goal = new UserGoal();

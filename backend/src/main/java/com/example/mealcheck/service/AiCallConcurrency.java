@@ -18,12 +18,23 @@ public class AiCallConcurrency {
     }
     public UUID acquire(Duration remaining) {
         long deadline=System.nanoTime()+remaining.toNanos();
+        long backoff=50;
         try {
             while (System.nanoTime()<deadline) {
+                AiCallContext.checkExecution();
                 // Conservative crash lease exceeds the client's remaining deadline. No DB transaction is held while waiting.
-                UUID id=store.acquire(limit, Math.max(1000, remaining.toMillis())+30000);
-                if (id!=null) return id;
-                Thread.sleep(Math.min(100, Math.max(1,(deadline-System.nanoTime())/1_000_000)));
+                var context=AiCallContext.capture();
+                var admission=store.tryAcquire(limit, Math.max(1000,(deadline-System.nanoTime())/1_000_000)+30000,
+                        context != null && context.background());
+                if (admission != null && admission.permit()!=null) return admission.permit();
+                String reason=admission == null ? "concurrency" : admission.reason();
+                metrics.counter("mealcheck.ai.admission.waits","reason",reason).increment();
+                long wait=admission != null && admission.retryMillis()>0 ? Math.min(1000,admission.retryMillis())
+                        : java.util.concurrent.ThreadLocalRandom.current().nextLong(Math.max(1,backoff/2),backoff+1);
+                long left=(deadline-System.nanoTime())/1_000_000;
+                if (left<=0) break;
+                Thread.sleep(Math.min(wait,left));
+                backoff=Math.min(1000,backoff*2);
             }
         } catch (InterruptedException interrupted) {
             Thread.currentThread().interrupt();
