@@ -22,7 +22,7 @@
         <jjwt.version>0.12.6</jjwt.version>
         <langchain4j.version>1.13.1</langchain4j.version>
         <langgraph4j.version>1.8.24</langgraph4j.version>
-        <mcp-java-sdk.version>0.18.3</mcp-java-sdk.version>
+        <mcp-java-sdk.version>2.0.1</mcp-java-sdk.version>
         <flyway.version>10.20.1</flyway.version>
         <twelvemonkeys.version>3.13.1</twelvemonkeys.version>
         <testcontainers.version>1.21.4</testcontainers.version>
