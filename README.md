@@ -1,257 +1,13 @@
 # MealCheck Fullstack
 
-## 当前部署：RAG 知识库 100 条，数据库 V31（2026-10-13）
+## Change Summary
 
-源码知识库更新为 `v3-curated-100`：保留原 26 个主题，补充 74 个独立条目，覆盖主食与蛋白质、蔬菜水果、饮品与标签、外食预算、食品安全和记录复盘。每条附公开资料来源，校园实践示例为应用建议，不是个体诊断或营养处方。
+- **2026-10-13:** Expanded the bundled knowledge guide to 100 curated topics; improved journal pagination, cache invalidation, assistant cancellation, report history, and query/service organization.
+- **2026-10-11:** Added meal times and types, manual records, recording goals, action plans, coverage statistics, streaming assistant replies, and optional nutrition estimates; fixed legacy account-deletion constraints.
+- **2026-10-04:** Added shared AI deadlines, retries and budgets, cursor-based conversation history, aggregate trend queries, resumable long-term memory rebuilds, and capacity/recovery tooling.
+- **2026-10-02:** Added separate user/admin workspaces, asynchronous image analysis, recognition corrections, durable weekly-report workflows, evaluation tools, and operational safeguards.
 
-文档首行 `<!-- mealcheck:independent-topics -->` 保留条目边界，不合并短主题，也不在主题之间追加无关重叠内容；单个长主题仍按最大 Token 限制切分。默认配置下 100 个主题对应 100 个系统知识片段，管理员手动条目另计。来源内容同步会替换旧的系统片段，保留 `source=admin` 条目。
-
-本轮已更新当前本地 Docker 后端。实际数据库为 `diet_guides.md` 来源的 100 条、100 个独立标题和内容哈希，分块 166–212 Token；旧系统 19 条已通过来源同步替换。原有 3 个账户、34 条餐食保留，临时验收账户已清理，五个容器健康。
-
-- 后端完整回归：272 项单元 / HTTP 测试、99 项数据库集成测试通过，无失败、无跳过。日志 `backend/target/rag100-backend-verification.log`。
-- 运行中验收：19 项检查通过，包括普通用户权限、管理员总数、五页完整分页、唯一标题及内容、来源版本和四项新增知识检索。结果 `deploy/release-results/rag100-20261013/live-smoke-final/verification.json`。
-- 升级前联合备份已隔离恢复通过：44 张表、34 个图片引用、35 个文件、1 个排队图片。证据 `deploy/recovery-results/rag100-20261013/pre-index-restored/verification.json`。
-- 当前后端镜像保留为 `mealcheck-local-backend:20261013-rag100`（`sha256:8e19dd1d035dc7b65ff9b1f9e2f7b9406f3bc91595a13a3935db694a47267f8c`）；原镜像另保留为 `mealcheck-local-backend:pre-rag100-20261013`。镜像内知识正文哈希与源码一致。
-- 沿用当前 `docker-compose.yml` 和 `mealcheck-fullstack` 项目；仅更新后端，前端及数据卷保留。当前来源版本无 `.env` 覆盖，使用新默认值。
-- 本地检索使用开发用 Hash 向量，无真实嵌入或重排密钥。真实模型回答质量、费用与正式发布基线未在本轮验收。
-
-本地无真实嵌入 / 重排密钥时，可重新验证（使用新的输出目录）：
-
-```powershell
-python deploy/scripts/verify_rag_knowledge.py --output deploy/release-results/your-rag-verification
-```
-
-以下为扩展前的历史部署证据。
-
-## 历史部署：七项代码优化，数据库 V31（2026-10-13）
-
-已完成本轮七项优化，并更新到**本地 Docker**。访问 [http://127.0.0.1:5173](http://127.0.0.1:5173)。继续使用 `mealcheck-fullstack` 项目和原持久卷，保留 3 个账户、34 条餐食、34 个图片引用及 35 个上传文件；五个容器均健康，仅绑定本机回环地址。以下 V28 / V27 部署记录为历史证据。
-
-### 优化结果
-
-1. 数据成功变更后统一通知目标、计划、趋势和当前周报，使相关缓存立即失效；失败请求保持原缓存。周报任务完成也刷新历史列表。
-2. 目标与计划返回分页结果及总数，前端支持翻页。目标修改直接按本人 ID 查询，超过原 100 项限制的旧目标可编辑；计划超过 500 项仍能完整查询。
-3. 手动计划保存后清空表单并支持连续创建；同一建议保存后的防重复按钮保持。
-4. 助手期限包含排队时间，排队阶段立即提供请求 ID，支持取消。取消排队任务会释放队列容量；运行任务清理结束后再允许同一用户提交。
-5. 覆盖率和目标进度复用一次按日期、餐次聚合的结果，使用前缀计数计算历史达标天数，查询次数不随目标数量增加。
-6. 餐食变化按受影响日期使相关周报过期，保留历史原文。计划、行为目标及备注的修改保留正文，并实时更新当前进度；增加历史周报分页与只读快照入口。当前报告不再使用旧周期快照。
-7. 后端拆分目标、计划、统计服务与查询 Repository；独立 DTO、明确接口类型、构造器注入和输入验证，控制器不直接操作 SQL。
-
-详细接口、统计、缓存、任务状态和限制见 [代码优化说明](deploy/CODE_OPTIMIZATIONS.md)。份量及营养估算仍可选、默认关闭，明确提示不准确，不作为目标达标依据。**真实 AI 助手测试继续暂缓**；任务与流式测试使用本地模型桩，生产验收只调用无密钥的本地规则回复。
-
-### 实际部署版本
-
-- 后端：`mealcheck-local-backend:20261013-journal-optimized-v31-verified`，内容 ID `sha256:2def3b697b9d9c4cd24dc6d109d7c3116dd83b5325b73c2aa70b19aa66d3a13d`。
-- 前端：`mealcheck-local-frontend:20261013-journal-optimized-v31-verified`，内容 ID `sha256:94cd2cf2e3aa06cee491a9449437beebd7226087611999921cb9515bda1c6b08`。
-- Flyway 从 V28 升级至 V31。V29 为本轮历史周报过期字段；工作区既有 V30 失败任务引用与 V31 查询索引迁移一并保留并验证，V31 的 `.sql.conf` 配置非事务并发索引创建。
-- `.env` 的两个本地镜像引用已更新。镜像来自未提交工作区，没有创建正式发布提交或推送；实际容器、数据库、源码和打包迁移由证据清单核验。
-- Docker Desktop 启动时再次出现孤立套接字。停止进程并核对路径后，仅重命名保存运行目录及真实套接字目录，再启动引擎；未重置 Docker、删除数据卷或改动其他项目。保存目录后缀为 `.stale-20261013-1424`、`1427`、`1429`，最终恢复使用 `1429`；Codex 的目录虚拟化路径也已核实。
-
-### 验证结果
-
-- 后端完整回归：270 项单元 / HTTP 测试与 99 项 PostgreSQL 集成测试全部通过，无失败、无跳过，日志 `backend/target/optimization-final-verification.log`。随后针对提交时请求 ID、报告周期与可空历史时间兼容修复，相关单元测试及全部 12 项餐食业务集成测试再次通过，日志 `optimization-final-boundaries.log`、`optimization-null-history-verification.log`。Surefire 统计排除旧的集成测试 XML，集成结果以 Failsafe 为准。
-- 前端最终回归：30 项单元测试、生产镜像构建和 67 项浏览器测试全部通过，日志 `frontend/test-optimization-unit-final.log`、`frontend/test-optimization-browser-verified.log`、`deploy/optimization-frontend-verified-build.log`。
-- 运行中验收：51 项检查通过，包括真实 API、生产 Nginx、目标 106 项 / 计划 602 项的分页、旧目标按 ID 编辑、局部过期及历史原文保留。手机页面另有 9 项业务检查和 8 项营养界面检查，验证连续创建两条计划、分页总数更新、返回已缓存周报时执行进度刷新，以及历史快照弹窗。
-- 所有运行中验收使用新注册的临时账户。结束后账户、合成餐食和图片已清理，原账户与餐食数量保持。初次验收暴露的历史生成时间为空错误已修复，并增加集成回归；初次 Node 单元测试中的导入扩展名问题也已修复。早期失败日志保留，最终通过证据以 `live-smoke-final-06` 为准。
-- 升级前和部署后联合备份均已在隔离容器恢复验证：44 张表、34 个图片引用、35 个文件，源数据未修改。部署后演练耗时 24.36 秒。
-
-| 证据路径（Git 忽略目录） | 内容 |
-| --- | --- |
-| `deploy/recovery-results/optimization-20261013/pre-deployment` | 升级前 V28 数据库与图片联合备份 |
-| `deploy/recovery-results/optimization-20261013/pre-deployment-restored/verification.json` | 升级前隔离恢复通过 |
-| `deploy/release-results/optimization-20261013/live-smoke-final-06/verification.json` | 最终 51 项部署验收及清理结果 |
-| `deploy/release-results/optimization-20261013/live-smoke-final-06/journal-browser/` | 9 项真实手机页面验收及截图 |
-| `deploy/recovery-results/optimization-20261013/post-deployment` | 最终 V31 数据库与图片联合备份 |
-| `deploy/recovery-results/optimization-20261013/post-deployment-restored/verification.json` | V31 隔离恢复通过 |
-| `deploy/release-results/optimization-20261013/evidence/manifest.json` | 实际镜像、健康、端口、数据库版本、打包迁移及源码哈希 |
-
-### 复现本轮部署
-
-在项目根目录执行 PowerShell。备份、恢复和验收输出目录使用新名称，避免覆盖证据；`.env` 的密钥不写入文档。
-
-```powershell
-python deploy/scripts/recovery.py backup --project mealcheck-fullstack --env-file .env --compose docker-compose.yml --compose deploy/compose.local.yml --output deploy/recovery-results/your-upgrade/pre-deployment
-python deploy/scripts/recovery.py drill --backup deploy/recovery-results/your-upgrade/pre-deployment --output deploy/recovery-results/your-upgrade/pre-deployment-restored
-
-docker build -t mealcheck-local-backend:20261013-journal-optimized-v31-verified -f backend/Dockerfile backend
-docker build -t mealcheck-local-frontend:20261013-journal-optimized-v31-verified -f frontend/Dockerfile frontend
-# 确认 .env 中两个本地镜像引用为上述标签。
-docker compose -p mealcheck-fullstack --env-file .env -f docker-compose.yml -f deploy/compose.local.yml up -d --no-build --wait --wait-timeout 180 backend frontend
-
-# 浏览器验收需要已安装 frontend 依赖和本机 Chromium / Chrome。
-$env:PLAYWRIGHT_CHROMIUM_EXECUTABLE='C:\Program Files\Google\Chrome\Application\chrome.exe'
-python deploy/scripts/verify_local_deployment.py --output deploy/release-results/your-upgrade/live-smoke --browser
-```
-
-Flyway 在后端启动时自动迁移；遇到失败先检查日志，不删除迁移历史。外部客户端的目标 / 计划 GET 响应须由数组改为解析分页 `content`，详见接口说明。需要回退数据时，使用升级前数据库和图片联合备份；旧镜像配合新库不视为完整回滚。助手任务注册仍限单个后端实例，多实例需另行设计路由或共享状态。
-
-## 历史部署：V28 餐食记录、行为目标与行动计划（2026-10-11）
-
-已完成本轮五项功能并更新到**本地 Docker**。访问 [http://127.0.0.1:5173](http://127.0.0.1:5173)。保留 `mealcheck-fullstack` 项目、原有持久卷、3 个账户和 34 条餐食；五个容器均为 healthy，仅绑定本机回环地址。以下 V27 记录保留为历史证据。
-
-### 新增功能
-
-1. 餐食记录增加实际用餐时间、早餐 / 午餐 / 晚餐 / 加餐、手动记录、补记与修改。趋势、筛选与周报按实际用餐日期统计，创建时间独立保留；历史及图片记录在未确认前暂沿用创建时间。
-2. 行为目标支持每周记录天数和每日不同餐次数，显示进度、剩余数量与每日历史达标天数。同一餐次多条记录只计一次；未指定餐次不计每日目标。营养估算保持默认关闭，提示不准确，不参与达标判断。
-3. 餐食建议、完整助手回答与周报建议可保存为计划，支持完成打卡、跳过、重新打开及调整内容 / 日期 / 备注，并保留建议来源和报告周期。
-4. 趋势和周报增加记录覆盖率、目标进度、计划执行汇总，区分“未记录，情况未知”与主动确认的“未吃”，提示样本不足和实际统计范围。
-5. 助手增加 SSE 流式回复、取消等待、回答评价、问题类型和请求 ID。未完成回答在历史中标为取消或异常，不作为完整回答保存为计划。
-
-入口、统计定义、接口、并发控制和迁移说明见 [V28 功能说明](deploy/MEAL_JOURNAL.md)。**真实 AI 助手测试按要求暂缓**；已使用本地模型桩验证流式、取消及超时，当前本地服务没有真实 AI 密钥，使用本地规则建议。
-
-### 本轮运行版本与复现部署
-
-- 后端：`mealcheck-local-backend:20261011-v28-final`，内容 ID `sha256:62808da716852f76713fb0a86a0b5023e7a0bb57165546d6a87a38d2361a6433`。
-- 前端：`mealcheck-local-frontend:20261011-v28-final`，内容 ID `sha256:9928019125435b7d09cc906e67551924faba1d0cd7199bfded1043fba5de7bd6`。
-- Flyway 已从 V27 升级到 V28，保留既有餐食和历史周报。V27 镜像与升级前联合备份保留。镜像来自包含未提交修改的工作区，没有提交或推送为正式发布。
-- 本轮再次遇到 Docker Desktop 4.73.0 的孤立 Windows 套接字启动问题。停止 Desktop 后检查运行目录，仅将含已知不可访问套接字的 `Docker/run` 与 `docker-secrets-engine` 重命名保存为 `.stale-20261011-2128`，随后恢复引擎；没有重置 Docker 或删除数据卷。
-
-在项目根目录执行以下 PowerShell 命令；`.env` 中的本地镜像引用已更新为上述标签，密钥不写入 README：
-
-```powershell
-# 升级前先备份，输出目录使用新的名称，避免覆盖已有证据。
-python deploy/scripts/recovery.py backup --project mealcheck-fullstack --env-file .env --compose docker-compose.yml --compose deploy/compose.local.yml --output deploy/recovery-results/your-upgrade/pre-deployment
-python deploy/scripts/recovery.py drill --backup deploy/recovery-results/your-upgrade/pre-deployment --output deploy/recovery-results/your-upgrade/pre-deployment-restored
-
-# 为新改动选择新的镜像标签；不要覆盖需要保留的旧版本。
-docker build -t mealcheck-local-backend:your-new-version -f backend/Dockerfile backend
-docker build -t mealcheck-local-frontend:your-new-version -f frontend/Dockerfile frontend
-# 更新 .env 中 MEALCHECK_LOCAL_BACKEND_IMAGE / MEALCHECK_LOCAL_FRONTEND_IMAGE 后启动。
-docker compose -p mealcheck-fullstack --env-file .env -f docker-compose.yml -f deploy/compose.local.yml up -d --no-build --wait --wait-timeout 180 backend frontend
-```
-
-Flyway 在后端启动时自动迁移，Nginx 已关闭 API 响应缓冲，以便 SSE 内容即时到达。V28 数据结构增加字段与四张业务表，旧镜像直接配合新库不应视为完整回滚；需要回退数据时使用升级前数据库和图片联合备份。
-
-### 验证与恢复证据
-
-- 后端：完整后端回归为 262 项单元 / HTTP 测试 + 87 项隔离 PostgreSQL 集成测试，全部通过。收尾修复取消回答的记忆游标后，再次运行全部 263 项单元 / HTTP 测试和 8 项新增业务集成测试，全部通过，无失败、无跳过；累计验证 **350 项不同测试**。日志 `backend/target/journal-final-verification.log` 与 `backend/target/journal-memory-final-verification.log`；统计时排除 surefire 中旧运行遗留的集成测试 XML，集成测试结果以 failsafe 为准。
-- 前端：30 项单元测试、生产构建、61 项浏览器测试通过。之后针对反馈按需加载与计划筛选的最后优化，新增功能及助手历史 6 项相关浏览器测试再次通过。日志 `frontend/test-journal-{unit-final,build-final,browser-final,refinement}.log`。
-- 运行中联合验收：**42 项检查通过**，包含真实 API、生产 Nginx 和手机页面。营养界面另有 8 项检查，新增记录 / 目标 / 计划 / 助手页面另有 5 项检查。使用新注册的临时账户和合成数据，结束后账户、记录和图片已清理，原有 3 个账户、34 条餐食数量保持。
-
-| 本轮证据路径（Git 忽略目录） | 用途 |
-| --- | --- |
-| `deploy/recovery-results/deployment-20261011-v28/pre-deployment` | V27 数据库与图片联合备份 |
-| `deploy/recovery-results/deployment-20261011-v28/pre-deployment-restored/verification.json` | 升级前隔离恢复通过：40 张表、34 个图片引用、35 个文件，源数据未修改 |
-| `deploy/release-results/deployment-20261011-v28/live-smoke-final-02/verification.json` | 42 项部署验收与清理结果 |
-| `deploy/release-results/deployment-20261011-v28/live-smoke-final-02/journal-browser/` | 生产手机页面验证及截图 |
-| `deploy/recovery-results/deployment-20261011-v28/post-deployment` | V28 部署后联合备份 |
-| `deploy/recovery-results/deployment-20261011-v28/post-deployment-restored/verification.json` | V28 隔离恢复通过：44 张表、34 个图片引用、35 个文件，源数据未修改 |
-| `deploy/release-results/deployment-20261011-v28/evidence/manifest.json` | 实际镜像、健康、端口、数据库版本、打包迁移与源码哈希证据 |
-
-备份与验证目录包含私人数据，保持 Git 忽略状态。可重复运行 `verify_local_deployment.py --browser` 验证，但应使用新的输出目录；脚本在调用本地助手前确认真实 AI 密钥为空，避免产生模型费用。
-
-## 历史部署：V27 本地 Docker 部署与功能验收（2026-10-11）
-
-本轮部署目标是 **本机 Docker**，沿用 `mealcheck-fullstack` 项目与原有持久卷。前端入口为
-[http://127.0.0.1:5173](http://127.0.0.1:5173)，后端为 `http://127.0.0.1:8080`。
-2026-10-10 完成 V26 部署后曾暂停；2026-10-11 已继续完成 V27 升级与新增功能修复。前端、后端、PostgreSQL、Redis、RabbitMQ 五个容器均为 `healthy`，原有 3 个账户、34 条餐食保留。
-
-### 已部署内容与版本
-
-- 本轮镜像包含当前工作区的多轮修改：执行期限及重试、AI 预算与并发准入、图片存储抽象及维护任务、周报批量调度、前端异步任务进度，以及默认关闭的可选份量和营养粗略估算。
-- 营养功能需要用户填写份量与每 100 克参考值，明确提示“不准确，仅供参考”；数据不完整时不显示整餐总量，不参与结构评分和周报判断。详见 [功能说明](deploy/OPTIONAL_NUTRITION.md)。
-- 实际运行后端：`mealcheck-local-backend:20261010-v27`，内容 ID：`sha256:33a76cce80f5b0dc8cecf0518b5b29c320c5fd6f6c29213bd57f489adb3e8b83`。
-- 实际运行前端：`mealcheck-local-frontend:20261011-v27-nutrition-fix`，内容 ID：`sha256:20b52f49a94f0b2108cc4c53339322e8df9033a1dd3938fdebce99017a38a81d`。
-- V26 镜像继续保留为 `mealcheck-local-backend:20261010-v26` 和 `mealcheck-local-frontend:20261010-v26`，没有覆盖其内容。
-- 本次构建使用包含未提交及新增文件的工作区，Git 基础提交为 `20f68e758003c853953e6dda5993c25446a81cd2`。没有提交或推送代码、镜像，不能将其视为已完成 [正式发布基线验收](deploy/RELEASE_BASELINE.md) 的版本。
-
-### 数据库与图片恢复
-
-原数据库为 V22，保存 3 个账户、34 条餐食。两次部署中 Flyway 已成功应用 V23–V27：全站 AI 准入、持久化助手评测任务、图片引用与周报调度、可选营养快照，以及遗留重复外键修复。原有账户和餐食数量保留。
-
-部署前发现旧上传卷为空，首次备份因此失败并保留失败记录。随后从 `backend/uploads` 找回原始图片，经数据库引用及文件哈希校验后恢复到原上传卷，并修复容器运行用户的目录权限。
-隔离恢复演练验证了 35 张表、34 个图片引用、35 个文件，源数据库未被演练修改。
-
-备份与验收证据保存在 Git 忽略目录，包含私人数据，不应提交仓库：
-
-| 路径 | 状态与用途 |
-| --- | --- |
-| `deploy/recovery-results/deployment-20261010-v26/pre-deployment` | 首次失败记录，不可作为完整备份使用 |
-| `deploy/recovery-results/deployment-20261010-v26/pre-deployment-local-files` | V22 数据库与找回的本地原图联合备份 |
-| `deploy/recovery-results/deployment-20261010-v26/pre-deployment-restored/verification.json` | 上述备份的隔离恢复演练通过记录 |
-| `deploy/recovery-results/deployment-20261010-v26/pre-deployment-volume-verified` | 图片恢复入卷后重新完成的联合备份 |
-| `deploy/recovery-results/deployment-20261010-v27/pre-v27` | V27 应用前的 V26 联合备份；备份完成后已自动恢复后端运行 |
-| `deploy/recovery-results/deployment-20261011-v27/pre-v27-restored/verification.json` | V26 备份的隔离恢复演练通过：40 张表、34 个图片引用、35 个文件 |
-| `deploy/recovery-results/deployment-20261011-v27/post-deployment` | 最终 V27 数据库与上传卷联合备份 |
-| `deploy/recovery-results/deployment-20261011-v27/post-deployment-restored/verification.json` | V27 备份的隔离恢复演练通过：40 张表、34 个图片引用、35 个文件，未修改原库 |
-
-旧镜像另保留为 `mealcheck-local-backend:pre-20261010` 和 `mealcheck-local-frontend:pre-20261010`。
-旧应用与升级后数据库的兼容性尚未验收；保留镜像不代表直接切换即可安全回退。
-
-### 构建、启动与维护命令
-
-本地使用 [deploy/compose.local.yml](deploy/compose.local.yml) 覆盖端口为 `127.0.0.1`，需要支持 `!override` 的 Compose 2.24.4+。
-本轮使用 Compose 5.1.3；数据库、缓存及消息队列使用开发配置，适用于本机环境。
-`.env` 已在本地创建并被 Git 忽略，业务时区为 `Asia/Shanghai`，时间存储口径为 `UTC`，当前镜像变量指向上述 V27 后端与修复后的前端标签。
-
-以下是本轮执行过的部署方式，在仓库根目录运行：
-
-```powershell
-# 仅在准备新版本时构建；先将 .env 镜像变量改为新的独立标签
-docker compose --env-file .env -p mealcheck-fullstack -f docker-compose.yml -f deploy/compose.local.yml --profile fullstack build backend frontend
-
-# 后端先启动，等待依赖健康与自动迁移完成
-docker compose --env-file .env -p mealcheck-fullstack -f docker-compose.yml -f deploy/compose.local.yml --profile fullstack up -d --no-build --wait --wait-timeout 120 backend
-
-# 启动前端
-docker compose --env-file .env -p mealcheck-fullstack -f docker-compose.yml -f deploy/compose.local.yml --profile fullstack up -d --no-build --wait --wait-timeout 60 frontend
-
-# 查看状态和后端日志
-docker compose --env-file .env -p mealcheck-fullstack -f docker-compose.yml -f deploy/compose.local.yml --profile fullstack ps
-docker compose --env-file .env -p mealcheck-fullstack -f docker-compose.yml -f deploy/compose.local.yml logs --tail 100 backend
-```
-
-升级时先备份，再构建并记录新的独立镜像标签、核对内容 ID 后启动；不要覆盖已验收标签。
-保持项目名一致以复用原卷，勿用 `down -v` 删除持久化数据。
-
-### 新增功能检查、优化与修复
-
-1. **旧数据库注销失败**：实际旧库在 V6 删除策略约束旁保留了 Hibernate 创建的 `NO ACTION` 外键，会阻止账户注销。V27 只移除与有效 V6 约束具有相同表、列和引用列的重复限制约束，保留级联、审计置空和其他外键，不改动业务行。回归测试先升级到 V5 并添加遗留约束，再升到 V26，真实复现约束触发顺序；验证升级前失败、V27 后正常删除、营养快照级联及审计保留。当前真实账户注销接口已通过。
-2. **空餐食仍可开启估算**：已禁用没有食物项时的开启入口，并提示先纠正识别结果，避免提交后才报错。已开启的失效设置仍能关闭清理。
-3. **不完整数据定位**：保存不完整资料时新增“已具备完整估算资料：X / Y 项食物”，帮助用户补全资料；未知值继续保留为空，整餐总量仍不显示。
-4. **真实页面验收**：新增 [移动端验收脚本](deploy/scripts/verify_local_browser.mjs)，通过真实前端容器与真实 API 验证默认关闭、不准确提示、保存、重开读取、关闭清理和空食物入口；不拦截或模拟 API。页面截图只包含本轮临时账户的合成数据。
-
-### 最终验收结果与证据
-
-| 检查 | 最终结果 | 证据 |
-| --- | --- | --- |
-| 后端完整 `mvn -o verify -Pintegration` | 259 项单元/HTTP、79 项集成测试通过，0 失败/跳过 | `backend/target/deployment-20261011-final-verification.log` |
-| 前端单元与生产构建 | 30 项测试通过，构建成功 | `frontend/test-deployment-20261011-unit-final.log`、`frontend/test-deployment-20261011-build-final.log` |
-| 前端浏览器回归 | 57 项通过，包括空餐食新用例、异步进度与预算提示 | `frontend/test-deployment-20261011-browser-final.log` |
-| 实际部署联合验收 | 25 项检查通过，包含真实移动端流程 | `deploy/release-results/deployment-20261011-v27/live-smoke-final-02/verification.json` |
-| V26 与 V27 备份恢复 | 均通过，数据库与图片一致，演练未修改原数据 | 上表中的 `pre-v27-restored`、`post-deployment-restored` |
-| 源码、运行镜像与证据绑定 | 工作区文件 SHA-256、运行镜像内容 ID、实际 JAR 内迁移文件比对 | `deploy/release-results/deployment-20261011-v27/evidence/manifest.json` 及 `manifest.sha256` |
-
-真实验收覆盖 Nginx 页面与资源、Redis 验证码、注册与认证、数据库/缓存/上传目录健康、预算查询、管理接口隔离、图片读取、默认关闭、仅份量保存不生成总量、负数拒绝、来源校验、完整换算、显式零值、版本冲突、真实纠错后估算失效及账户注销清理。临时数据会自动清理；合成食物与营养值不代表真实模型质量或真实食品数据。
-
-前序失败证据继续保留：旧库回归测试的初版必填标题遗漏及约束顺序不准确均已修正；本轮 Docker 未启动时的集成失败、受限运行导致的浏览器失败也没有被覆盖。以上最终记录才是本次完成部署的通过依据。
-
-### 复验与备份命令
-
-需要 Python 3.11+、Node/npm、已安装前端依赖和 Docker。每次使用新的输出目录，脚本拒绝覆盖既有验收与备份目录。
-
-```powershell
-# 联合验收：真实 HTTP + 390px 移动端页面，仅创建并清理临时账户/餐食
-$env:PLAYWRIGHT_CHROMIUM_EXECUTABLE='C:\Program Files\Google\Chrome\Application\chrome.exe'
-python deploy/scripts/verify_local_deployment.py --browser --output deploy/release-results/my-next-check
-
-# 一致备份：短暂停止后端写入，完成后自动恢复；应同时停止外部写入者
-python deploy/scripts/recovery.py backup --project mealcheck-fullstack --env-file .env --compose docker-compose.yml --compose deploy/compose.local.yml --output deploy/recovery-results/my-next-backup
-
-# 隔离演练：恢复到新的无公开端口容器，核对表数量、图片引用和文件哈希
-python deploy/scripts/recovery.py drill --backup deploy/recovery-results/my-next-backup --output deploy/recovery-results/my-next-restore
-```
-
-### 本机启动问题与当前限制
-
-本轮 Docker Desktop 4.73.0 因两处遗留的 AF_UNIX 通信 socket 无法访问而启动失败，与 [Docker 官方仓库问题记录](https://github.com/docker/for-win/issues/15064) 中的错误一致。停止报错的 Desktop 后，仅将两处只含损坏 socket 的目录重命名留存，重新启动后引擎恢复；未重置 Docker 或删除数据卷。
-留存目录为 `%LOCALAPPDATA%/docker-secrets-engine.stale-20261011-2009` 和 `%LOCALAPPDATA%/Docker/run.stale-20261011-2011`。遇到类似错误应先确认日志与目录内容，不要直接套用删除或恢复出厂设置操作。
-
-- 当前未配置真实模型密钥和地址，**真实图片 AI 识别不可用**；真实模型质量、调用费用尚未验收。启用前在本地 `.env` 填写 `MEALCHECK_AI_API_KEY` 和 `MEALCHECK_AI_BASE_URL` 后重建后端容器，并单独验收。没有部署远程服务器、域名或 HTTPS。
-
-发布候选版本的源码、镜像及验收证据绑定流程见 [发布基线](deploy/RELEASE_BASELINE.md)。
-
-最近多轮改进已汇总到下方「近期改进」与「后端优化」，文档更新于 **2026-10-04**。内容对应当前工作区实现；本地验收、生产待验收事项和运行步骤分别见 [优化验收](deploy/OPTIMIZATION_VERIFICATION.md) 与 [运行说明](deploy/OPERATIONS_AND_EVALUATION.md)。
+The technical descriptions below cover source and configuration uploaded to this repository. Deployment and verification procedures are documented in [Release Baseline](deploy/RELEASE_BASELINE.md), [Optimization Verification](deploy/OPTIMIZATION_VERIFICATION.md), and [Operations and Evaluation](deploy/OPERATIONS_AND_EVALUATION.md).
 
 MealCheck is a meal image analysis system. Users can upload meal photos, get food recognition results, receive nutrition scores, and view RAG-based dietary suggestions. In addition, users can interact with an AI assistant powered by LangChain4j and RAG to receive personalized dietary advice. Administrators can manage users, meal records, and the RAG knowledge base.
 
@@ -260,7 +16,7 @@ MealCheck is a meal image analysis system. Users can upload meal photos, get foo
 - Backend: Spring Boot
 - Frontend: React + Vite
 - Database: PostgreSQL
-- Query optimization: [字段裁剪、游标分页、联表索引与监控](deploy/QUERY_OPTIMIZATION.md)
+- Query optimization: [Field projection, cursor pagination, join indexes, and monitoring](deploy/QUERY_OPTIMIZATION.md)
 - Vector Search: pgvector
 - Cache & Session: Redis
 - Image analysis messaging: RabbitMQ + PostgreSQL transactional outbox
@@ -279,7 +35,7 @@ MealCheck is a meal image analysis system. Users can upload meal photos, get foo
 - User registration, login, and JWT authentication
 - Meal image upload and food recognition
 - Meal structure scoring and risk tag analysis
-- Optional per-meal portion entry and rough nutrition estimates (disabled by default). Users supply weights and per-100g label/reference data; incomplete inputs never produce a whole-meal total. Estimates explicitly warn about inaccuracy and are kept separate from structure scores, trends, and reports. See [可选营养估算说明](deploy/OPTIONAL_NUTRITION.md).
+- Optional per-meal portion entry and rough nutrition estimates (disabled by default). Users supply weights and per-100g label/reference data; incomplete inputs never produce a whole-meal total. Estimates explicitly warn about inaccuracy and are kept separate from structure scores, trends, and reports. See [Optional nutrition estimates](deploy/OPTIONAL_NUTRITION.md).
 - RAG-based nutrition advice
 - AI Assistant: LangChain4j + RAG
   - Provides personalized diet Q&A based on user meal history and nutrition knowledge
@@ -302,55 +58,91 @@ MealCheck is a meal image analysis system. Users can upload meal photos, get foo
   - RAG knowledge creation, editing, deletion, search, rebuild, and hit statistics
   - AI assistant usage statistics, question trends, RAG reference ranking, and session analytics
 
-## 近期改进（截至 2026-10-02）
+## Meal Journal, Goals, Plans, and Report History
 
-### 用户端与管理端工作台
+### Meal records and behavioral goals
 
-- 用户端按「饮食分析、饮食记录、饮食趋势、我的周报、饮食目标」拆分页面；管理端按业务管理、智能服务、质量评测和系统管理分组导航。
-- 两端共用工作台布局，支持桌面侧栏折叠、移动端抽屉导航、键盘焦点循环、Esc 关闭和焦点返回。
-- 分析结果、餐食记录和完整指标通过详情抽屉展开；趋势、周报拥有独立页面。长建议、完整食物列表和周报正文仍可查看。
-- 管理端将助手评测拆为当前结果、评测历史、运行对比和样本候选库，将监控及助手统计按类别切换，减少单页信息堆叠。
-- 切换助手会话、筛选条件或管理页面时，取消或忽略过期请求；统一保留 HTTP 状态、错误码、请求 ID 和 `Retry-After`，登录失效时返回登录页。
+1. Meal records include the actual eating time, breakfast/lunch/dinner/snack type, manual entry, backdated entry, and editing. Trends, filters, and reports use the actual eating date; creation time is stored separately. Historical and image-based records temporarily use creation time until their eating time is confirmed.
+2. Behavioral goals support weekly recording days and daily distinct meal types, showing progress, remaining counts, and historical days that met the daily goal. Multiple records of the same meal type count once; records without a meal type do not count toward daily goals. Nutrition estimates remain disabled by default, explicitly warn about inaccuracy, and do not determine goal completion.
+3. Meal suggestions, complete assistant answers, and weekly-report suggestions can be saved as plans. Plans support completion, skipping, reopening, and changes to content, dates, and notes, while retaining the suggestion source and report period.
+4. Trends and reports include recording coverage, goal progress, and plan execution summaries. They distinguish "not recorded; status unknown" from an explicitly confirmed skipped meal, and identify insufficient samples and the actual statistical range.
+5. The assistant supports SSE streaming, cancellation while waiting, answer feedback, question types, and request IDs. Incomplete answers are marked cancelled or abnormal in history and cannot be saved as plans as though they were complete answers.
 
-### 图片分析异步化与用户纠错
+Entry points, statistical definitions, APIs, concurrency controls, and migrations are described in [Meal Journal](deploy/MEAL_JOURNAL.md). Nginx disables API response buffering so SSE content reaches the client immediately. V28 adds fields and four business tables while retaining existing meals and historical reports.
 
-- 图片分析已接入 RabbitMQ：任务与 Outbox 在同一事务入库，发布确认和不可路由检查保障补发，消费者默认每实例并发 8 条、prefetch 1，全站最多 32 个未完成任务；结果事务提交后确认消息。支持死信队列、执行租约恢复及重复投递隔离，部署与配置见 [RabbitMQ 运行说明](deploy/RABBITMQ.md)。
-- `POST /api/meals/analysis-requests` 接收图片、目标和 `Idempotency-Key`，新任务返回 `202 / PENDING`；`GET /api/meals/analysis-requests/{key}` 查询当前用户的进度和结果。兼容接口 `/api/meals/analyze` 保留同步客户端支持。
-- 图片经解码、尺寸校验和归一化后进入持久队列，独立 worker 领取任务；租约过期可恢复，尝试令牌隔离旧任务，成功后清除排队图片。
-- 同一请求标识绑定图片与目标，重复提交复用请求；更换内容返回冲突。成功结果与餐食、画像更新在同一事务发布，避免重复餐食记录。崩溃恢复仍可能再次调用模型，不承诺供应商只计费一次。
-- 前端自动查询任务，断网后有限重试；刷新页面保留未确认的请求标识并继续查询。失败后使用原图重试，无需因响应丢失而另建分析。
-- 用户可纠正食物名称、分类和漏识别项。纠错保存原始识别及修订记录，校验记录归属与版本，并重新计算评分和画像。
-- 评分仅使用置信度达标、去重后的结构化食物分类；场景描述和备注不直接影响分数。历史记录不会因规则升级被自动重算。
+### Cache, pagination, cancellation, and query behavior
 
-### 周报一致性与 Agent 执行追踪
+1. Successful data mutations notify goals, plans, trends, and the current report through a shared mechanism, immediately invalidating related caches. Failed requests retain existing caches. Report-job completion also refreshes the history list.
+2. Goals and plans return paginated results and totals, and the frontend supports page navigation. Goal edits query by ID and authenticated ownership directly, allowing older goals beyond the former 100-item limit to be edited; plan queries remain complete beyond 500 items.
+3. Saving a manually entered plan clears the form for consecutive creation. The duplicate-prevention button remains active after saving the same suggestion.
+4. Assistant deadlines include queue time. A request ID is available immediately during queuing, and queued requests can be cancelled. Cancelling a queued task releases queue capacity; a user can submit another request only after cleanup of a running task finishes.
+5. Coverage and goal progress reuse one date/meal-type aggregation, with prefix counts for historical days that met the goal. Query counts do not increase with the number of goals.
+6. Meal changes mark reports stale according to the affected dates while preserving historical report text. Plan, behavioral-goal, and note changes retain report text and update current progress in real time. Report history supports pagination and a read-only snapshot view; current reports no longer reuse snapshots from an older period.
+7. The backend separates goal, plan, and statistics services from query repositories, uses independent DTOs, explicit interface types, constructor injection, and input validation, and keeps SQL out of controllers.
 
-- 周报读取与生成分离：查询只读快照或规则摘要，显式提交后台任务才触发生成；页面刷新不会重复调用 AI。
-- 新增、删除或纠正餐食后，旧周报及相关任务失效；失效任务标为 `STALE`，同日可提交新任务。快照发布与任务成功共享事务，并校验尝试编号，阻止旧尝试覆盖新结果。
-- 周报详情按服务端 `periodStart` / `periodEnd` 独立分页加载餐食，不受历史列表的分页和筛选条件影响；食物项数量与包含该类食物的餐次数分开统计。
-- 管理端新增「Agent 协调」，保存周报运行及节点记录，可查看步骤状态、耗时、审查修订和降级情况；配套心跳、超时恢复与运行积压指标。
+See [Code Optimizations](deploy/CODE_OPTIMIZATIONS.md) for APIs, statistics, caches, task states, and limits. External clients must parse paginated `content` from goal/plan GET responses instead of expecting arrays. V29 adds historical-report staleness fields, V30 adds failed-task references, and V31 adds query indexes; the V31 `.sql.conf` file enables non-transactional concurrent index creation. Assistant task registration is limited to one backend instance; multiple instances require routing or shared task state.
 
-### 助手与识别质量评测
+### Optional nutrition estimates and legacy account deletion
 
-- 助手联合评测包含 **200 条合成用例**，提供快速 10 题、标准 50 题和完整 200 题模式，覆盖意图路由、工具调用和回答质量。评测复用生产 Function Calling 循环与工具定义，用户、餐食、目标和会话使用隔离的合成数据。
-- 工具名称、参数、状态、耗时、轮次与预期工具顺序均可追踪；缺少必需工具、调用禁用工具或违反轨迹约束会导致用例失败。
-- 支持独立裁判模型、质量维度与硬门禁、Skill 命中率及 Macro-F1。同模型自评最多得到 `NEEDS_REVIEW`，不会直接判为 `PASSED`。
-- 评测运行、逐题结果、人工复核与脱敏失败样本候选持久化；运行对比记录数据集版本及 SHA-256 指纹，模式或数据集不同会提示不可直接比较。候选样本审核通过后仍需整理和代码评审才能进入正式评测集。
-- 管理端「识别纠错评测」支持脱敏审核、独立标注期望评分、固定回归集导出、历史运行和失败案例比较。历史快照不依赖原餐食继续存在。
-- 新增独立图片识别评测工具，校验图片授权声明、人工标注声明及 SHA-256，输出 precision/recall、分类准确率、逐题错误、P95、成本和质量门槛结果。**评分回归、合成助手评测和独立图片识别评测分别衡量不同能力，不能互相代替。**
+- Portion and nutrition estimates require user-entered weights and per-100g reference values. The UI explicitly states that estimates are inaccurate and for reference only. Incomplete inputs do not produce whole-meal totals, and estimates do not affect structure scoring or report judgments. See [Optional Nutrition](deploy/OPTIONAL_NUTRITION.md).
+- Enabling estimates is disabled when a meal has no food items, with a prompt to correct recognition first. Existing invalid enabled settings can still be disabled and cleared.
+- When incomplete information is saved, the UI shows "Food items with complete estimate data: X / Y" to help users fill gaps. Unknown values remain null, and the whole-meal total remains hidden.
+- Legacy databases may retain Hibernate-created `NO ACTION` foreign keys alongside the V6 deletion constraints, blocking account deletion. V27 removes only duplicate restrictive constraints with the same table, columns, and referenced columns as the active V6 constraints; cascade constraints, audit nullification, other foreign keys, and business rows remain intact. The regression test upgrades to V5, introduces the legacy constraints, and then upgrades to V26 to reproduce constraint ordering. It verifies failure before V27, successful deletion afterward, cascading nutrition snapshots, and retained audit records.
+- The [mobile verification script](deploy/scripts/verify_local_browser.mjs) uses the real frontend container and API to check default-off behavior, inaccuracy notices, saving, reopening, disabling/clearing, and the empty-food entry point. It does not intercept or mock the API; screenshots use synthetic data from disposable accounts.
 
-详细评测口径见 [助手评测说明](backend/src/test/resources/evaluation/README.md)、[纠错与可靠性说明](deploy/RELIABILITY.md) 和 [视觉评测运行说明](deploy/OPERATIONS_AND_EVALUATION.md)。当前没有基于独立真实图片标注集的识别准确率结论。
+## Curated Knowledge Source
 
-### 运行、安全与发布验证
+The `v3-curated-100` source retains the original 26 topics and adds 74 independent entries covering staples and protein, vegetables and fruit, beverages and labels, eating-out budgets, food safety, and recording/review practices. Each entry includes public references; campus examples are application suggestions, not individual diagnoses or nutrition prescriptions.
 
-- 增加生产 Compose、生产配置校验、非 root 容器、健康检查及 Nginx 反向代理配置；前端使用 Docker DNS 动态解析后端地址，支持后端容器重建后的访问。
-- JWT 校验不可变用户 ID、用户名、有效期与账户状态；删除账户后的旧令牌不能登录同名新账户。普通用户可通过密码校验注销账户，并清理关联数据、图片及缓存。
-- 密码统一限制为 72 个 UTF-8 字节；同名并发注册返回 409，AI 预算和超时保留对应状态，错误响应及共享健康状态使用安全摘要。详细约定见 [密码与错误处理说明](backend/ERROR_CONTRACT.md)。
-- 增加分析失败率、耗时、队列积压、Token 与估算成本指标，以及 15 条告警规则；提供 Prometheus、Alertmanager 和 webhook 通知配置。
-- 提供数据库与图片一致备份、rclone crypt 加密复制、内容校验和隔离恢复演练，以及每日备份、每周恢复的 systemd 配置。
-- 增加失败图片、失败请求、失效周报任务和审计日志的保留策略；保留成功请求的幂等标识，避免清理后重复入库。
-- CI 已配置后端单元/HTTP 与真实 PostgreSQL 集成测试、前端测试与构建、Playwright 浏览器验收、告警校验、生产配置冒烟和恢复演练。
+The leading `<!-- mealcheck:independent-topics -->` marker preserves topic boundaries: short topics are not merged and unrelated overlap is not added between topics. An individual long topic still splits at the maximum token limit. At default settings, 100 topics produce 100 system knowledge chunks, with manually added administrator entries counted separately. Source synchronization replaces old system chunks while preserving `source=admin` entries. The detailed vector, chunk metadata, retrieval, and benchmark behavior is retained in Notes below.
 
-**已有验收范围：** [2026-10-01 优化验收记录](deploy/OPTIMIZATION_VERIFICATION.md)记录了 163 个后端单元/HTTP 测试、19 个 PostgreSQL 集成测试、12 个前端测试、7 条浏览器验收及 4 个 Python 测试通过。这是该轮历史结果，后续工作台拆页另有浏览器用例，当前测试数量应以重新执行结果为准。混合压测使用模型替身和小数据量，不能代表真实供应商容量。生产通知、异地存储、定时任务启用和正式发布仍需按运行说明验收。
+## Workspace and Request Behavior
+
+- User pages are separated into meal analysis, meal records, diet trends, weekly reports, and diet goals. Admin navigation groups business management, intelligent services, quality evaluation, and system management.
+- Both interfaces share a workspace layout with a collapsible desktop sidebar, mobile drawer navigation, keyboard focus trapping, Escape-to-close, and focus restoration.
+- Analysis results, meal records, and complete metrics open in detail drawers; trends and reports have separate pages. Long suggestions, complete food lists, and full report text remain accessible.
+- Admin assistant evaluation is separated into current results, evaluation history, run comparison, and candidate samples. Monitoring and assistant statistics switch by category to avoid stacking all information on one page.
+- Switching assistant conversations, filters, or admin pages cancels or ignores stale requests. HTTP status, error codes, request IDs, and `Retry-After` are retained consistently; expired authentication returns the user to login.
+
+## Asynchronous Image Analysis and User Corrections
+
+- RabbitMQ handles image analysis: tasks and outbox entries are persisted in the same transaction; publisher confirms and unroutable-message checks support redelivery. Consumers default to concurrency 8 per instance and prefetch 1, with at most 32 unfinished tasks globally. Messages are acknowledged after the result transaction commits. Dead-letter queues, execution-lease recovery, and duplicate-delivery isolation are supported. See [RabbitMQ Operations](deploy/RABBITMQ.md).
+- `POST /api/meals/analysis-requests` accepts an image, a goal, and `Idempotency-Key`; a new task returns `202 / PENDING`. `GET /api/meals/analysis-requests/{key}` returns the authenticated user's progress and result. `/api/meals/analyze` remains available for synchronous clients.
+- Images are decoded, dimension-checked, and normalized before entering the durable queue. Independent workers claim tasks; expired leases can be recovered, attempt tokens fence old executions, and queued images are removed after success.
+- A request identifier is bound to the image and goal. Repeated submissions reuse the request; changed content returns a conflict. Successful results, meal records, and profile updates are published in one transaction to avoid duplicate meals. Crash recovery may still call the model again, so provider billing is not guaranteed to occur exactly once.
+- The frontend polls task status with bounded retries after network failures. Refreshing preserves an unconfirmed request identifier and resumes polling. Failed requests can be retried with the original image, without creating another analysis merely because a response was lost.
+- Users can correct food names, categories, and missed items. Corrections retain original recognition and revision history, validate ownership and record version, and recalculate scores and profiles.
+- Scoring uses confident, deduplicated structured food categories only. Scene descriptions and notes do not directly affect scores. Historical records are not automatically rescored when rules change.
+
+## Weekly Report Consistency and Agent Traces
+
+- Reading and generating reports are separate: reads return a snapshot or rule-based summary, and only explicit background-job submission triggers generation. Refreshing the page does not repeat AI calls.
+- Adding, deleting, or correcting meals invalidates old reports and related jobs. Invalidated jobs become `STALE`, allowing a fresh job for the same date. Snapshot publication and successful job completion share a transaction and validate the attempt number to prevent old attempts from overwriting new results.
+- Report details load meals independently with pagination according to server-provided `periodStart` / `periodEnd`, unaffected by history-list pagination or filters. Food-item counts and counts of meals containing a category remain separate.
+- The admin Agent Coordination view persists report runs and node records, displaying step state, duration, review revisions, and fallback behavior. Heartbeats, timeout recovery, and run-backlog metrics accompany this view.
+
+## Assistant and Recognition Quality Evaluation
+
+- Combined assistant evaluation contains **200 synthetic cases**, with quick 10-question, standard 50-question, and full 200-question modes covering intent routing, tool calls, and answer quality. Evaluation reuses the production Function Calling loop and tool definitions; users, meals, goals, and conversations use isolated synthetic data.
+- Tool names, arguments, states, durations, rounds, and expected tool order are traceable. Missing required tools, invoking disabled tools, or violating trace constraints fails a case.
+- Evaluation supports an independent judge model, quality dimensions and hard gates, Skill hit rate, and Macro-F1. Self-evaluation by the same model can receive at most `NEEDS_REVIEW`, never an automatic `PASSED`.
+- Evaluation runs, per-case results, manual reviews, and anonymized failure candidates are persisted. Run comparison records the dataset version and SHA-256 fingerprint, warning when different modes or datasets cannot be compared directly. Approved candidates still require preparation and code review before entering the official evaluation set.
+- Admin Recognition Correction Evaluation supports anonymization review, independently annotated expected scores, fixed regression-set export, historical runs, and failure comparison. Historical snapshots remain available even after the original meal is deleted.
+- Independent image-recognition evaluation validates image-authorization declarations, human-annotation declarations, and SHA-256 hashes. It outputs precision/recall, category accuracy, per-case errors, P95, cost, and quality-gate results. **Scoring regression, synthetic assistant evaluation, and independent image-recognition evaluation measure different capabilities and cannot substitute for one another.**
+
+Detailed definitions are in [Assistant Evaluation](backend/src/test/resources/evaluation/README.md), [Corrections and Reliability](deploy/RELIABILITY.md), and [Vision Evaluation Operations](deploy/OPERATIONS_AND_EVALUATION.md). These tools do not establish recognition accuracy on an independently annotated real-image dataset.
+
+## Operations, Security, and Release Verification
+
+- Production Compose, production configuration validation, non-root containers, health checks, and Nginx reverse-proxy configuration are provided. The frontend uses Docker DNS to resolve backend addresses dynamically, supporting access after backend container recreation.
+- JWT validation checks immutable user ID, username, expiration, and account state. A deleted account's old token cannot authenticate a new account with the same username. Users can delete their own accounts after password verification, cleaning up associated data, images, and caches.
+- Passwords are limited to 72 UTF-8 bytes. Concurrent registration with the same username returns 409. AI budget and timeout errors retain the appropriate status; error responses and shared health states use safe summaries. See [Password and Error Contract](backend/ERROR_CONTRACT.md).
+- Metrics cover analysis failure rate, duration, queue backlog, tokens, and estimated cost. The initial monitoring configuration includes 15 alert rules with Prometheus, Alertmanager, and webhook notification configuration; budget and other extensions are detailed below.
+- Database/image-consistent backup, rclone crypt encrypted copying, content verification, isolated restore drills, and systemd configuration for daily backups and weekly restore drills are provided.
+- Retention policies cover failed images, failed requests, stale report jobs, and audit logs. Idempotency identifiers for successful requests are retained to prevent duplicate insertion after cleanup.
+- CI defines backend unit/HTTP and real PostgreSQL integration tests, frontend tests and builds, Playwright browser acceptance, alert validation, production configuration smoke tests, and restore drills.
+
+Published historical acceptance details are linked in [Optimization Verification](deploy/OPTIMIZATION_VERIFICATION.md). Test counts depend on the revision and must be taken from a fresh execution. Mixed load tests use model stubs and small datasets, so they do not establish real-provider capacity. Production notifications, remote storage, scheduled jobs, and release acceptance require the procedures in [Operations and Evaluation](deploy/OPERATIONS_AND_EVALUATION.md).
 
 ## Earlier Version Highlights
 
@@ -368,88 +160,142 @@ Compared with the previous project version, [MealCheck-agent2](https://github.co
   - Added more detailed user, meal record, RAG knowledge base, assistant usage, abnormal upload, and system operation statistics.
   - Improved pagination, filtering, deletion confirmation, visual analytics, RAG evaluation, and AI observability panels.
 
-## 后端优化（2026-10-04）
+## Backend Technical Details
 
-### AI 总超时、统一重试与每日预算
+### Shared AI deadlines, retries, and daily budgets
 
-图片分析和 AI 周报以异步任务为主流程，同步兼容接口保留。默认后端 AI 操作 120 秒、前端容器代理 150 秒、宿主机代理 165 秒、浏览器长请求 180 秒；普通查询、任务提交和轮询仍为 75 秒。自定义提高后端超时时需同步调整其他层，详见 [超时与部署说明](deploy/TIMEOUTS.md)。
+Image analysis and AI weekly reports primarily use asynchronous tasks, while synchronous compatibility endpoints remain available. Defaults are 120 seconds for backend AI operations, 150 seconds for the frontend container proxy, 165 seconds for the host proxy, and 180 seconds for long browser requests; ordinary queries, task submissions, and polling remain at 75 seconds. Raising the backend timeout requires corresponding changes in the other layers. See [Timeouts and Deployment](deploy/TIMEOUTS.md).
 
-- 视觉识别、饮食建议、普通助手、Function Calling、周报 Agent、Embedding、Reranker 和评测裁判共用 `AiHttpTransport`。LangChain4j 通过 HTTP 适配器复用这一入口，关闭 SDK 内部重试，避免叠加重试。Token 与估算成本指标也在此统一采集。
-- 单个外部调用连同所有重试、退避默认最多 60 秒；单餐分析、助手对话和周报生成共享默认 120 秒的操作截止时间。Function Calling 保留更短的 30 秒上限。每次 HTTP 请求按剩余时间设置超时，执行器排队不会获得额外时间，取消后不启动新尝试。上下文通过有界执行器和周报图节点显式传递。
-- 重试采用指数退避加随机抖动，支持供应商 `Retry-After` 的秒数和 HTTP 日期。供应商要求的等待超过剩余时间时直接结束操作。普通 4xx 不重试，429、5xx 和网络故障可在预算内重试。
-- PostgreSQL 在每次外部尝试前原子预留调用次数和估算费用，多实例并发共享额度。每用户默认每天 100 次**外部尝试**，重试、函数调用轮次和查询向量都分别计数；这不是 100 次提问或图片上传。后台索引和管理端联合评测使用独立的系统额度，默认每天 5,000 次；联合评测逐题重置操作超时。
-- 返回可信 usage 且配置了匹配模型、接口的输入/输出价格时，按 Token 用量结算；其他供应商、缺失 usage 或结果不确定的失败使用预留额保守记账。未发送的预留会释放；进程中断后，恢复任务回收超过 10 分钟的预留，已标记发送的尝试仍保留调用次数和估算费用。账本保留 30 天，注销用户时级联清理。
-- 费用单位与配置的每百万 Token 价格一致，默认不启用金额上限。金额预算属于**估算额度**：输入按请求长度保守预估，图片的 Base64 数据可能导致预留偏高；供应商实际计费、隐藏 Token 或缺失 usage 也可能与估算不同。不能将它当作供应商账单的硬上限。
-- `GET /api/profile/ai-budget` 只返回当前登录用户的当日调用次数、剩余额度、已结算费用、预留费用和重置时间。预算耗尽返回 `429 / AI_BUDGET_EXCEEDED` 与 `Retry-After`；预算存储故障拒绝新模型调用，返回 `503 / AI_BUDGET_UNAVAILABLE`。直接处理接口超时返回 `504 / AI_DEADLINE_EXCEEDED`；已有助手、周报和重排降级路径仍可返回本地结果。
+- Vision recognition, dietary suggestions, the ordinary assistant, Function Calling, weekly-report Agents, Embedding, Reranker, and evaluation judges share `AiHttpTransport`. LangChain4j reuses this entry point through an HTTP adapter, with SDK-internal retries disabled to avoid compounded retries. Tokens and estimated costs are collected centrally here.
+- A single external call, including all retries and backoff, has a default total limit of 60 seconds. Single-meal analysis, assistant conversations, and weekly-report generation share a default 120-second operation deadline. Function Calling retains the shorter 30-second limit. Each HTTP request uses the remaining time as its timeout; executor queuing does not grant additional time, and cancellation prevents new attempts. Context is explicitly propagated through bounded executors and report graph nodes.
+- Retries use exponential backoff with jitter and support provider `Retry-After` values expressed as seconds or HTTP dates. If the requested wait exceeds the remaining time, the operation ends immediately. Ordinary 4xx responses are not retried; 429, 5xx, and network failures can be retried within the budget.
+- PostgreSQL atomically reserves call counts and estimated costs before each external attempt, sharing quotas across instances. Each user defaults to 100 **external attempts** per day; retries, function-calling rounds, and query embeddings each count separately. This is not 100 questions or image uploads. Background indexing and admin combined evaluation use an independent system quota of 5,000 attempts per day by default; combined evaluation resets the operation timeout for each case.
+- Trusted usage with configured input/output prices matching the model and API is settled according to token usage. Other providers, missing usage, or failures with uncertain results are conservatively charged at the reserved amount. Unsent reservations are released. After process interruption, recovery reclaims reservations older than 10 minutes; attempts already marked sent retain call counts and estimated costs. Ledger entries are retained for 30 days and cascade-delete with the user account.
+- Cost units follow the configured per-million-token prices, and monetary limits are disabled by default. Monetary budgets are **estimated quotas**: input is conservatively estimated from request length, and image Base64 may inflate reservations; actual provider billing, hidden tokens, or missing usage can differ. These budgets are not a hard cap on provider invoices.
+- `GET /api/profile/ai-budget` returns only the authenticated user's daily call count, remaining quota, settled cost, reserved cost, and reset time. Exhaustion returns `429 / AI_BUDGET_EXCEEDED` with `Retry-After`; unavailable budget storage rejects new model calls with `503 / AI_BUDGET_UNAVAILABLE`. Direct-processing endpoint timeouts return `504 / AI_DEADLINE_EXCEEDED`; existing assistant, report, and reranking fallback paths may still return local results.
 
-常用配置（已加入两个环境示例与 Compose）：
+Common configuration settings are included in both environment examples and Compose:
 
-| 环境变量 | 默认值 | 用途 |
+| Environment variable | Default | Purpose |
 | --- | --- | --- |
-| `MEALCHECK_REMOTE_TOTAL_TIMEOUT_SECONDS` | `60` | 一次外部调用含重试的总上限 |
-| `MEALCHECK_AI_OPERATION_TIMEOUT_SECONDS` | `120` | 一次用户 AI 操作的共享上限 |
-| `MEALCHECK_AI_MAX_OUTPUT_TOKENS` | `2048` | 聊天模型输出上限 |
-| `MEALCHECK_AI_GLOBAL_DAILY_CALLS` | `100000` | 所有用户与系统任务共享的每日外部尝试上限 |
-| `MEALCHECK_AI_BUDGET_ENABLED` | `true` | 启用持久化预算 |
-| `MEALCHECK_AI_DAILY_CALLS` | `100` | 每用户每日外部尝试上限 |
-| `MEALCHECK_AI_SYSTEM_DAILY_CALLS` | `5000` | 后台与联合评测的每日尝试上限 |
-| `MEALCHECK_AI_DAILY_COST` | `0` | 每用户每日估算金额上限，0 表示不限制金额 |
-| `MEALCHECK_AI_SYSTEM_DAILY_COST` | `0` | 系统每日估算金额上限，0 表示不限制金额 |
-| `MEALCHECK_AI_RESERVATION_COST` | `0.02` | 每次尝试的最低预留额；未知成本按预留额结算 |
-| `MEALCHECK_AI_BUDGET_ZONE` | `Asia/Shanghai` | 每日额度重置时区 |
+| `MEALCHECK_REMOTE_TOTAL_TIMEOUT_SECONDS` | `60` | Total limit for one external call, including retries |
+| `MEALCHECK_AI_OPERATION_TIMEOUT_SECONDS` | `120` | Shared limit for one user AI operation |
+| `MEALCHECK_AI_MAX_OUTPUT_TOKENS` | `2048` | Chat-model output limit |
+| `MEALCHECK_AI_GLOBAL_DAILY_CALLS` | `100000` | Daily external-attempt limit shared by all users and system tasks |
+| `MEALCHECK_AI_BUDGET_ENABLED` | `true` | Enable persistent budgets |
+| `MEALCHECK_AI_DAILY_CALLS` | `100` | External-attempt limit per user per day |
+| `MEALCHECK_AI_SYSTEM_DAILY_CALLS` | `5000` | Daily attempt limit for background work and combined evaluation |
+| `MEALCHECK_AI_DAILY_COST` | `0` | Estimated monetary limit per user per day; 0 disables the monetary limit |
+| `MEALCHECK_AI_SYSTEM_DAILY_COST` | `0` | Daily estimated monetary limit for system work; 0 disables the monetary limit |
+| `MEALCHECK_AI_RESERVATION_COST` | `0.02` | Minimum reservation per attempt; unknown costs settle at the reserved amount |
+| `MEALCHECK_AI_BUDGET_ZONE` | `Asia/Shanghai` | Timezone for daily quota resets |
 
-价格仍通过 `MEALCHECK_AI_INPUT_COST_PER_MILLION` / `MEALCHECK_AI_OUTPUT_COST_PER_MILLION` 配置。两项总超时允许 1–300 秒，输出上限允许 1–32,768 Token；无效预算配置会阻止启动。部署时执行 Flyway **V21**，创建预算账本及查询索引；关闭预算只跳过账本限制，仍保留超时、重试和输出上限。
+Prices are configured through `MEALCHECK_AI_INPUT_COST_PER_MILLION` / `MEALCHECK_AI_OUTPUT_COST_PER_MILLION`. Both total timeouts accept 1–300 seconds; output limits accept 1–32,768 tokens. Invalid budget configuration prevents startup. Flyway **V21** creates the budget ledger and query indexes. Disabling budgets skips ledger limits only; deadlines, retries, and output limits remain active.
 
-### 长会话游标分页
+### Cursor pagination for long conversations
 
-- `GET /api/assistant/conversations/{id}?limit=40` 默认只返回最近 40 条消息，`limit` 范围为 1–100。消息在页内按时间、ID 升序展示，响应新增 `hasMore` 和 `nextBefore`。
-- 有历史页时，将服务端返回的 `nextBefore` 作为下一次请求的 `before` 参数。游标绑定会话，以 `(createdAt,id)` 为边界；相同时间的消息以及翻页期间新增的消息不会造成重复或漏页。每次最多读取 `limit+1` 条，不加载完整历史或统计全量页数。游标不能跨会话复用，所有查询仍验证当前用户归属。
-- 聊天页面增加「加载更早的消息」，向前追加历史后保留滚动位置；新建或切换会话会取消旧历史请求并忽略迟到响应。模型记忆仍使用独立的受限窗口与摘要，不受页面加载历史数量影响。
-- 原详情地址保留，但 `messages` 现在表示**当前页**；使用该接口的其他客户端需要按分页字段读取更早的消息。
+- `GET /api/assistant/conversations/{id}?limit=40` returns only the latest 40 messages by default, with `limit` from 1–100. Messages within a page are displayed in ascending time/ID order; the response includes `hasMore` and `nextBefore`.
+- When earlier pages exist, pass the returned `nextBefore` as the next request's `before` parameter. The cursor is bound to the conversation and uses `(createdAt,id)` as its boundary. Equal timestamps and newly inserted messages during pagination do not cause duplicate or missing pages. Each read fetches at most `limit+1` rows, without loading the full history or counting all pages. Cursors cannot be reused across conversations; every query still validates authenticated ownership.
+- The chat page offers "Load earlier messages" and preserves scroll position after prepending history. Creating or switching conversations cancels old history requests and ignores late responses. Model memory uses a separate bounded window and summaries, independent of the amount of history loaded by the page.
+- The original detail URL remains, but `messages` now means the **current page**. Other clients must use the pagination fields to retrieve older messages.
 
-### 趋势查询使用聚合与字段投影
+### Aggregate trend queries and field projection
 
-- 餐次数、平均分、高低分计数、首末评分和每日均分由 PostgreSQL 聚合；食物与风险统计只读取两项 JSON 字段，不加载完整 `MealRecord`、长建议、原始识别结果或用户实体。
-- 保留 7–90 天范围、评分阈值、四舍五入和现有响应字段。三项查询在同一个只读数据库快照中执行，避免并发新增餐食导致计数与图表不一致。按日统计将底层 UTC 时间转回服务端时区，保持原实体读取的日期口径；相同时间的首末评分用 ID 稳定排序。筛选始终限制当前用户。
-- V21 增加用户/时间/ID 与会话/时间/ID 索引。目前使用实时查询，没有增加每日汇总表。集成测试会在 2,000 条含长建议的隔离数据上保存 `EXPLAIN (ANALYZE,BUFFERS)` 对比到 `backend/target/trend-query-plans.txt`；小样本的 SQL 耗时差异不构成线上性能结论，当前主要收益是减少返回数据和 Java 实体加载。上线后再根据真实慢查询和负载决定是否汇总。
+- PostgreSQL aggregates meal counts, average scores, high/low-score counts, first/last scores, and daily averages. Food and risk statistics read only their two JSON fields, without loading full `MealRecord` entities, long suggestions, original recognition results, or user entities.
+- The 7–90-day range, score thresholds, rounding, and existing response fields are retained. Three queries run in the same read-only database snapshot to keep counts and charts consistent during concurrent meal insertion. Daily statistics convert underlying UTC timestamps back to the server timezone to preserve the original entity-read date definitions; equal timestamps use ID ordering for stable first/last scores. Filters always restrict results to the authenticated user.
+- V21 adds user/time/ID and conversation/time/ID indexes. Queries remain live, without a daily-summary table. Integration tests save `EXPLAIN (ANALYZE,BUFFERS)` comparisons for 2,000 isolated records with long suggestions to `backend/target/trend-query-plans.txt`. Small-sample SQL timing differences do not establish production performance; the primary benefit is reduced returned data and Java entity loading. Whether to add summaries depends on actual production slow queries and load.
 
-### 助手长期记忆迁移与可恢复重建
+### Long-term assistant memory migrations and resumable rebuilds
 
-- Flyway **V22** 管理长期记忆结构。记忆原文与不同版本的向量分开保存；升级已有 `vector` / `halfvec` 表时保留原文、记录 ID 和旧向量。应用启动不再执行动态 DDL、清空记忆或同步调用模型。
-- Embedding 模型、维度或存储精度变化后，后台创建持久化重建任务，每批处理 5 条。任务使用 3 分钟租约和执行令牌，过期后可由其他实例接管；已完成且原文哈希仍匹配的向量继续复用。累计 5 次执行失败后暂停，管理员可修复配置或依赖后重试。
-- 全部当前记忆准备完成后，在数据库事务中原子切换版本。重建期间、版本不匹配或查询 Embedding 失败时，助手回退到当前用户最近的有限条原文；新增记忆先保存原文，向量调用失败也不会丢失文本。
-- 管理员接口：`POST /api/admin/assistant-memory/rebuilds` 发起或复用任务，`GET /api/admin/assistant-memory/rebuilds/{id}` 查看进度，`POST /api/admin/assistant-memory/rebuilds/{id}/retry` 重试。响应只包含任务信息，不返回用户记忆正文。多实例应使用一致的模型、维度与压缩配置；不同目标版本的重建不能同时启动。
-- PostgreSQL 集成测试覆盖旧 `halfvec(3)` 表实际升级、维度/模型/精度变更、断点恢复、过期执行令牌、新增记忆阻止提前切换、切换回滚及用户隔离。
+- Flyway **V22** manages long-term memory structure. Original text and vectors for different versions are stored separately. Upgrading existing `vector` / `halfvec` tables preserves text, record IDs, and old vectors. Application startup no longer performs dynamic DDL, clears memory, or synchronously calls models for this memory structure.
+- Changes to the embedding model, dimension, or storage precision create persistent background rebuild jobs, processing five entries per batch. Jobs use a three-minute lease and execution token, allowing another instance to take over expired work. Completed vectors whose source-text hash still matches are reused. After five cumulative execution failures, the job pauses; administrators can fix configuration or dependencies and retry.
+- Once all current memory is ready, the active version switches atomically within a database transaction. During rebuilds, version mismatches, or query-embedding failures, the assistant falls back to a bounded set of the current user's recent original text. New memories store original text first, so failed vector calls do not lose it.
+- Admin endpoints: `POST /api/admin/assistant-memory/rebuilds` starts or reuses a job; `GET /api/admin/assistant-memory/rebuilds/{id}` reads progress; `POST /api/admin/assistant-memory/rebuilds/{id}/retry` retries it. Responses contain job metadata only, never user memory text. Multiple instances should use the same model, dimension, and precision configuration; rebuilds targeting different versions cannot start simultaneously.
+- PostgreSQL integration tests cover actual upgrades of legacy `halfvec(3)` tables, dimension/model/precision changes, checkpoint recovery, expired execution tokens, new memory preventing premature activation, activation rollback, and user isolation.
 
-### AI 额度提示、管理监控与告警
+### User quota displays, admin monitoring, and alerts
 
-- 上传页与助手页显示剩余外部调用次数、重置时间，并在操作后更新，支持手动刷新。启用金额上限时同时显示已用与预留的估算费用。页面明确提示一次操作可能有多次调用，重试也消耗额度；最终准入仍由后端原子预留决定。
-- 异步图片任务失败响应增加允许公开的 `errorCode`：额度耗尽提示等待重置，预算存储故障提示稍后重试。内部异常不直接传给用户；额度错误不会清除登录会话。
-- 管理端 AI 监控新增预算卡片，`GET /api/admin/ai-budget` 返回预算启用状态、恢复监控健康度、未结算/超时预留、最老预留秒数及拒绝/延迟结算/存储故障计数。预留统计来自共享数据库；累计计数属于当前实例，跨实例应在 Prometheus 汇总。
-- 新增 5 条预算告警：拒绝量异常、结算延迟、超时预留积压、恢复监控失效、预算存储不可用。关闭预算时监控健康告警不误报；规则文件共 25 条并通过 `promtool` 校验。规则阈值应按实际调用量调整，通知接收端仍按部署监控配置接入。
+- Upload and assistant pages show remaining external-call counts and reset time, update after operations, and support manual refresh. When monetary limits are enabled, used and reserved estimated costs are also displayed. The UI states that one operation may make multiple calls and retries consume quota; final admission remains controlled by atomic backend reservation.
+- Failed asynchronous image tasks expose a permitted public `errorCode`: exhausted quota asks the user to wait for reset, while unavailable budget storage asks for a later retry. Internal exceptions are not sent directly to users; quota errors do not clear login sessions.
+- Admin AI monitoring includes budget cards. `GET /api/admin/ai-budget` returns budget enablement, recovery-monitor health, unsettled/expired reservations, the age of the oldest reservation in seconds, and rejection/delayed-settlement/storage-failure counts. Reservation statistics come from the shared database; cumulative counters belong to the current instance and should be aggregated across instances in Prometheus.
+- Five budget alerts cover unusual rejection counts, settlement delays, expired reservation backlog, failed recovery monitoring, and unavailable budget storage. Disabling budgets avoids false monitoring-health alerts. The corresponding rule set contains 25 rules and can be checked with `promtool`. Thresholds should reflect actual call volume; notification receivers use the deployment monitoring configuration.
 
-### 大数据量、图片资源与故障验收
+### Large datasets, image resources, and dependency recovery checks
 
-- 新增独立的 [容量验收环境](deploy/compose.acceptance.yml) 和 [验收脚本](loadtests/capacity_acceptance.py)，只使用固定的本地隔离 Compose 项目、专用账号及模型替身；执行数据写入和依赖中断前验证项目标签与替身配置。完整命令见 [压测说明](loadtests/README.md#隔离容量与故障验收2026-10-04)。CI 已接入脚本、清理与证据归档，远程 CI 结果需以实际运行记录为准。
-- 默认准备 5 个账号、50,000 条含长建议的餐食、10,000 条聊天消息与 4096×4096 图片。验证趋势查询、连续两页历史、正常上传、慢模型、429 后恢复、解码并发饱和，以及 Redis/PostgreSQL 中断后使用原 JWT 恢复访问。
-- 采集 k6 成功/失败/拒绝/超时、CPU、容器内存、JVM 堆、连接池获取时间、队列等待直方图、HTTP 重试和估算费用；另保存实际趋势 SQL 的 `EXPLAIN (ANALYZE,BUFFERS)`。连接池获取时间不是 SQL 执行耗时；队列 P95 是直方图桶上界，资源峰值来自采样。
-- 本地短时结果（2 CPU、512 MiB JVM 堆、768 MiB 容器）：趋势 P95 **898 ms**，历史分页 P95 **95 ms**；约 7.36 MiB 图片正常分析 P95 **3.22 秒**，每次模型请求延迟 1 秒时 **4.83 秒**。临时前两次模型请求返回 429 后，记录 2 次重试，5 个任务全部成功；5 张并发上传时 2 张成功、3 张被入口明确拒绝，已接受任务没有执行失败、超时或不确定结果。两项依赖故障均返回 503，恢复后原 JWT 可继续使用。
-- 验收也暴露了边界：查询冷启动最大耗时约 **3.47 秒**，突发阶段容器内存采样达到约 **741.5 MiB / 768 MiB**。最初持续周期性 429 的替身使 1 个任务在有限重试后失败，原始证据保留；这与暂时故障后恢复的用例分别记录。短时合成数据和模型替身不能证明线上最大容量、持续稳定性或真实识别效果，正式资源配置仍需要持续负载验证。
+- The separate [capacity acceptance environment](deploy/compose.acceptance.yml) and [acceptance script](loadtests/capacity_acceptance.py) use only a fixed isolated local Compose project, dedicated accounts, and model stubs. Project labels and stub configuration are verified before data writes or dependency interruption. Full commands are in the [load-testing guide](loadtests/README.md). CI defines execution, cleanup, and evidence archiving; remote CI results must be taken from actual run records.
+- Defaults prepare five accounts, 50,000 meals with long suggestions, 10,000 chat messages, and 4096×4096 images. Checks cover trend queries, two consecutive history pages, normal uploads, slow models, recovery after 429 responses, saturated decode concurrency, and access recovery with the original JWT after Redis/PostgreSQL interruption.
+- Collection includes k6 success/failure/rejection/timeout counts, CPU, container memory, JVM heap, connection-pool acquisition time, queue-wait histograms, HTTP retries, and estimated costs, plus actual trend SQL `EXPLAIN (ANALYZE,BUFFERS)` output. Connection acquisition time is not SQL execution time; queue P95 is a histogram bucket upper bound, and resource peaks come from sampling.
+- Temporary 429 responses followed by recovery are tested separately from sustained periodic 429 responses that can exhaust finite retries. Accepted-task success, entrance rejection, execution failure, timeout, and uncertain results are recorded independently. Both dependency outages are expected to return 503, with the original JWT usable after recovery.
+- Query cold-start latency and sampled container-memory peaks are recorded as capacity boundaries. Short synthetic runs and model stubs do not establish maximum production capacity, sustained stability, or real recognition quality; production resource sizing requires sustained-load verification.
 
-### 调度、代理与任务可靠性
+### Scheduler, proxy, and task reliability
 
-本轮同时保留并完善了此前六项优化，详情见 [后端可靠性与资源隔离](deploy/BACKEND_OPTIMIZATIONS.md)：
+Six related optimizations are detailed in [Backend Reliability and Resource Isolation](deploy/BACKEND_OPTIMIZATIONS.md):
 
-- 后台调度器与助手计时线程分离；耗时维护任务使用有界线程池，同类未完成任务合并。
-- 两层 Nginx 清除并重建转发头，仅信任明确的代理地址，提供真实代理链与伪造头回归测试。
-- 图片解码前执行入口限流和幂等检查；重复请求跳过解码，默认最多并发解码两张图片。
-- 周报领取数量匹配线程池容量；调度拒绝归还重试次数、延后执行并轮换令牌，阻止旧尝试更新任务。
-- JWT 无效返回 401；Redis、数据库认证故障返回 503 并记录指标，避免前端清除用户会话。
-- 知识库固定结构通过 Flyway V20 管理；向量重建分批保存进度、支持恢复与管理员重试，全部完成后原子切换。
+- Background schedulers are separated from assistant timer threads; expensive maintenance uses bounded pools, and duplicate unfinished work of the same type is coalesced.
+- Both Nginx layers clear and reconstruct forwarding headers and trust only explicit proxy addresses. Real proxy-chain and forged-header regression tests are provided.
+- Upload admission limiting and idempotency checks occur before image decoding. Repeated requests skip decoding; by default, at most two images decode concurrently.
+- Weekly-report claims match executor capacity. Scheduling rejection returns the attempt count, delays execution, and rotates the token to prevent old attempts from updating the job.
+- Invalid JWTs return 401; Redis/database authentication dependency failures return 503 with metrics, preventing frontend session removal.
+- Flyway V20 manages the fixed knowledge schema. Vector rebuilds persist batch progress, support recovery and admin retry, and activate atomically after completion.
 
-验证方式：后端运行 `mvn verify -Pintegration`（需要 Docker）；前端运行 `npm test`、`npm run build` 与 `npx playwright test e2e/assistant-history.spec.js`。真实 HTTP 测试覆盖总超时、Retry-After、SDK 共用传输层和预算拒绝；PostgreSQL 测试覆盖并发额度、结算幂等、崩溃恢复、游标边界和趋势日期口径。
+Verification: run `mvn verify -Pintegration` for the backend with Docker available; run `npm test`, `npm run build`, and `npx playwright test e2e/assistant-history.spec.js` for the frontend. Real HTTP tests cover total deadlines, `Retry-After`, shared SDK transport, and budget rejection. PostgreSQL tests cover concurrent quotas, idempotent settlement, crash recovery, cursor boundaries, and trend date definitions.
 
-最新本地验证：**204 个后端单元/HTTP 测试、16 个前端测试及生产构建通过**。本轮完整 PostgreSQL 集成验证通过 49 项；最后补充 HTTP 指标与权限回归后，另重跑记忆/RabbitMQ 相关 11 项通过。浏览器既有 39 项通过，新增额度验收在修正测试拦截数据后单独重跑通过，共覆盖 40 项。隔离容量与依赖恢复用例通过，25 条告警规则校验通过；Python 脚本另有安全边界和真实 k6 替身契约验证。以上均为本地结果。
+## Local Deployment, Upgrade, and Recovery Procedures
+
+The [local Compose overlay](deploy/compose.local.yml) binds ports to `127.0.0.1` and requires Compose 2.24.4+ for `!override`. Database, cache, and messaging development settings are intended for local use. Keep `.env` untracked; the business timezone is `Asia/Shanghai` and timestamps are stored in `UTC`. Configure `MEALCHECK_LOCAL_BACKEND_IMAGE` and `MEALCHECK_LOCAL_FRONTEND_IMAGE` with distinct image tags for the intended version.
+
+Run from the repository root:
+
+```powershell
+# Build a new version using distinct image tags configured in .env.
+docker compose --env-file .env -p mealcheck-fullstack -f docker-compose.yml -f deploy/compose.local.yml --profile fullstack build backend frontend
+
+# Start the backend first and wait for dependencies and migrations.
+docker compose --env-file .env -p mealcheck-fullstack -f docker-compose.yml -f deploy/compose.local.yml --profile fullstack up -d --no-build --wait --wait-timeout 120 backend
+
+# Start the frontend.
+docker compose --env-file .env -p mealcheck-fullstack -f docker-compose.yml -f deploy/compose.local.yml --profile fullstack up -d --no-build --wait --wait-timeout 60 frontend
+
+# Inspect status and backend logs.
+docker compose --env-file .env -p mealcheck-fullstack -f docker-compose.yml -f deploy/compose.local.yml --profile fullstack ps
+docker compose --env-file .env -p mealcheck-fullstack -f docker-compose.yml -f deploy/compose.local.yml logs --tail 100 backend
+```
+
+Before an upgrade, back up data, build and record distinct new image tags, verify content IDs, and then start services. Do not overwrite verified tags. Keep the project name unchanged to reuse existing volumes, and do not use `down -v` to delete persistent data.
+
+Python 3.11+, Node/npm, installed frontend dependencies, and Docker are required for deployment verification and recovery. Use new output directories for every run; scripts refuse to overwrite existing verification and backup directories. Backup and verification output can contain private data and stays Git-ignored.
+
+```powershell
+# Consistent pre-upgrade database and image backup, followed by an isolated restore drill.
+python deploy/scripts/recovery.py backup --project mealcheck-fullstack --env-file .env --compose docker-compose.yml --compose deploy/compose.local.yml --output deploy/recovery-results/your-upgrade/pre-deployment
+python deploy/scripts/recovery.py drill --backup deploy/recovery-results/your-upgrade/pre-deployment --output deploy/recovery-results/your-upgrade/pre-deployment-restored
+
+# Choose new image tags and update the two MEALCHECK_LOCAL_*_IMAGE values in .env.
+docker build -t mealcheck-local-backend:your-new-version -f backend/Dockerfile backend
+docker build -t mealcheck-local-frontend:your-new-version -f frontend/Dockerfile frontend
+docker compose -p mealcheck-fullstack --env-file .env -f docker-compose.yml -f deploy/compose.local.yml up -d --no-build --wait --wait-timeout 180 backend frontend
+
+# Real HTTP and 390px mobile-page verification with disposable accounts and meals.
+$env:PLAYWRIGHT_CHROMIUM_EXECUTABLE='C:\Program Files\Google\Chrome\Application\chrome.exe'
+python deploy/scripts/verify_local_deployment.py --browser --output deploy/release-results/my-next-check
+
+# Consistent backup briefly stops backend writes and resumes them afterward.
+# Stop external writers as well.
+python deploy/scripts/recovery.py backup --project mealcheck-fullstack --env-file .env --compose docker-compose.yml --compose deploy/compose.local.yml --output deploy/recovery-results/my-next-backup
+
+# Restore into new containers without public ports; verify table counts, image references, and file hashes.
+python deploy/scripts/recovery.py drill --backup deploy/recovery-results/my-next-backup --output deploy/recovery-results/my-next-restore
+
+# Verify the curated RAG source locally without real embedding or reranking keys.
+python deploy/scripts/verify_rag_knowledge.py --output deploy/release-results/your-rag-verification
+```
+
+Flyway runs automatically at backend startup. V23–V27 cover global AI admission, persistent assistant evaluation tasks, image references and weekly-report dispatch, optional nutrition snapshots, and legacy duplicate foreign-key cleanup. If migration fails, inspect logs rather than deleting migration history. Reusing an old image with an upgraded database is not a complete rollback; restore a consistent pre-upgrade database and image backup when data rollback is required. Preserved images alone do not establish compatibility with the new database.
+
+Deployment verification checks Nginx pages and assets, Redis CAPTCHA, registration and authentication, database/cache/upload-directory health, budget reads, admin API isolation, image reads, default-off estimates, portion-only saves without totals, negative-value rejection, source validation, complete conversion, explicit zeros, version conflicts, estimate invalidation after real corrections, and account-deletion cleanup. Disposable data is cleaned up automatically; synthetic foods and nutrition values do not represent model quality or real food data. The deployment verifier checks that real AI keys are absent before invoking local assistant fallback, preventing model charges.
+
+Image recognition requires real provider configuration. Set `MEALCHECK_AI_API_KEY` and `MEALCHECK_AI_BASE_URL` in the local `.env`, recreate the backend container, and verify real model quality and cost separately. Hash embeddings and local rule-based assistant replies do not constitute real-model acceptance.
 
 ## Project Structure
 
@@ -743,15 +589,15 @@ Browser tests use deterministic API fixtures. Real PostgreSQL tests validate per
 | [Load testing](loadtests/README.md) | k6 scenarios and interpretation of results |
 | [MCP demonstration](deploy/MCP_DEMO.md) | Authenticated initialize/list/call example |
 
-图片分析容量测试使用 `loadtests/analysis-capacity.js`，支持固定新增任务速率、突发提交、独立幂等键、轮询到任务结束及端到端 P95/P99；结果同时核对失败、拒绝、超时、未完成和丢弃迭代。测试说明包含模拟模型、批量账号准备和并发 2/4/8 的对比步骤。模拟测试不代表真实模型供应商容量。
+Image-analysis capacity tests use `loadtests/analysis-capacity.js`, supporting a fixed new-task arrival rate, burst submissions, independent idempotency keys, polling until task completion, and end-to-end P95/P99. Results also check failures, rejections, timeouts, unfinished work, and dropped iterations. The guide includes model stubs, bulk account preparation, and comparisons at concurrency 2/4/8. Stub-based tests do not establish real model-provider capacity.
 
 Flyway migrations now include V7–V18 for evaluation history, coordination tracking, snapshot fencing, corrections, durable analysis and the RabbitMQ outbox. V16 changes the weekly-job unique index; V17 adds the async queue and evaluation snapshots; V18 adds transactional dispatch and backfills unfinished image tasks. Before rolling back, stop new submissions, handle pending tasks, and follow the compatible-version or consistent-backup restore procedure in the guides.
 
 ## Pictures
 
-最新后端代码完善及 V25 迁移说明见 [后端代码完善（2026-10-10）](deploy/BACKEND_IMPROVEMENTS.md)，包含任务重试、图片存储、分批清理、交互 AI 名额预留、周报断点续跑和全站额度监控。
+Backend implementation details and the V25 migration are documented in [Backend Improvements (2026-10-10)](deploy/BACKEND_IMPROVEMENTS.md), covering task retries, image storage, batched cleanup, reserved interactive AI permits, resumable weekly-report scheduling, and global quota monitoring.
 
-The images below show earlier interfaces. The current workspace navigation and page separation are described in the recent improvements above; these images are not acceptance evidence for the latest UI.
+The images below show earlier interfaces. The current workspace navigation and page separation are described in Workspace and Request Behavior above; these images are not acceptance evidence for the latest UI.
 
 ### user 
 
