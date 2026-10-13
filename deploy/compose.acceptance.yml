@@ -22,7 +22,13 @@ services:
     image: eclipse-temurin:17-jre
     user: "10001:10001"
     command: [java, -Xms128m, -Xmx512m, -jar, /app/app.jar]
-    volumes: ["../backend/target/mealcheck-backend-0.3.0.jar:/app/app.jar:ro"]
+    volumes:
+      - type: bind
+        source: ../backend/target/mealcheck-backend.jar
+        target: /app/app.jar
+        read_only: true
+        bind:
+          create_host_path: false
     tmpfs: [/tmp]
     ports: ["127.0.0.1:18081:8080", "127.0.0.1:19091:9091"]
     mem_limit: 768m

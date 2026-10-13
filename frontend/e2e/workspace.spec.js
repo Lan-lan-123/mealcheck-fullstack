@@ -9,7 +9,7 @@ async function openWorkspace(page, role = 'USER') {
     const path = new URL(route.request().url()).pathname
     if (!path.startsWith('/api/')) return route.continue()
     const value = path === '/api/profile/goals/current' ? { goalType: 'balanced' }
-      : path === '/api/meals/trends' ? { totalMeals: 0, dailyScores: [], commonFoods: [], commonRisks: [] }
+      : path === '/api/meals/trends' ? null
       : path === '/api/assistant/conversations' ? [] : null
     return route.fulfill({ contentType: 'application/json', body: JSON.stringify(value) })
   })
@@ -28,7 +28,9 @@ test('desktop user sidebar preserves drafts and remembers its collapsed state', 
   await page.getByRole('button', { name: '饮食目标', exact: true }).click()
   await page.getByRole('textbox', { name: '目标说明', exact: true }).fill('每天认真吃早餐')
   await page.getByRole('button', { name: '饮食趋势', exact: true }).click()
-  await expect(page.getByRole('heading', { name: '饮食趋势', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '饮食趋势', exact: true })).toHaveCount(2)
+  await expect(page.getByRole('heading', { name: '饮食趋势', level: 1, exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '饮食趋势', level: 2, exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: '饮食趋势', exact: true })).toHaveAttribute('aria-current', 'page')
   await page.getByRole('button', { name: '饮食记录', exact: true }).click()
   await expect(page.getByRole('heading', { name: '最近饮食记录' })).toBeVisible()
@@ -63,7 +65,7 @@ for (const role of ['USER', 'ADMIN']) {
     await openButton.click()
     await drawer.getByRole('button', { name: role === 'ADMIN' ? '用户管理' : '饮食记录', exact: true }).click()
     await expect(drawer).not.toBeVisible()
-    await expect(page.getByRole('heading', { name: role === 'ADMIN' ? '用户管理' : '最近饮食记录', exact: true }).first()).toBeVisible()
+    await expect(page.getByRole('heading', { name: role === 'ADMIN' ? '用户管理' : '最近饮食记录', level: role === 'ADMIN' ? 1 : 2, exact: true })).toBeVisible()
     await expectNoPageOverflow(page)
     await page.screenshot({ path: `test-results/workspace-${role.toLowerCase()}-mobile.png`, fullPage: true })
     await openButton.click()
@@ -75,7 +77,7 @@ for (const role of ['USER', 'ADMIN']) {
   test(`${role} workspace fits desktop, tablet and narrow mobile screens`, async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 1000 })
     await openWorkspace(page, role)
-    await expect(page.getByRole('heading', { name: role === 'ADMIN' ? '系统概览' : '饮食分析', exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { name: role === 'ADMIN' ? '系统概览' : '饮食分析', level: 1, exact: true })).toBeVisible()
     await page.screenshot({ path: `test-results/workspace-${role.toLowerCase()}-overview.png`, fullPage: true })
     for (const width of [1440, 1024, 768, 390, 360]) {
       await page.setViewportSize({ width, height: 900 })

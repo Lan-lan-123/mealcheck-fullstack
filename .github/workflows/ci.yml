@@ -40,8 +40,14 @@ jobs:
       - name: Isolated capacity and dependency recovery acceptance
         run: |
           python -m pip install Pillow
+          test -s backend/target/mealcheck-backend.jar
           docker compose -p mealcheck-capacity-acceptance -f deploy/compose.acceptance.yml up -d --wait --wait-timeout 90
           python loadtests/capacity_acceptance.py --output loadtests/results/ci-acceptance --fault-checks
+      - name: Collect isolated capacity logs
+        if: always()
+        run: |
+          mkdir -p loadtests/results/ci-acceptance
+          docker compose -p mealcheck-capacity-acceptance -f deploy/compose.acceptance.yml logs --no-color --tail 300 > loadtests/results/ci-acceptance/compose.log 2>&1
       - name: Cleanup isolated capacity stack
         if: always()
         run: docker compose -p mealcheck-capacity-acceptance -f deploy/compose.acceptance.yml down --volumes
@@ -74,6 +80,7 @@ jobs:
             loadtests/results/**/acceptance.json
             loadtests/results/**/query-plans.txt
             loadtests/results/**/*-metrics.prom
+            loadtests/results/**/compose.log
             frontend/playwright-report/
             deploy/recovery-results/**/verification.json
       - name: Validate production compose file
