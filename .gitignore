@@ -18,3 +18,8 @@ loadtests/results/
 *.log
 .DS_Store
 .idea/
+
+# Local learning documents
+*.doc
+*.docx
+/docx/
