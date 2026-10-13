@@ -78,6 +78,8 @@ jobs:
             backend/target/failsafe-reports/
             backend/target/trend-query-plans.txt
             loadtests/results/**/acceptance.json
+            loadtests/results/**/queries.json
+            loadtests/results/**/queries.log
             loadtests/results/**/query-plans.txt
             loadtests/results/**/*-metrics.prom
             loadtests/results/**/compose.log

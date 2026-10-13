@@ -185,6 +185,11 @@ def run_k6(name, script, settings, output, backend):
     # Exact SQL totals complement sampled application/container metrics.
     report['databaseTasks'] = json.loads(sql("SELECT json_build_object('pending',count(*) FILTER(WHERE status='PENDING'),'processing',count(*) FILTER(WHERE status='PROCESSING'),'failed',count(*) FILTER(WHERE status='FAILED')) FROM meal_analysis_requests;"))
     report['passed'] = bool(report['passed']) and result.returncode == 0
+    if not report['passed']:
+        print(json.dumps({'case': name, 'passed': False, 'exitCode': result.returncode,
+                         'failedThresholds': report.get('failedThresholds', []),
+                         'trendMs': report.get('trendMs'), 'historyMs': report.get('historyMs'),
+                         'checks': report.get('checks')}, ensure_ascii=False), flush=True)
     return report
 
 

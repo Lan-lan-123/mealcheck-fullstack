@@ -290,12 +290,15 @@ public class MealAnalysisService {
         LocalDateTime since = AppTime.startOfDay(AppTime.today().minusDays(safeDays-1L));
         var summary = mealRecordRepository.trendSummary(userId, since);
         int averageScore = summary.getAverage() == null ? 0 : (int) Math.round(summary.getAverage());
-        List<String> foods = new ArrayList<>(), risks = new ArrayList<>();
+        Map<String, Integer> foods = new LinkedHashMap<>(), risks = new LinkedHashMap<>();
+        // Parse each distinct fact pair once; its weight preserves counts across repeated meals.
         for (var fact : mealRecordRepository.trendFacts(userId, since)) {
+            int occurrences = Math.toIntExact(fact.getOccurrences());
             List<FoodItem> parsedFoods = Jsons.fromJson(objectMapper, fact.getFoods(), new TypeReference<List<FoodItem>>() {});
-            if (parsedFoods != null) parsedFoods.stream().filter(Objects::nonNull).map(FoodItem::getName).forEach(foods::add);
+            if (parsedFoods != null) parsedFoods.stream().filter(Objects::nonNull)
+                    .map(FoodItem::getName).forEach(name -> addMetric(foods, name, occurrences));
             List<String> parsedRisks = Jsons.fromJson(objectMapper, fact.getRisks(), new TypeReference<List<String>>() {});
-            if (parsedRisks != null) risks.addAll(parsedRisks);
+            if (parsedRisks != null) parsedRisks.forEach(name -> addMetric(risks, name, occurrences));
         }
         var daily = mealRecordRepository.trendDailyScores(userId, since, AppTime.businessZone().getId()).stream()
                 .map(row -> new UserMealTrendResponse.MetricItem(row.getDay().toString(), (int) Math.round(row.getAverage())))
@@ -399,12 +402,11 @@ public class MealAnalysisService {
         return response;
     }
 
-    private List<UserMealTrendResponse.MetricItem> topMetrics(List<String> values, int limit) {
-        Map<String, Integer> counts = new LinkedHashMap<>();
-        values.stream()
-                .filter(value -> value != null && !value.isBlank())
-                .forEach(value -> counts.merge(value.trim(), 1, Integer::sum));
+    private void addMetric(Map<String, Integer> counts, String value, int occurrences) {
+        if (value != null && !value.isBlank()) counts.merge(value.trim(), occurrences, Integer::sum);
+    }
 
+    private List<UserMealTrendResponse.MetricItem> topMetrics(Map<String, Integer> counts, int limit) {
         return counts.entrySet()
                 .stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder()))

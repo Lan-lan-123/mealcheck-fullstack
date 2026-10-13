@@ -21,7 +21,7 @@ public interface MealRecordRepository extends JpaRepository<MealRecord, Long>, J
         Integer getFirstScore(); Integer getLastScore();
     }
     interface DailyScore { java.time.LocalDate getDay(); Double getAverage(); }
-    interface TrendFacts { String getFoods(); String getRisks(); }
+    interface TrendFacts { String getFoods(); String getRisks(); Long getOccurrences(); }
 
     @Query(value = """
             WITH selected AS (
@@ -47,8 +47,13 @@ public interface MealRecordRepository extends JpaRepository<MealRecord, Long>, J
     }
 
     @Query(value = """
-            SELECT detected_foods_json AS foods,risk_tags_json AS risks FROM meal_records
-            WHERE user_id=:userId AND coalesce(occurred_at,created_at)>=:since ORDER BY coalesce(occurred_at,created_at),id
+            WITH selected AS (
+              SELECT detected_foods_json,risk_tags_json,
+                row_number() OVER (ORDER BY coalesce(occurred_at,created_at),id) AS position
+              FROM meal_records WHERE user_id=:userId AND coalesce(occurred_at,created_at)>=:since
+            )
+            SELECT detected_foods_json AS foods,risk_tags_json AS risks,count(*) AS occurrences
+            FROM selected GROUP BY detected_foods_json,risk_tags_json ORDER BY min(position)
             """, nativeQuery = true)
     List<TrendFacts> trendFacts(long userId, LocalDateTime since);
 

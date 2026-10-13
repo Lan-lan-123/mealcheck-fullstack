@@ -198,9 +198,31 @@ class BackendQueryAndBudgetDatabaseIntegrationTest {
         assertThat(summary.getFirstScore()).isEqualTo(0);assertThat(summary.getLastScore()).isEqualTo(100);
         var daily=meals.trendDailyScores(user.getId(),since,ZoneId.systemDefault().getId());
         assertThat(daily).hasSize(2);assertThat(daily.get(0).getAverage()).isCloseTo(149.0/3,within(0.00001));
-        assertThat(meals.trendFacts(user.getId(),since)).hasSize(4).allSatisfy(f->{assertThat(f.getFoods()).contains("rice");assertThat(f.getRisks()).contains("risk");});
+        assertThat(meals.trendFacts(user.getId(),since)).singleElement().satisfies(f->{
+            assertThat(f.getFoods()).contains("rice");assertThat(f.getRisks()).contains("risk");
+            assertThat(f.getOccurrences()).isEqualTo(4);
+        });
         assertThat(meals.trendSummary(other.getId(),since.plusYears(1)).getTotal()).isZero();
         assertThat(meals.trendSummary(other.getId(),since.plusYears(1)).getAverage()).isNull();
+    }
+    @Test void repeatedTrendFactsAreWeightedAndKeepFirstMealOrder() {
+        var since=LocalDateTime.of(2026,10,1,0,0);
+        // Insert out of time order: ties in metric counts must follow first meal time, then id.
+        jdbc.update("""
+                INSERT INTO meal_records(user_id,created_at,score,detected_foods_json,risk_tags_json)
+                VALUES (?,?,70,'[{"name":"later"}]','["risk-later"]'),
+                       (?,?,70,'[{"name":"earlier"}]','["risk-earlier"]'),
+                       (?,?,70,'[{"name":"tie"}]','[]')
+                """,user.getId(),since.plusDays(1),user.getId(),since,user.getId(),since);
+        jdbc.update("""
+                INSERT INTO meal_records(user_id,created_at,score,detected_foods_json,risk_tags_json)
+                SELECT ?,?,70,'[{"name":"earlier"}]','["risk-earlier"]' FROM generate_series(1,10000)
+                """,user.getId(),since.plusDays(2));
+        meal(other,70,since);meal(user,70,since.minusSeconds(1));
+        var facts=meals.trendFacts(user.getId(),since);
+        assertThat(facts).extracting(MealRecordRepository.TrendFacts::getFoods)
+                .containsExactly("[{\"name\":\"earlier\"}]","[{\"name\":\"tie\"}]","[{\"name\":\"later\"}]");
+        assertThat(facts).extracting(MealRecordRepository.TrendFacts::getOccurrences).containsExactly(10001L,1L,1L);
     }
     @Test void capturesQueryPlansWithLargeAdviceExcluded() throws Exception {
         jdbc.update("""

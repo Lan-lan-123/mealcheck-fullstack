@@ -124,6 +124,7 @@ class ApiSecurityAndMealFlowTest {
         when(summary.getFirstScore()).thenReturn(69);when(summary.getLastScore()).thenReturn(80);
         when(meals.trendSummary(eq(10L),any())).thenReturn(summary);
         var facts=mock(MealRecordRepository.TrendFacts.class);
+        when(facts.getOccurrences()).thenReturn(3L);
         when(facts.getFoods()).thenReturn("[{\"name\":\"米饭\"},{\"name\":\"鸡蛋\"}]");when(facts.getRisks()).thenReturn("[\"高油\"]");
         when(meals.trendFacts(eq(10L),any())).thenReturn(List.of(facts));
         var daily=mock(MealRecordRepository.DailyScore.class);when(daily.getDay()).thenReturn(java.time.LocalDate.of(2026,10,4));when(daily.getAverage()).thenReturn(74.5);
