@@ -266,8 +266,10 @@ def main():
             verification.run('browser-install', [executable('npx'), 'playwright', 'install', '--with-deps', 'chromium'], frontend)
         verification.run('browser-acceptance', [npm, 'run', 'test:e2e'], frontend)
         shutil.copytree(frontend / 'playwright-report', verification.output / 'reports/browser')
+        verification.env['MEALCHECK_RUN_RECOVERY_DB_TESTS'] = '1'
         for name, directory, pattern in [('operations-contracts', 'tools', 'test_operations.py'),
                                           ('capacity-contracts', 'loadtests', 'test_capacity_acceptance.py'),
+                                          ('recovery-contracts', 'tools', 'test_recovery*.py'),
                                           ('model-stub-contracts', 'loadtests', 'test_model_stub.py')]:
             verification.run(name, [sys.executable, '-m', 'unittest', 'discover', '-s', directory, '-p', pattern, '-v'])
         nginx = shutil.which('nginx')

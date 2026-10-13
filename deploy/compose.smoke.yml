@@ -12,3 +12,9 @@ services:
       MEALCHECK_KNOWLEDGE_RERANK_ENABLED: "false"
   frontend:
     image: mealcheck-reliability-smoke-frontend
+
+# Disposable smoke stacks may coexist with retained production/capacity bridges.
+networks:
+  edge:
+    ipam:
+      config: !reset []

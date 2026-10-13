@@ -23,6 +23,9 @@ jobs:
           node-version: "22"
           cache: npm
           cache-dependency-path: frontend/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Test backend
         working-directory: backend
         run: mvn --batch-mode --no-transfer-progress verify -Pintegration
@@ -36,6 +39,10 @@ jobs:
         run: python -m unittest discover -s tools -p test_operations.py -v
       - name: Capacity acceptance contracts
         run: python -m unittest discover -s loadtests -p test_capacity_acceptance.py -v
+      - name: Recovery storage and migration contracts
+        env:
+          MEALCHECK_RUN_RECOVERY_DB_TESTS: "1"
+        run: python -m unittest discover -s tools -p 'test_recovery*.py' -v
       - uses: grafana/setup-k6-action@v1
       - name: Isolated capacity and dependency recovery acceptance
         run: |
@@ -59,13 +66,22 @@ jobs:
       - name: Validate analysis and backup alerts
         run: docker run --rm --entrypoint promtool -v "$PWD/deploy/monitoring:/rules:ro" prom/prometheus:v3.5.0 check rules /rules/mealcheck-alerts.yml
       - name: Isolated database and image restore drill
-        run: python deploy/scripts/recovery.py self-test --migrations backend/src/main/resources/db/migration --output deploy/recovery-results/ci-self-test
+        shell: bash
+        run: |
+          mkdir -p deploy/recovery-results
+          python deploy/scripts/recovery.py self-test --migrations backend/src/main/resources/db/migration --output deploy/recovery-results/ci-self-test 2>&1 | tee deploy/recovery-results/ci-self-test.log
       - name: Production profile startup and HTTP smoke
+        shell: bash
         run: |
           docker compose -p mealcheck-reliability-smoke --env-file deploy/smoke.env -f docker-compose.prod.yml -f deploy/compose.smoke.yml up --build -d --wait --wait-timeout 180
-          python deploy/scripts/smoke.py --base-url http://127.0.0.1:18080
-          python deploy/scripts/recovery.py backup --project mealcheck-reliability-smoke --compose docker-compose.prod.yml --compose deploy/compose.smoke.yml --env-file deploy/smoke.env --output deploy/recovery-results/ci-stack-backup
-          python deploy/scripts/recovery.py drill --backup deploy/recovery-results/ci-stack-backup --output deploy/recovery-results/ci-stack-restored
+          python deploy/scripts/smoke.py --base-url http://127.0.0.1:18080 2>&1 | tee deploy/recovery-results/ci-http-smoke.log
+          python deploy/scripts/recovery.py backup --project mealcheck-reliability-smoke --compose docker-compose.prod.yml --compose deploy/compose.smoke.yml --env-file deploy/smoke.env --output deploy/recovery-results/ci-stack-backup 2>&1 | tee deploy/recovery-results/ci-stack-backup.log
+          python deploy/scripts/recovery.py drill --backup deploy/recovery-results/ci-stack-backup --output deploy/recovery-results/ci-stack-restored 2>&1 | tee deploy/recovery-results/ci-stack-restored.log
+      - name: Collect production smoke logs
+        if: always()
+        run: |
+          mkdir -p deploy/recovery-results
+          docker compose -p mealcheck-reliability-smoke --env-file deploy/smoke.env -f docker-compose.prod.yml -f deploy/compose.smoke.yml logs --no-color --tail 300 > deploy/recovery-results/ci-smoke-compose.log 2>&1
       - name: Cleanup isolated smoke stack
         if: always()
         run: docker compose -p mealcheck-reliability-smoke --env-file deploy/smoke.env -f docker-compose.prod.yml -f deploy/compose.smoke.yml down --volumes
@@ -84,6 +100,7 @@ jobs:
             loadtests/results/**/*-metrics.prom
             loadtests/results/**/compose.log
             frontend/playwright-report/
+            deploy/recovery-results/*.log
             deploy/recovery-results/**/verification.json
       - name: Validate production compose file
         env:

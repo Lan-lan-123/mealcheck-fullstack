@@ -73,6 +73,8 @@ npm run test:e2e
 
 CI 还会启动独立的生产配置栈，验证网页、注册、鉴权、餐食/周报查询、账号注销及联合备份恢复。冒烟不调用 AI。执行独立测试栈：
 
+冒烟覆盖文件让 Docker 自动分配临时边缘网络的网段，以便与已有生产或容量测试网络共存。正式生产配置中的固定网段和代理信任地址保持不变。
+
 ```bash
 docker compose -p mealcheck-reliability-smoke --env-file deploy/smoke.env -f docker-compose.prod.yml -f deploy/compose.smoke.yml up --build -d --wait --wait-timeout 180
 python deploy/scripts/smoke.py --base-url http://127.0.0.1:18080
@@ -100,6 +102,10 @@ python deploy/scripts/recovery.py drill --backup /private/backups/mealcheck/new-
 ```bash
 python deploy/scripts/recovery.py self-test --migrations backend/src/main/resources/db/migration --output deploy/recovery-results/new-self-test
 ```
+
+自检使用 psql 的脚本解析器执行迁移，保留 `DO` 块和函数体中的分号。迁移默认在单个事务中执行；同名 `.sql.conf` 中的 `executeInTransaction=false` 会启用逐条提交，兼容 V31 的并发索引。任意语句失败都会停止执行，并报告对应迁移文件。
+
+CI 和候选发布验证还会运行 `tools/test_recovery*.py`，通过临时 PostgreSQL 验证并发索引、完整事务回滚、非事务脚本遇错停止和外部图片备份边界。数据库用例由 `MEALCHECK_RUN_RECOVERY_DB_TESTS=1` 显式启用。
 
 备份包含私人数据，应加密后上传到私有异地存储。RDS、OSS、多应用实例及外部写入者需要相应的一致性备份方案。Redis 缓存不作为餐食数据恢复来源。恢复演练成功说明备份可还原，不表示已经完成正式环境切换；正式切换需检查迁移、配置、外部连接和应用功能。
 

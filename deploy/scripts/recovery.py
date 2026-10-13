@@ -40,6 +40,29 @@ def query(container, sql):
                 "-U", user, "-d", database, "-At", "-c", sql]).decode().strip()
 
 
+def apply_migration(container, migration):
+    # psql parses complete statements, including dollar-quoted DO/function bodies.
+    # Match Flyway's transaction setting instead of sending a whole file with -c.
+    transactional = True
+    configuration = migration.with_name(migration.name + ".conf")
+    if configuration.exists():
+        for line in configuration.read_text(encoding="utf-8").splitlines():
+            key, separator, value = line.strip().partition("=")
+            if separator and key.strip() == "executeInTransaction":
+                if value.strip() not in ("true", "false"):
+                    raise ValueError(f"Invalid executeInTransaction setting in {configuration.name}")
+                transactional = value.strip() == "true"
+    user, database = database_env(container)
+    command = ["docker", "exec", "-i", container, "psql", "-X", "-v", "ON_ERROR_STOP=1",
+               "-U", user, "-d", database, "-At", "-f", "-"]
+    if transactional:
+        command.append("--single-transaction")
+    try:
+        run(command, data=migration.read_bytes())
+    except RuntimeError as error:
+        raise RuntimeError(f"Migration {migration.name} failed: {error}") from error
+
+
 def digest(path):
     with path.open("rb") as stream:
         return hashlib.file_digest(stream, "sha256").hexdigest()
@@ -207,7 +230,8 @@ def self_test(args):
             migrations = sorted(args.migrations.glob("V*__*.sql"), key=lambda path: int(path.name.split("__")[0][1:]))
             if not migrations: raise RuntimeError("No migration files found")
             for migration in migrations:
-                query(container, migration.read_text(encoding="utf-8"))
+                print(f"Applying {migration.name}", flush=True)
+                apply_migration(container, migration)
             query(container, "INSERT INTO users(username,password_hash) VALUES ('restore-fixture','test-only-hash'); "
                              "INSERT INTO meal_records(user_id,score,stored_image_path,detected_foods_json,original_foods_json) "
                              "VALUES (1,90,'user-1/meal.jpg','[]','[]'); "
