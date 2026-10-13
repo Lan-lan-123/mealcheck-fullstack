@@ -1,0 +1,7 @@
+# Overlay for the existing isolated capacity-acceptance project only.
+services:
+  backend:
+    image: ${MEALCHECK_RELEASE_BACKEND_IMAGE:?Set candidate backend image}
+    volumes: !reset []
+    entrypoint: [java, -Xms128m, -Xmx512m, -jar, /app/app.jar]
+    command: !reset []

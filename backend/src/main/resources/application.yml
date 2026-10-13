@@ -2,6 +2,20 @@ server:
   port: ${SERVER_PORT:8080}
 
 spring:
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:mealcheck}
+    password: ${SPRING_RABBITMQ_PASSWORD:mealcheck-rabbit-dev}
+    virtual-host: ${SPRING_RABBITMQ_VIRTUAL_HOST:/}
+    connection-timeout: 3s
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
+    listener:
+      simple:
+        missing-queues-fatal: false
   application:
     name: mealcheck-backend
   datasource:
@@ -10,6 +24,7 @@ spring:
     password: ${SPRING_DATASOURCE_PASSWORD:mealcheck123}
     driver-class-name: org.postgresql.Driver
     hikari:
+      connection-init-sql: "SET TIME ZONE '${MEALCHECK_TIMESTAMP_STORAGE_ZONE:UTC}'"
       maximum-pool-size: ${MEALCHECK_DB_MAX_POOL_SIZE:12}
       minimum-idle: ${MEALCHECK_DB_MIN_IDLE:2}
       connection-timeout: ${MEALCHECK_DB_CONNECTION_TIMEOUT_MILLIS:2000}
@@ -34,10 +49,13 @@ spring:
             timeout: ${MEALCHECK_DB_QUERY_TIMEOUT_MILLIS:3000}
       hibernate:
         format_sql: true
-        jdbc:
-          time_zone: UTC
+        # LocalDateTime stores the explicit AppTime wall-clock value in TIMESTAMP.
+        # A JDBC Calendar override would shift that value when the JVM zone differs.
   flyway:
     enabled: true
+    # Concurrent index migrations require session advisory locks instead of transaction locks.
+    postgresql:
+      transactional-lock: false
     baseline-on-migrate: true
     baseline-version: 0
     locations: classpath:db/migration
@@ -45,15 +63,37 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 12MB
+      file-size-threshold: 0
+      location: ${MEALCHECK_UPLOAD_TMP_DIR:${java.io.tmpdir}/mealcheck-multipart}
 
 mealcheck:
+  failure-management:
+    max-manual-retries: ${MEALCHECK_FAILURE_MAX_MANUAL_RETRIES:3}
+    dead-letter-archive-enabled: ${MEALCHECK_FAILURE_DEAD_LETTER_ARCHIVE_ENABLED:true}
+    metrics-ms: ${MEALCHECK_FAILURE_METRICS_MS:15000}
   jwt:
     secret: ${MEALCHECK_JWT_SECRET:mealcheck-jwt-secret-change-me-please-32chars}
     expiration-minutes: ${MEALCHECK_JWT_EXPIRATION_MINUTES:10080}
   cors:
     allowed-origins: ${MEALCHECK_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
   upload-dir: ${MEALCHECK_UPLOAD_DIR:./uploads}
+  storage:
+    provider: ${MEALCHECK_IMAGE_STORAGE_PROVIDER:local}
+    oss:
+      endpoint: ${MEALCHECK_OSS_ENDPOINT:}
+      region: ${MEALCHECK_OSS_REGION:}
+      bucket: ${MEALCHECK_OSS_BUCKET:}
+      prefix: ${MEALCHECK_OSS_PREFIX:mealcheck/}
+      access-key-id: ${MEALCHECK_OSS_ACCESS_KEY_ID:}
+      access-key-secret: ${MEALCHECK_OSS_ACCESS_KEY_SECRET:}
+  ai-pricing:
+    currency: ${MEALCHECK_AI_COST_CURRENCY:CNY}
+    catalog-json: ${MEALCHECK_AI_PRICE_CATALOG_JSON:[]}
   upload:
+    max-concurrent-decodes: ${MEALCHECK_UPLOAD_MAX_CONCURRENT_DECODES:2}
+    max-pending-decodes: ${MEALCHECK_UPLOAD_MAX_PENDING_DECODES:20}
+    decode-wait-millis: ${MEALCHECK_UPLOAD_DECODE_WAIT_MILLIS:8000}
+    temporary-max-bytes: ${MEALCHECK_UPLOAD_TEMPORARY_MAX_BYTES:1073741824}
     max-input-bytes: ${MEALCHECK_UPLOAD_MAX_INPUT_BYTES:10485760}
     max-width: ${MEALCHECK_UPLOAD_MAX_WIDTH:4096}
     max-height: ${MEALCHECK_UPLOAD_MAX_HEIGHT:4096}
@@ -63,8 +103,27 @@ mealcheck:
     orphan-cleanup-enabled: ${MEALCHECK_UPLOAD_ORPHAN_CLEANUP_ENABLED:true}
     orphan-cleanup-cron: ${MEALCHECK_UPLOAD_ORPHAN_CLEANUP_CRON:0 30 3 * * *}
     orphan-grace-hours: ${MEALCHECK_UPLOAD_ORPHAN_GRACE_HOURS:24}
+  analysis:
+    max-outstanding: ${MEALCHECK_ANALYSIS_MAX_OUTSTANDING:32}
+    max-outstanding-per-user: ${MEALCHECK_ANALYSIS_MAX_OUTSTANDING_PER_USER:2}
+    dispatch: ${MEALCHECK_ANALYSIS_DISPATCH:rabbitmq}
+    concurrency: ${MEALCHECK_ANALYSIS_CONCURRENCY:8}
+    lease-seconds: ${MEALCHECK_ANALYSIS_LEASE_SECONDS:90}
+    outbox-poll-ms: ${MEALCHECK_ANALYSIS_OUTBOX_POLL_MS:1000}
+    worker-enabled: ${MEALCHECK_ANALYSIS_WORKER_ENABLED:true}
+    poll-ms: ${MEALCHECK_ANALYSIS_POLL_MS:1000}
+    metrics-ms: ${MEALCHECK_ANALYSIS_METRICS_MS:15000}
+  retention:
+    enabled: ${MEALCHECK_RETENTION_ENABLED:true}
+    resume-ms: ${MEALCHECK_RETENTION_RESUME_MS:60000}
+    failed-image-days: ${MEALCHECK_RETENTION_FAILED_IMAGE_DAYS:7}
+    failed-request-days: ${MEALCHECK_RETENTION_FAILED_REQUEST_DAYS:90}
+    stale-report-days: ${MEALCHECK_RETENTION_STALE_REPORT_DAYS:30}
+    audit-days: ${MEALCHECK_RETENTION_AUDIT_DAYS:180}
   ai:
-    api-key: ${MEALCHECK_AI_API_KEY:sk-1bbe3ff11b46460f9b3b55040bd38cff}
+    input-cost-per-million: ${MEALCHECK_AI_INPUT_COST_PER_MILLION:0}
+    output-cost-per-million: ${MEALCHECK_AI_OUTPUT_COST_PER_MILLION:0}
+    api-key: ${MEALCHECK_AI_API_KEY:}
     base-url: ${MEALCHECK_AI_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
     model: ${MEALCHECK_AI_MODEL:qwen3-vl-30b-a3b-instruct}
     timeout-seconds: ${MEALCHECK_AI_TIMEOUT_SECONDS:60}
@@ -93,13 +152,38 @@ mealcheck:
     chunk-max-tokens: ${MEALCHECK_KNOWLEDGE_CHUNK_MAX_TOKENS:500}
     chunk-overlap-tokens: ${MEALCHECK_KNOWLEDGE_CHUNK_OVERLAP_TOKENS:50}
     splitter-strategy: ${MEALCHECK_KNOWLEDGE_SPLITTER_STRATEGY:recursive-markdown}
-    source-version: ${MEALCHECK_KNOWLEDGE_SOURCE_VERSION:v2-recursive}
+    source-version: ${MEALCHECK_KNOWLEDGE_SOURCE_VERSION:v3-curated-100}
     benchmark-regression-tolerance: ${MEALCHECK_KNOWLEDGE_BENCHMARK_REGRESSION_TOLERANCE:0.02}
   upload-guard:
     non-food-window-minutes: ${MEALCHECK_NON_FOOD_WINDOW_MINUTES:5}
     non-food-limit: ${MEALCHECK_NON_FOOD_LIMIT:10}
     non-food-block-minutes: ${MEALCHECK_NON_FOOD_BLOCK_MINUTES:60}
   rate-limit:
+    upload-ingress:
+      capacity: ${MEALCHECK_RATE_LIMIT_UPLOAD_INGRESS_CAPACITY:20}
+      refill-tokens: 1
+      refill-period-seconds: 1
+      request-cost: 1
+    weekly-report:
+      capacity: ${MEALCHECK_RATE_LIMIT_WEEKLY_REPORT_CAPACITY:3}
+      refill-tokens: 1
+      refill-period-seconds: ${MEALCHECK_RATE_LIMIT_WEEKLY_REPORT_REFILL_PERIOD_SECONDS:3600}
+      request-cost: 1
+    login:
+      capacity: ${MEALCHECK_RATE_LIMIT_LOGIN_CAPACITY:5}
+      refill-tokens: ${MEALCHECK_RATE_LIMIT_LOGIN_REFILL_TOKENS:1}
+      refill-period-seconds: ${MEALCHECK_RATE_LIMIT_LOGIN_REFILL_PERIOD_SECONDS:60}
+      request-cost: 1
+    registration:
+      capacity: ${MEALCHECK_RATE_LIMIT_REGISTRATION_CAPACITY:3}
+      refill-tokens: ${MEALCHECK_RATE_LIMIT_REGISTRATION_REFILL_TOKENS:1}
+      refill-period-seconds: ${MEALCHECK_RATE_LIMIT_REGISTRATION_REFILL_PERIOD_SECONDS:300}
+      request-cost: 1
+    captcha:
+      capacity: ${MEALCHECK_RATE_LIMIT_CAPTCHA_CAPACITY:10}
+      refill-tokens: ${MEALCHECK_RATE_LIMIT_CAPTCHA_REFILL_TOKENS:1}
+      refill-period-seconds: ${MEALCHECK_RATE_LIMIT_CAPTCHA_REFILL_PERIOD_SECONDS:10}
+      request-cost: 1
     assistant:
       capacity: ${MEALCHECK_RATE_LIMIT_ASSISTANT_CAPACITY:5}
       refill-tokens: ${MEALCHECK_RATE_LIMIT_ASSISTANT_REFILL_TOKENS:1}
@@ -113,6 +197,8 @@ mealcheck:
   weekly-report:
     cron: ${MEALCHECK_WEEKLY_REPORT_CRON:0 0 6 * * MON}
     batch-size: ${MEALCHECK_WEEKLY_REPORT_BATCH_SIZE:100}
+    active-days: ${MEALCHECK_WEEKLY_REPORT_ACTIVE_DAYS:30}
+    enqueue-resume-ms: ${MEALCHECK_WEEKLY_REPORT_ENQUEUE_RESUME_MS:60000}
     executor-core-pool-size: ${MEALCHECK_WEEKLY_REPORT_EXECUTOR_CORE_POOL_SIZE:2}
     executor-max-pool-size: ${MEALCHECK_WEEKLY_REPORT_EXECUTOR_MAX_POOL_SIZE:4}
     executor-queue-capacity: ${MEALCHECK_WEEKLY_REPORT_EXECUTOR_QUEUE_CAPACITY:20}
@@ -127,6 +213,8 @@ mealcheck:
     max-review-revisions: ${MEALCHECK_WEEKLY_REPORT_MAX_REVIEW_REVISIONS:1}
     rag-limit: ${MEALCHECK_WEEKLY_REPORT_RAG_LIMIT:5}
     agent-timeout-seconds: ${MEALCHECK_WEEKLY_REPORT_AGENT_TIMEOUT_SECONDS:30}
+    coordination-heartbeat-millis: ${MEALCHECK_WEEKLY_REPORT_COORDINATION_HEARTBEAT_MILLIS:30000}
+    coordination-stale-seconds: ${MEALCHECK_WEEKLY_REPORT_COORDINATION_STALE_SECONDS:900}
   mcp:
     enabled: ${MEALCHECK_MCP_ENABLED:true}
     endpoint: ${MEALCHECK_MCP_ENDPOINT:/mcp}
@@ -155,12 +243,35 @@ mealcheck:
     background-queue-capacity: ${MEALCHECK_ASSISTANT_BACKGROUND_QUEUE_CAPACITY:16}
     timeout-millis: ${MEALCHECK_ASSISTANT_TOOLS_TIMEOUT_MILLIS:2500}
     total-timeout-millis: ${MEALCHECK_ASSISTANT_TOOLS_TOTAL_TIMEOUT_MILLIS:3000}
+  assistant-evaluation:
+    lease-seconds: ${MEALCHECK_ASSISTANT_EVALUATION_LEASE_SECONDS:90}
+    poll-ms: ${MEALCHECK_ASSISTANT_EVALUATION_POLL_MS:2000}
+    judge-api-key: ${MEALCHECK_ASSISTANT_EVALUATION_JUDGE_API_KEY:}
+    judge-base-url: ${MEALCHECK_ASSISTANT_EVALUATION_JUDGE_BASE_URL:}
+    judge-model: ${MEALCHECK_ASSISTANT_EVALUATION_JUDGE_MODEL:}
+    judge-timeout-seconds: ${MEALCHECK_ASSISTANT_EVALUATION_JUDGE_TIMEOUT_SECONDS:60}
   remote-resilience:
+    total-timeout-seconds: ${MEALCHECK_REMOTE_TOTAL_TIMEOUT_SECONDS:60}
     max-attempts: ${MEALCHECK_REMOTE_MAX_ATTEMPTS:2}
     initial-backoff-millis: ${MEALCHECK_REMOTE_INITIAL_BACKOFF_MILLIS:200}
     failure-threshold: ${MEALCHECK_REMOTE_FAILURE_THRESHOLD:5}
     open-duration-seconds: ${MEALCHECK_REMOTE_OPEN_DURATION_SECONDS:30}
     max-concurrent-calls: ${MEALCHECK_REMOTE_MAX_CONCURRENT_CALLS:8}
+  ai-budget:
+    interactive-reserved-permits: ${MEALCHECK_AI_INTERACTIVE_RESERVED_PERMITS:2}
+    global-daily-calls: ${MEALCHECK_AI_GLOBAL_DAILY_CALLS:100000}
+    global-daily-cost: ${MEALCHECK_AI_GLOBAL_DAILY_COST:0}
+    max-concurrent-calls: ${MEALCHECK_AI_GLOBAL_MAX_CONCURRENT_CALLS:10}
+    max-starts-per-minute: ${MEALCHECK_AI_GLOBAL_MAX_STARTS_PER_MINUTE:120}
+    enabled: ${MEALCHECK_AI_BUDGET_ENABLED:true}
+    daily-calls: ${MEALCHECK_AI_DAILY_CALLS:100}
+    system-daily-calls: ${MEALCHECK_AI_SYSTEM_DAILY_CALLS:5000}
+    daily-cost: ${MEALCHECK_AI_DAILY_COST:0}
+    system-daily-cost: ${MEALCHECK_AI_SYSTEM_DAILY_COST:0}
+    reservation-cost: ${MEALCHECK_AI_RESERVATION_COST:0.02}
+    zone: ${MEALCHECK_AI_BUDGET_ZONE:Asia/Shanghai}
+    operation-timeout-seconds: ${MEALCHECK_AI_OPERATION_TIMEOUT_SECONDS:120}
+    max-output-tokens: ${MEALCHECK_AI_MAX_OUTPUT_TOKENS:2048}
 
 management:
   endpoints:

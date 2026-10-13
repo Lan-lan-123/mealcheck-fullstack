@@ -2,7 +2,24 @@ backend/target/
 backend/uploads/
 frontend/node_modules/
 frontend/dist/
+loadtests/mcp-results/
+frontend/test-results/
+frontend/playwright-report/
+deploy/recovery-results/
+deploy/release-results/
+**/__pycache__/
 .env
+.env.production
+.env.operations
+tools/.runtime/
+tools/vision-results/
+tools/datasets/synthetic-meals-100/images/
+loadtests/results/
 *.log
 .DS_Store
 .idea/
+
+# Local learning documents
+*.doc
+*.docx
+/docx/

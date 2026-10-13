@@ -1,5 +1,7 @@
 package com.example.mealcheck.controller;
 
+import com.example.mealcheck.util.AppTime;
+
 import com.example.mealcheck.dto.ApiErrorResponse;
 import com.example.mealcheck.service.AiChatClient;
 import com.example.mealcheck.service.RateLimitExceededException;
@@ -13,11 +15,54 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler(com.example.mealcheck.service.UsernameConflictException.class)
+    public ResponseEntity<ApiErrorResponse> usernameConflict(com.example.mealcheck.service.UsernameConflictException ex) {
+        return error(HttpStatus.CONFLICT, "AUTH_USERNAME_CONFLICT", "用户名已存在");
+    }
+
+    @ExceptionHandler({org.springframework.http.converter.HttpMessageNotReadableException.class,
+            org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class,
+            org.springframework.web.bind.MissingServletRequestParameterException.class,
+            org.springframework.web.bind.MissingRequestHeaderException.class,
+            org.springframework.web.multipart.support.MissingServletRequestPartException.class,
+            org.springframework.web.bind.ServletRequestBindingException.class})
+    public ResponseEntity<ApiErrorResponse> invalidRequest(Exception ex) {
+        return error(HttpStatus.BAD_REQUEST, "BAD_REQUEST", "请求格式或参数不正确，请检查后重试。");
+    }
+
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiErrorResponse> uploadTooLarge(org.springframework.web.multipart.MaxUploadSizeExceededException ex) {
+        return error(HttpStatus.PAYLOAD_TOO_LARGE, "UPLOAD_TOO_LARGE", "上传内容超过大小限制。");
+    }
+
+    @ExceptionHandler(com.example.mealcheck.service.AnalysisAdmissionException.class)
+    public ResponseEntity<ApiErrorResponse> analysisBusy(com.example.mealcheck.service.AnalysisAdmissionException ex) {
+        return ResponseEntity.status(429).header("Retry-After", "3")
+                .body(new ApiErrorResponse(429,"Too Many Requests",ex.code(),ex.getMessage(),AppTime.now()));
+    }
+
+    @ExceptionHandler(com.example.mealcheck.service.AiBudgetService.BudgetExceededException.class)
+    public ResponseEntity<ApiErrorResponse> aiBudget(com.example.mealcheck.service.AiBudgetService.BudgetExceededException ex) {
+        return ResponseEntity.status(429).header("Retry-After",Long.toString(ex.retryAfter()))
+                .body(new ApiErrorResponse(429,"Too Many Requests","AI_BUDGET_EXCEEDED",ex.getMessage(),AppTime.now()));
+    }
+    @ExceptionHandler(com.example.mealcheck.service.AiBudgetService.BudgetUnavailableException.class)
+    public ResponseEntity<ApiErrorResponse> aiBudgetUnavailable(com.example.mealcheck.service.AiBudgetService.BudgetUnavailableException ex) {
+        return error(HttpStatus.SERVICE_UNAVAILABLE,"AI_BUDGET_UNAVAILABLE",ex.getMessage());
+    }
+    @ExceptionHandler(com.example.mealcheck.service.RemoteCallGuard.RemoteCallDeadlineException.class)
+    public ResponseEntity<ApiErrorResponse> aiDeadline(com.example.mealcheck.service.RemoteCallGuard.RemoteCallDeadlineException ex) {
+        return error(HttpStatus.GATEWAY_TIMEOUT,"AI_DEADLINE_EXCEEDED","AI 处理超时，请稍后重试。");
+    }
+
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> accessDenied(org.springframework.security.access.AccessDeniedException ex) {
+        return error(HttpStatus.FORBIDDEN, "ACCESS_DENIED", "没有权限执行此操作。");
+    }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiErrorResponse> badCredentials(BadCredentialsException ex) {
@@ -50,8 +95,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AiChatClient.AiClientException.class)
     public ResponseEntity<ApiErrorResponse> aiClient(AiChatClient.AiClientException ex) {
-        log.warn("AI client error: {}", ex.getMessage());
-        return error(HttpStatus.BAD_GATEWAY, "AI_CALL_FAILED", safeMessage(ex, "AI 服务调用失败。"));
+        log.warn("AI client error type={}", ex.getClass().getSimpleName());
+        return error(HttpStatus.BAD_GATEWAY, "AI_CALL_FAILED", "AI 服务调用失败，请稍后重试。");
     }
 
     @ExceptionHandler(RateLimitExceededException.class)
@@ -59,9 +104,9 @@ public class GlobalExceptionHandler {
         ApiErrorResponse body = new ApiErrorResponse(
                 HttpStatus.TOO_MANY_REQUESTS.value(),
                 HttpStatus.TOO_MANY_REQUESTS.getReasonPhrase(),
-                "RATE_LIMIT_EXCEEDED",
+                ex.getCode(),
                 safeMessage(ex, "请求太频繁，请稍后重试。"),
-                LocalDateTime.now()
+                AppTime.now()
         );
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                 .headers(RateLimitHttpHeaders.from(ex.getLimit(), ex.getRemaining(), ex.getRetryAfter()))
@@ -70,13 +115,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ApiErrorResponse> illegalState(IllegalStateException ex) {
-        log.warn("Service dependency unavailable: {}", ex.getMessage());
-        return error(HttpStatus.SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", safeMessage(ex, "服务依赖暂时不可用，请稍后重试。"));
+        log.warn("Service dependency unavailable type={}", ex.getClass().getSimpleName());
+        return error(HttpStatus.SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", "服务依赖暂时不可用，请稍后重试。");
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> server(Exception ex) {
-        log.error("Unhandled server error", ex);
+        log.error("Unhandled server error type={}", ex.getClass().getSimpleName());
         return error(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "服务器内部错误，请稍后重试。");
     }
 
@@ -86,7 +131,7 @@ public class GlobalExceptionHandler {
                 status.getReasonPhrase(),
                 code,
                 message,
-                LocalDateTime.now()
+                AppTime.now()
         );
         return ResponseEntity.status(status).body(body);
     }

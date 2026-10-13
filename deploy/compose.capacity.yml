@@ -1,0 +1,51 @@
+# Only combine with compose.smoke.yml and its dedicated project.
+services:
+  model-stub:
+    image: ${MEALCHECK_TEST_PYTHON_IMAGE:-python:3.12-alpine}
+    command: ["python", "/stub/model_stub.py"]
+    volumes: ["./deploy/scripts/model_stub.py:/stub/model_stub.py:ro"]
+    user: "10001:10001"
+    read_only: true
+    environment:
+      MODEL_STUB_DELAY_SECONDS: ${MODEL_STUB_DELAY_SECONDS:-0.05}
+      MODEL_STUB_ERROR_EVERY_N: ${MODEL_STUB_ERROR_EVERY_N:-0}
+      MODEL_STUB_ERROR_STATUS: ${MODEL_STUB_ERROR_STATUS:-429}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:9082/health', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [app]
+  backend:
+    image: ${MEALCHECK_CAPACITY_BACKEND_IMAGE:-mealcheck-capacity-backend}
+    depends_on:
+      model-stub:
+        condition: service_healthy
+    environment:
+      # Local browser tests use HTTP; retain production settings without activating
+      # the prod-only validator that requires public HTTPS CORS origins.
+      SPRING_PROFILES_ACTIVE: capacity
+      SPRING_CONFIG_ADDITIONAL_LOCATION: classpath:/application-prod.yml
+      MEALCHECK_CORS_ALLOWED_ORIGINS: http://localhost:${MEALCHECK_FRONTEND_PORT:-18080},http://127.0.0.1:${MEALCHECK_FRONTEND_PORT:-18080}
+      # Selected by the 4/6/8 comparison, mixed load, and one-hour soak.
+      MEALCHECK_ANALYSIS_CONCURRENCY: ${MEALCHECK_ANALYSIS_CONCURRENCY:-8}
+      MEALCHECK_ANALYSIS_MAX_OUTSTANDING: ${MEALCHECK_ANALYSIS_MAX_OUTSTANDING:-32}
+      # Long comparison runs must not expire their dedicated test-account tokens.
+      MEALCHECK_JWT_EXPIRATION_MINUTES: 180
+      MEALCHECK_AI_API_KEY: capacity-test-only
+      MEALCHECK_AI_BASE_URL: http://model-stub:9082/v1
+      MEALCHECK_AI_INPUT_COST_PER_MILLION: "1"
+      MEALCHECK_AI_OUTPUT_COST_PER_MILLION: "2"
+      # Capacity fixtures use a fake model and fresh accounts; avoid measuring the
+      # production billing quota instead of service capacity during long runs.
+      MEALCHECK_AI_DAILY_CALLS: "1000"
+      MEALCHECK_AI_SYSTEM_DAILY_CALLS: "50000"
+      MEALCHECK_AI_GLOBAL_DAILY_CALLS: "100000"
+      MEALCHECK_RATE_LIMIT_REGISTRATION_CAPACITY: "100"
+      MEALCHECK_RATE_LIMIT_REGISTRATION_REFILL_TOKENS: "100"
+      MEALCHECK_RATE_LIMIT_REGISTRATION_REFILL_PERIOD_SECONDS: "1"
+      MEALCHECK_RATE_LIMIT_CAPTCHA_CAPACITY: "100"
+      MEALCHECK_RATE_LIMIT_CAPTCHA_REFILL_TOKENS: "100"
+      MEALCHECK_RATE_LIMIT_CAPTCHA_REFILL_PERIOD_SECONDS: "1"
+  frontend:
+    image: ${MEALCHECK_CAPACITY_FRONTEND_IMAGE:-mealcheck-capacity-frontend}

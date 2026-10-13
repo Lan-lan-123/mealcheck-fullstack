@@ -51,7 +51,7 @@ public class AssistantController {
 
     @PostMapping({"/assistant/ask", "/chat"})
     public ResponseEntity<AssistantResponse> ask(@AuthenticationPrincipal UserPrincipal principal,
-                                                 @RequestBody AssistantRequest request) {
+                                                 @jakarta.validation.Valid @RequestBody AssistantRequest request) {
         String question = request.questionText();
         if (question.isBlank()) {
             throw new IllegalArgumentException("Question cannot be empty.");
@@ -82,8 +82,10 @@ public class AssistantController {
 
     @GetMapping("/assistant/conversations/{id}")
     public AssistantConversationDetailResponse conversation(@AuthenticationPrincipal UserPrincipal principal,
-                                                            @PathVariable Long id) {
-        return conversationService.detail(user(principal), id);
+                                                            @PathVariable Long id,
+                                                            @org.springframework.web.bind.annotation.RequestParam(defaultValue="40") int limit,
+                                                            @org.springframework.web.bind.annotation.RequestParam(required=false) String before) {
+        return conversationService.detail(user(principal), id, limit, before);
     }
 
     @DeleteMapping("/assistant/conversations/{id}")
@@ -99,6 +101,6 @@ public class AssistantController {
     }
 
     private UserAccount user(UserPrincipal principal) {
-        return userAccountRepository.findByUsername(principal.getUsername()).orElseThrow();
+        return userAccountRepository.findById(principal.getId()).orElseThrow();
     }
 }

@@ -1,5 +1,7 @@
 package com.example.mealcheck.entity;
 
+import com.example.mealcheck.util.AppTime;
+
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -58,7 +60,7 @@ public class UserDietProfile {
     @Column(length = 1000)
     private String profileSummary;
 
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    private LocalDateTime updatedAt = AppTime.now();
 
     @Version
     private long version;

@@ -8,11 +8,17 @@ import java.util.Map;
 import java.time.LocalDateTime;
 
 public class WeeklyReportResponse implements Serializable {
+    private TrackingDtos.Summary tracking;
+    public TrackingDtos.Summary getTracking() { return tracking; }
+    public void setTracking(TrackingDtos.Summary v) { tracking=v; }
     private static final long serialVersionUID = 1L;
     private int days;
     private int totalMeals;
     private double averageScore;
     private Map<String, Integer> categoryTotals = new LinkedHashMap<>();
+    private Map<String, Integer> categoryMealCounts = new LinkedHashMap<>();
+    private java.time.LocalDate periodStart;
+    private java.time.LocalDate periodEnd;
     private Map<String, Integer> riskTotals = new LinkedHashMap<>();
     private List<String> highlights;
     private String reportText;
@@ -22,6 +28,7 @@ public class WeeklyReportResponse implements Serializable {
     private String generationMode = "RULE_BASED";
     private String reviewStatus = "NOT_REQUIRED";
     private List<String> agentTrace = List.of();
+    private String coordinationRunId;
 
     public int getDays() { return days; }
     public void setDays(int days) { this.days = days; }
@@ -31,6 +38,12 @@ public class WeeklyReportResponse implements Serializable {
     public void setAverageScore(double averageScore) { this.averageScore = averageScore; }
     public Map<String, Integer> getCategoryTotals() { return categoryTotals; }
     public void setCategoryTotals(Map<String, Integer> categoryTotals) { this.categoryTotals = categoryTotals; }
+    public Map<String, Integer> getCategoryMealCounts() { return categoryMealCounts; }
+    public void setCategoryMealCounts(Map<String, Integer> value) { this.categoryMealCounts = value; }
+    public java.time.LocalDate getPeriodStart() { return periodStart; }
+    public void setPeriodStart(java.time.LocalDate value) { this.periodStart = value; }
+    public java.time.LocalDate getPeriodEnd() { return periodEnd; }
+    public void setPeriodEnd(java.time.LocalDate value) { this.periodEnd = value; }
     public Map<String, Integer> getRiskTotals() { return riskTotals; }
     public void setRiskTotals(Map<String, Integer> riskTotals) { this.riskTotals = riskTotals; }
     public List<String> getHighlights() { return highlights; }
@@ -49,4 +62,6 @@ public class WeeklyReportResponse implements Serializable {
     public void setReviewStatus(String reviewStatus) { this.reviewStatus = reviewStatus; }
     public List<String> getAgentTrace() { return agentTrace; }
     public void setAgentTrace(List<String> agentTrace) { this.agentTrace = agentTrace; }
+    public String getCoordinationRunId() { return coordinationRunId; }
+    public void setCoordinationRunId(String coordinationRunId) { this.coordinationRunId = coordinationRunId; }
 }

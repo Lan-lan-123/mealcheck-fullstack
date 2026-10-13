@@ -55,11 +55,11 @@ class AssistantFunctionCallingServiceTest {
         );
         KnowledgeSnippet snippet = new KnowledgeSnippet(7L, "蛋白质", "内容", 0.9);
         when(registry.execute(any(), any(), anyLong()))
-                .thenReturn(new AssistantFunctionToolRegistry.ToolResult(
+                .thenReturn(new AssistantFunctionToolRuntime.ToolResult(
                         "{\"count\":1}", List.of(snippet)));
 
         AssistantFunctionCallingService service = new AssistantFunctionCallingService(
-                properties, registry, modelFactory, new RemoteCallGuard(properties), httpExecutor);
+                properties, registry, modelFactory, httpExecutor);
         UserAccount user = user("demo");
 
         AssistantFunctionCallingService.FunctionCallingResult result = service.ask(
@@ -69,6 +69,11 @@ class AssistantFunctionCallingServiceTest {
         assertThat(result.calledTools()).containsExactly("search_diet_knowledge");
         assertThat(result.references()).containsExactly(snippet);
         assertThat(result.toolRounds()).isEqualTo(1);
+        assertThat(result.toolTrace()).singleElement().satisfies(trace -> {
+            assertThat(trace.name()).isEqualTo("search_diet_knowledge");
+            assertThat(trace.status()).isEqualTo("SUCCESS");
+            assertThat(trace.round()).isEqualTo(1);
+        });
 
         ArgumentCaptor<ChatRequest> requests = ArgumentCaptor.forClass(ChatRequest.class);
         verify(model, times(2)).chat(requests.capture());
@@ -95,14 +100,20 @@ class AssistantFunctionCallingServiceTest {
         when(model.chat(any(ChatRequest.class))).thenReturn(ChatResponse.builder()
                 .aiMessage(AiMessage.from(List.of(first, second))).build());
         when(registry.execute(any(), any(), anyLong()))
-                .thenReturn(new AssistantFunctionToolRegistry.ToolResult("{}", List.of()));
+                .thenReturn(new AssistantFunctionToolRuntime.ToolResult("{}", List.of()));
 
         AssistantFunctionCallingService service = new AssistantFunctionCallingService(
-                properties, registry, modelFactory, new RemoteCallGuard(properties), httpExecutor);
+                properties, registry, modelFactory, httpExecutor);
 
         assertThatThrownBy(() -> service.ask(user("demo"), "system", List.of(), "问题"))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("maximum tool calls");
+                .isInstanceOfSatisfying(
+                        AssistantFunctionCallingService.FunctionCallingExecutionException.class,
+                        exception -> {
+                            assertThat(exception).hasMessageContaining("maximum tool calls");
+                            assertThat(exception.getToolTrace()).hasSize(2);
+                            assertThat(exception.getToolTrace().get(1).status()).isEqualTo("REJECTED");
+                            assertThat(exception.getToolTrace().get(1).round()).isEqualTo(1);
+                        });
     }
 
     private UserAccount user(String username) {

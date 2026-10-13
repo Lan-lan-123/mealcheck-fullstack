@@ -1,5 +1,7 @@
 package com.example.mealcheck.service;
 
+import com.example.mealcheck.util.AppTime;
+
 import com.example.mealcheck.dto.AdminMealAnalyticsResponse;
 import com.example.mealcheck.dto.AdminUploadTrendResponse;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -67,27 +69,28 @@ public class AdminAnalyticsQueryService {
         List<UploadTrendRow> rows = jdbcTemplate.query("""
                 WITH days AS (
                     SELECT generate_series(CAST(? AS date), CAST(? AS date), INTERVAL '1 day')::date AS day
+                ), normal AS (
+                    SELECT %s AS day,COUNT(*) AS total
+                    FROM meal_records m WHERE m.created_at>=? AND m.created_at<? GROUP BY 1
+                ), abnormal AS (
+                    SELECT %s AS day,COUNT(*) AS total,
+                           COUNT(*) FILTER (WHERE e.threshold_reached=true) AS alerts,
+                           COUNT(DISTINCT e.username) FILTER (WHERE e.threshold_reached=true) AS blocked
+                    FROM non_food_upload_events e WHERE e.created_at>=? AND e.created_at<? GROUP BY 1
                 )
-                SELECT d.day,
-                       (SELECT COUNT(*) FROM meal_records m
-                        WHERE m.created_at >= d.day AND m.created_at < d.day + INTERVAL '1 day') AS normal_count,
-                       (SELECT COUNT(*) FROM non_food_upload_events e
-                        WHERE e.created_at >= d.day AND e.created_at < d.day + INTERVAL '1 day') AS abnormal_count,
-                       (SELECT COUNT(*) FROM non_food_upload_events e
-                        WHERE e.threshold_reached = true
-                          AND e.created_at >= d.day AND e.created_at < d.day + INTERVAL '1 day') AS alert_count,
-                       (SELECT COUNT(DISTINCT e.username) FROM non_food_upload_events e
-                        WHERE e.threshold_reached = true
-                          AND e.created_at >= d.day AND e.created_at < d.day + INTERVAL '1 day') AS blocked_users
+                SELECT d.day,COALESCE(n.total,0) AS normal_count,COALESCE(a.total,0) AS abnormal_count,
+                       COALESCE(a.alerts,0) AS alert_count,COALESCE(a.blocked,0) AS blocked_users
                 FROM days d
+                LEFT JOIN normal n ON n.day=d.day LEFT JOIN abnormal a ON a.day=d.day
                 ORDER BY d.day
-                """, (rs, rowNum) -> new UploadTrendRow(
+                """.formatted(businessDaySql("m.created_at"), businessDaySql("e.created_at")), (rs, rowNum) -> new UploadTrendRow(
                 rs.getDate("day").toLocalDate(),
                 rs.getInt("normal_count"),
                 rs.getInt("abnormal_count"),
                 rs.getInt("alert_count"),
                 rs.getInt("blocked_users")
-        ), Date.valueOf(start), Date.valueOf(end));
+        ), Date.valueOf(start), Date.valueOf(end), AppTime.startOfDay(start), AppTime.startOfDay(end.plusDays(1)),
+                AppTime.startOfDay(start), AppTime.startOfDay(end.plusDays(1)));
 
         return new AdminUploadTrendResponse(
                 rows.stream().map(row -> metric(row.day(), row.normalCount())).toList(),
@@ -106,9 +109,9 @@ public class AdminAnalyticsQueryService {
                 WHERE role = 'user' AND created_at >= ? AND created_at < ?
                 GROUP BY created_at::date
                 ORDER BY day
-                """, (org.springframework.jdbc.core.RowCallbackHandler) rs ->
+                """.replace("created_at::date", businessDaySql("created_at")), (org.springframework.jdbc.core.RowCallbackHandler) rs ->
                         values.put(rs.getDate("day").toLocalDate(), rs.getInt("total")),
-                start.atStartOfDay(), end.plusDays(1).atStartOfDay());
+                AppTime.startOfDay(start), AppTime.startOfDay(end.plusDays(1)));
         return values;
     }
 
@@ -149,10 +152,16 @@ public class AdminAnalyticsQueryService {
                     LIMIT 14
                 ) recent_days ORDER BY day
                 """;
+        sql = sql.replace("m.created_at::date", businessDaySql("m.created_at"));
         return jdbcTemplate.query(sql,
                 (rs, rowNum) -> new AdminMealAnalyticsResponse.MetricItem(
                         rs.getDate("day").toLocalDate().toString(), rs.getInt("average_score")),
                 filter.args().toArray());
+    }
+
+    private String businessDaySql(String column) {
+        return "CAST(" + column + " AT TIME ZONE '" + AppTime.storageZone()
+                + "' AT TIME ZONE '" + AppTime.businessZone() + "' AS date)";
     }
 
     private SqlFilter mealFilter(String username,
@@ -168,11 +177,11 @@ public class AdminAnalyticsQueryService {
         }
         if (from != null) {
             predicates.add("m.created_at >= ?");
-            args.add(from.atStartOfDay());
+            args.add(AppTime.startOfDay(from));
         }
         if (to != null) {
             predicates.add("m.created_at < ?");
-            args.add(to.plusDays(1).atStartOfDay());
+            args.add(AppTime.startOfDay(to.plusDays(1)));
         }
         if (minScore != null) {
             predicates.add("m.score >= ?");

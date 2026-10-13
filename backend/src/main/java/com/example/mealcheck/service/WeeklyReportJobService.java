@@ -1,5 +1,7 @@
 package com.example.mealcheck.service;
 
+import com.example.mealcheck.util.AppTime;
+
 import com.example.mealcheck.config.AppProperties;
 import com.example.mealcheck.entity.WeeklyReportJob;
 import com.example.mealcheck.repository.WeeklyReportJobRepository;
@@ -16,18 +18,23 @@ import java.util.List;
 public class WeeklyReportJobService {
     private final WeeklyReportJobRepository repository;
     private final AppProperties properties;
+    private final TaskFailureRecorder failures;
+    private final com.example.mealcheck.repository.UserAccountRepository users;
 
-    public WeeklyReportJobService(WeeklyReportJobRepository repository, AppProperties properties) {
+    public WeeklyReportJobService(WeeklyReportJobRepository repository, AppProperties properties,
+            TaskFailureRecorder failures, com.example.mealcheck.repository.UserAccountRepository users) {
         this.repository = repository;
         this.properties = properties;
+        this.failures = failures;
+        this.users = users;
     }
 
     @Transactional
     public int enqueue(List<Long> userIds, int days, LocalDate reportWeek) {
         LocalDate week = reportWeek == null
-                ? LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                ? AppTime.today().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
                 : reportWeek;
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = AppTime.now();
         int inserted = 0;
         for (Long userId : userIds) {
             if (userId != null) {
@@ -39,36 +46,74 @@ public class WeeklyReportJobService {
 
     @Transactional
     public List<WeeklyReportJob> claimBatch() {
-        LocalDateTime now = LocalDateTime.now();
-        repository.recoverStale(now.minusSeconds(staleLeaseSeconds()), now);
-        List<WeeklyReportJob> jobs = repository.findClaimable(now, workerBatchSize());
+        return claimBatch(workerBatchSize());
+    }
+
+    @Transactional
+    public List<WeeklyReportJob> claimBatch(int availableCapacity) {
+        LocalDateTime now = AppTime.now();
+        failures.recoverExpiredWeekly(now.minusSeconds(staleLeaseSeconds()), maxAttempts());
+        repository.recoverStale(now.minusSeconds(staleLeaseSeconds()), now, maxAttempts());
+        if (availableCapacity <= 0) return List.of();
+        List<WeeklyReportJob> jobs = repository.findClaimable(now, Math.min(workerBatchSize(), availableCapacity));
         jobs.forEach(job -> {
             job.setStatus(WeeklyReportJob.RUNNING);
             job.setAttempts(job.getAttempts() + 1);
+            job.setExecutionToken(java.util.UUID.randomUUID().toString());
             job.setUpdatedAt(now);
         });
         return List.copyOf(jobs);
     }
 
     @Transactional
-    public boolean markSucceeded(Long jobId, int attempt) {
-        return repository.markSucceeded(jobId, attempt, LocalDateTime.now()) == 1;
+    public boolean releaseUndispatched(Long jobId, int attempt, String token) {
+        return repository.releaseUndispatched(jobId, attempt, token,
+                AppTime.now().plusSeconds(5), AppTime.now(), java.util.UUID.randomUUID().toString()) == 1;
     }
 
     @Transactional
-    public boolean markFailed(Long jobId, int attempt, Throwable error) {
-        LocalDateTime now = LocalDateTime.now();
-        boolean dead = attempt >= maxAttempts();
+    public boolean markFailed(Long jobId, int attempt, String token, Throwable error) {
+        var candidate = repository.findById(jobId);
+        if (candidate.isEmpty() || users.findByIdForUpdate(candidate.get().getUserId()).isEmpty()) return false;
+        LocalDateTime now = AppTime.now();
+        var failure = TaskFailureClassifier.classify(error, "GENERATE");
+        Long admissionDelay = admissionRetryDelay(error);
+        boolean budgetWait="AI_BUDGET_EXCEEDED".equals(failure.code());
+        boolean dead = !failure.recoverable() || "REMOTE_CONFIGURATION".equals(failure.code())
+                || (!budgetWait && attempt >= maxAttempts());
         String status = dead ? WeeklyReportJob.DEAD : WeeklyReportJob.RETRY;
-        LocalDateTime nextRetryAt = dead ? now : now.plusSeconds(retryDelaySeconds(attempt));
-        return repository.markFailed(
+        LocalDateTime nextRetryAt = dead ? now : now.plusSeconds(admissionDelay == null ? retryDelaySeconds(attempt) : admissionDelay);
+        boolean changed = budgetWait
+                ? repository.deferAdmission(jobId, attempt, token, failure.code(), nextRetryAt, now) == 1
+                : repository.markFailed(
                 jobId,
                 attempt,
+                token,
                 status,
-                truncate(error == null ? "unknown failure" : error.getMessage(), 1000),
+                failure.code(),
                 nextRetryAt,
                 now
         ) == 1;
+        if (changed) failures.record("WEEKLY_REPORT", candidate.get().getUserId(), jobId.toString(), null,
+                token, attempt, "GENERATE", failure, dead);
+        return changed;
+    }
+
+    private Long admissionRetryDelay(Throwable error) {
+        for (Throwable cause = error; cause != null; cause = cause.getCause()) {
+            if (cause instanceof AiBudgetService.BudgetExceededException budget)
+                return Math.max(1, budget.retryAfter());
+            if (cause instanceof RemoteCallGuard.RemoteCallDeadlineException deadline && deadline.retryAfter()!=null)
+                return Math.max(1,deadline.retryAfter().toSeconds()+(deadline.retryAfter().toNanosPart()>0?1:0));
+            if (cause instanceof RemoteCallGuard.RetryableRemoteCallException remote && remote.retryAfter() != null)
+                return Math.max(1, remote.retryAfter().toSeconds() + (remote.retryAfter().toNanosPart() > 0 ? 1 : 0));
+            if (cause instanceof org.springframework.web.server.ResponseStatusException response
+                    && response.getStatusCode().value() == 429) {
+                try { return Math.max(1, Long.parseLong(response.getHeaders().getFirst("Retry-After"))); }
+                catch (RuntimeException ignored) { return 60L; }
+            }
+        }
+        return null;
     }
 
     private int workerBatchSize() {

@@ -38,16 +38,33 @@ public class AuthService {
 
     @Transactional
     public AuthDtos.AuthResponse register(AuthDtos.RegisterRequest request) {
+        if (!captchaService.verify(request.getCaptchaId(), request.getCaptchaAnswer())) {
+            throw new BadCredentialsException("验证码错误或已过期");
+        }
         String username = request.getUsername().trim();
+        if (username.length() < 3 || username.length() > 64) {
+            throw new IllegalArgumentException("用户名必须为 3 到 64 个字符");
+        }
         if (userRepository.existsByUsername(username)) {
-            throw new IllegalArgumentException("用户名已存在");
+            throw new UsernameConflictException();
         }
         UserAccount user = new UserAccount();
         user.setUsername(username);
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setDisplayName(request.getDisplayName() == null || request.getDisplayName().isBlank()
                 ? username : request.getDisplayName().trim());
-        userRepository.save(user);
+        try {
+            // Flush inside this transaction so the unique constraint race is translated here.
+            userRepository.saveAndFlush(user);
+        } catch (org.springframework.dao.DataIntegrityViolationException conflict) {
+            for (Throwable cause = conflict; cause != null; cause = cause.getCause()) {
+                if (cause instanceof org.hibernate.exception.ConstraintViolationException violation
+                        && "users_username_key".equals(violation.getConstraintName())) {
+                    throw new UsernameConflictException();
+                }
+            }
+            throw conflict;
+        }
         UserPrincipal principal = new UserPrincipal(user);
         return new AuthDtos.AuthResponse(
                 jwtService.generateToken(principal),

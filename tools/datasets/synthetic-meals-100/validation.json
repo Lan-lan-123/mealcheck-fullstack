@@ -1,0 +1,14 @@
+{
+  "images": 100,
+  "foodImages": 80,
+  "nonFoodImages": 20,
+  "uniqueChecksums": 100,
+  "totalMegabytes": 222.51,
+  "scenes": {
+    "backlight": 20,
+    "close-up": 20,
+    "low-light": 20,
+    "normal": 20,
+    "occlusion": 20
+  }
+}

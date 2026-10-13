@@ -1,0 +1,26 @@
+.form-field { display: grid; gap: 6px; margin: 0; min-width: 0; color: var(--text-soft); font-size: 13px; font-weight: 600; }
+.form-field-wide { grid-column: 1 / -1; }
+.form-field :is(input, select, textarea) { width: 100%; margin: 0; }
+.filter-disclosure { margin-block: 18px; padding: 0; border: 1px solid var(--line); border-radius: 10px; background: #fafcfb; }
+.filter-disclosure > summary { cursor: pointer; padding: 12px 14px; font-size: 14px; font-weight: 600; color: var(--ink); }
+.filter-disclosure > summary span { margin-left: 12px; font-size: 12px; font-weight: 400; color: var(--muted); }
+.filter-disclosure .record-filter-form, .filter-disclosure .filter-grid { margin: 0; padding: 4px 14px 14px; align-items: end; }
+.workspace :is(.hint, .empty, .empty-mini, .detail-entry > span, .upload-card p, .analysis-empty .empty) { font-size: 13px; color: var(--muted); }
+.workspace :is(.workspace-page-heading p, .trend-head p, .section-title-row p, .workspace-disclosure > p) { font-size: 13px; color: var(--muted); }
+.workspace :is(.analysis-steps, .workspace-footer, .workspace-role, .workspace-eyebrow) { color: var(--muted); }
+@media (max-width: 760px) {
+  .workspace :is(input, select, textarea) { font-size: 16px; }
+  .workspace :is(.secondary-btn, .delete-btn, .table-danger-btn, .section-switcher button, .workspace-refresh, .account-delete-button) { min-height: 44px; }
+  .workspace .filter-disclosure .record-filter-form, .workspace .filter-disclosure .filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .filter-disclosure select, .filter-disclosure input:not([type=date]):not([type=number]) { grid-column: 1 / -1; }
+  .filter-disclosure > summary { min-height: 44px; }
+  .form-field { font-size: 13px; }
+  .workspace .compact-pagination { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .compact-pagination button:first-child { order: 1; }
+  .compact-pagination button:nth-of-type(2) { order: 2; }
+  .compact-pagination > span { order: 3; grid-column: 1 / -1; text-align: center; }
+  .compact-pagination > select { order: 4; grid-column: 1 / -1; }
+}
+@media (max-width: 380px) {
+  .workspace .filter-disclosure .record-filter-form, .workspace .filter-disclosure .filter-grid { grid-template-columns: minmax(0, 1fr); }
+}

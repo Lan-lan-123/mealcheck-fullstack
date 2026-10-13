@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +29,7 @@ public class VisionFoodRecognitionService {
 
         try {
             String dataUrl = "data:" + image.contentType() + ";base64,"
-                    + Base64.getEncoder().encodeToString(image.bytes());
+                    + image.base64();
             String content = aiChatClient.complete("vision-recognition", visionMessages(dataUrl), 0.1);
 
             RecognitionResult result = objectMapper.readValue(Jsons.extractJsonObject(content), RecognitionResult.class);
@@ -41,17 +40,20 @@ public class VisionFoodRecognitionService {
 
             if (result.getFoods() == null || result.getFoods().isEmpty()) {
                 String message = "视觉模型没有返回有效 foods 字段。";
-                log.warn("{} content={}", message, content);
+                log.warn("Vision response missing food items");
                 throw new AiChatClient.AiClientException(message);
             }
 
             result.setDemoMode(false);
             return result;
+        } catch (AiBudgetService.BudgetExceededException | AiBudgetService.BudgetUnavailableException
+                 | RemoteCallGuard.RemoteCallDeadlineException e) {
+            throw e;
         } catch (AiChatClient.AiClientException e) {
             throw e;
         } catch (Exception e) {
-            String message = "视觉模型调用失败：" + e.getMessage();
-            log.warn(message, e);
+            String message = "视觉模型返回结果无效，请稍后重试。";
+            log.warn("Vision response failed type={}", e.getClass().getSimpleName());
             throw new AiChatClient.AiClientException(message, e);
         }
     }

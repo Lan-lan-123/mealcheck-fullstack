@@ -1,5 +1,7 @@
 package com.example.mealcheck.service;
 
+import com.example.mealcheck.util.AppTime;
+
 import com.example.mealcheck.dto.FoodItem;
 import com.example.mealcheck.dto.UserDietProfileResponse;
 import com.example.mealcheck.entity.MealRecord;
@@ -67,7 +69,7 @@ public class UserDietProfileService {
         profile.setCommonFoodsJson(Jsons.toJson(objectMapper, foods));
         profile.setCommonRisksJson(Jsons.toJson(objectMapper, risks));
         profile.setProfileSummary(buildSummary(records.size(), averageScore, preferredGoal, foods, risks));
-        profile.setUpdatedAt(LocalDateTime.now());
+        profile.setUpdatedAt(AppTime.now());
         return profileRepository.save(profile);
     }
 
@@ -206,7 +208,7 @@ public class UserDietProfileService {
         profile.setCommonRisksJson(Jsons.toJson(objectMapper, risks));
         profile.setProfileSummary(buildSummary(totalMeals, averageScore, preferredGoal, foods, risks));
         profile.setAggregateInitialized(true);
-        profile.setUpdatedAt(LocalDateTime.now());
+        profile.setUpdatedAt(AppTime.now());
         return profileRepository.save(profile);
     }
 

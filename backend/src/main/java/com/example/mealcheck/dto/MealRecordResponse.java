@@ -15,6 +15,28 @@ public class MealRecordResponse {
     private List<String> riskTags;
     private String advice;
     private String imageUrl;
+    private long revision;
+    private LocalDateTime occurredAt;
+    private String mealType, recordSource, note;
+    private boolean timeConfirmed;
+    private long metadataVersion;
+    public LocalDateTime getOccurredAt() { return occurredAt; }
+    public void setOccurredAt(LocalDateTime value) { occurredAt=value; }
+    public String getMealType() { return mealType; }
+    public void setMealType(String value) { mealType=value; }
+    public String getRecordSource() { return recordSource; }
+    public void setRecordSource(String value) { recordSource=value; }
+    public boolean isTimeConfirmed() { return timeConfirmed; }
+    public void setTimeConfirmed(boolean value) { timeConfirmed=value; }
+    public long getMetadataVersion() { return metadataVersion; }
+    public void setMetadataVersion(long value) { metadataVersion=value; }
+    public String getNote() { return note; }
+    public void setNote(String value) { note=value; }
+    private String scoringVersion;
+    public long getRevision() { return revision; }
+    public void setRevision(long value) { revision = value; }
+    public String getScoringVersion() { return scoringVersion; }
+    public void setScoringVersion(String value) { scoringVersion = value; }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

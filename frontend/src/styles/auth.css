@@ -1,0 +1,17 @@
+.auth-page { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at top left, #e0f3dc, transparent 32%), #f5f7f1; }
+.auth-card { width: min(440px, 100%); background: rgba(255,255,255,.88); border: 1px solid #e1e9d9; border-radius: 28px; padding: 28px; box-shadow: 0 20px 60px rgba(38, 56, 37, .12); }
+.brand { display: flex; align-items: center; gap: 14px; }
+.brand h1 { margin: 0; font-size: 30px; }
+.brand p { margin: 3px 0 0; color: #6b7568; }
+.brand.compact h1 { font-size: 22px; }
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 6px; background: #eef4ea; border-radius: 18px; margin: 26px 0; }
+.tabs button { border: 0; background: transparent; padding: 10px; border-radius: 14px; cursor: pointer; }
+.tabs button:only-child { grid-column: 1 / -1; }
+.tabs button.active { background: #ffffff; box-shadow: 0 6px 20px rgba(0,0,0,.08); }
+.role-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 24px; }
+.role-tabs button { border: 1px solid #d5e4cf; background: #ffffff; color: #2f713b; border-radius: 16px; padding: 12px; cursor: pointer; font-weight: 800; }
+.role-tabs button.active { background: #2f7a3b; color: #ffffff; border-color: #2f7a3b; box-shadow: 0 10px 24px rgba(47, 122, 59, .18); }
+.captcha-row { display: grid; grid-template-columns: minmax(96px, auto) 1fr auto; gap: 8px; align-items: center; }
+.captcha-row span { min-height: 45px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #dbe8d6; border-radius: 14px; background: #f5faf2; color: #223524; font-weight: 900; letter-spacing: .04em; padding: 0 12px; }
+.captcha-row input { min-width: 0; }
+.captcha-row button { border: 1px solid #d5e4cf; background: #ffffff; color: #2f713b; border-radius: 14px; padding: 11px 12px; cursor: pointer; white-space: nowrap; }

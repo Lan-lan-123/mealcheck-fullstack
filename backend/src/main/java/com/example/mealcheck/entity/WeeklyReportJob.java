@@ -1,5 +1,7 @@
 package com.example.mealcheck.entity;
 
+import com.example.mealcheck.util.AppTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -39,17 +41,27 @@ public class WeeklyReportJob {
     @Column(nullable = false)
     private int attempts;
 
+    @Column(nullable = false, length = 36)
+    private String executionToken = java.util.UUID.randomUUID().toString();
+
     @Column(nullable = false)
-    private LocalDateTime nextRetryAt = LocalDateTime.now();
+    private int manualRetryCount;
+
+    public String getExecutionToken() { return executionToken; }
+    public void setExecutionToken(String executionToken) { this.executionToken = executionToken; }
+    public int getManualRetryCount() { return manualRetryCount; }
+
+    @Column(nullable = false)
+    private LocalDateTime nextRetryAt = AppTime.now();
 
     @Column(length = 1000)
     private String lastError;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt = AppTime.now();
 
     @Column(nullable = false)
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    private LocalDateTime updatedAt = AppTime.now();
 
     @Version
     private long version;

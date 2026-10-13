@@ -52,7 +52,8 @@ class AdminServiceDeletionTest {
                 mock(RagBenchmarkService.class),
                 mock(AssistantProactiveAdviceService.class),
                 mock(AdminAnalyticsQueryService.class),
-                mock(MealRecordPersistenceService.class)
+                mock(MealRecordPersistenceService.class),
+                mock(AdminMealQueryService.class)
         );
 
         service.deleteUser(9L, admin);

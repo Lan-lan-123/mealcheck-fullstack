@@ -1,0 +1,10 @@
+dialog.app-dialog { width: min(460px, calc(100vw - 32px)); max-height: calc(100dvh - 40px); overflow-y: auto; border: 1px solid var(--line); border-radius: 16px; padding: 26px; color: var(--ink); background: var(--surface); box-shadow: 0 24px 80px #142c2440; }
+.app-dialog::backdrop { background: #142c2466; backdrop-filter: blur(2px); }
+.app-dialog h2 { margin: 0 0 14px; font-size: 20px; }
+.app-dialog p { margin: 0 0 20px; line-height: 1.8; color: var(--text-soft); overflow-wrap: anywhere; }
+.app-dialog input, .app-dialog textarea { border: 1px solid var(--line); border-radius: 9px; padding: 12px; font-size: 16px; }
+.app-dialog textarea { min-height: 100px; resize: vertical; }
+.app-dialog-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+.app-dialog-actions button { min-height: 44px; padding: 10px 18px; border-radius: 9px; cursor: pointer; font-size: 14px; }
+.danger-btn { border: 1px solid #b33f36; background: #b33f36; color: #fff; font-weight: 600; }
+body:has(dialog[open]) { overflow: hidden; }

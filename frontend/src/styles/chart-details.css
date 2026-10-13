@@ -1,0 +1,12 @@
+.mini-bar-track { position: relative; }
+.mini-bar-baseline { position: absolute; width: 1px; top: 0; bottom: 0; background: #6c7f72; }
+.mini-bar-row { grid-template-columns: minmax(72px, 110px) minmax(0, 1fr) minmax(34px, max-content); }
+.mini-bar-row > strong { font-variant-numeric: tabular-nums; }
+.score-trend svg { display: block; width: 100%; max-height: 250px; overflow: visible; }
+.score-trend text { font-size: 12px; fill: var(--muted); }
+.score-trend-grid { stroke: var(--line); stroke-width: 1; }
+.score-trend-line { fill: none; stroke: var(--accent); stroke-width: 2.5; }
+.score-trend circle { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.score-trend circle:focus { outline: none; stroke: #d59126; stroke-width: 4; }
+.score-trend-caption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; font-size: 13px; color: var(--ink); }
+.score-trend-caption span { font-size: 12px; color: var(--muted); }

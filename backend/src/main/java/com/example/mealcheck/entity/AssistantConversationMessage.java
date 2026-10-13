@@ -1,5 +1,7 @@
 package com.example.mealcheck.entity;
 
+import com.example.mealcheck.util.AppTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -30,7 +32,16 @@ public class AssistantConversationMessage {
     private String text;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt = AppTime.now();
+
+    @Column(length=64)
+    private String requestId;
+    @Column(nullable=false,length=16)
+    private String deliveryStatus="COMPLETE";
+    public String getRequestId() { return requestId; }
+    public void setRequestId(String v) { requestId=v; }
+    public String getDeliveryStatus() { return deliveryStatus; }
+    public void setDeliveryStatus(String v) { deliveryStatus=v; }
 
     public Long getId() { return id; }
     public AssistantConversation getConversation() { return conversation; }

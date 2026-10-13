@@ -16,8 +16,10 @@ public class AppProperties {
     private AssistantFunctionCalling assistantFunctionCalling = new AssistantFunctionCalling();
     private AssistantMemory assistantMemory = new AssistantMemory();
     private AssistantTools assistantTools = new AssistantTools();
+    private AssistantEvaluation assistantEvaluation = new AssistantEvaluation();
     private WeeklyReport weeklyReport = new WeeklyReport();
     private RemoteResilience remoteResilience = new RemoteResilience();
+    private AiBudget aiBudget = new AiBudget();
 
     public Jwt getJwt() { return jwt; }
     public void setJwt(Jwt jwt) { this.jwt = jwt; }
@@ -45,10 +47,44 @@ public class AppProperties {
     public void setAssistantMemory(AssistantMemory assistantMemory) { this.assistantMemory = assistantMemory; }
     public AssistantTools getAssistantTools() { return assistantTools; }
     public void setAssistantTools(AssistantTools assistantTools) { this.assistantTools = assistantTools; }
+    public AssistantEvaluation getAssistantEvaluation() { return assistantEvaluation; }
+    public void setAssistantEvaluation(AssistantEvaluation assistantEvaluation) { this.assistantEvaluation = assistantEvaluation; }
     public WeeklyReport getWeeklyReport() { return weeklyReport; }
     public void setWeeklyReport(WeeklyReport weeklyReport) { this.weeklyReport = weeklyReport; }
     public RemoteResilience getRemoteResilience() { return remoteResilience; }
     public void setRemoteResilience(RemoteResilience remoteResilience) { this.remoteResilience = remoteResilience; }
+    public AiBudget getAiBudget() { return aiBudget; }
+    public void setAiBudget(AiBudget aiBudget) { this.aiBudget = aiBudget; }
+
+    public static class AiBudget {
+        private boolean enabled = true;
+        private int dailyCalls = 100;
+        private int systemDailyCalls = 5000;
+        private java.math.BigDecimal dailyCost = java.math.BigDecimal.ZERO;
+        private java.math.BigDecimal systemDailyCost = java.math.BigDecimal.ZERO;
+        private java.math.BigDecimal reservationCost = new java.math.BigDecimal("0.02");
+        private String zone = "Asia/Shanghai";
+        private int operationTimeoutSeconds = 120;
+        private int maxOutputTokens = 2048;
+        public boolean isEnabled() { return enabled; }
+        public void setEnabled(boolean value) { enabled=value; }
+        public int getDailyCalls() { return dailyCalls; }
+        public void setDailyCalls(int value) { dailyCalls=value; }
+        public int getSystemDailyCalls() { return systemDailyCalls; }
+        public void setSystemDailyCalls(int value) { systemDailyCalls=value; }
+        public java.math.BigDecimal getDailyCost() { return dailyCost; }
+        public void setDailyCost(java.math.BigDecimal value) { dailyCost=value; }
+        public java.math.BigDecimal getSystemDailyCost() { return systemDailyCost; }
+        public void setSystemDailyCost(java.math.BigDecimal value) { systemDailyCost=value; }
+        public java.math.BigDecimal getReservationCost() { return reservationCost; }
+        public void setReservationCost(java.math.BigDecimal value) { reservationCost=value; }
+        public String getZone() { return zone; }
+        public void setZone(String value) { zone=value; }
+        public int getOperationTimeoutSeconds() { return operationTimeoutSeconds; }
+        public void setOperationTimeoutSeconds(int value) { operationTimeoutSeconds=value; }
+        public int getMaxOutputTokens() { return maxOutputTokens; }
+        public void setMaxOutputTokens(int value) { maxOutputTokens=value; }
+    }
 
     public static class Jwt {
         private String secret;
@@ -70,6 +106,12 @@ public class AppProperties {
         private String baseUrl;
         private String model;
         private int timeoutSeconds = 60;
+        private java.math.BigDecimal inputCostPerMillion = java.math.BigDecimal.ZERO;
+        private java.math.BigDecimal outputCostPerMillion = java.math.BigDecimal.ZERO;
+        public java.math.BigDecimal getInputCostPerMillion() { return inputCostPerMillion; }
+        public void setInputCostPerMillion(java.math.BigDecimal value) { inputCostPerMillion=value; }
+        public java.math.BigDecimal getOutputCostPerMillion() { return outputCostPerMillion; }
+        public void setOutputCostPerMillion(java.math.BigDecimal value) { outputCostPerMillion=value; }
         public String getApiKey() { return apiKey; }
         public void setApiKey(String apiKey) { this.apiKey = apiKey; }
         public String getBaseUrl() { return baseUrl; }
@@ -108,7 +150,7 @@ public class AppProperties {
         private int chunkMaxTokens = 500;
         private int chunkOverlapTokens = 50;
         private String splitterStrategy = "recursive-markdown";
-        private String sourceVersion = "v2-recursive";
+        private String sourceVersion = "v3-curated-100";
         private String vectorStorage = "halfvec";
         private double benchmarkRegressionTolerance = 0.02;
         public boolean isAutoIndex() { return autoIndex; }
@@ -189,6 +231,18 @@ public class AppProperties {
     }
 
     public static class Upload {
+        private int maxConcurrentDecodes = 2;
+        public int getMaxConcurrentDecodes() { return maxConcurrentDecodes; }
+        public void setMaxConcurrentDecodes(int value) { maxConcurrentDecodes = value; }
+        private int maxPendingDecodes = 20;
+        private long decodeWaitMillis = 8000;
+        private long temporaryMaxBytes = 1024L * 1024 * 1024;
+        public int getMaxPendingDecodes() { return maxPendingDecodes; }
+        public void setMaxPendingDecodes(int value) { maxPendingDecodes = value; }
+        public long getDecodeWaitMillis() { return decodeWaitMillis; }
+        public void setDecodeWaitMillis(long value) { decodeWaitMillis = value; }
+        public long getTemporaryMaxBytes() { return temporaryMaxBytes; }
+        public void setTemporaryMaxBytes(long value) { temporaryMaxBytes = value; }
         private long maxInputBytes = 10L * 1024 * 1024;
         private int maxWidth = 4096;
         private int maxHeight = 4096;
@@ -217,13 +271,28 @@ public class AppProperties {
     }
 
     public static class RateLimit {
+        private TokenBucket uploadIngress = new TokenBucket(20, 1, 1, 1);
+        public TokenBucket getUploadIngress() { return uploadIngress; }
+        public void setUploadIngress(TokenBucket value) { uploadIngress = value; }
         private TokenBucket assistant = new TokenBucket(5, 1, 3, 1);
         private TokenBucket mealAnalysis = new TokenBucket(3, 1, 6, 1);
+        private TokenBucket login = new TokenBucket(5, 1, 60, 1);
+        private TokenBucket registration = new TokenBucket(3, 1, 300, 1);
+        private TokenBucket captcha = new TokenBucket(10, 1, 10, 1);
+        private TokenBucket weeklyReport = new TokenBucket(3, 1, 3600, 1);
+        public TokenBucket getWeeklyReport() { return weeklyReport; }
+        public void setWeeklyReport(TokenBucket value) { this.weeklyReport = value; }
 
         public TokenBucket getAssistant() { return assistant; }
         public void setAssistant(TokenBucket assistant) { this.assistant = assistant; }
         public TokenBucket getMealAnalysis() { return mealAnalysis; }
         public void setMealAnalysis(TokenBucket mealAnalysis) { this.mealAnalysis = mealAnalysis; }
+        public TokenBucket getLogin() { return login; }
+        public void setLogin(TokenBucket login) { this.login = login; }
+        public TokenBucket getRegistration() { return registration; }
+        public void setRegistration(TokenBucket registration) { this.registration = registration; }
+        public TokenBucket getCaptcha() { return captcha; }
+        public void setCaptcha(TokenBucket captcha) { this.captcha = captcha; }
     }
 
     public static class TokenBucket {
@@ -340,6 +409,22 @@ public class AppProperties {
         public void setTotalTimeoutMillis(int totalTimeoutMillis) { this.totalTimeoutMillis = totalTimeoutMillis; }
     }
 
+    public static class AssistantEvaluation {
+        private String judgeApiKey = "";
+        private String judgeBaseUrl = "";
+        private String judgeModel = "";
+        private int judgeTimeoutSeconds = 60;
+
+        public String getJudgeApiKey() { return judgeApiKey; }
+        public void setJudgeApiKey(String judgeApiKey) { this.judgeApiKey = judgeApiKey; }
+        public String getJudgeBaseUrl() { return judgeBaseUrl; }
+        public void setJudgeBaseUrl(String judgeBaseUrl) { this.judgeBaseUrl = judgeBaseUrl; }
+        public String getJudgeModel() { return judgeModel; }
+        public void setJudgeModel(String judgeModel) { this.judgeModel = judgeModel; }
+        public int getJudgeTimeoutSeconds() { return judgeTimeoutSeconds; }
+        public void setJudgeTimeoutSeconds(int judgeTimeoutSeconds) { this.judgeTimeoutSeconds = judgeTimeoutSeconds; }
+    }
+
     public static class WeeklyReport {
         private int batchSize = 100;
         private int executorCorePoolSize = 2;
@@ -390,6 +475,9 @@ public class AppProperties {
     }
 
     public static class RemoteResilience {
+        private int totalTimeoutSeconds = 60;
+        public int getTotalTimeoutSeconds() { return totalTimeoutSeconds; }
+        public void setTotalTimeoutSeconds(int value) { totalTimeoutSeconds=value; }
         private int maxAttempts = 2;
         private int initialBackoffMillis = 200;
         private int failureThreshold = 5;

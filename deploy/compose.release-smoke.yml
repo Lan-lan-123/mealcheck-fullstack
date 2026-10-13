@@ -1,0 +1,14 @@
+# Use the exact images built for this candidate; never rebuild during acceptance.
+services:
+  backend:
+    image: ${MEALCHECK_RELEASE_BACKEND_IMAGE:?Set candidate backend image}
+    build: !reset null
+  frontend:
+    image: ${MEALCHECK_RELEASE_FRONTEND_IMAGE:?Set candidate frontend image}
+    build: !reset null
+
+# Scratch stacks must coexist with retained production/capacity networks.
+networks:
+  edge:
+    ipam:
+      config: !reset []

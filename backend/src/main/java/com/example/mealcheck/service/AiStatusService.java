@@ -1,5 +1,7 @@
 package com.example.mealcheck.service;
 
+import com.example.mealcheck.util.AppTime;
+
 import com.example.mealcheck.dto.AiCallStatusResponse;
 import com.example.mealcheck.dto.AiOperationMetricsResponse;
 import org.springframework.stereotype.Service;
@@ -24,7 +26,7 @@ public class AiStatusService {
     public void recordSuccess(String operation, long latencyMs) {
         successCount.incrementAndGet();
         metrics.computeIfAbsent(operation, ignored -> new MutableMetrics()).record(true, latencyMs);
-        statuses.put(operation, new AiCallStatusResponse(operation, true, "最近调用成功", LocalDateTime.now()));
+        statuses.put(operation, new AiCallStatusResponse(operation, true, "最近调用成功", AppTime.now()));
     }
 
     public void recordFailure(String operation, String message) {
@@ -34,8 +36,8 @@ public class AiStatusService {
     public void recordFailure(String operation, String message, long latencyMs) {
         failureCount.incrementAndGet();
         metrics.computeIfAbsent(operation, ignored -> new MutableMetrics()).record(false, latencyMs);
-        String safeMessage = message == null || message.isBlank() ? "最近调用失败" : message;
-        statuses.put(operation, new AiCallStatusResponse(operation, false, safeMessage, LocalDateTime.now()));
+        // This snapshot is shared through /api/health: never store provider or user content.
+        statuses.put(operation, new AiCallStatusResponse(operation, false, "最近调用失败", AppTime.now()));
     }
 
     public List<AiCallStatusResponse> recentCalls() {

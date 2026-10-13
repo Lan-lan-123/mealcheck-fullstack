@@ -1,11 +1,12 @@
 package com.example.mealcheck.service;
 
+import com.example.mealcheck.util.AppTime;
+
 import com.example.mealcheck.config.AppProperties;
 import com.example.mealcheck.dto.KnowledgeSnippet;
 import com.example.mealcheck.dto.AdminAssistantStatsResponse;
 import com.example.mealcheck.dto.AdminKnowledgeChunkPageResponse;
 import com.example.mealcheck.dto.AdminKnowledgeChunkResponse;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-public class PgVectorKnowledgeService implements InitializingBean {
+public class PgVectorKnowledgeService {
     private static final Logger log = LoggerFactory.getLogger(PgVectorKnowledgeService.class);
     private static final Pattern VECTOR_TYPE = Pattern.compile("(vector|halfvec)\\((\\d+)\\)");
     private final JdbcTemplate jdbcTemplate;
@@ -51,42 +52,6 @@ public class PgVectorKnowledgeService implements InitializingBean {
         this.compressionService = compressionService;
     }
 
-    @Override
-    public void afterPropertiesSet() {
-        jdbcTemplate.execute("CREATE EXTENSION IF NOT EXISTS vector");
-        jdbcTemplate.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm");
-        int embeddingDimension = safeEmbeddingDimension();
-        jdbcTemplate.execute("""
-                CREATE TABLE IF NOT EXISTS knowledge_chunks (
-                    id BIGSERIAL PRIMARY KEY,
-                    source VARCHAR(255) NOT NULL,
-                    title TEXT,
-                    content TEXT NOT NULL,
-                    embedding %s NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-                """.formatted(compressionService.columnType(embeddingDimension)));
-        jdbcTemplate.execute("ALTER TABLE knowledge_chunks ADD COLUMN IF NOT EXISTS hit_count BIGINT DEFAULT 0");
-        jdbcTemplate.execute("ALTER TABLE knowledge_chunks ADD COLUMN IF NOT EXISTS last_hit_at TIMESTAMP");
-        jdbcTemplate.execute("ALTER TABLE knowledge_chunks ADD COLUMN IF NOT EXISTS category VARCHAR(64) DEFAULT 'general'");
-        jdbcTemplate.execute("ALTER TABLE knowledge_chunks ADD COLUMN IF NOT EXISTS embedding_signature VARCHAR(255)");
-        jdbcTemplate.execute("ALTER TABLE knowledge_chunks ADD COLUMN IF NOT EXISTS chunk_key VARCHAR(160)");
-        jdbcTemplate.execute("ALTER TABLE knowledge_chunks ADD COLUMN IF NOT EXISTS chunk_index INTEGER DEFAULT 0");
-        jdbcTemplate.execute("ALTER TABLE knowledge_chunks ADD COLUMN IF NOT EXISTS content_hash CHAR(64)");
-        jdbcTemplate.execute("ALTER TABLE knowledge_chunks ADD COLUMN IF NOT EXISTS token_count INTEGER DEFAULT 0");
-        jdbcTemplate.execute("ALTER TABLE knowledge_chunks ADD COLUMN IF NOT EXISTS source_version VARCHAR(64) DEFAULT 'v1'");
-        jdbcTemplate.execute("ALTER TABLE knowledge_chunks ADD COLUMN IF NOT EXISTS source_updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
-        jdbcTemplate.execute("ALTER TABLE knowledge_chunks ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
-        jdbcTemplate.execute("ALTER TABLE knowledge_chunks ALTER COLUMN title TYPE TEXT");
-        migrateEmbeddingStorageIfRequired(embeddingDimension);
-        jdbcTemplate.execute("CREATE INDEX IF NOT EXISTS idx_knowledge_chunks_embedding ON knowledge_chunks USING ivfflat (embedding "
-                + compressionService.cosineOperatorClass() + ") WITH (lists = 100)");
-        jdbcTemplate.execute("CREATE INDEX IF NOT EXISTS idx_knowledge_chunks_title_trgm_gist ON knowledge_chunks USING gist (title gist_trgm_ops)");
-        jdbcTemplate.execute("CREATE INDEX IF NOT EXISTS idx_knowledge_chunks_content_trgm_gist ON knowledge_chunks USING gist (content gist_trgm_ops)");
-        jdbcTemplate.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_knowledge_chunks_source_key ON knowledge_chunks(source, chunk_key) WHERE chunk_key IS NOT NULL");
-        jdbcTemplate.execute("CREATE INDEX IF NOT EXISTS idx_knowledge_chunks_content_hash ON knowledge_chunks(content_hash)");
-    }
-
     public long count() {
         Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM knowledge_chunks", Long.class);
         return count == null ? 0 : count;
@@ -96,6 +61,7 @@ public class PgVectorKnowledgeService implements InitializingBean {
                                  String sourceVersion,
                                  LocalDateTime sourceUpdatedAt,
                                  List<KnowledgeChunk> chunks) {
+        requireCompatibleStorage();
         List<ExistingChunk> stored = jdbcTemplate.query("""
                 SELECT id, chunk_key, content_hash, embedding_signature
                 FROM knowledge_chunks
@@ -147,10 +113,12 @@ public class PgVectorKnowledgeService implements InitializingBean {
     }
 
     public void add(String source, String title, String content) {
+        requireCompatibleStorage();
         vectorPersistenceService.add(source, vectorRow(title, content));
     }
 
     public boolean update(Long id, String title, String content) {
+        requireCompatibleStorage();
         return vectorPersistenceService.update(id, vectorRow(title, content));
     }
 
@@ -160,18 +128,19 @@ public class PgVectorKnowledgeService implements InitializingBean {
     }
 
     public List<KnowledgeSnippet> search(String query, int limit) {
-        String vector = embeddingService.toPgVector(embeddingService.embed(query));
+        boolean vectorReady = storageMatchesConfiguration() && !hasStaleEmbeddings();
+        String vector = vectorReady ? embeddingService.toPgVector(embeddingService.embed(query)) : null;
         String category = inferCategory(query, query);
         int safeLimit = Math.max(1, Math.min(limit, 20));
         int candidateLimit = Math.max(safeLimit, safeLimit * Math.max(2, properties.getKnowledge().getRerankCandidateMultiplier()));
-        double vectorWeight = normalizedWeight(properties.getKnowledge().getVectorWeight());
+        double vectorWeight = vectorReady ? normalizedWeight(properties.getKnowledge().getVectorWeight()) : 0.0;
         double keywordWeight = normalizedWeight(properties.getKnowledge().getKeywordWeight());
         double categoryWeight = normalizedWeight(properties.getKnowledge().getCategoryWeight());
         double totalWeight = vectorWeight + keywordWeight + categoryWeight;
         if (totalWeight <= 0.0) {
-            vectorWeight = 0.65;
-            keywordWeight = 0.25;
-            categoryWeight = 0.10;
+            vectorWeight = vectorReady ? 0.65 : 0.0;
+            keywordWeight = vectorReady ? 0.25 : 0.75;
+            categoryWeight = vectorReady ? 0.10 : 0.25;
             totalWeight = 1.0;
         }
         vectorWeight /= totalWeight;
@@ -181,15 +150,21 @@ public class PgVectorKnowledgeService implements InitializingBean {
         double contentWeight = keywordWeight / 2.0;
         int rrfK = Math.max(1, Math.min(1000, properties.getKnowledge().getRrfK()));
         double normalizationFactor = rrfK + 1.0;
+        String vectorCandidates = vectorReady ? """
+                SELECT id, ROW_NUMBER() OVER (ORDER BY distance, id) AS vector_rank
+                FROM (
+                    SELECT id, embedding <=> %s AS distance FROM knowledge_chunks
+                    WHERE embedding_signature=? ORDER BY distance, id LIMIT ?
+                ) ranked_vector
+                """.formatted(compressionService.castParameter())
+                : "SELECT NULL::bigint AS id, NULL::bigint AS vector_rank WHERE false";
+        List<Object> args = new ArrayList<>();
+        if (vectorReady) { args.add(vector); args.add(activeSignature()); args.add(candidateLimit); }
+        args.addAll(List.of(query, candidateLimit, query, candidateLimit, normalizationFactor,
+                vectorWeight, rrfK, titleWeight, rrfK, contentWeight, rrfK, category, categoryWeight, rrfK, safeLimit));
         List<KnowledgeSnippet> snippets = jdbcTemplate.query("""
                 WITH vector_candidates AS (
-                    SELECT id, ROW_NUMBER() OVER (ORDER BY distance, id) AS vector_rank
-                    FROM (
-                        SELECT id, embedding <=> %s AS distance
-                        FROM knowledge_chunks
-                        ORDER BY distance, id
-                        LIMIT ?
-                    ) ranked_vector
+                    %s
                 ), keyword_title_candidates AS (
                     SELECT id, ROW_NUMBER() OVER (ORDER BY distance, id) AS title_rank
                     FROM (
@@ -231,19 +206,13 @@ public class PgVectorKnowledgeService implements InitializingBean {
                 JOIN candidate_ranks ranks ON ranks.id = k.id
                 ORDER BY score DESC, k.id ASC
                 LIMIT ?
-                """.formatted(compressionService.castParameter()), (rs, rowNum) -> new KnowledgeSnippet(
+                """.formatted(vectorCandidates), (rs, rowNum) -> new KnowledgeSnippet(
                 rs.getLong("id"),
                 rs.getString("title"),
                 rs.getString("content"),
                 rs.getString("category"),
                 rs.getDouble("score")
-        ), vector, candidateLimit, query, candidateLimit, query, candidateLimit,
-                normalizationFactor,
-                vectorWeight, rrfK,
-                titleWeight, rrfK,
-                contentWeight, rrfK,
-                category, categoryWeight, rrfK,
-                safeLimit);
+        ), args.toArray());
         for (int index = 0; index < snippets.size(); index++) {
             KnowledgeSnippet snippet = snippets.get(index);
             snippet.setRoughScore(snippet.getScore());
@@ -258,26 +227,6 @@ public class PgVectorKnowledgeService implements InitializingBean {
 
     public int embeddingDimension() {
         return safeEmbeddingDimension();
-    }
-
-    public int refreshStaleEmbeddings() {
-        String signature = activeSignature();
-        List<StoredKnowledge> stale = jdbcTemplate.query(
-                "SELECT id, title, content FROM knowledge_chunks WHERE embedding_signature IS DISTINCT FROM ? ORDER BY id",
-                (rs, rowNum) -> new StoredKnowledge(rs.getLong("id"), rs.getString("title"), rs.getString("content")),
-                signature
-        );
-        if (stale.isEmpty()) {
-            return 0;
-        }
-        List<KnowledgeVectorPersistenceService.KnowledgeVectorUpdate> updates = stale.stream()
-                .map(chunk -> new KnowledgeVectorPersistenceService.KnowledgeVectorUpdate(
-                        chunk.id(), embeddingService.toPgVector(embeddingService.embed(
-                                embeddingText(chunk.title(), chunk.content())))))
-                .toList();
-        vectorPersistenceService.updateEmbeddings(updates, signature);
-        log.info("Refreshed {} stale knowledge embeddings using {}", updates.size(), embeddingService.providerName());
-        return updates.size();
     }
 
     private double normalizedWeight(double weight) {
@@ -298,37 +247,25 @@ public class PgVectorKnowledgeService implements InitializingBean {
                 chunker.contentHash(safeTitle, safeContent),
                 chunker.estimateTokens(safeContent),
                 "manual",
-                LocalDateTime.now()
+                AppTime.now()
         );
     }
 
-    private void migrateEmbeddingStorageIfRequired(int targetDimension) {
-        EmbeddingColumn current = currentEmbeddingColumn();
-        String targetStorage = compressionService.storageType().sqlName();
-        if (current == null || (current.dimension() == targetDimension && current.storageType().equals(targetStorage))) {
-            return;
-        }
+    public boolean storageMatchesConfiguration() {
+        EmbeddingColumn column = currentEmbeddingColumn();
+        return column != null && column.dimension() == safeEmbeddingDimension()
+                && column.storageType().equals(compressionService.storageType().sqlName());
+    }
 
-        boolean reuseExistingValues = current.dimension() == targetDimension;
-        log.info("Migrating knowledge embedding storage from {}({}) to {}({}); reuseExistingValues={}",
-                current.storageType(), current.dimension(), targetStorage, targetDimension, reuseExistingValues);
-        List<KnowledgeVectorPersistenceService.KnowledgeVectorUpdate> updates = List.of();
-        if (!reuseExistingValues) {
-            List<StoredKnowledge> storedKnowledge = jdbcTemplate.query(
-                    "SELECT id, title, content FROM knowledge_chunks ORDER BY id",
-                    (rs, rowNum) -> new StoredKnowledge(
-                            rs.getLong("id"), rs.getString("title"), rs.getString("content"))
-            );
-            updates = storedKnowledge.stream()
-                    .map(chunk -> new KnowledgeVectorPersistenceService.KnowledgeVectorUpdate(
-                            chunk.id(), embeddingService.toPgVector(embeddingService.embed(
-                                    embeddingText(chunk.title(), chunk.content())))))
-                    .toList();
-        }
-        vectorPersistenceService.migrateStorage(
-                targetDimension, reuseExistingValues, updates, activeSignature());
-        log.info("Knowledge embedding storage migration completed. regenerated={}, estimatedBytesPerVector={}",
-                updates.size(), compressionService.estimatedBytesPerVector(targetDimension));
+    public String configuredSignature() { return activeSignature(); }
+
+    public boolean hasStaleEmbeddings() {
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject("SELECT EXISTS(SELECT 1 FROM knowledge_chunks WHERE embedding_signature IS DISTINCT FROM ?)",
+                Boolean.class, activeSignature()));
+    }
+
+    private void requireCompatibleStorage() {
+        if (!storageMatchesConfiguration() || hasStaleEmbeddings()) throw new IllegalStateException("向量存储正在等待后台重建，请稍后再试。");
     }
 
     private EmbeddingColumn currentEmbeddingColumn() {
@@ -356,7 +293,6 @@ public class PgVectorKnowledgeService implements InitializingBean {
         return Math.max(1, Math.min(properties.getKnowledge().getEmbeddingDim(), 2000));
     }
 
-    private record StoredKnowledge(Long id, String title, String content) {}
     private record ExistingChunk(Long id, String chunkKey, String contentHash, String embeddingSignature) {}
     private record EmbeddingColumn(String storageType, int dimension) {}
 

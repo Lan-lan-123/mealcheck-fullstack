@@ -9,6 +9,54 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RemoteCallGuardTest {
+    @Test void expiredOuterOperationCannotDispatchOrRenewItsDeadline() {
+        var guard = new RemoteCallGuard(new AppProperties());
+        var calls = new AtomicInteger();
+        var expired = new AiCallContext.Context(1L, System.nanoTime() - 1);
+        try (var outer = AiCallContext.restore(expired);
+             var nested = AiCallContext.open(1L, java.time.Duration.ofSeconds(120))) {
+            assertThat(AiCallContext.capture().deadlineNanos()).isEqualTo(expired.deadlineNanos());
+            assertThatThrownBy(() -> guard.execute("expired", calls::incrementAndGet))
+                    .isInstanceOf(RemoteCallGuard.RemoteCallDeadlineException.class);
+            assertThat(calls).hasValue(0);
+        }
+        assertThat(AiCallContext.capture()).isNull();
+    }
+    @Test
+    void remainingDeadlineShrinksAcrossAttemptsAndRetryAfterDoesNotRetryEarly() {
+        AppProperties properties=new AppProperties();
+        RemoteCallGuard guard=new RemoteCallGuard(properties);
+        AtomicInteger calls=new AtomicInteger();
+        try (var scope=AiCallContext.open(1L,java.time.Duration.ofMillis(100))) {
+            assertThatThrownBy(()->guard.execute("retry-after",java.time.Duration.ofSeconds(30),remaining->{
+                calls.incrementAndGet();
+                assertThat(remaining).isLessThan(java.time.Duration.ofMillis(101));
+                throw new RemoteCallGuard.RetryableRemoteCallException(429,java.time.Duration.ofSeconds(3));
+            })).isInstanceOf(RemoteCallGuard.RemoteCallDeadlineException.class);
+        }
+        assertThat(calls).hasValue(1);
+        assertThat(AiCallContext.capture()).isNull();
+    }
+    @Test
+    void parsesSecondsAndHttpDateRetryAfter() {
+        var now=java.time.Instant.parse("2026-10-04T00:00:00Z");
+        assertThat(RemoteCallGuard.parseRetryAfter("3",now)).isEqualTo(java.time.Duration.ofSeconds(3));
+        assertThat(RemoteCallGuard.parseRetryAfter("Sun, 04 Oct 2026 00:00:05 GMT",now)).isEqualTo(java.time.Duration.ofSeconds(5));
+        assertThat(RemoteCallGuard.parseRetryAfter("invalid",now)).isNull();
+    }
+    @Test
+    void interruptedOperationNeverStartsAnotherRemoteCall() {
+        var guard=new RemoteCallGuard(new AppProperties());
+        AtomicInteger calls=new AtomicInteger();
+        Thread.currentThread().interrupt();
+        try {
+            assertThatThrownBy(()->guard.execute("interrupted",()->calls.incrementAndGet()))
+                    .isInstanceOf(RemoteCallGuard.RemoteCallRejectedException.class);
+            assertThat(calls).hasValue(0);
+            assertThat(Thread.currentThread().isInterrupted()).isTrue();
+        } finally { Thread.interrupted(); }
+        assertThat(guard.execute("interrupted",()->"next")).isEqualTo("next");
+    }
     @Test
     void retriesTransientFailureThenReturnsResult() {
         AppProperties properties = new AppProperties();

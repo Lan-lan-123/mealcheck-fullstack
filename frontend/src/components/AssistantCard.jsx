@@ -1,7 +1,12 @@
-import { useEffect, useMemo, useState } from 'react'
+import PlanSaveButton from "./PlanSaveButton"
+import AnswerFeedback from "./AnswerFeedback"
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { createRequestScope } from '../utils/requestScope'
+import AiBudgetNotice from './AiBudgetNotice'
+import TaskProgress from './TaskProgress'
 import { Bot, MessageCircle, Plus, Send, Trash2, X } from 'lucide-react'
 import {
-  askDietAssistant,
+  streamDietAssistant,
   assistantConversation,
   assistantConversations,
   assistantProactiveAdvice,
@@ -45,16 +50,45 @@ export default function AssistantCard({ onError }) {
   const [question, setQuestion] = useState('')
   const [messages, setMessages] = useState(INITIAL_MESSAGES)
   const [loading, setLoading] = useState(false)
+  const [loadingTask, setLoadingTask] = useState(null)
   const [conversations, setConversations] = useState([])
   const [conversationId, setConversationId] = useState(null)
+  const [nextBefore, setNextBefore] = useState(null)
+  const [loadingOlder, setLoadingOlder] = useState(false)
+  const historyScope = useRef(createRequestScope())
+  const olderRequest = useRef(null)
+  const messageViewport = useRef(null)
+  const prependScroll = useRef(null)
   const [proactiveItems, setProactiveItems] = useState([])
+  const scope = useRef(createRequestScope())
+  const activeRequest = useRef(null)
+  const sidebarScope = useRef(createRequestScope())
+  useEffect(() => () => {
+    scope.current.invalidate()
+    sidebarScope.current.invalidate()
+    historyScope.current.invalidate()
+    olderRequest.current?.abort()
+    activeRequest.current?.abort()
+  }, [])
+
+  useLayoutEffect(() => {
+    if (prependScroll.current && messageViewport.current) {
+      const { height, top } = prependScroll.current
+      messageViewport.current.scrollTop = top + messageViewport.current.scrollHeight - height
+      prependScroll.current = null
+    }
+  }, [messages])
+
+  useLayoutEffect(() => {
+    if (open && loading && messageViewport.current) messageViewport.current.scrollTop = messageViewport.current.scrollHeight
+  }, [open, loading])
 
   const requestHistory = useMemo(
     () =>
       messages
-        .filter(message => message.role === 'user' || message.role === 'assistant')
+        .filter(message => (message.role === 'user' || message.role === 'assistant') && (!message.deliveryStatus || message.deliveryStatus === 'COMPLETE'))
         .slice(-8)
-        .map(message => ({ role: message.role, text: message.text })),
+        .map(message => ({ role: message.role, text: message.text.slice(0, 8000) })),
     [messages]
   )
 
@@ -64,32 +98,46 @@ export default function AssistantCard({ onError }) {
   }, [open])
 
   async function refreshSidebar() {
-    const [sessionData, proactiveData] = await Promise.all([
+    const current = sidebarScope.current.begin()
+    const [sessions, proactive] = await Promise.allSettled([
       assistantConversations(),
       assistantProactiveAdvice()
     ])
-    setConversations(sessionData || [])
-    setProactiveItems(proactiveData?.items || [])
+    if (!current()) return
+    if (sessions.status === 'fulfilled') setConversations(sessions.value || [])
+    if (proactive.status === 'fulfilled') setProactiveItems(proactive.value?.items || [])
   }
 
   async function submit(e, presetQuestion) {
     e?.preventDefault()
     const text = (presetQuestion || question).trim()
     if (!text || loading) return
+    const current = scope.current.begin()
+    const controller = new AbortController()
+    activeRequest.current = controller
 
     setLoading(true)
+    setLoadingTask({ kind: 'reply', startedAt: Date.now() })
     setQuestion('')
     onError?.('')
-    setMessages(current => [...current, { role: 'user', text }])
+    const streamKey = crypto.randomUUID()
+    setMessages(current => [...current, { role: 'user', text }, { role: 'assistant', text: '', streamKey, deliveryStatus: 'STREAMING' }])
 
     try {
-      const data = await askDietAssistant(text, requestHistory, conversationId)
+      const data = await streamDietAssistant(text, requestHistory, conversationId, controller.signal, (event, value) => {
+        if (!current()) return
+        if (event === "queued") setLoadingTask(task => ({ ...task, status: 'QUEUED' }))
+        if (event === "meta") setLoadingTask(task => ({ ...task, status: 'RUNNING' }))
+        if (event === "meta" && value.conversationId) setConversationId(value.conversationId)
+        setMessages(items => items.map(item => item.streamKey !== streamKey ? item : { ...item, ...(value.requestId ? { requestId: value.requestId } : {}), text: event === "delta" ? item.text + value.text : item.text }))
+      })
+      if (!current()) return
       if (data.conversationId) {
         setConversationId(data.conversationId)
       }
-      setMessages(current => [
-        ...current,
-        {
+      setMessages(items => items.map(item => item.streamKey !== streamKey ? item : {
+          ...item,
+          messageId: data.messageId, requestId: data.requestId, deliveryStatus: data.deliveryStatus || "COMPLETE",
           role: 'assistant',
           text: buildAssistantText(data),
           summary: data.summary,
@@ -97,33 +145,87 @@ export default function AssistantCard({ onError }) {
           weeklyTrend: data.weeklyTrend,
           riskLevel: data.riskLevel,
           references: Array.isArray(data.references) ? data.references : []
-        }
-      ])
+        }))
+      setLoading(false)
       await refreshSidebar()
     } catch (err) {
+      if (!current()) return
+      if (err.name === 'AbortError') {
+        setMessages(items => items.map(item => item.streamKey !== streamKey ? item : { ...item, text: item.text || '回复已取消', deliveryStatus: 'CANCELLED' }))
+        return
+      }
       const message = err.message || '饮食助手暂时不可用，请稍后再试。'
-      setMessages(current => [...current, { role: 'assistant', text: message }])
+      setMessages(items => items.map(item => item.streamKey !== streamKey ? item : { ...item, text: item.text ? `${item.text}\n\n${message}` : message, requestId: err.requestId || item.requestId, deliveryStatus: 'ERROR' }))
       onError?.(message)
     } finally {
-      setLoading(false)
+      if (current()) {
+        setLoading(false)
+        activeRequest.current = null
+      }
     }
   }
 
   async function openConversation(id) {
-    const data = await assistantConversation(id)
-    setConversationId(data.id)
-    setMessages(data.messages?.length ? data.messages : INITIAL_MESSAGES)
+    resetHistoryPage()
+    activeRequest.current?.abort()
+    const current = scope.current.begin()
+    setLoading(true)
+    setLoadingTask({ kind: 'history', startedAt: Date.now() })
+    try {
+      const data = await assistantConversation(id)
+      if (!current()) return
+      setConversationId(data.id)
+      setMessages(data.messages?.length ? data.messages : INITIAL_MESSAGES)
+      setNextBefore(data.hasMore ? data.nextBefore : null)
+    } catch (err) {
+      if (current()) onError?.(err.message)
+    } finally { if (current()) setLoading(false) }
+  }
+
+  function resetHistoryPage() {
+    historyScope.current.invalidate()
+    olderRequest.current?.abort()
+    olderRequest.current = null
+    prependScroll.current = null
+    setNextBefore(null)
+    setLoadingOlder(false)
+  }
+
+  async function loadOlderMessages() {
+    if (!conversationId || !nextBefore || loadingOlder || loading) return
+    const current = historyScope.current.begin()
+    const controller = new AbortController()
+    olderRequest.current = controller
+    setLoadingOlder(true)
+    try {
+      const data = await assistantConversation(conversationId, { before: nextBefore, signal: controller.signal })
+      if (!current()) return
+      if (messageViewport.current) prependScroll.current = {
+        height: messageViewport.current.scrollHeight, top: messageViewport.current.scrollTop
+      }
+      setMessages(messages => [...(data.messages || []), ...messages])
+      setNextBefore(data.hasMore ? data.nextBefore : null)
+    } catch (err) {
+      if (current() && err.name !== 'AbortError') onError?.(err.message)
+    } finally {
+      if (current()) { setLoadingOlder(false); olderRequest.current = null }
+    }
   }
 
   async function removeConversation(id) {
-    await deleteAssistantConversation(id)
-    if (conversationId === id) {
-      startNewConversation()
-    }
-    await refreshSidebar()
+    if (conversationId === id) startNewConversation()
+    try {
+      await deleteAssistantConversation(id)
+      await refreshSidebar()
+    } catch (err) { onError?.(err.message) }
   }
 
   function startNewConversation() {
+    resetHistoryPage()
+    scope.current.invalidate()
+    activeRequest.current?.abort()
+    activeRequest.current = null
+    setLoading(false)
     setConversationId(null)
     setMessages(INITIAL_MESSAGES)
   }
@@ -161,6 +263,7 @@ export default function AssistantCard({ onError }) {
             </aside>
 
             <div className="assistant-main">
+              <AiBudgetNotice revision={messages.length} />
               {!!proactiveItems.length && (
                 <div className="assistant-proactive">
                   <strong>主动建议</strong>
@@ -168,7 +271,10 @@ export default function AssistantCard({ onError }) {
                 </div>
               )}
 
-              <div className="assistant-messages">
+              <div className="assistant-messages" ref={messageViewport}>
+                {nextBefore && <button type="button" onClick={loadOlderMessages} disabled={loadingOlder || loading}>
+                  {loadingOlder ? '正在加载历史消息…' : '加载更早的消息'}
+                </button>}
                 {messages.map((message, index) => (
                   <div className={`assistant-message ${message.role}`} key={`${message.role}-${index}`}>
                     {message.riskLevel && (
@@ -176,7 +282,9 @@ export default function AssistantCard({ onError }) {
                         {RISK_LABELS[message.riskLevel] || message.riskLevel}
                       </span>
                     )}
-                    <div>{message.text}</div>
+                    <div>{message.text || "正在等待回复…"}</div>
+                    {message.role === "assistant" && message.messageId && <><AnswerFeedback key={message.messageId} message={message} />{(!message.deliveryStatus || message.deliveryStatus === "COMPLETE") && <PlanSaveButton text={message.text} sourceType="ASSISTANT" sourceMessageId={message.messageId} />}</>}
+                    {message.role === "assistant" && !message.messageId && message.requestId && <p className="hint">请求 ID：{message.requestId} · {message.deliveryStatus === "CANCELLED" ? "已取消，内容未完成" : message.deliveryStatus === "ERROR" ? "回复未完成" : "正在生成"}</p>}
                     {message.references?.length > 0 && (
                       <div className="assistant-reference-list">
                         <span>参考依据</span>
@@ -190,7 +298,12 @@ export default function AssistantCard({ onError }) {
                     )}
                   </div>
                 ))}
-                {loading && <div className="assistant-message assistant">正在调用用户记录、目标、周报和知识库生成建议...</div>}
+                {loading && <div className="assistant-message assistant assistant-progress">
+                  <TaskProgress label="饮食助手进度" startedAt={loadingTask?.startedAt}
+                    title={loadingTask?.kind === 'history' ? '正在加载历史对话' : loadingTask?.status === 'QUEUED' ? '正在排队等待回复' : '正在整理饮食建议'}
+                    description={loadingTask?.kind === 'history' ? '正在读取这段对话的消息。' : loadingTask?.status === 'QUEUED' ? '排队时间计入回复期限，可以随时取消等待。' : '正在结合你的问题与饮食信息生成回复。'}
+                    longWaitMessage="等待时间较长，请稍候；关闭聊天窗口后仍可返回查看。" />
+                </div>}
               </div>
 
               <div className="assistant-quick-list">
@@ -201,6 +314,7 @@ export default function AssistantCard({ onError }) {
                 ))}
               </div>
 
+              {loading && loadingTask?.kind === "reply" && <button type="button" className="secondary-btn" onClick={() => activeRequest.current?.abort()}>取消等待</button>}
               <form className="assistant-chat-form" onSubmit={submit}>
                 <input
                   value={question}

@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
@@ -172,8 +171,18 @@ public class RedisCacheService {
                 return staleFallback.get();
             }
             try {
-                return (T) existing.join();
-            } catch (CompletionException error) {
+                AiCallContext.checkExecution();
+                var context = AiCallContext.capture();
+                long remaining = context == null ? java.util.concurrent.TimeUnit.SECONDS.toNanos(75)
+                        : context.deadlineNanos() - System.nanoTime();
+                if (remaining <= 0) throw new java.util.concurrent.TimeoutException();
+                return (T) existing.get(remaining, java.util.concurrent.TimeUnit.NANOSECONDS);
+            } catch (java.util.concurrent.TimeoutException error) {
+                throw new RemoteCallGuard.RemoteCallDeadlineException("Cache load wait exceeded caller deadline");
+            } catch (InterruptedException error) {
+                Thread.currentThread().interrupt();
+                throw new RemoteCallGuard.RemoteCallRejectedException("Cache load wait interrupted");
+            } catch (java.util.concurrent.ExecutionException error) {
                 Throwable cause = error.getCause() == null ? error : error.getCause();
                 if (cause instanceof RuntimeException runtimeException) {
                     throw runtimeException;

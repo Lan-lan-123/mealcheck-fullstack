@@ -1,5 +1,7 @@
 package com.example.mealcheck.entity;
 
+import com.example.mealcheck.util.AppTime;
+
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -54,9 +56,46 @@ public class MealRecord {
     @Basic(fetch = FetchType.LAZY)
     @Column(columnDefinition = "TEXT")
     private String advice;
+    @Column(columnDefinition = "TEXT")
+    private String originalFoodsJson;
+    @Column(nullable = false)
+    private long revision;
+    @Column(nullable = false, length = 80)
+    private String scoringVersion = "legacy";
+    @Column(length = 100)
+    private String recognitionModel;
+
+    public String getOriginalFoodsJson() { return originalFoodsJson; }
+    public void setOriginalFoodsJson(String value) { originalFoodsJson = value; }
+    public long getRevision() { return revision; }
+    public void setRevision(long value) { revision = value; }
+    public String getScoringVersion() { return scoringVersion; }
+    public void setScoringVersion(String value) { scoringVersion = value; }
+    public String getRecognitionModel() { return recognitionModel; }
+    public void setRecognitionModel(String value) { recognitionModel = value; }
 
     @Column(nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt = AppTime.now();
+
+    private LocalDateTime occurredAt;
+    @Column(nullable=false, length=16) private String mealType = "UNSPECIFIED";
+    @Column(nullable=false, length=16) private String recordSource = "PHOTO";
+    @Column(nullable=false) private boolean timeConfirmed;
+    @Column(nullable=false) private long metadataVersion;
+    @Column(length=500) private String note;
+    @jakarta.persistence.PrePersist void defaultMealTime() { if (occurredAt == null) occurredAt = createdAt; }
+    public LocalDateTime getOccurredAt() { return occurredAt == null ? createdAt : occurredAt; }
+    public void setOccurredAt(LocalDateTime value) { occurredAt = value; }
+    public String getMealType() { return mealType; }
+    public void setMealType(String value) { mealType = value; }
+    public String getRecordSource() { return recordSource; }
+    public void setRecordSource(String value) { recordSource = value; }
+    public boolean isTimeConfirmed() { return timeConfirmed; }
+    public void setTimeConfirmed(boolean value) { timeConfirmed = value; }
+    public long getMetadataVersion() { return metadataVersion; }
+    public void setMetadataVersion(long value) { metadataVersion = value; }
+    public String getNote() { return note; }
+    public void setNote(String value) { note = value; }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

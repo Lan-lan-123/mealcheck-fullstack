@@ -12,21 +12,37 @@
 
     <groupId>com.example</groupId>
     <artifactId>mealcheck-backend</artifactId>
-    <version>0.3.0</version>
+    <version>1.0.0</version>
     <name>MealCheck Backend</name>
     <description>Campus cafeteria meal structure assessment with Spring Boot, JWT and PostgreSQL pgvector.</description>
 
     <properties>
         <java.version>17</java.version>
+        <spring-security.version>6.3.10</spring-security.version>
         <jjwt.version>0.12.6</jjwt.version>
         <langchain4j.version>1.13.1</langchain4j.version>
         <langgraph4j.version>1.8.24</langgraph4j.version>
         <mcp-java-sdk.version>0.18.3</mcp-java-sdk.version>
         <flyway.version>10.20.1</flyway.version>
         <twelvemonkeys.version>3.13.1</twelvemonkeys.version>
+        <testcontainers.version>1.21.4</testcontainers.version>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>com.aliyun.oss</groupId>
+            <artifactId>aliyun-sdk-oss</artifactId>
+            <version>3.18.4</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -146,11 +162,35 @@
     </dependencies>
 
     <build>
+        <finalName>mealcheck-backend</finalName>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludes><exclude>**/*DatabaseIntegrationTest.java</exclude></excludes>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>integration</id>
+            <build><plugins><plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <includes><include>**/*DatabaseIntegrationTest.java</include></includes>
+                    <failIfNoTests>true</failIfNoTests>
+                </configuration>
+                <executions><execution><goals>
+                    <goal>integration-test</goal><goal>verify</goal>
+                </goals></execution></executions>
+            </plugin></plugins></build>
+        </profile>
+    </profiles>
 </project>

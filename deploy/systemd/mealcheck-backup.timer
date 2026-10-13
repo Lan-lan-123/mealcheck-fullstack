@@ -1,0 +1,9 @@
+[Unit]
+Description=Daily MealCheck encrypted off-site backup
+[Timer]
+OnCalendar=*-*-* 02:00:00 UTC
+RandomizedDelaySec=5m
+Persistent=true
+Unit=mealcheck-backup.service
+[Install]
+WantedBy=timers.target

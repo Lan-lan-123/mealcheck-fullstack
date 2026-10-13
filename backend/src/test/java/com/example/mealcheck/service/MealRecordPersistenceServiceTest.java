@@ -23,7 +23,7 @@ class MealRecordPersistenceServiceTest {
         UserAccountRepository users = mock(UserAccountRepository.class);
         UserDietProfileService profiles = mock(UserDietProfileService.class);
         ImageStorageService images = mock(ImageStorageService.class);
-        MealRecordPersistenceService service = new MealRecordPersistenceService(records, users, profiles, images);
+        MealRecordPersistenceService service = new MealRecordPersistenceService(records, users, profiles, images, mock(MealReportInvalidationService.class));
         UserAccount user = user(7L);
         MealRecord record = new MealRecord();
         ValidatedImage image = image();
@@ -45,7 +45,7 @@ class MealRecordPersistenceServiceTest {
         UserAccountRepository users = mock(UserAccountRepository.class);
         UserDietProfileService profiles = mock(UserDietProfileService.class);
         ImageStorageService images = mock(ImageStorageService.class);
-        MealRecordPersistenceService service = new MealRecordPersistenceService(records, users, profiles, images);
+        MealRecordPersistenceService service = new MealRecordPersistenceService(records, users, profiles, images, mock(MealReportInvalidationService.class));
         UserAccount user = user(8L);
         MealRecord record = new MealRecord();
         ValidatedImage image = image();

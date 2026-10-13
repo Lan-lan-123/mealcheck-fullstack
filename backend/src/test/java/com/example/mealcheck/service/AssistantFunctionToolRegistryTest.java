@@ -54,7 +54,7 @@ class AssistantFunctionToolRegistryTest {
                 .arguments("{\"query\":\"protein\",\"limit\":99}")
                 .build();
 
-        AssistantFunctionToolRegistry.ToolResult result = registry.execute(
+        AssistantFunctionToolRuntime.ToolResult result = registry.execute(
                 user(), request, System.nanoTime() + TimeUnit.SECONDS.toNanos(2));
 
         assertThat(result.content()).contains("title").contains("content");

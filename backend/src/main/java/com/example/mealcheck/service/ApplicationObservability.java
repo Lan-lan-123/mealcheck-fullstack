@@ -97,12 +97,70 @@ public class ApplicationObservability {
         counter("mealcheck.ai.call.requests", "operation", safeOperation(operation), "outcome", outcome).increment();
     }
 
+    public void recordAiUsage(String operation,long input,long output,double cost) {
+        counter("mealcheck.ai.tokens","operation",safeOperation(operation),"direction","input").increment(Math.max(0,input));
+        counter("mealcheck.ai.tokens","operation",safeOperation(operation),"direction","output").increment(Math.max(0,output));
+        counter("mealcheck.ai.estimated.cost","operation",safeOperation(operation)).increment(Math.max(0,cost));
+    }
+    public void recordAiHttpAttempt(String operation,long elapsedNanos,boolean success,boolean retry) {
+        counter("mealcheck.ai.http.attempts","operation",safeOperation(operation),"outcome",success?"success":"failure").increment();
+        timer("mealcheck.ai.http.duration","operation",safeOperation(operation)).record(Math.max(0,elapsedNanos),TimeUnit.NANOSECONDS);
+        if (retry) counter("mealcheck.ai.http.retries","operation",safeOperation(operation)).increment();
+    }
+    public void recordAiUsageAvailability(String operation,boolean known,boolean priced) {
+        if (!known) counter("mealcheck.ai.usage.missing","operation",safeOperation(operation)).increment();
+        if (!priced) counter("mealcheck.ai.cost.unpriced","operation",safeOperation(operation)).increment();
+    }
+
     public void recordWeeklyReport(String outcome, int count) {
         counter("mealcheck.weekly.report.generated", "outcome", outcome).increment(Math.max(0, count));
     }
 
     public void recordWeeklyReportJob(String outcome) {
         counter("mealcheck.weekly.report.jobs", "outcome", outcome).increment();
+    }
+
+    public void recordWeeklyReportCoordinationRun(long elapsedMs,
+                                                  String status,
+                                                  String generationMode) {
+        String safeStatus = safeCoordinationStatus(status);
+        String safeMode = safeGenerationMode(generationMode);
+        timer("mealcheck.weekly.report.coordination.duration",
+                "status", safeStatus, "generationMode", safeMode)
+                .record(Math.max(0L, elapsedMs), TimeUnit.MILLISECONDS);
+        counter("mealcheck.weekly.report.coordination.runs",
+                "status", safeStatus, "generationMode", safeMode).increment();
+    }
+
+    public void recordWeeklyReportCoordinationStep(long elapsedMs,
+                                                   String node,
+                                                   String nodeType,
+                                                   String status,
+                                                   boolean fallbackUsed) {
+        String safeNode = safeCoordinationNode(node);
+        String safeType = "TOOL".equals(nodeType) ? "TOOL" :
+                ("ORCHESTRATION".equals(nodeType) ? "ORCHESTRATION" : "AGENT");
+        String safeStatus = safeCoordinationStatus(status);
+        String fallback = Boolean.toString(fallbackUsed);
+        timer("mealcheck.weekly.report.coordination.step.duration",
+                "node", safeNode, "nodeType", safeType,
+                "status", safeStatus, "fallback", fallback)
+                .record(Math.max(0L, elapsedMs), TimeUnit.MILLISECONDS);
+        counter("mealcheck.weekly.report.coordination.steps",
+                "node", safeNode, "nodeType", safeType,
+                "status", safeStatus, "fallback", fallback).increment();
+    }
+
+    public void recordWeeklyReportCoordinationRevisions(int revisionCount) {
+        DistributionSummary.builder("mealcheck.weekly.report.coordination.revisions")
+                .baseUnit("revisions").register(registry).record(Math.max(0, revisionCount));
+    }
+
+    public void recordWeeklyReportCoordinationRecovery(int runCount, int stepCount) {
+        counter("mealcheck.weekly.report.coordination.recoveries", "type", "runs")
+                .increment(Math.max(0, runCount));
+        counter("mealcheck.weekly.report.coordination.recoveries", "type", "steps")
+                .increment(Math.max(0, stepCount));
     }
 
     public void recordMcpTool(long startedAt, String tool, String outcome) {
@@ -157,8 +215,35 @@ public class ApplicationObservability {
         }
         return switch (operation) {
             case "vision-recognition", "meal-advice", "diet-assistant",
-                 "diet-assistant-function-calling" -> operation;
+                 "diet-assistant-function-calling", "weekly-report-trend-agent",
+                 "weekly-report-plan-agent", "weekly-report-review-agent" -> operation;
             default -> "other";
+        };
+    }
+
+    private String safeCoordinationNode(String node) {
+        if (node == null || node.isBlank()) return "unknown";
+        return switch (node) {
+            case "prepare", "trend_agent", "evidence_tool", "plan_agent", "review_agent" -> node;
+            default -> "other";
+        };
+    }
+
+    private String safeCoordinationStatus(String status) {
+        if (status == null || status.isBlank()) return "UNKNOWN";
+        return switch (status) {
+            case "RUNNING", "SUCCEEDED", "DEGRADED", "FAILED", "INTERRUPTED" -> status;
+            default -> "UNKNOWN";
+        };
+    }
+
+    private String safeGenerationMode(String generationMode) {
+        if (generationMode == null || generationMode.isBlank()) return "UNKNOWN";
+        return switch (generationMode) {
+            case "MULTI_AGENT", "MULTI_AGENT_PARTIAL_FALLBACK",
+                 "RULE_BASED_REVIEW_FALLBACK", "RULE_BASED_GRAPH_FALLBACK",
+                 "INTERRUPTED" -> generationMode;
+            default -> "OTHER";
         };
     }
 

@@ -45,15 +45,50 @@ class MarkdownKnowledgeChunkerTest {
     }
 
     @Test
-    void bundledKnowledgeUsesTargetTokenRange() throws Exception {
+    void bundledKnowledgeContainsOneHundredDistinctIndependentTopics() throws Exception {
         MarkdownKnowledgeChunker chunker = new MarkdownKnowledgeChunker(new AppProperties());
         String markdown = new String(new ClassPathResource("knowledge/diet_guides.md")
                 .getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 
         List<PgVectorKnowledgeService.KnowledgeChunk> chunks = chunker.split(markdown);
 
-        assertThat(chunks).hasSize(19).allSatisfy(chunk ->
-                assertThat(chunk.tokenCount()).isBetween(300, 500));
+        assertThat(chunks).hasSize(100).allSatisfy(chunk -> {
+            assertThat(chunk.tokenCount()).isBetween(100, 500);
+            assertThat(chunk.content()).contains("https://");
+        });
+        assertThat(chunks.stream().map(PgVectorKnowledgeService.KnowledgeChunk::title)).doesNotHaveDuplicates();
+        assertThat(chunks.stream().map(PgVectorKnowledgeService.KnowledgeChunk::contentHash)).doesNotHaveDuplicates();
+        assertThat(chunks.stream().map(PgVectorKnowledgeService.KnowledgeChunk::chunkKey)).doesNotHaveDuplicates();
+        assertThat(chunks.stream().map(PgVectorKnowledgeService.KnowledgeChunk::chunkIndex))
+                .containsExactlyElementsOf(java.util.stream.IntStream.range(0, 100).boxed().toList());
+    }
+
+    @Test
+    void independentTopicsDoNotMergeOrCarryUnrelatedContext() {
+        MarkdownKnowledgeChunker chunker = new MarkdownKnowledgeChunker(new AppProperties());
+        List<PgVectorKnowledgeService.KnowledgeChunk> chunks = chunker.split(
+                "<!-- mealcheck:independent-topics -->\n# Guide\n## Topic A\n甲"
+                        + "\n## Topic B\n乙");
+
+        assertThat(chunks).hasSize(2);
+        assertThat(chunks.get(0).title()).isEqualTo("Topic A");
+        assertThat(chunks.get(0).content()).isEqualTo("甲");
+        assertThat(chunks.get(1).title()).isEqualTo("Topic B");
+        assertThat(chunks.get(1).content()).isEqualTo("乙");
+    }
+
+    @Test
+    void independentLongTopicStillSplitsWithInternalOverlap() {
+        MarkdownKnowledgeChunker chunker = new MarkdownKnowledgeChunker(new AppProperties());
+        List<PgVectorKnowledgeService.KnowledgeChunk> chunks = chunker.split(
+                "<!-- mealcheck:independent-topics -->\n## Long topic\n" + "甲".repeat(900));
+
+        assertThat(chunks).hasSizeGreaterThan(1).allSatisfy(chunk -> {
+            assertThat(chunk.title()).isEqualTo("Long topic");
+            assertThat(chunk.tokenCount()).isBetween(300, 500);
+        });
+        assertThat(chunks.get(1).content()).startsWith(chunks.get(0).content().substring(
+                chunks.get(0).content().length() - 50));
     }
 
     @Test

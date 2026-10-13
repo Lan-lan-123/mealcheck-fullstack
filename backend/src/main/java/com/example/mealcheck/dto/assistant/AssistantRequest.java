@@ -1,12 +1,18 @@
 package com.example.mealcheck.dto.assistant;
 
 import java.util.List;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 
 public class AssistantRequest {
+    @Size(max=4000)
     private String question;
+    @Size(max=4000)
     private String message;
+    @Min(1)
     private Long conversationId;
-    private List<AssistantChatMessage> history;
+    @Size(max=20)
+    private List<@NotNull @Valid AssistantChatMessage> history;
 
     public String getQuestion() {
         return question;

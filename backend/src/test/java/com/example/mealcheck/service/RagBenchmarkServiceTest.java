@@ -145,10 +145,9 @@ class RagBenchmarkServiceTest {
     private KnowledgeRerankerService disabledReranker(AppProperties properties) {
         return new KnowledgeRerankerService(
                 properties,
-                mock(java.net.http.HttpClient.class),
                 new ObjectMapper(),
                 mock(ApplicationObservability.class),
-                mock(RemoteCallGuard.class)
+                mock(AiHttpTransport.class)
         );
     }
 

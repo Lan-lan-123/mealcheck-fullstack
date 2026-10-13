@@ -1,5 +1,7 @@
 package com.example.mealcheck.service;
 
+import com.example.mealcheck.util.AppTime;
+
 import com.example.mealcheck.config.AppProperties;
 import com.example.mealcheck.dto.AdminMealAnalyticsResponse;
 import com.example.mealcheck.dto.KnowledgeSnippet;
@@ -78,7 +80,7 @@ public class RagEvaluationService {
     }
 
     public RagEvaluationSummaryResponse summary24h() {
-        LocalDateTime since = LocalDateTime.now().minusHours(24);
+        LocalDateTime since = AppTime.now().minusHours(24);
         SummaryRow summary = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*) AS searches,
                        COALESCE(AVG(top_score), 0) AS avg_top_score,

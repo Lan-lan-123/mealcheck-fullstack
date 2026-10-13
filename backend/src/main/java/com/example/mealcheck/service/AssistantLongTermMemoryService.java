@@ -5,8 +5,6 @@ import com.example.mealcheck.entity.AssistantConversation;
 import com.example.mealcheck.entity.UserAccount;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -21,8 +19,7 @@ import java.util.Locale;
 import java.util.Set;
 
 @Service
-@DependsOnDatabaseInitialization
-public class AssistantLongTermMemoryService implements InitializingBean {
+public class AssistantLongTermMemoryService {
     private static final Logger log = LoggerFactory.getLogger(AssistantLongTermMemoryService.class);
     private static final List<String> MEMORY_MARKERS = List.of(
             "我喜欢", "我不喜欢", "我不吃", "我不能吃", "我对", "我想", "我的目标", "过敏",
@@ -32,66 +29,27 @@ public class AssistantLongTermMemoryService implements InitializingBean {
     private final KnowledgeEmbeddingService embeddingService;
     private final VectorCompressionService compressionService;
     private final AppProperties properties;
+    private final AssistantMemoryStore store;
 
     public AssistantLongTermMemoryService(JdbcTemplate jdbcTemplate,
                                           KnowledgeEmbeddingService embeddingService,
                                           VectorCompressionService compressionService,
-                                          AppProperties properties) {
+                                          AppProperties properties, AssistantMemoryStore store) {
         this.jdbcTemplate = jdbcTemplate;
         this.embeddingService = embeddingService;
         this.compressionService = compressionService;
         this.properties = properties;
+        this.store = store;
     }
 
-    @Override
-    public void afterPropertiesSet() {
-        jdbcTemplate.execute("CREATE EXTENSION IF NOT EXISTS vector");
-        int dimension = Math.max(1, properties.getKnowledge().getEmbeddingDim());
-        jdbcTemplate.execute("""
-                CREATE TABLE IF NOT EXISTS assistant_memory_facts (
-                    id BIGSERIAL PRIMARY KEY,
-                    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                    conversation_id BIGINT REFERENCES assistant_conversations(id) ON DELETE CASCADE,
-                    fact_type VARCHAR(32) NOT NULL,
-                    fact_text TEXT NOT NULL,
-                    fact_hash CHAR(64) NOT NULL,
-                    embedding %s NOT NULL,
-                    embedding_signature VARCHAR(255) NOT NULL,
-                    confidence DOUBLE PRECISION NOT NULL DEFAULT 0.7,
-                    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    last_seen_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-                )
-                """.formatted(compressionService.columnType(dimension)));
-        migrateEmbeddingStorageIfRequired(dimension);
-        jdbcTemplate.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_assistant_memory_user_hash "
-                + "ON assistant_memory_facts(user_id, fact_hash)");
-        jdbcTemplate.execute("CREATE INDEX IF NOT EXISTS idx_assistant_memory_user_seen "
-                + "ON assistant_memory_facts(user_id, last_seen_at DESC)");
-        jdbcTemplate.execute("CREATE INDEX IF NOT EXISTS idx_assistant_memory_embedding ON assistant_memory_facts "
-                + "USING ivfflat (embedding " + compressionService.cosineOperatorClass() + ") WITH (lists = 50)");
-    }
+    private String signature() { return embeddingService.signature() + ":" + compressionService.signatureSuffix(); }
 
-    private void migrateEmbeddingStorageIfRequired(int dimension) {
-        String currentType = jdbcTemplate.queryForObject("""
-                SELECT format_type(attribute.atttypid, attribute.atttypmod)
-                FROM pg_attribute attribute
-                JOIN pg_class relation ON relation.oid = attribute.attrelid
-                WHERE relation.relname = 'assistant_memory_facts'
-                  AND attribute.attname = 'embedding'
-                  AND attribute.attnum > 0
-                  AND NOT attribute.attisdropped
-                """, String.class);
-        String expectedType = compressionService.columnType(dimension);
-        if (currentType == null || currentType.equalsIgnoreCase(expectedType)) {
-            return;
-        }
-        log.warn("Resetting derived long-term memory vectors after storage change: {} -> {}",
-                currentType, expectedType);
-        jdbcTemplate.execute("DROP INDEX IF EXISTS idx_assistant_memory_embedding");
-        jdbcTemplate.execute("TRUNCATE TABLE assistant_memory_facts");
-        jdbcTemplate.execute("ALTER TABLE assistant_memory_facts DROP COLUMN embedding");
-        jdbcTemplate.execute("ALTER TABLE assistant_memory_facts ADD COLUMN embedding "
-                + expectedType + " NOT NULL");
+    private List<MemoryFact> textRecall(UserAccount user, AssistantConversation conversation, int limit) {
+        return jdbcTemplate.query("""
+                SELECT fact_type,fact_text,confidence FROM assistant_memory_facts WHERE user_id=?
+                ORDER BY CASE WHEN conversation_id=? THEN 0 ELSE 1 END,last_seen_at DESC,id DESC LIMIT ?
+                """, (rs,n)->new MemoryFact(rs.getString(1),rs.getString(2),rs.getDouble(3),0,0.35),
+                user.getId(),conversation==null?null:conversation.getId(),Math.max(1,Math.min(10,limit)));
     }
 
     public List<MemoryFact> recall(UserAccount user,
@@ -102,29 +60,32 @@ public class AssistantLongTermMemoryService implements InitializingBean {
             return List.of();
         }
         try {
+            if (!store.ready(signature())) return textRecall(user, conversation, limit);
             String vector = embeddingService.toPgVector(embeddingService.embed(query));
             int safeLimit = Math.max(1, Math.min(10, limit));
             Long conversationId = conversation == null ? null : conversation.getId();
             return jdbcTemplate.query("""
                     SELECT fact_type, fact_text, confidence,
-                           GREATEST(0.0, 1.0 - (embedding <=> %s)) AS semantic_score,
-                           (0.82 * GREATEST(0.0, 1.0 - (embedding <=> %s))
+                           GREATEST(0.0, 1.0 - (coalesce(v.embedding,v.embedding_half::vector) <=> CAST(? AS vector))) AS semantic_score,
+                           (0.82 * GREATEST(0.0, 1.0 - (coalesce(v.embedding,v.embedding_half::vector) <=> CAST(? AS vector)))
                             + 0.13 * EXP(-EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - last_seen_at)) / 7776000.0)
                             + CASE WHEN conversation_id = ? THEN 0.05 ELSE 0.0 END) AS final_score
-                    FROM assistant_memory_facts
-                    WHERE user_id = ? AND embedding_signature = ?
+                    FROM assistant_memory_facts f JOIN assistant_memory_vectors v ON v.fact_id=f.id AND v.input_hash=f.fact_hash
+                    JOIN assistant_memory_version active ON active.id=1 AND active.signature=v.signature
+                    WHERE f.user_id = ? AND v.signature = ?
                     ORDER BY final_score DESC, last_seen_at DESC
                     LIMIT ?
-                    """.formatted(compressionService.castParameter(), compressionService.castParameter()),
+                    """,
                     (rs, rowNum) -> new MemoryFact(
                             rs.getString("fact_type"), rs.getString("fact_text"),
                             rs.getDouble("confidence"), rs.getDouble("semantic_score"),
                             rs.getDouble("final_score")),
-                    vector, vector, conversationId, user.getId(), embeddingService.signature(), safeLimit)
+                    vector, vector, conversationId, user.getId(), signature(), safeLimit)
                     .stream().filter(fact -> fact.finalScore() >= 0.35).toList();
         } catch (Exception e) {
             log.warn("Long-term memory recall degraded: {}", e.getMessage());
-            return List.of();
+            try { return textRecall(user, conversation, limit); }
+            catch (RuntimeException unavailable) { return List.of(); }
         }
     }
 
@@ -135,26 +96,16 @@ public class AssistantLongTermMemoryService implements InitializingBean {
         int stored = 0;
         for (ExtractedFact fact : extractFacts(userText)) {
             try {
-                String vector = embeddingService.toPgVector(embeddingService.embed(fact.text()));
-                stored += jdbcTemplate.update("""
-                        INSERT INTO assistant_memory_facts(
-                            user_id, conversation_id, fact_type, fact_text, fact_hash,
-                            embedding, embedding_signature, confidence, created_at, last_seen_at)
-                        VALUES (?, ?, ?, ?, ?, %s, ?, ?, ?, ?)
-                        ON CONFLICT (user_id, fact_hash) DO UPDATE SET
-                            conversation_id = EXCLUDED.conversation_id,
-                            fact_type = EXCLUDED.fact_type,
-                            fact_text = EXCLUDED.fact_text,
-                            embedding = EXCLUDED.embedding,
-                            embedding_signature = EXCLUDED.embedding_signature,
-                            confidence = LEAST(1.0, assistant_memory_facts.confidence + 0.05),
-                            last_seen_at = EXCLUDED.last_seen_at
-                        """.formatted(compressionService.castParameter()),
-                        user.getId(), conversation.getId(), fact.type(), fact.text(), sha256(fact.text()),
-                        vector, embeddingService.signature(), fact.confidence(),
-                        LocalDateTime.now(), LocalDateTime.now());
+                String hash=sha256(fact.text());
+                long id=store.saveText(user.getId(),conversation.getId(),fact.type(),fact.text(),hash,fact.confidence());
+                stored++;
+                if (store.ready(signature())) {
+                    String vector=embeddingService.toPgVector(embeddingService.embed(fact.text()));
+                    store.saveVector(id,hash,signature(),properties.getKnowledge().getEmbeddingDim(),compressionService.storageType().sqlName(),vector);
+                }
             } catch (Exception e) {
-                log.warn("Long-term memory write degraded: {}", e.getMessage());
+                // A failed embedding cannot roll back already saved preference/restriction text.
+                log.warn("Long-term memory vector write deferred: {}", e.getClass().getSimpleName());
             }
         }
         return stored;

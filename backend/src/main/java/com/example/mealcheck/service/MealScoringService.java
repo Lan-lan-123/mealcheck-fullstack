@@ -8,17 +8,20 @@ import org.springframework.stereotype.Service;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
 public class MealScoringService {
+    public static final String VERSION = "structured-foods-v2";
 
     public StructureEvaluation evaluate(RecognitionResult recognition, String goal) {
         StructureEvaluation evaluation = new StructureEvaluation();
 
-        List<FoodItem> foods = recognition == null || recognition.getFoods() == null
-                ? List.of()
-                : recognition.getFoods();
+        List<FoodItem> foods = acceptedFoods(recognition);
+        if (foods.isEmpty()) {
+            throw new IllegalArgumentException("没有足够可信的食物识别结果，请重新拍摄清晰的餐食图片。");
+        }
 
         Map<String, Integer> counts = new LinkedHashMap<>();
         for (FoodItem food : foods) {
@@ -27,31 +30,30 @@ public class MealScoringService {
         }
         evaluation.setCategoryCounts(counts);
 
-        String foodText = buildFoodText(recognition, foods);
+        String foodText = buildFoodText(foods);
         String normalizedGoal = normalizeGoal(goal);
 
-        boolean hasSoyMilk = containsAny(foodText, List.of(
+        boolean hasSoyMilk = foods.stream().filter(food -> !"dessert".equals(normalize(food.getCategory())))
+                .anyMatch(food -> containsAny(food.getName().toLowerCase(Locale.ROOT), List.of(
                 "豆浆", "热豆浆", "无糖豆浆", "原味豆浆", "soy milk", "soymilk"
-        ));
+        )));
 
-        boolean hasMilk = containsAny(foodText, List.of(
-                "牛奶", "纯牛奶", "鲜奶", "低脂牛奶", "无糖牛奶", "milk"
-        ));
+        boolean hasMilk = foods.stream().anyMatch(food -> List.of(
+                "牛奶", "纯牛奶", "鲜奶", "低脂牛奶", "无糖牛奶", "milk", "whole milk", "skim milk")
+                .contains(food.getName().trim().toLowerCase(Locale.ROOT)));
 
         boolean hasPlainDrink = containsAny(foodText, List.of(
                 "白水", "矿泉水", "纯净水", "无糖茶", "茶水", "黑咖啡", "无糖饮料", "无糖饮品"
         ));
 
-        boolean hasSugaryDrink = containsAny(foodText, List.of(
+        boolean hasSugaryDrink = foods.stream().anyMatch(food -> !isSugarFree(food.getName())
+                && containsAny(food.getName().toLowerCase(Locale.ROOT), List.of(
                 "可乐", "cola", "汽水", "碳酸饮料", "含糖饮料", "含糖饮品", "甜饮",
                 "奶茶", "果汁", "果味饮料", "乳酸菌饮料", "甜豆浆", "加糖豆浆",
                 "糖水", "soda", "sweet drink"
-        ));
+        )));
 
-        boolean hasDessert = counts.getOrDefault("dessert", 0) > 0
-                || containsAny(foodText, List.of(
-                "甜品", "蛋糕", "面包甜点", "饼干", "冰淇淋", "糖水", "dessert", "cake"
-        ));
+        boolean hasDessert = counts.getOrDefault("dessert", 0) > 0;
 
         boolean hasDrink = counts.getOrDefault("drink", 0) > 0
                 || hasSoyMilk
@@ -71,49 +73,21 @@ public class MealScoringService {
 
         boolean hasSugaryDrinkOrDessert = hasSugaryDrink || hasDessert;
 
-        boolean hasStaple = counts.getOrDefault("staple", 0) > 0
-                || containsAny(foodText, List.of(
-                "米饭", "白米饭", "糙米", "杂粮饭", "面条", "馒头", "包子",
-                "粥", "白粥", "肉粥", "小米粥", "燕麦粥", "土豆", "红薯",
-                "玉米", "面包", "主食", "rice", "noodle", "bread"
-        ));
-
+        boolean hasStaple = counts.getOrDefault("staple", 0) > 0;
         boolean hasProtein = counts.getOrDefault("protein", 0) > 0
-                || counts.getOrDefault("dairy", 0) > 0
-                || hasSoyMilk
-                || hasMilk
-                || containsAny(foodText, List.of(
-                "鸡肉", "鸡腿", "鸡排", "炸鸡", "炸鸡排", "猪排", "炸猪排",
-                "牛肉", "猪肉", "鱼", "虾", "鸡蛋", "水煮蛋", "煮鸡蛋",
-                "蛋", "豆腐", "豆制品", "肉粥", "protein", "chicken",
-                "beef", "pork", "fish", "egg", "tofu"
-        ));
+                || counts.getOrDefault("dairy", 0) > 0 || hasSoyMilk || hasMilk;
+        boolean hasVegetable = counts.getOrDefault("vegetable", 0) > 0;
+        boolean hasFruit = counts.getOrDefault("fruit", 0) > 0;
+        boolean hasSoup = counts.getOrDefault("soup", 0) > 0;
 
-        boolean hasVegetable = counts.getOrDefault("vegetable", 0) > 0
-                || containsAny(foodText, List.of(
-                "青菜", "白菜", "卷心菜", "包菜", "生菜", "西兰花", "菠菜",
-                "黄瓜", "凉拌黄瓜", "番茄", "西红柿", "胡萝卜", "蔬菜",
-                "绿叶菜", "vegetable", "cabbage", "broccoli", "cucumber"
-        ));
-
-        boolean hasFruit = counts.getOrDefault("fruit", 0) > 0
-                || containsAny(foodText, List.of(
-                "水果", "苹果", "香蕉", "橙子", "橘子", "梨", "葡萄", "fruit"
-        ));
-
-        boolean hasSoup = counts.getOrDefault("soup", 0) > 0
-                || containsAny(foodText, List.of(
-                "汤", "蛋花汤", "紫菜汤", "粥", "白粥", "肉粥", "soup", "porridge"
-        ));
-
-        boolean hasFriedOrHighOil = counts.getOrDefault("fried", 0) > 0
-                || counts.getOrDefault("oily", 0) > 0
-                || containsAny(foodText, List.of(
-                "炸", "油炸", "炸鸡", "炸鸡排", "鸡排", "炸猪排", "猪排",
-                "鸡扒", "肉排", "炸排", "酥脆", "脆皮", "煎炸", "裹粉",
+        boolean hasFriedOrHighOil = foods.stream().anyMatch(food -> containsAny(food.getName().toLowerCase(Locale.ROOT),
+                List.of("非油炸", "非油煎", "not fried", "non-fried", "non fried"))
+                ? false : (List.of("fried", "oily").contains(normalize(food.getCategory()))
+                || containsAny(food.getName().toLowerCase(Locale.ROOT), List.of(
+                "炸", "油炸", "炸鸡", "炸鸡排", "炸猪排", "炸排", "酥脆", "脆皮", "煎炸", "裹粉",
                 "面包糠", "薯条", "高油", "重油", "油脂", "油腻",
                 "fried", "crispy"
-        ));
+        ))));
 
         int score = 50;
 
@@ -353,23 +327,29 @@ public class MealScoringService {
         return evaluation;
     }
 
-    private String buildFoodText(RecognitionResult recognition, List<FoodItem> foods) {
-        String sceneSummary = recognition == null || recognition.getSceneSummary() == null
-                ? ""
-                : recognition.getSceneSummary();
+    private String buildFoodText(List<FoodItem> foods) {
+        // Scene summaries and notes can contain negations or advice, not observed foods.
+        return foods.stream().map(FoodItem::getName)
+                .collect(Collectors.joining(" ")).toLowerCase(Locale.ROOT);
+    }
 
-        String foodItems = foods == null
-                ? ""
-                : foods.stream()
-                .map(food -> {
-                    String name = food.getName() == null ? "" : food.getName();
-                    String category = food.getCategory() == null ? "" : food.getCategory();
-                    String note = food.getNote() == null ? "" : food.getNote();
-                    return name + " " + category + " " + note;
-                })
-                .collect(Collectors.joining(" "));
+    public List<FoodItem> acceptedFoods(RecognitionResult recognition) {
+        Map<String, FoodItem> unique = new LinkedHashMap<>();
+        if (recognition != null && recognition.isFoodImage() && recognition.getFoods() != null) {
+            for (FoodItem food : recognition.getFoods()) {
+                if (food == null || food.getName() == null || food.getName().isBlank()
+                        || !Double.isFinite(food.getConfidence())
+                        || food.getConfidence() < 0.5 || food.getConfidence() > 1.0) continue;
+                String key = food.getName().trim().toLowerCase(Locale.ROOT).replaceAll("\\s+", " ");
+                unique.merge(key, food, (a, b) -> a.getConfidence() >= b.getConfidence() ? a : b);
+            }
+        }
+        return List.copyOf(unique.values());
+    }
 
-        return (sceneSummary + " " + foodItems).toLowerCase();
+    private boolean isSugarFree(String name) {
+        return containsAny(name.toLowerCase(Locale.ROOT), List.of(
+                "无糖", "零糖", "0糖", "零度", "sugar-free", "sugar free", "zero sugar", "diet cola"));
     }
 
     private boolean containsAny(String text, List<String> keywords) {

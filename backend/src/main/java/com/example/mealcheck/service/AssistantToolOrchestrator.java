@@ -1,5 +1,7 @@
 package com.example.mealcheck.service;
 
+import com.example.mealcheck.util.AppTime;
+
 import com.example.mealcheck.config.AppProperties;
 import com.example.mealcheck.dto.KnowledgeSnippet;
 import com.example.mealcheck.dto.WeeklyReportResponse;
@@ -212,7 +214,7 @@ public class AssistantToolOrchestrator {
         response.setNextWeekSuggestions(List.of());
         response.setGoalType("balanced");
         response.setReportText("暂无可用周报。");
-        response.setGeneratedAt(LocalDateTime.now());
+        response.setGeneratedAt(AppTime.now());
         return response;
     }
 

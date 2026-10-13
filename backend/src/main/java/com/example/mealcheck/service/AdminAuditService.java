@@ -28,7 +28,7 @@ public class AdminAuditService {
     public void log(UserPrincipal principal, String action, String targetType, Long targetId, String detail) {
         AdminAuditLog log = new AdminAuditLog();
         if (principal != null) {
-            userAccountRepository.findByUsername(principal.getUsername()).ifPresent(log::setAdmin);
+            userAccountRepository.findById(principal.getId()).ifPresent(log::setAdmin);
             log.setAdminUsername(principal.getUsername());
         } else {
             log.setAdminUsername("unknown");

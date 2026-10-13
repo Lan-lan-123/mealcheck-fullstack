@@ -1,0 +1,10 @@
+* { box-sizing: border-box; }
+body { margin: 0; }
+button, input, select, textarea { font: inherit; }
+label { display: grid; gap: 8px; margin-bottom: 14px; font-weight: 700; }
+input, select { width: 100%; border: 1px solid #dbe5d4; border-radius: 15px; padding: 12px 14px; background: #fff; outline: none; }
+.primary { width: 100%; border: 0; border-radius: 16px; background: #2f6b36; color: white; padding: 13px 18px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.primary:disabled, .ghost:disabled { opacity: .65; cursor: not-allowed; }
+.ghost { width: 100%; margin-top: 10px; border: 1px solid #d5e2cc; background: #fff; border-radius: 16px; padding: 12px 16px; cursor: pointer; color: #2f6b36; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.error { color: #b12a2a; font-weight: 700; }
+.hint, .empty { color: #6f7b6b; line-height: 1.7; }

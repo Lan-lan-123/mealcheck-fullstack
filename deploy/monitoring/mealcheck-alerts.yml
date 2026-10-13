@@ -1,0 +1,179 @@
+groups:
+  - name: mealcheck-ai-budget
+    rules:
+      - alert: MealCheckGlobalAiBudgetNearLimit
+        expr: max(mealcheck_ai_budget_global_attempts) / clamp_min(max(mealcheck_ai_budget_global_limit), 1) >= 0.8 and max(mealcheck_ai_budget_monitor_healthy) == 1 and max(mealcheck_ai_budget_enabled) == 1
+        for: 5m
+        labels: {severity: warning, service: mealcheck}
+        annotations: {summary: "全站 AI 日额度已使用至少 80%，请检查消耗与剩余额度"}
+      - alert: MealCheckAiBudgetRejected
+        expr: sum(increase(mealcheck_ai_budget_rejected_total[15m])) >= 20
+        for: 5m
+        labels: {severity: warning, service: mealcheck}
+        annotations: {summary: "AI 每日额度拒绝较多，请检查用户或系统额度配置"}
+      - alert: MealCheckAiBudgetSettlementDeferred
+        expr: sum(increase(mealcheck_ai_budget_settlement_deferred_total[15m])) > 0
+        for: 5m
+        labels: {severity: warning, service: mealcheck}
+        annotations: {summary: "AI 预算结算延迟，预留仍被保守计入额度"}
+      - alert: MealCheckAiBudgetRecoveryBacklog
+        expr: max(mealcheck_ai_budget_recovery_stale) > 0 and max(mealcheck_ai_budget_monitor_healthy) == 1
+        for: 5m
+        labels: {severity: warning, service: mealcheck}
+        annotations: {summary: "超过 10 分钟的 AI 预留持续未恢复"}
+      - alert: MealCheckAiBudgetMonitorUnavailable
+        expr: mealcheck_ai_budget_monitor_healthy == 0 and on(instance,job) mealcheck_ai_budget_enabled == 1
+        for: 5m
+        labels: {severity: warning, service: mealcheck}
+        annotations: {summary: "AI 预算恢复监控不可用，请检查数据库与维护线程池"}
+      - alert: MealCheckAiBudgetStoreUnavailable
+        expr: sum(increase(mealcheck_ai_budget_unavailable_total[15m])) > 0
+        for: 1m
+        labels: {severity: critical, service: mealcheck}
+        annotations: {summary: "AI 预算存储故障，新模型调用已拒绝"}
+  - name: mealcheck-task-failures
+    rules:
+      - alert: MealCheckTerminalTaskFailures
+        expr: sum(increase(mealcheck_failure_events_total{terminal="true",error_code!~"INVALID_INPUT|BUSINESS_VALIDATION"}[15m])) >= 3
+        for: 5m
+        labels: {severity: warning, service: mealcheck}
+        annotations: {summary: "15 分钟内出现至少 3 次终止任务失败，请查看失败任务管理"}
+      - alert: MealCheckUnresolvedTaskFailures
+        expr: max(mealcheck_failure_oldest_actionable_seconds) > 1800
+        for: 5m
+        labels: {severity: warning, service: mealcheck}
+        annotations: {summary: "可恢复的失败事件已等待处理超过 30 分钟"}
+      - alert: MealCheckDeadLetterArchiveBacklog
+        expr: max(mealcheck_failure_dead_ready) > 0
+        for: 5m
+        labels: {severity: critical, service: mealcheck}
+        annotations: {summary: "死信归档持续积压，请检查归档消费者和数据库"}
+      - alert: MealCheckFailureMonitorUnavailable
+        expr: min(mealcheck_failure_monitor_healthy) == 0
+        for: 5m
+        labels: {severity: warning, service: mealcheck}
+        annotations: {summary: "失败任务监控或死信归档消费者不可用"}
+      - alert: MealCheckDeadLetterArchiveErrors
+        expr: sum(increase(mealcheck_failure_archive_total{outcome="failure"}[15m])) > 0
+        for: 5m
+        labels: {severity: warning, service: mealcheck}
+        annotations: {summary: "死信归档发生错误，消息正在等待重投"}
+  - name: mealcheck-weekly-report-coordination
+    rules:
+      - alert: MealCheckWeeklyReportCoordinationFailures
+        expr: |
+          sum(rate(mealcheck_weekly_report_coordination_runs_total{status=~"FAILED|INTERRUPTED"}[15m]))
+          /
+          clamp_min(sum(rate(mealcheck_weekly_report_coordination_runs_total[15m])), 0.001)
+          > 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service: mealcheck
+        annotations:
+          summary: "MealCheck 周报 Agent 协调失败率过高"
+          description: "过去 15 分钟 FAILED 或 INTERRUPTED 占比持续超过 10%。"
+
+      - alert: MealCheckWeeklyReportCoordinationDegraded
+        expr: |
+          sum(rate(mealcheck_weekly_report_coordination_runs_total{status="DEGRADED"}[30m]))
+          /
+          clamp_min(sum(rate(mealcheck_weekly_report_coordination_runs_total[30m])), 0.001)
+          > 0.25
+        for: 15m
+        labels:
+          severity: warning
+          service: mealcheck
+        annotations:
+          summary: "MealCheck 周报 Agent 降级率偏高"
+          description: "过去 30 分钟降级运行占比持续超过 25%。"
+
+      - alert: MealCheckWeeklyReportCoordinationSlow
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (
+              rate(mealcheck_weekly_report_coordination_duration_seconds_bucket[30m])
+            )
+          ) > 45
+        for: 15m
+        labels:
+          severity: warning
+          service: mealcheck
+        annotations:
+          summary: "MealCheck 周报 Agent 协调 P95 延迟过高"
+          description: "协调运行 P95 耗时持续超过 45 秒。"
+
+      - alert: MealCheckWeeklyReportCoordinationStuck
+        expr: mealcheck_weekly_report_coordination_oldest_active_age_seconds > 600
+        for: 5m
+        labels:
+          severity: warning
+          service: mealcheck
+        annotations:
+          summary: "MealCheck 存在长时间运行的 Agent 协调任务"
+          description: "最老的运行中任务已超过 10 分钟，接近默认 15 分钟中断恢复阈值。"
+
+      - alert: MealCheckWeeklyReportCoordinationRecovery
+        expr: increase(mealcheck_weekly_report_coordination_recoveries_total{type="runs"}[15m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+          service: mealcheck
+        annotations:
+          summary: "MealCheck 已自动恢复中断的 Agent 协调任务"
+          description: "过去 15 分钟至少有一个协调运行因心跳过期被标记为 INTERRUPTED。"
+
+  - name: mealcheck-analysis-and-backups
+    rules:
+      - alert: MealCheckUnavailable
+        expr: up{job="mealcheck"} == 0
+        for: 2m
+        labels: {severity: critical, service: mealcheck}
+        annotations: {summary: "MealCheck 指标端不可访问"}
+      - alert: MealCheckAnalysisFailures
+        expr: sum(rate(mealcheck_analysis_jobs_total{outcome="failure"}[15m])) / clamp_min(sum(rate(mealcheck_analysis_jobs_total[15m])), 0.001) > 0.1
+        for: 5m
+        labels: {severity: critical, service: mealcheck}
+        annotations: {summary: "图片分析失败率超过 10%"}
+      - alert: MealCheckAnalysisSlow
+        expr: histogram_quantile(0.95, sum by(le)(rate(mealcheck_analysis_duration_seconds_bucket[15m]))) > 60
+        for: 10m
+        labels: {severity: warning, service: mealcheck}
+        annotations: {summary: "图片分析 P95 超过 60 秒"}
+      - alert: MealCheckAnalysisStuck
+        expr: mealcheck_analysis_oldest_active_seconds > 300 or mealcheck_analysis_expired_leases > 0
+        for: 5m
+        labels: {severity: critical, service: mealcheck}
+        annotations: {summary: "图片分析存在积压或过期任务"}
+      - alert: MealCheckModelCostHigh
+        expr: sum(increase(mealcheck_ai_estimated_cost_total[1h])) > 10
+        for: 5m
+        labels: {severity: warning, service: mealcheck}
+        annotations: {summary: "模型每小时估算成本超过配置阈值", description: "默认阈值 10，按实际统一币种和预算调整；供应商账单为准。"}
+      - alert: MealCheckBackupFailed
+        expr: mealcheck_backup_success == 0
+        for: 1m
+        labels: {severity: critical, service: mealcheck}
+        annotations: {summary: "数据库与图片异地备份失败"}
+      - alert: MealCheckBackupMissing
+        expr: absent(mealcheck_backup_last_success_timestamp_seconds) or time()-mealcheck_backup_last_success_timestamp_seconds > 93600
+        for: 30m
+        labels: {severity: critical, service: mealcheck}
+        annotations: {summary: "超过 26 小时没有成功的异地备份"}
+      - alert: MealCheckRestoreFailed
+        expr: mealcheck_restore_success == 0
+        for: 1m
+        labels: {severity: critical, service: mealcheck}
+        annotations: {summary: "异地备份恢复验证失败"}
+      - alert: MealCheckRestoreMissing
+        expr: absent(mealcheck_restore_last_success_timestamp_seconds) or time()-mealcheck_restore_last_success_timestamp_seconds > 691200
+        for: 30m
+        labels: {severity: warning, service: mealcheck}
+        annotations: {summary: "超过 8 天未通过异地恢复验证"}
+
+      - alert: MealCheckModelCostUnknown
+        expr: sum(increase(mealcheck_ai_cost_unpriced_total[1h])) > 0 or sum(increase(mealcheck_ai_usage_missing_total[1h])) > 0
+        for: 5m
+        labels: {severity: warning, service: mealcheck}
+        annotations: {summary: "模型用量或单价缺失，成本估算不完整"}

@@ -1,5 +1,7 @@
+import { scaleBars } from '../utils/barScale'
+
 export default function MiniBars({ items = [], emptyText }) {
-  const max = Math.max(1, ...items.map(item => Number(item.value) || 0))
+  const bars = scaleBars(items)
 
   if (!items.length) {
     return <p className="empty-mini">{emptyText}</p>
@@ -7,13 +9,14 @@ export default function MiniBars({ items = [], emptyText }) {
 
   return (
     <div className="mini-bars">
-      {items.map(item => (
-        <div className="mini-bar-row" key={item.label}>
+      {items.map((item, index) => (
+        <div className="mini-bar-row" key={`${item.label}-${index}`}>
           <span>{item.label}</span>
-          <div className="mini-bar-track">
-            <i style={{ width: `${Math.max(8, ((Number(item.value) || 0) / max) * 100)}%` }} />
+          <div className="mini-bar-track" aria-hidden="true">
+            {bars[index].baseline > 0 && <b className="mini-bar-baseline" style={{ left: `${bars[index].baseline}%` }} />}
+            <i style={{ width: `${bars[index].width}%`, marginLeft: `${bars[index].left}%` }} />
           </div>
-          <strong>{item.value}</strong>
+          <strong>{bars[index].value === null ? '暂无' : item.value}</strong>
         </div>
       ))}
     </div>

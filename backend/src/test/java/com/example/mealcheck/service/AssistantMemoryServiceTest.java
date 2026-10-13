@@ -70,4 +70,16 @@ class AssistantMemoryServiceTest {
     private AssistantChatMessage message(String role, String text) {
         return new AssistantChatMessage(role, text);
     }
+    @Test void incompleteAnswersStayOutOfMemoryButAdvanceTheDatabaseSummaryCursor() {
+        var conversations=mock(AssistantConversationService.class);
+        var service=new AssistantMemoryService(new AppProperties(),conversations,mock(ApplicationObservability.class));
+        var conversation=new AssistantConversation();conversation.setMemorySummary("已有摘要");
+        var cancelled=message("assistant","取消后不应进入建议的内容");cancelled.setDeliveryStatus("CANCELLED");
+        var error=message("assistant","异常部分回答");error.setDeliveryStatus("ERROR");
+        var rows=List.of(cancelled,error);
+        var history=new AssistantConversationService.MemoryHistory(rows,rows,List.of(),0,2,2);
+        var context=service.prepare(conversation,"午餐怎么选","BALANCED",history,rows);
+        assertThat(context.summary()).isEqualTo("已有摘要");assertThat(context.workingMessages()).isEmpty();
+        verify(conversations).updateMemory(eq(conversation),eq("已有摘要"),eq(context.state()),eq(2));
+    }
 }

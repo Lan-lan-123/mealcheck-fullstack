@@ -7,6 +7,7 @@ import com.example.mealcheck.entity.UserAccount;
 import com.example.mealcheck.entity.UserDietProfile;
 import com.example.mealcheck.service.KnowledgeIndexService;
 import com.example.mealcheck.service.UserDietProfileService;
+import com.example.mealcheck.service.WeeklyReportCoordinationRecorder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -51,6 +52,7 @@ class WeeklyReportMultiAgentOrchestratorTest {
 
         assertThat(response.getGenerationMode()).isEqualTo("MULTI_AGENT");
         assertThat(response.getReviewStatus()).isEqualTo("APPROVED_AI");
+        assertThat(response.getCoordinationRunId()).isEqualTo("run-1");
         assertThat(response.getReportText()).isEqualTo("审查通过后的周报");
         assertThat(response.getAgentTrace()).contains(
                 "trend-agent:ai",
@@ -62,6 +64,7 @@ class WeeklyReportMultiAgentOrchestratorTest {
         verify(fixture.planAgent, times(2)).createPlan(any(), anyString(), any(), any(), anyString());
         verify(fixture.reviewAgent, times(2)).review(any(), anyString(), any(), any());
         verify(fixture.knowledgeIndexService).recordHits(List.of(7L));
+        verify(fixture.coordinationRecorder).completeRun("run-1", "MULTI_AGENT", "APPROVED_AI", 2);
     }
 
     @Test
@@ -101,6 +104,7 @@ class WeeklyReportMultiAgentOrchestratorTest {
         WeeklyTrendAgent trendAgent = mock(WeeklyTrendAgent.class);
         WeeklyPlanAgent planAgent = mock(WeeklyPlanAgent.class);
         WeeklySafetyReviewAgent reviewAgent = mock(WeeklySafetyReviewAgent.class);
+        WeeklyReportCoordinationRecorder coordinationRecorder = mock(WeeklyReportCoordinationRecorder.class);
         AppProperties properties = new AppProperties();
         properties.getWeeklyReport().setMultiAgentEnabled(true);
         properties.getWeeklyReport().setMaxReviewRevisions(1);
@@ -117,6 +121,7 @@ class WeeklyReportMultiAgentOrchestratorTest {
         when(knowledgeIndexService.search(anyString(), anyInt())).thenReturn(List.of(snippet));
         when(trendAgent.analyze(any(), anyString())).thenReturn(
                 new WeeklyTrendAnalysis("蔬菜覆盖不足", List.of("蔬菜不足"), List.of("蔬菜"), true));
+        when(coordinationRecorder.startRun(42L, null)).thenReturn("run-1");
 
         WeeklyReportMultiAgentOrchestrator orchestrator = new WeeklyReportMultiAgentOrchestrator(
                 knowledgeIndexService,
@@ -125,8 +130,10 @@ class WeeklyReportMultiAgentOrchestratorTest {
                 planAgent,
                 reviewAgent,
                 properties,
+                coordinationRecorder,
                 graphExecutor);
-        return new Fixture(orchestrator, knowledgeIndexService, trendAgent, planAgent, reviewAgent, properties, user);
+        return new Fixture(orchestrator, knowledgeIndexService, trendAgent, planAgent, reviewAgent,
+                coordinationRecorder, properties, user);
     }
 
     private WeeklyReportResponse baseReport() {
@@ -148,6 +155,7 @@ class WeeklyReportMultiAgentOrchestratorTest {
                            WeeklyTrendAgent trendAgent,
                            WeeklyPlanAgent planAgent,
                            WeeklySafetyReviewAgent reviewAgent,
+                           WeeklyReportCoordinationRecorder coordinationRecorder,
                            AppProperties properties,
                            UserAccount user) {
     }

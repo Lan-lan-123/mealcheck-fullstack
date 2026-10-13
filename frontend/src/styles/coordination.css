@@ -1,0 +1,190 @@
+.coordination-filter-grid {
+  grid-template-columns: minmax(180px, 1fr) repeat(2, minmax(140px, 0.8fr)) auto auto;
+}
+
+.coordination-table code,
+.coordination-modal code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: #315e3a;
+  overflow-wrap: anywhere;
+}
+
+.coordination-status {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.coordination-status.success {
+  color: #256a34;
+  background: #eaf7e8;
+}
+
+.coordination-status.running {
+  color: #1f5f8f;
+  background: #e9f4ff;
+}
+
+.coordination-status.degraded {
+  color: #8a5b00;
+  background: #fff4d9;
+}
+
+.coordination-status.failed {
+  color: #a62c25;
+  background: #ffeded;
+}
+
+.coordination-modal {
+  width: min(980px, 96vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #fbfff8;
+  border: 1px solid #dcead8;
+  border-radius: 26px;
+  box-shadow: 0 24px 80px rgba(30, 60, 35, 0.25);
+  padding: 28px;
+}
+
+.coordination-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.coordination-summary-grid > div {
+  display: grid;
+  gap: 5px;
+  padding: 14px 16px;
+  border: 1px solid #e0edda;
+  border-radius: 15px;
+  background: #f5faf2;
+}
+
+.coordination-summary-grid span {
+  color: #6b776a;
+  font-size: 12px;
+}
+
+.coordination-summary-grid strong {
+  color: #263a29;
+}
+
+.coordination-run-error,
+.coordination-step-error {
+  color: #9c2f27;
+  background: #fff0ef;
+  border: 1px solid #ffd1cc;
+  border-radius: 12px;
+  padding: 12px 14px;
+  overflow-wrap: anywhere;
+}
+
+.coordination-run-error {
+  margin-bottom: 20px;
+}
+
+.coordination-timeline {
+  display: grid;
+  gap: 0;
+}
+
+.coordination-step {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  min-height: 110px;
+}
+
+.coordination-step-marker {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.coordination-step-marker::after {
+  content: '';
+  position: absolute;
+  top: 34px;
+  bottom: -4px;
+  width: 2px;
+  background: #dbe8d6;
+}
+
+.coordination-step:last-child .coordination-step-marker::after {
+  display: none;
+}
+
+.coordination-step-marker span {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: #ffffff;
+  background: #4b8054;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.coordination-step.degraded .coordination-step-marker span {
+  background: #c18413;
+}
+
+.coordination-step.failed .coordination-step-marker span,
+.coordination-step.interrupted .coordination-step-marker span {
+  background: #bd4137;
+}
+
+.coordination-step.running .coordination-step-marker span {
+  background: #2b79af;
+}
+
+.coordination-step-content {
+  margin: 0 0 16px 8px;
+  padding: 16px 18px;
+  border: 1px solid #e0eadc;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.coordination-step-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.coordination-step-head > div {
+  display: grid;
+  gap: 4px;
+}
+
+.coordination-step-head strong {
+  color: #233727;
+}
+
+.coordination-step-head > div span,
+.coordination-step-meta {
+  color: #718071;
+  font-size: 13px;
+}
+
+.coordination-step-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: 12px;
+}
+
+.coordination-step-error {
+  margin: 12px 0 0;
+  font-size: 13px;
+}

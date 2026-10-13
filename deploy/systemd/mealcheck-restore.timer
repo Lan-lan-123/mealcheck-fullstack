@@ -1,0 +1,8 @@
+[Unit]
+Description=Weekly MealCheck remote restore verification
+[Timer]
+OnCalendar=Sun *-*-* 04:00:00 UTC
+Persistent=true
+Unit=mealcheck-restore.service
+[Install]
+WantedBy=timers.target

@@ -1,5 +1,7 @@
 package com.example.mealcheck.service;
 
+import com.example.mealcheck.util.AppTime;
+
 import com.example.mealcheck.dto.AdminAuditLogPageResponse;
 import com.example.mealcheck.dto.AdminAssistantStatsResponse;
 import com.example.mealcheck.dto.AdminDashboardResponse;
@@ -8,7 +10,6 @@ import com.example.mealcheck.dto.AdminKnowledgeChunkRequest;
 import com.example.mealcheck.dto.AdminKnowledgeChunkResponse;
 import com.example.mealcheck.dto.AdminMealAnalyticsResponse;
 import com.example.mealcheck.dto.AdminMealPageResponse;
-import com.example.mealcheck.dto.AdminMealRecordResponse;
 import com.example.mealcheck.dto.AdminNonFoodUploadEventPageResponse;
 import com.example.mealcheck.dto.AdminNonFoodUploadEventResponse;
 import com.example.mealcheck.dto.AdminOperationsResponse;
@@ -33,8 +34,6 @@ import com.example.mealcheck.security.UserPrincipal;
 import com.example.mealcheck.util.Jsons;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -85,6 +84,7 @@ public class AdminService {
     private final AssistantProactiveAdviceService assistantProactiveAdviceService;
     private final AdminAnalyticsQueryService analyticsQueryService;
     private final MealRecordPersistenceService mealRecordPersistenceService;
+    private final AdminMealQueryService mealQueryService;
 
     @Value("${mealcheck.ai.api-key:}")
     private String apiKey;
@@ -112,7 +112,8 @@ public class AdminService {
                         RagBenchmarkService ragBenchmarkService,
                         AssistantProactiveAdviceService assistantProactiveAdviceService,
                         AdminAnalyticsQueryService analyticsQueryService,
-                        MealRecordPersistenceService mealRecordPersistenceService) {
+                        MealRecordPersistenceService mealRecordPersistenceService,
+                        AdminMealQueryService mealQueryService) {
         this.userAccountRepository = userAccountRepository;
         this.mealRecordRepository = mealRecordRepository;
         this.nonFoodUploadEventRepository = nonFoodUploadEventRepository;
@@ -131,6 +132,7 @@ public class AdminService {
         this.assistantProactiveAdviceService = assistantProactiveAdviceService;
         this.analyticsQueryService = analyticsQueryService;
         this.mealRecordPersistenceService = mealRecordPersistenceService;
+        this.mealQueryService = mealQueryService;
     }
 
     public AdminStatsResponse stats() {
@@ -161,7 +163,7 @@ public class AdminService {
         long userCount = userAccountRepository.count();
         long mealRecordCount = mealRecordRepository.count();
 
-        LocalDateTime todayStart = LocalDate.now().atStartOfDay();
+        LocalDateTime todayStart = AppTime.startOfDay(AppTime.today());
         long todayNormalUploadCount = mealRecordRepository.countByCreatedAtAfter(todayStart);
         long todayAbnormalUploadCount = nonFoodUploadEventRepository.countByCreatedAtAfter(todayStart);
 
@@ -194,8 +196,8 @@ public class AdminService {
         );
         List<com.example.mealcheck.dto.NonFoodUploadAlert> alerts = nonFoodUploadGuardService.activeAlerts();
         AdminOperationsResponse operations = new AdminOperationsResponse(
-                userAccountRepository.countByLastUploadAtAfter(LocalDateTime.now().minusDays(7)),
-                mealRecordRepository.countByCreatedAtAfter(LocalDateTime.now().minusDays(7)),
+                userAccountRepository.countByLastUploadAtAfter(AppTime.now().minusDays(7)),
+                mealRecordRepository.countByCreatedAtAfter(AppTime.now().minusDays(7)),
                 aiStatusService.successCount(),
                 aiStatusService.failureCount(),
                 alerts.size()
@@ -214,7 +216,7 @@ public class AdminService {
                 ? 0.0
                 : Math.round((double) questionCount / conversationCount * 100.0) / 100.0;
 
-        LocalDate today = LocalDate.now();
+        LocalDate today = AppTime.today();
         LocalDate start = today.minusDays(6);
         Map<LocalDate, Integer> questionsByDay = analyticsQueryService.assistantQuestionTrend(start, today);
 
@@ -267,7 +269,6 @@ public class AdminService {
         );
     }
 
-    @Transactional(readOnly = true)
     public AdminMealPageResponse meals(int page,
                                        int size,
                                        String username,
@@ -275,22 +276,13 @@ public class AdminService {
                                        LocalDate to,
                                        Integer minScore,
                                        Integer maxScore) {
-        int safePage = Math.max(0, page);
-        int safeSize = Math.max(1, Math.min(size, 100));
-        Pageable pageable = PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return mealQueryService.page(page, size, username, from, to, minScore, maxScore);
+    }
 
-        Page<MealRecord> records = mealRecordRepository.findAll(
-                mealSpecification(username, from, to, minScore, maxScore),
-                pageable
-        );
-
-        return new AdminMealPageResponse(
-                records.getContent().stream().map(this::toMealResponse).toList(),
-                records.getTotalElements(),
-                records.getTotalPages(),
-                records.getNumber(),
-                records.getSize()
-        );
+    public AdminMealQueryService.CursorPage mealsCursor(int size, String username, LocalDate from,
+                                                        LocalDate to, Integer minScore, Integer maxScore,
+                                                        LocalDateTime beforeTime, Long beforeId) {
+        return mealQueryService.cursor(size, username, from, to, minScore, maxScore, beforeTime, beforeId);
     }
 
     @Transactional(readOnly = true)
@@ -317,7 +309,7 @@ public class AdminService {
         PageRequest pageable = PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "createdAt"));
         if (blockedOnly) {
             Page<NonFoodUploadEvent> filtered = nonFoodUploadEventRepository.findActiveBlocked(
-                    username == null ? "" : username.trim(), LocalDateTime.now(), pageable);
+                    username == null ? "" : username.trim(), AppTime.now(), pageable);
             return new AdminNonFoodUploadEventPageResponse(
                     filtered.getContent().stream().map(event -> toNonFoodUploadResponse(event, true)).toList(),
                     filtered.getTotalElements(),
@@ -433,32 +425,6 @@ public class AdminService {
                 user.getRole(),
                 user.getCreatedAt(),
                 user.getLastUploadAt()
-        );
-    }
-
-    private AdminMealRecordResponse toMealResponse(MealRecord record) {
-        String username = record.getUser() == null ? "未知用户" : record.getUser().getUsername();
-
-        List<FoodItem> foods = Jsons.fromJson(
-                objectMapper,
-                record.getDetectedFoodsJson(),
-                new TypeReference<List<FoodItem>>() {}
-        );
-
-        List<String> foodNames = foods == null
-                ? List.of()
-                : foods.stream()
-                .map(FoodItem::getName)
-                .filter(name -> name != null && !name.isBlank())
-                .toList();
-
-        return new AdminMealRecordResponse(
-                record.getId(),
-                username,
-                record.getScore(),
-                record.getSummary(),
-                foodNames,
-                record.getCreatedAt()
         );
     }
 
@@ -593,7 +559,7 @@ public class AdminService {
         return records.stream()
                 .filter(record -> record.getCreatedAt() != null && record.getScore() != null)
                 .collect(Collectors.groupingBy(
-                        record -> record.getCreatedAt().toLocalDate(),
+                        record -> AppTime.businessDate(record.getCreatedAt()),
                         LinkedHashMap::new,
                         Collectors.averagingInt(MealRecord::getScore)
                 ))
@@ -628,44 +594,6 @@ public class AdminService {
         };
     }
 
-    private Specification<MealRecord> mealSpecification(String username,
-                                                        LocalDate from,
-                                                        LocalDate to,
-                                                        Integer minScore,
-                                                        Integer maxScore) {
-        return (root, query, cb) -> {
-            List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
-
-            if (query != null && query.getResultType() != Long.class && query.getResultType() != long.class) {
-                root.fetch("user", JoinType.LEFT);
-                query.distinct(true);
-            }
-
-            if (username != null && !username.isBlank()) {
-                Join<MealRecord, UserAccount> user = root.join("user", JoinType.LEFT);
-                predicates.add(cb.like(cb.lower(user.get("username")), "%" + username.trim().toLowerCase() + "%"));
-            }
-
-            if (from != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), from.atStartOfDay()));
-            }
-
-            if (to != null) {
-                predicates.add(cb.lessThan(root.get("createdAt"), to.plusDays(1).atStartOfDay()));
-            }
-
-            if (minScore != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("score"), minScore));
-            }
-
-            if (maxScore != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("score"), maxScore));
-            }
-
-            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
-        };
-    }
-
     private Specification<NonFoodUploadEvent> nonFoodUploadSpecification(String username) {
         return (root, query, cb) -> {
             if (username == null || username.isBlank()) {
@@ -676,7 +604,7 @@ public class AdminService {
     }
 
     private AdminUploadTrendResponse buildUploadTrends() {
-        LocalDate today = LocalDate.now();
+        LocalDate today = AppTime.today();
         LocalDate start = today.minusDays(6);
         return analyticsQueryService.uploadTrends(start, today);
     }

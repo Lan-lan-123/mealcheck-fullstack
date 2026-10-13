@@ -10,38 +10,53 @@ function buildApiUrl(path) {
 }
 
 export default function AuthImage({ url, alt }) {
-  const [src, setSrc] = useState('')
+  const [image, setImage] = useState({ url: '', src: '', status: 'empty' })
+  const [revision, setRevision] = useState(0)
 
   useEffect(() => {
     if (!url) {
-      setSrc('')
+      setImage({ url, src: '', status: 'empty' })
       return
     }
 
     let objectUrl = ''
+    let active = true
+    const controller = new AbortController()
     const token = getToken()
+    setImage({ url, src: '', status: 'loading' })
 
     fetch(buildApiUrl(url), {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      signal: controller.signal
     })
       .then(res => {
         if (!res.ok) throw new Error('图片加载失败')
         return res.blob()
       })
       .then(blob => {
+        if (!active) return
         objectUrl = URL.createObjectURL(blob)
-        setSrc(objectUrl)
+        setImage({ url, src: objectUrl, status: 'success' })
       })
-      .catch(() => setSrc(''))
+      .catch(() => { if (active) setImage({ url, src: '', status: 'error' }) })
 
     return () => {
+      active = false
+      controller.abort()
       if (objectUrl) URL.revokeObjectURL(objectUrl)
     }
-  }, [url])
+  }, [url, revision])
 
-  if (!src) {
-    return <div className="photo-placeholder">图片加载中</div>
+  if (!url) return <div className="photo-placeholder">暂无图片</div>
+  if (image.url !== url || image.status === 'loading' || image.status === 'empty') {
+    return <div className="photo-placeholder" role="status">图片加载中</div>
   }
+  if (image.status === 'error') return <div className="photo-placeholder" role="status">
+    <span>图片加载失败</span><button type="button" onClick={() => setRevision(value => value + 1)}>重新加载</button>
+  </div>
 
-  return <img src={src} alt={alt} />
+  return <img src={image.src} alt={alt} onError={() => {
+    URL.revokeObjectURL(image.src)
+    setImage(current => current.src === image.src ? { url, src: '', status: 'error' } : current)
+  }} />
 }

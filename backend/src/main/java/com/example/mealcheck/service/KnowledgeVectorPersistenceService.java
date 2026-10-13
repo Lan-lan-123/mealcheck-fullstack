@@ -79,43 +79,6 @@ public class KnowledgeVectorPersistenceService {
         }
     }
 
-    @Transactional
-    public void migrateStorage(int targetDimension,
-                               boolean reuseExistingValues,
-                               List<KnowledgeVectorUpdate> updates,
-                               String signature) {
-        jdbcTemplate.execute("ALTER TABLE knowledge_chunks DROP COLUMN IF EXISTS embedding_next");
-        jdbcTemplate.execute("ALTER TABLE knowledge_chunks ADD COLUMN embedding_next "
-                + compressionService.columnType(targetDimension));
-        if (reuseExistingValues) {
-            jdbcTemplate.update("UPDATE knowledge_chunks SET embedding_next = CAST(embedding AS "
-                    + compressionService.storageType().sqlName() + "), embedding_signature = ?", signature);
-        } else {
-            for (KnowledgeVectorUpdate update : updates) {
-                jdbcTemplate.update(
-                        "UPDATE knowledge_chunks SET embedding_next = " + compressionService.castParameter()
-                                + ", embedding_signature = ? WHERE id = ?",
-                        update.vector(), signature, update.id()
-                );
-            }
-        }
-        jdbcTemplate.execute("ALTER TABLE knowledge_chunks ALTER COLUMN embedding_next SET NOT NULL");
-        jdbcTemplate.execute("DROP INDEX IF EXISTS idx_knowledge_chunks_embedding");
-        jdbcTemplate.execute("ALTER TABLE knowledge_chunks DROP COLUMN embedding");
-        jdbcTemplate.execute("ALTER TABLE knowledge_chunks RENAME COLUMN embedding_next TO embedding");
-    }
-
-    @Transactional
-    public void updateEmbeddings(List<KnowledgeVectorUpdate> updates, String signature) {
-        for (KnowledgeVectorUpdate update : updates) {
-            jdbcTemplate.update(
-                    "UPDATE knowledge_chunks SET embedding = " + compressionService.castParameter()
-                            + ", embedding_signature = ? WHERE id = ?",
-                    update.vector(), signature, update.id()
-            );
-        }
-    }
-
     private void insert(String source, KnowledgeVectorRow row) {
         jdbcTemplate.update(
                 """

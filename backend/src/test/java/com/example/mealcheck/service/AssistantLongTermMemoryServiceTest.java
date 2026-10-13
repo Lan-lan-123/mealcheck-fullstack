@@ -13,7 +13,7 @@ class AssistantLongTermMemoryServiceTest {
         AppProperties properties = new AppProperties();
         AssistantLongTermMemoryService service = new AssistantLongTermMemoryService(
                 mock(JdbcTemplate.class), mock(KnowledgeEmbeddingService.class),
-                new VectorCompressionService(properties), properties);
+                new VectorCompressionService(properties), properties, mock(AssistantMemoryStore.class));
 
         var facts = service.extractFacts("我对花生过敏。我不喜欢香菜；今天午饭吃什么？我的目标是减脂！");
 

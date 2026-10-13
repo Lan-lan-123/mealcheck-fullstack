@@ -6,6 +6,7 @@ import com.example.mealcheck.dto.WeeklyReportResponse;
 import com.example.mealcheck.entity.UserAccount;
 import com.example.mealcheck.service.KnowledgeIndexService;
 import com.example.mealcheck.service.UserDietProfileService;
+import com.example.mealcheck.service.WeeklyReportCoordinationRecorder;
 import org.bsc.langgraph4j.CompiledGraph;
 import org.bsc.langgraph4j.GraphStateException;
 import org.bsc.langgraph4j.RunnableConfig;
@@ -44,6 +45,7 @@ public class WeeklyReportMultiAgentOrchestrator {
     private final WeeklySafetyReviewAgent reviewAgent;
     private final AppProperties properties;
     private final Executor graphExecutor;
+    private final WeeklyReportCoordinationRecorder coordinationRecorder;
     private final CompiledGraph<WeeklyReportAgentState> graph;
 
     public WeeklyReportMultiAgentOrchestrator(KnowledgeIndexService knowledgeIndexService,
@@ -52,6 +54,7 @@ public class WeeklyReportMultiAgentOrchestrator {
                                               WeeklyPlanAgent planAgent,
                                               WeeklySafetyReviewAgent reviewAgent,
                                               AppProperties properties,
+                                              WeeklyReportCoordinationRecorder coordinationRecorder,
                                               @Qualifier("weeklyReportAgentExecutor") Executor graphExecutor) {
         this.knowledgeIndexService = knowledgeIndexService;
         this.profileService = profileService;
@@ -59,12 +62,24 @@ public class WeeklyReportMultiAgentOrchestrator {
         this.planAgent = planAgent;
         this.reviewAgent = reviewAgent;
         this.properties = properties;
+        this.coordinationRecorder = coordinationRecorder;
         this.graphExecutor = graphExecutor;
         this.graph = buildGraph();
         this.graph.setMaxIterations(12);
     }
 
     public WeeklyReportResponse generate(UserAccount user, WeeklyReportResponse baseReport) {
+        return generate(user, baseReport, null);
+    }
+
+    public WeeklyReportResponse generate(UserAccount user,
+                                         WeeklyReportResponse baseReport,
+                                         Long jobId) {
+        try (var scope=com.example.mealcheck.service.AiCallContext.open(user.getId(),java.time.Duration.ofSeconds(Math.max(1,properties.getAiBudget().getOperationTimeoutSeconds())))) {
+            return generateWithinDeadline(user,baseReport,jobId);
+        }
+    }
+    private WeeklyReportResponse generateWithinDeadline(UserAccount user,WeeklyReportResponse baseReport,Long jobId) {
         if (!properties.getWeeklyReport().isMultiAgentEnabled()) {
             baseReport.setGenerationMode("RULE_BASED");
             baseReport.setReviewStatus("DISABLED");
@@ -72,25 +87,36 @@ public class WeeklyReportMultiAgentOrchestrator {
             return baseReport;
         }
 
+        String runId = coordinationRecorder.startRun(safeUserId(user), jobId);
+        baseReport.setCoordinationRunId(runId);
         Map<String, Object> inputs = new LinkedHashMap<>();
+        inputs.put(WeeklyReportAgentState.AI_CONTEXT,com.example.mealcheck.service.AiCallContext.capture());
         inputs.put(WeeklyReportAgentState.BASE_REPORT, baseReport);
+        if (runId != null && !runId.isBlank()) {
+            inputs.put(WeeklyReportAgentState.RUN_ID, runId);
+        }
         inputs.put(WeeklyReportAgentState.PROFILE_CONTEXT, profileContext(user));
         inputs.put(WeeklyReportAgentState.REVISION_COUNT, 0);
 
         RunnableConfig config = RunnableConfig.builder()
-                .threadId("weekly-report-user-" + safeUserId(user))
+                .threadId(runId == null ? "weekly-report-user-" + safeUserId(user) : runId)
                 .addParallelNodeExecutor(PREPARE, graphExecutor)
                 .build();
         try {
             WeeklyReportAgentState state = graph.invoke(inputs, config)
                     .orElseThrow(() -> new IllegalStateException("Weekly report graph returned no final state"));
-            return finalizeReport(baseReport, state);
+            WeeklyReportResponse response = finalizeReport(baseReport, state);
+            coordinationRecorder.completeRun(runId, response.getGenerationMode(),
+                    response.getReviewStatus(), state.revisionCount());
+            return response;
         } catch (Exception error) {
             log.warn("Weekly report graph degraded to rule-based report. userId={}, reason={}",
                     safeUserId(user), rootMessage(error), error);
             baseReport.setGenerationMode("RULE_BASED_GRAPH_FALLBACK");
             baseReport.setReviewStatus("GRAPH_FAILED");
             baseReport.setAgentTrace(List.of("graph:fallback"));
+            coordinationRecorder.failRun(runId, baseReport.getGenerationMode(),
+                    baseReport.getReviewStatus(), 0, error);
             return baseReport;
         }
     }
@@ -99,12 +125,11 @@ public class WeeklyReportMultiAgentOrchestrator {
         try {
             StateGraph<WeeklyReportAgentState> workflow = new StateGraph<>(
                     WeeklyReportAgentState.SCHEMA, WeeklyReportAgentState::new);
-            workflow.addNode(PREPARE, node_async(state -> Map.of(
-                            WeeklyReportAgentState.TRACE, List.of("prepare:completed"))))
-                    .addNode(TREND_AGENT, node_async(this::analyzeTrend))
-                    .addNode(EVIDENCE_TOOL, node_async(this::retrieveEvidence))
-                    .addNode(PLAN_AGENT, node_async(this::createPlan))
-                    .addNode(REVIEW_AGENT, node_async(this::reviewPlan))
+            workflow.addNode(PREPARE, node_async(state->withAiContext(state,this::prepare)))
+                    .addNode(TREND_AGENT, node_async(state->withAiContext(state,this::analyzeTrend)))
+                    .addNode(EVIDENCE_TOOL, node_async(state->withAiContext(state,this::retrieveEvidence)))
+                    .addNode(PLAN_AGENT, node_async(state->withAiContext(state,this::createPlan)))
+                    .addNode(REVIEW_AGENT, node_async(state->withAiContext(state,this::reviewPlan)))
                     .addEdge(START, PREPARE)
                     .addEdge(PREPARE, TREND_AGENT)
                     .addEdge(PREPARE, EVIDENCE_TOOL)
@@ -120,24 +145,50 @@ public class WeeklyReportMultiAgentOrchestrator {
         }
     }
 
+    private Map<String, Object> prepare(WeeklyReportAgentState state) {
+        WeeklyReportCoordinationRecorder.StepHandle step = coordinationRecorder.startStep(
+                state.runId(), PREPARE, "ORCHESTRATION", 1);
+        coordinationRecorder.completeStep(step, "COMPLETED", null, false);
+        return Map.of(WeeklyReportAgentState.TRACE, List.of("prepare:completed"));
+    }
+
+    private Map<String,Object> withAiContext(WeeklyReportAgentState state,
+            org.bsc.langgraph4j.action.NodeAction<WeeklyReportAgentState> action) throws Exception {
+        try (var scope=com.example.mealcheck.service.AiCallContext.restore(state.aiContext())) { return action.apply(state); }
+    }
+
     private Map<String, Object> analyzeTrend(WeeklyReportAgentState state) {
-        WeeklyTrendAnalysis trend = trendAgent.analyze(state.baseReport(), state.profileContext());
-        return Map.of(
-                WeeklyReportAgentState.TREND, trend,
-                WeeklyReportAgentState.TRACE,
-                List.of("trend-agent:" + (trend.aiGenerated() ? "ai" : "fallback")));
+        WeeklyReportCoordinationRecorder.StepHandle step = coordinationRecorder.startStep(
+                state.runId(), TREND_AGENT, "AGENT", 1);
+        try {
+            WeeklyTrendAnalysis trend = trendAgent.analyze(state.baseReport(), state.profileContext());
+            coordinationRecorder.completeStep(step, trend.aiGenerated() ? "AI" : "FALLBACK",
+                    trend.aiGenerated(), !trend.aiGenerated());
+            return Map.of(
+                    WeeklyReportAgentState.TREND, trend,
+                    WeeklyReportAgentState.TRACE,
+                    List.of("trend-agent:" + (trend.aiGenerated() ? "ai" : "fallback")));
+        } catch (RuntimeException error) {
+            coordinationRecorder.failStep(step, error);
+            throw error;
+        }
     }
 
     private Map<String, Object> retrieveEvidence(WeeklyReportAgentState state) {
+        WeeklyReportCoordinationRecorder.StepHandle step = coordinationRecorder.startStep(
+                state.runId(), EVIDENCE_TOOL, "TOOL", 1);
         try {
             List<KnowledgeSnippet> evidence = knowledgeIndexService.search(
                     evidenceQuery(state.baseReport()), ragLimit());
             knowledgeIndexService.recordHits(evidence.stream().map(KnowledgeSnippet::getId).toList());
+            coordinationRecorder.completeStep(step, evidence.isEmpty() ? "EMPTY" : "FOUND",
+                    null, false);
             return Map.of(
                     WeeklyReportAgentState.EVIDENCE, evidence,
                     WeeklyReportAgentState.TRACE, List.of("evidence-tool:" + evidence.size()));
         } catch (Exception error) {
             log.warn("Weekly report RAG evidence degraded. reason={}", rootMessage(error));
+            coordinationRecorder.degradeStep(step, "FALLBACK", null, error);
             return Map.of(
                     WeeklyReportAgentState.EVIDENCE, List.of(),
                     WeeklyReportAgentState.TRACE, List.of("evidence-tool:fallback"));
@@ -145,29 +196,47 @@ public class WeeklyReportMultiAgentOrchestrator {
     }
 
     private Map<String, Object> createPlan(WeeklyReportAgentState state) {
-        WeeklyReportReview previousReview = state.review();
-        WeeklyReportDraft draft = planAgent.createPlan(
-                state.baseReport(),
-                state.profileContext(),
-                state.trend(),
-                state.evidence(),
-                previousReview.approved() ? "" : previousReview.feedback());
         int attempt = state.revisionCount() + 1;
-        return Map.of(
-                WeeklyReportAgentState.DRAFT, draft,
-                WeeklyReportAgentState.REVISION_COUNT, attempt,
-                WeeklyReportAgentState.TRACE,
-                List.of("plan-agent:" + (draft.aiGenerated() ? "ai" : "fallback") + ":attempt-" + attempt));
+        WeeklyReportCoordinationRecorder.StepHandle step = coordinationRecorder.startStep(
+                state.runId(), PLAN_AGENT, "AGENT", attempt);
+        WeeklyReportReview previousReview = state.review();
+        try {
+            WeeklyReportDraft draft = planAgent.createPlan(
+                    state.baseReport(),
+                    state.profileContext(),
+                    state.trend(),
+                    state.evidence(),
+                    previousReview.approved() ? "" : previousReview.feedback());
+            coordinationRecorder.completeStep(step, draft.aiGenerated() ? "AI" : "FALLBACK",
+                    draft.aiGenerated(), !draft.aiGenerated());
+            return Map.of(
+                    WeeklyReportAgentState.DRAFT, draft,
+                    WeeklyReportAgentState.REVISION_COUNT, attempt,
+                    WeeklyReportAgentState.TRACE,
+                    List.of("plan-agent:" + (draft.aiGenerated() ? "ai" : "fallback") + ":attempt-" + attempt));
+        } catch (RuntimeException error) {
+            coordinationRecorder.failStep(step, error);
+            throw error;
+        }
     }
 
     private Map<String, Object> reviewPlan(WeeklyReportAgentState state) {
-        WeeklyReportReview review = reviewAgent.review(
-                state.baseReport(), state.profileContext(), state.trend(), state.draft());
-        String outcome = review.approved() ? "approved" : "rejected";
-        return Map.of(
-                WeeklyReportAgentState.REVIEW, review,
-                WeeklyReportAgentState.TRACE,
-                List.of("review-agent:" + outcome + (review.aiGenerated() ? ":ai" : ":rules")));
+        WeeklyReportCoordinationRecorder.StepHandle step = coordinationRecorder.startStep(
+                state.runId(), REVIEW_AGENT, "AGENT", Math.max(1, state.revisionCount()));
+        try {
+            WeeklyReportReview review = reviewAgent.review(
+                    state.baseReport(), state.profileContext(), state.trend(), state.draft());
+            String outcome = review.approved() ? "APPROVED" : "REJECTED";
+            coordinationRecorder.completeStep(step, outcome, review.aiGenerated(), !review.aiGenerated());
+            return Map.of(
+                    WeeklyReportAgentState.REVIEW, review,
+                    WeeklyReportAgentState.TRACE,
+                    List.of("review-agent:" + outcome.toLowerCase()
+                            + (review.aiGenerated() ? ":ai" : ":rules")));
+        } catch (RuntimeException error) {
+            coordinationRecorder.failStep(step, error);
+            throw error;
+        }
     }
 
     private String reviewRoute(WeeklyReportAgentState state) {
@@ -217,10 +286,10 @@ public class WeeklyReportMultiAgentOrchestrator {
                 .limit(3)
                 .map(Map.Entry::getKey)
                 .forEach(terms::add);
-        if (report.getCategoryTotals().getOrDefault("vegetable", 0) < report.getTotalMeals()) {
+        if (report.getCategoryMealCounts().getOrDefault("vegetable", 0) < report.getTotalMeals()) {
             terms.add("蔬菜 膳食纤维");
         }
-        if (report.getCategoryTotals().getOrDefault("protein", 0) < report.getTotalMeals()) {
+        if (report.getCategoryMealCounts().getOrDefault("protein", 0) < report.getTotalMeals()) {
             terms.add("蛋白质");
         }
         return terms.stream().filter(value -> value != null && !value.isBlank())

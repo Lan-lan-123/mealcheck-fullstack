@@ -1,0 +1,21 @@
+# Local deployment only. Keep the existing mealcheck-fullstack project and volumes.
+# Compose 2.24.4+ supports !override; this avoids merging the previous public bindings.
+services:
+  postgres:
+    ports: !override
+      - "127.0.0.1:5432:5432"
+  redis:
+    ports: !override
+      - "127.0.0.1:6379:6379"
+  rabbitmq:
+    ports: !override
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
+  backend:
+    image: ${MEALCHECK_LOCAL_BACKEND_IMAGE:-mealcheck-fullstack-backend:latest}
+    ports: !override
+      - "127.0.0.1:8080:8080"
+  frontend:
+    image: ${MEALCHECK_LOCAL_FRONTEND_IMAGE:-mealcheck-fullstack-frontend:latest}
+    ports: !override
+      - "127.0.0.1:5173:8080"

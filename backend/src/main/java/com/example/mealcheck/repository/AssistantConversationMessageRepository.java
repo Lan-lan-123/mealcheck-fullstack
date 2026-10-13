@@ -10,10 +10,20 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AssistantConversationMessageRepository extends JpaRepository<AssistantConversationMessage, Long> {
-    List<AssistantConversationMessage> findByConversationOrderByCreatedAtAsc(AssistantConversation conversation);
     List<AssistantConversationMessage> findByConversationOrderByCreatedAtDesc(
             AssistantConversation conversation, Pageable pageable);
     long countByConversation(AssistantConversation conversation);
+
+    @Query("select m from AssistantConversationMessage m where m.conversation = :conversation order by m.createdAt desc, m.id desc")
+    List<AssistantConversationMessage> latestPage(AssistantConversation conversation, Pageable pageable);
+
+    @Query("""
+            select m from AssistantConversationMessage m where m.conversation = :conversation
+              and (m.createdAt < :beforeTime or (m.createdAt = :beforeTime and m.id < :beforeId))
+            order by m.createdAt desc, m.id desc
+            """)
+    List<AssistantConversationMessage> beforePage(AssistantConversation conversation, LocalDateTime beforeTime,
+                                                 long beforeId, Pageable pageable);
 
     @Query(value = """
             SELECT *
