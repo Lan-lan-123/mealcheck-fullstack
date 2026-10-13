@@ -19,7 +19,7 @@
     <properties>
         <java.version>17</java.version>
         <spring-security.version>6.3.10</spring-security.version>
-        <jjwt.version>0.12.6</jjwt.version>
+        <jjwt.version>0.13.0</jjwt.version>
         <langchain4j.version>1.13.1</langchain4j.version>
         <langgraph4j.version>1.8.24</langgraph4j.version>
         <mcp-java-sdk.version>0.18.3</mcp-java-sdk.version>
