@@ -1,18 +1,28 @@
+
 version: 2
+
 updates:
   - package-ecosystem: npm
     directory: /frontend
     schedule:
       interval: weekly
+    open-pull-requests-limit: 0
+
   - package-ecosystem: maven
     directory: /backend
     schedule:
       interval: weekly
+    open-pull-requests-limit: 0
+
   - package-ecosystem: docker
     directory: /backend
     schedule:
       interval: weekly
+    open-pull-requests-limit: 0
+
   - package-ecosystem: docker
     directory: /frontend
     schedule:
       interval: weekly
+    open-pull-requests-limit: 0
+
