@@ -15,6 +15,8 @@ public class AiBudgetStore {
     private int globalDailyCalls = 100000;
     @org.springframework.beans.factory.annotation.Value("${mealcheck.ai-budget.global-daily-cost:0}")
     private BigDecimal globalDailyCost = BigDecimal.ZERO;
+    @org.springframework.beans.factory.annotation.Autowired(required=false)
+    private AiCostSettingsService costSettings;
     @jakarta.annotation.PostConstruct
     public void validateGlobalBudget() {
         if (globalDailyCalls < 1 || globalDailyCost.signum() < 0)
@@ -27,8 +29,10 @@ public class AiBudgetStore {
     public Reservation reserve(String key, Long userId, LocalDate day, int callLimit, BigDecimal costLimit,
                                BigDecimal amount, long retryAfter) {
         // Acquire global before personal quota everywhere, including settlement.
-        debit("global",null,day,globalDailyCalls,globalDailyCost,amount,retryAfter);
-        debit(key,userId,day,callLimit,costLimit,amount,retryAfter);
+        var limits=costSettings==null ? new AiCostSettingsService.Limits(globalDailyCost,costLimit)
+                : costSettings.limits(userId,globalDailyCost,costLimit,true);
+        debit("global",null,day,globalDailyCalls,limits.global(),amount,retryAfter);
+        debit(key,userId,day,callLimit,limits.quota(),amount,retryAfter);
         UUID globalId=UUID.randomUUID();
         jdbc.update("INSERT INTO ai_budget_reservations(id,quota_key,usage_day,amount,status) VALUES (?,'global',?,?,'RESERVED')",globalId,day,amount);
         UUID id=UUID.randomUUID();
@@ -106,7 +110,8 @@ public class AiBudgetStore {
     }
     public java.util.Map<String,Object> globalUsage(LocalDate day) {
         var result=new java.util.LinkedHashMap<String,Object>(usage("global",day));
-        result.put("callLimit",globalDailyCalls);result.put("costLimit",globalDailyCost);
+        result.put("callLimit",globalDailyCalls);result.put("costLimit",costSettings==null?globalDailyCost
+                :costSettings.limits(null,globalDailyCost,BigDecimal.ZERO,false).global());
         result.put("remainingCalls",Math.max(0,globalDailyCalls-((Number)result.get("attempts")).longValue()));
         return result;
     }

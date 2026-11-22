@@ -1,0 +1,1567 @@
+{
+  "reviewVersion": "rag-chunk-assistant-review-v1",
+  "reviewer": "Codex assistant",
+  "independentlyAnnotated": false,
+  "corpusSha256": "09f60831a24bce93982862e885fa97dcacc82675f05b1c2436e45834496a39b7",
+  "caseRange": [
+    "rag-001",
+    "rag-060"
+  ],
+  "scope": "Selected new candidate chunks read in full; not exhaustive corpus judgments, independent human annotation, or external factual verification. Selected corroborating chunks may be outside original target titles.",
+  "cases": [
+    {
+      "caseId": "rag-001",
+      "inspectedKnowledgeIds": [
+        "9209f2426a6c28ee361ee00e0e948a936ce64c92cf20ad6bafe2dd9811b29d10"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "9209f2426a6c28ee361ee00e0e948a936ce64c92cf20ad6bafe2dd9811b29d10",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "在校园选餐中，可以先确认这顿饭是否有普通主食、可辨认的蛋白质食物和蔬菜，再考虑某个额外项目是否真的需要。如果原来就只有一份很单一的食品，下一步未必是继续删减；若已有一套合适的饭菜又额外加购炸物，则可以针对加购环节作选择，两种情境应分别处理。"
+          ],
+          "rationale": "保留主食、明确蛋白质与蔬菜，再调整额外项目，可用于减脂晚餐。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": [
+        {
+          "knowledgeId": "9209f2426a6c28ee361ee00e0e948a936ce64c92cf20ad6bafe2dd9811b29d10",
+          "kind": "MID_SENTENCE_PREFIX",
+          "detail": "开头“带另一份小吃；”依赖前片语境，锚点选在后面的完整章节。"
+        }
+      ]
+    },
+    {
+      "caseId": "rag-002",
+      "inspectedKnowledgeIds": [
+        "d6953843f77b46f3758aeb7e4ce35954874feaff01dd23b707b3c36a91ea399f",
+        "fff84d3dde99ce888aeffc8edaf44f75ddf3e4fbd7e3276a8f8a1dd3c6254468"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "d6953843f77b46f3758aeb7e4ce35954874feaff01dd23b707b3c36a91ea399f",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "外卖页面容易把主餐、加料、饮品和优惠凑单混在一起。可以先选定真正要吃的主餐，检查是否有本人需要的主食、主菜和蔬菜，再看购物车里是否多了为了起送或满减添加的食品。对不需要的加购作选择，不等于要求每次只点页面上份量最小的商品。"
+          ],
+          "rationale": "先固定基础主餐，再检查无意附带的加购，直接支持外卖选择。",
+          "alternativeForGroups": [
+            0
+          ]
+        },
+        {
+          "knowledgeId": "fff84d3dde99ce888aeffc8edaf44f75ddf3e4fbd7e3276a8f8a1dd3c6254468",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "盖饭常由米饭、浇头、酱汁和配菜组成，可以先决定哪一层是这次要调整的对象。想保留喜欢的浇头时，可查看是否能够加蔬菜或少舀额外汁；饭量经常吃不完时，可询问较小份或分开盛装。并不需要把四层一起削减，也不能因为备注了少汁，就认定整份菜的配方已经发生相应改变。"
+          ],
+          "rationale": "加蔬菜、少额外汁与按需要选饭量规格的外卖调整。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-003",
+      "inspectedKnowledgeIds": [
+        "9209f2426a6c28ee361ee00e0e948a936ce64c92cf20ad6bafe2dd9811b29d10",
+        "e2e2fb397ffdf47867463ea4448bf96b72d683202335cbbdc83eba8e938b68ce"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "9209f2426a6c28ee361ee00e0e948a936ce64c92cf20ad6bafe2dd9811b29d10",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "减脂并不意味着所有主食必须移出餐盘，也不意味着把餐食改成单一肉类或蔬菜就自动更适合本人。可以保留熟悉食品，再调整重复点单、额外配料或经常出现的甜饮等项目。通用搭配只是便于选餐的框架，实际份量仍需要结合个人需求，而不是按照片面积统一分配。"
+          ],
+          "rationale": "不应取消主食，份量结合个人需求，不按照片面积统一分配。",
+          "alternativeForGroups": [
+            0
+          ]
+        },
+        {
+          "knowledgeId": "e2e2fb397ffdf47867463ea4448bf96b72d683202335cbbdc83eba8e938b68ce",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "餐盘里能看见主食、蔬菜与明确的蛋白质食品，可以支持对基础组合的观察。这与每种营养的精确总量、所有调味来源以及全天摄入是否适合本人，是不同问题。结构较完整的组合值得保留，但不能仅靠类别齐全就断言份量和所有营养都恰好合适。"
+          ],
+          "rationale": "可识别组成，但未给出主食与蔬菜的比例分配。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": [
+        {
+          "knowledgeId": "e2e2fb397ffdf47867463ea4448bf96b72d683202335cbbdc83eba8e938b68ce",
+          "kind": "MID_SENTENCE_PREFIX",
+          "detail": "开头“少营养。”是残尾，本次锚定后续完整段落。"
+        }
+      ]
+    },
+    {
+      "caseId": "rag-004",
+      "inspectedKnowledgeIds": [
+        "bae7ef183dc02c5d515d31a2a12114099109dc615db7217d7ef443299d844891",
+        "a4507087ef6de758a959dad0c7f4987e358a71661f0f92fa6bb4d9846a933df4"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "bae7ef183dc02c5d515d31a2a12114099109dc615db7217d7ef443299d844891",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "炸鸡可能是想吃的主菜，薯条可能来自套餐，炸年糕又可能是临时加购。把这三个购买理由分开后，通常更容易找到并非自己真正需要的一项。例如保留炸鸡，取消临时加购的小吃，再选现场能取得的蔬菜或普通主食，就形成了清楚的订单变化。是否还需要增加食品，要看原来的套餐已经有什么以及本人是否还饿，不能机械要求每次购买都额外点一份。"
+          ],
+          "rationale": "减少同餐重复炸物的订单操作，没有解释经常食用的健康后果。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "a4507087ef6de758a959dad0c7f4987e358a71661f0f92fa6bb4d9846a933df4",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "如果每次晚自习后都会顺路买炸物，可以先改变其中一次回宿舍的采购安排，或提前准备能替代该次购买的普通食物。若只是在同学聚餐偶尔吃一次，行动可以是下次不重复点炸配菜。两种情况所需改变不同，不必设一个对所有人相同的禁止天数。复盘时只核对计划改变的购买场景是否发生即可。"
+          ],
+          "rationale": "提供降低购买频率的方法，不解释常吃的风险原因。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。原因性问题不能用控制行为替代。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-005",
+      "inspectedKnowledgeIds": [
+        "56f9860d592ab50825f85c064916e9d4ebe96c60da6bcfa586863f8bf01240c4",
+        "5a00aa3ab3ae07220e2b8bb1e4e3ea50d4d1f116c9774995b94107653968d580"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "56f9860d592ab50825f85c064916e9d4ebe96c60da6bcfa586863f8bf01240c4",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "同样叫炒菜，不同配方、厨师和份量可能使用不同的油；同样叫炸鸡，也可能有不同的裹层与制作方式。因此做法标签适合帮助比较可选方案和观察频率，不足以单独计算具体脂肪克数。建议可以直接讨论这餐是否还加炸物、下次能否换一种做法，不必先给菜肴制造一个未经核实的精确用油数字。"
+          ],
+          "rationale": "区分做法与实际油量，可减少同餐炸物或换做法，不虚构脂肪克数。",
+          "alternativeForGroups": [
+            0
+          ]
+        },
+        {
+          "knowledgeId": "5a00aa3ab3ae07220e2b8bb1e4e3ea50d4d1f116c9774995b94107653968d580",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "若一餐已经明确选择了喜欢的炸鸡，额外再加炸薯条或油炸小吃时，可以考虑是否保留其中最想吃的一项，再搭配普通主食和蔬菜。选择依据是这餐实际出现的做法与自己的需要，不必先假装知道吸油量，也不需要把所有带油的食品统一禁用。"
+          ],
+          "rationale": "减少炸物叠加，支持控制的一部分，不独立覆盖红烧与炸物全部要求。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-006",
+      "inspectedKnowledgeIds": [
+        "adb8aa3dab0a156229855517f54794cf8586c8a8be5612b908cff46c0e357dd2"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "adb8aa3dab0a156229855517f54794cf8586c8a8be5612b908cff46c0e357dd2",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "桌边另加的蘸料可以由本人决定，但食材事先腌过什么、烤制时是否刷酱，属于另外的问题。想调整口味时，可以具体询问是否有未腌选项、能否少刷酱或将蘸料另放。不同餐厅提供的服务不同，无法调整时就按现有菜品决定是否换一道，不把取消桌上蘸料解释成整道烤肉已经没有其他调味。"
+          ],
+          "rationale": "区分腌料刷酱与蘸料，但少酱不能直接等同少脂肪，仅为背景。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。少刷酱不能直接改写为已知少脂肪。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-007",
+      "inspectedKnowledgeIds": [
+        "9fd61e95506a0798ad86f562eabc9297179c7e6ac10998e0cda19cbf6479e05c"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "9fd61e95506a0798ad86f562eabc9297179c7e6ac10998e0cda19cbf6479e05c",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "一顿饭里的蔬菜可能是独立配菜、混合主菜的一部分，也可能只是装饰。单独盛取的青菜与面汤上少量葱花，不能按出现一次就算作相同份量。判断时先把这些角色区分开，再考虑是否需要另选配菜。这样既不会把点缀夸大为一整份蔬菜，也不会因为蔬菜与米饭或肉混合，就在描述中把它完全删掉。"
+          ],
+          "rationale": "帮助识别蔬菜是否只有点缀，未解释蔬菜偏少的后果。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。所读新片未解释蔬菜不足的后果。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-008",
+      "inspectedKnowledgeIds": [
+        "da6aff4a55e8ca8b0e20ec6c49176faa086ba65172b2df3c7382db4fe6a24002"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "da6aff4a55e8ca8b0e20ec6c49176faa086ba65172b2df3c7382db4fe6a24002",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "购买蔬菜沙拉前，先看菜单是否能明确选择主食和蛋白质食物。有些店允许增加米饭、面包、蛋或豆腐，有些只售蔬菜与酱。若沙拉仅提供蔬菜，可以在同一条购买路线上找到合适的主食和其他食品，再判断这次采购是否方便。店内选项不足时，选择另一份已有完整组成的餐食，也比为了沙拉名称来回补买更省事。"
+          ],
+          "rationale": "直接支持纯蔬菜沙拉补主食、蛋或豆腐，以及选项不足时的采购替代。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-009",
+      "inspectedKnowledgeIds": [
+        "ae1e90ed6a0001d1afbec140368c7e2ee9df7c91bd46e8d28b696e45ffe13125",
+        "bfd06a0d8b0fc26740870df3c88f916e6531089c896bafd7d02efb1825e5b5fa"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "ae1e90ed6a0001d1afbec140368c7e2ee9df7c91bd46e8d28b696e45ffe13125",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "如果早餐和午餐安排稳定，只有晚餐常因窗口关闭缺少蔬菜，可以先解决晚餐来源，而不必重做一天所有菜单。具体动作可能是选能同时提供配菜的晚餐窗口，或提前确认另一个可行地点。改变后看自己是否确实买到并吃了所选食品，以及路线是否可持续；不要把一餐改进的结果扩展成整周已经满足所有营养要求。"
+          ],
+          "rationale": "定位常缺菜的一餐，确认配菜窗口和实际吃到，直接支持提高覆盖。",
+          "alternativeForGroups": [
+            0
+          ]
+        },
+        {
+          "knowledgeId": "bfd06a0d8b0fc26740870df3c88f916e6531089c896bafd7d02efb1825e5b5fa",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "某个窗口只有主食和肉，不代表整座食堂都没有可选蔬菜。可以观察是否有单卖小份配菜的窗口，再决定能否顺路组合。若来回排队成本很高，则下一次优先选能一处完成搭配的套餐。建议应考虑真实时间，不让赶课的人为了完成理想清单错过吃饭；找到便利的独立配菜来源，比每次临时重新寻找更有帮助。"
+          ],
+          "rationale": "补找独立配菜，或下次选择一处能完成搭配的窗口。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-010",
+      "inspectedKnowledgeIds": [
+        "799310f76ff872adc95531213f8a397173f97ab215025f536ef2bb81effa68bb",
+        "8f8aa2f4f6d935a5500ac767f02da8d78ed5de014b224f6ec253675dcc64f806"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "799310f76ff872adc95531213f8a397173f97ab215025f536ef2bb81effa68bb",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "在采用美国营养标签的包装上，总糖包括食品原有的糖和后来添加的糖，添加糖是其中的一部分。例如标签明确写着总糖中包含若干添加糖时，两项不能相加当成整份含糖量。糖的来源解释与本人的实际饮用量也要分开：先读明字段，再结合喝下的份数计算。"
+          ],
+          "rationale": "美国总糖与添加糖标签是相关背景，没有说明应少喝甜饮的原因。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "8f8aa2f4f6d935a5500ac767f02da8d78ed5de014b224f6ec253675dcc64f806",
+          "relevance": 0,
+          "evidenceQuotes": [
+            "复盘甜饮和甜品，不只列出买过哪些，还可以看哪些是主动想吃、哪些来自默认套餐、哪些是优惠诱发的额外购买。三种来源对应的调整不同：主动喜欢的可以安排份量，默认赠送的可以更改选择，优惠加购的可以改变下单步骤。无需把所有原因都归结为不够自律。"
+          ],
+          "rationale": "购买行为复盘不提供应少喝甜饮的原因性依据。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。所读新片没有少喝的原因性依据。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-011",
+      "inspectedKnowledgeIds": [
+        "c3bc85d835a93deedf9c8f10eaa4dfa7e72b8f1843e51cf51ce25e7a286594cf",
+        "078fab76cf00b380055181d17ac95fd7544415a6016fc4def4e222712d87194b"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "c3bc85d835a93deedf9c8f10eaa4dfa7e72b8f1843e51cf51ce25e7a286594cf",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "经常在晚自习前、取外卖时或路过某门店买甜饮，适合把计划落在那个具体地点和时间。例如准备在出门前装好可用的饮水，或取餐时只取已经决定的餐食。与其写以后少喝，不如确定下一次在同一场景要采取的动作，同时保留正常吃饭和休息的安排。"
+          ],
+          "rationale": "将减少甜饮频率落实到固定触发场景和下一次购买动作。",
+          "alternativeForGroups": [
+            0
+          ]
+        },
+        {
+          "knowledgeId": "078fab76cf00b380055181d17ac95fd7544415a6016fc4def4e222712d87194b",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "同一次下单可以分别决定杯型、基础茶饮、甜度和额外配料。先选最在意的口味，再看看哪些附加项其实可以不买，例如喜欢珍珠口感时保留珍珠而取消另一份布丁，或喜欢原来的茶底时只调整杯型。这样能保留购买的主要乐趣，同时明确改变了什么；不需要把所有可选按钮同时改成最少，再因为不喜欢而恢复原订单。"
+          ],
+          "rationale": "单次订单配方不等同购买频率，只作背景。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-012",
+      "inspectedKnowledgeIds": [
+        "ddb532ef38175178a1a0c36708c1f9978acb1421854db759a169157315442160"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "ddb532ef38175178a1a0c36708c1f9978acb1421854db759a169157315442160",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "若两个都想要，可以根据实际需要选择杯型、份量或分享方式，无需把选择变成必须彻底禁用其中一类的规则。之后的一餐仍按正常安排进行；甜品前后添加白水、茶或蔬菜，不会把已经吃下的甜品从这次饮食中抹去，也无需给它们赋予清除糖分的功能。"
+          ],
+          "rationale": "直接说明不必彻底禁止一类，可按需要调整杯型份量或分享，之后正常就餐。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-013",
+      "inspectedKnowledgeIds": [
+        "cc440df5ef238389e3fbd00e33ebadaea212c197b27e68d1dd538b0e83dfeaf1"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "cc440df5ef238389e3fbd00e33ebadaea212c197b27e68d1dd538b0e83dfeaf1",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "食堂菜名里的肉末、鸡汤味或牛肉风味，不能单独证明有多少可食用的肉。选择时可以观察和询问实际组成，例如一份蒸蛋、可见鱼肉、豆腐或鸡肉，比只有风味名称的菜更容易确认来源。但确认出现某种食品，仍与确认足够满足个人需要是两步判断。"
+          ],
+          "rationale": "列出蒸蛋、鱼、豆腐或鸡肉等明确来源，区分来源存在与满足个体需要。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-014",
+      "inspectedKnowledgeIds": [
+        "7f5837faae784963f295361c2a2e7b60386e44c01823bbe29b15bcca12d3e58f"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "7f5837faae784963f295361c2a2e7b60386e44c01823bbe29b15bcca12d3e58f",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "增肌餐不宜在选菜时只盯着肉，把主食当作可以随意删除的背景。食堂组合可以先确定本人愿意吃且方便取得的普通主食，再搭配蛋肉豆类和蔬菜。米饭、面条或其他常见主食可根据窗口供应轮换，不必为了符合“训练餐”的外观而只吃一种，也不用在缺少个体依据时规定所有人都加同样多主食。"
+          ],
+          "rationale": "普通主食与蛋肉豆类、蔬菜一起组成食堂训练餐。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-015",
+      "inspectedKnowledgeIds": [
+        "3fa6c370db2e22adf11fad5df33eb1814a3ff3a1b741ccba48aa9e62c3483412",
+        "ad2e009f158787ca5f3958ddbb6fdcf30f3d50e667299cc39ae8ecd3cdf9a9ba"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "3fa6c370db2e22adf11fad5df33eb1814a3ff3a1b741ccba48aa9e62c3483412",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "蛋白质来源多样，不等于同一顿饭必须同时买肉、鱼、蛋和豆腐。可以先确定这一餐真实需要、本人喜欢且价格可接受的一项，再在其他餐次轮换。已经有明确主菜时，是否再加蛋要结合自己的食量与其他安排；不能把更多种类直接等同于更好的分数，也不为了完成清单而在吃饱后继续增加食品。"
+          ],
+          "rationale": "不必每餐买齐全部来源，不等于回答每餐蛋白质是否必需。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "ad2e009f158787ca5f3958ddbb6fdcf30f3d50e667299cc39ae8ecd3cdf9a9ba",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "课表也可能显示训练前后的时间很宽裕，原来的正常餐次已经能够安排好，这时不必为了套用他人的作息额外复制很多次进食。知识库可以帮助发现时间冲突与备用选择，不能仅凭训练名称替本人规定每天必须吃几顿、每次吃多少，个体摄入目标仍需结合实际评估。"
+          ],
+          "rationale": "不能统一规定进食次数，不等于每餐蛋白质是否必须。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。每餐买齐来源与每餐是否必须有蛋白质不同。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-016",
+      "inspectedKnowledgeIds": [
+        "f22238895a1d9f812c757dedb014e979dfbf2f8f121f5ce4f25eb0f91057ce83"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "f22238895a1d9f812c757dedb014e979dfbf2f8f121f5ce4f25eb0f91057ce83",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "一餐米饭减少后，若只剩酱汁浓的肉菜和饮料，原有的蔬菜缺项并没有因此解决。反过来，一份正常主食搭配明确蛋白质食品与蔬菜，也不应只因有米饭就被否定。结构判断可以先指出最容易改善的一项，例如补充配菜或减少不需要的套餐附加食品，不把取消主食当成所有问题的通用答案。"
+          ],
+          "rationale": "普通主食与蛋白质、蔬菜的组合不应被否定，不能把取消主食当通用答案。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-017",
+      "inspectedKnowledgeIds": [
+        "a19ceeef372644289039697ea592cd9a603fc9ca832914444f42f7e6f9f15d5c"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "a19ceeef372644289039697ea592cd9a603fc9ca832914444f42f7e6f9f15d5c",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "主食轮换可以从本人喜欢且供应稳定的选项开始，例如某些午餐选米饭，另一些餐选面、薯类或含豆类的混合饭。先试能接受的做法，比一次买大量不喜欢的食品更容易持续。轮换的目的是让日常选择不被一个窗口限制，不需要每顿都出现不同颜色，也不必在已经吃饱后追加一份来完成品种数量。"
+          ],
+          "rationale": "直接列出米饭、面、薯类轮换，结合口味供应与搭配而非固定排名。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-018",
+      "inspectedKnowledgeIds": [
+        "36f44eac557b0773739ac418fb7666a13bfe48dc0f01b5ee302e98bc9c96a959",
+        "713a793c3cb02c7fb807c3dfbbc7e27300f3b9e31b478293682deb630e7cda2d"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "36f44eac557b0773739ac418fb7666a13bfe48dc0f01b5ee302e98bc9c96a959",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "食堂的小碗、餐盒的一格和店铺的一份，都只在特定餐具或订单中有意义。比较消费记录时，可以写同一窗口的半份与一份，也可以在确有称量时用重量；不要给所有小碗指定一个共同克数。跨窗口选择更适合先比较可见组成与是否允许少盛，而不是制造两个无法核实的精确能量数字。"
+          ],
+          "rationale": "份与碗不是统一克数，可用同一窗口份型或当次称量，支持份量判断。",
+          "alternativeForGroups": [
+            0
+          ]
+        },
+        {
+          "knowledgeId": "713a793c3cb02c7fb807c3dfbbc7e27300f3b9e31b478293682deb630e7cda2d",
+          "relevance": 0,
+          "evidenceQuotes": [
+            "只是暂时不喜欢某种谷物，可以从别的可接受主食中安排轮换；若本人已有明确的食品过敏或专业限制，则需要按该限制筛选原料与制作信息。不能把不喜欢粗粮解释为必须训练自己吃，也不能用普通轮换建议覆盖个人已经明确的限制。对配方不清的混合主食，可以选择信息更清楚且符合个人条件的食品，而不靠试吃来确认。"
+          ],
+          "rationale": "口味与过敏限制不是本餐主食份量估计依据。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": [
+        {
+          "knowledgeId": "36f44eac557b0773739ac418fb7666a13bfe48dc0f01b5ee302e98bc9c96a959",
+          "kind": "MID_SENTENCE_PREFIX",
+          "detail": "开头“为必吃项目。”缺主语，本次锚定完整份型章节。"
+        }
+      ]
+    },
+    {
+      "caseId": "rag-019",
+      "inspectedKnowledgeIds": [
+        "3be772fbd650e6dd910cc6c5695489fe431efdbcea3006c13436972e114771ce",
+        "06213f718cc99e3ffc839ea22132ec75875bc5f55ac0d164597ad01fef7cce4f"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "3be772fbd650e6dd910cc6c5695489fe431efdbcea3006c13436972e114771ce",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "清淡是一个容易产生不同理解的词。本人可能想少油，窗口可能理解为不放辣椒，也可能仅减少某种香料。点单前可以先决定本次最想改变的是烹饪方式、现有酱汁还是桌面调料，再表达一个可执行的要求。这样拿到饭后有具体结果可检查，也不会把所有营养变化都压在一个模糊词上。"
+          ],
+          "rationale": "将清淡拆成做法、酱汁与额外调料的可执行要求，不把不辣当少油盐。",
+          "alternativeForGroups": [
+            0
+          ]
+        },
+        {
+          "knowledgeId": "06213f718cc99e3ffc839ea22132ec75875bc5f55ac0d164597ad01fef7cce4f",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "第一种情况是要求表达清楚，窗口却无法提供，这时应改变购买方案；第二种是窗口已分装，但本人仍不自觉全部添加，可以改变取用顺序或先留下一部分。这两种情况都可能让最终用量与原计划接近，却不能用同一句没有坚持来解释。"
+          ],
+          "rationale": "调法失效后的复盘，只补充清淡饮食背景。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-020",
+      "inspectedKnowledgeIds": [
+        "5589caa52288202d76a2bef763364cfc2818d7c9e1fd82760656ef8edbb63c16"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "5589caa52288202d76a2bef763364cfc2818d7c9e1fd82760656ef8edbb63c16",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "先确定早餐是在宿舍、食堂还是路上吃，再选能在这条路线上取得的饮品。例如到教学楼前只经过一家便利店，可以事先查看是否有自己能接受的奶类或无额外加糖的饮品，并把面包、鸡蛋等食品放在同一次采购里。若早餐在食堂解决，先拿到食物再决定是否需要饮品，能减少因为队伍太长而只买一杯饮料就离开的情况。购买顺序服务于真正吃到早餐，而不是完成一个固定菜单。"
+          ],
+          "rationale": "将可接受奶类或无额外加糖饮品纳入早餐路线，并与面包鸡蛋等食品一起考虑。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-021",
+      "inspectedKnowledgeIds": [
+        "d58d2e712ce6993f1b94f16544abb21487e3740477ae76f78c9d5e265c70eef6",
+        "e2e2fb397ffdf47867463ea4448bf96b72d683202335cbbdc83eba8e938b68ce"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "d58d2e712ce6993f1b94f16544abb21487e3740477ae76f78c9d5e265c70eef6",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "到了看缺项这一步，先回看前面已经选定的食品。若有主食和主要蛋白质食物，最方便的补充可能是蔬菜；若只是买了一份面包和饮料，则可以寻找蛋、奶类或其他方便搭配的食品。缺项判断应围绕这顿饭的组成，不要因为附近出现促销商品，就把每一种新增食品都称为补充营养。"
+          ],
+          "rationale": "已有主食蛋白质时补蔬菜，仅面包饮料时补其他来源，直接支持完善组合。",
+          "alternativeForGroups": [
+            0
+          ]
+        },
+        {
+          "knowledgeId": "e2e2fb397ffdf47867463ea4448bf96b72d683202335cbbdc83eba8e938b68ce",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "餐盘里能看见主食、蔬菜与明确的蛋白质食品，可以支持对基础组合的观察。这与每种营养的精确总量、所有调味来源以及全天摄入是否适合本人，是不同问题。结构较完整的组合值得保留，但不能仅靠类别齐全就断言份量和所有营养都恰好合适。"
+          ],
+          "rationale": "三类基础角色及不能仅凭齐全推定个体需要满足。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-022",
+      "inspectedKnowledgeIds": [
+        "0ccfe616e209e44f1f7dcb8b8911ba2e7cbd7b4bc3726aa6636ac5de24572e88"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "0ccfe616e209e44f1f7dcb8b8911ba2e7cbd7b4bc3726aa6636ac5de24572e88",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "一套好用的三步法应有替代窗口。可以在平时就留意另一处能提供普通主食、蛋肉豆类和配菜的地方，记住实际营业时段与大致价格。临时售罄时，按照相同的食材角色重新组合，而不是固守某一道菜名；原本计划吃鱼，最后能取得的是豆腐和鸡蛋，也应按真实选择重新看整餐搭配。"
+          ],
+          "rationale": "提前记录备用窗口及时间价格，按食材角色重组，减少临时选择。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-023",
+      "inspectedKnowledgeIds": [
+        "c8da09c9126bd3f288f79d50dd715456364bb8ec03de642bf40d99dc793b32ca"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "c8da09c9126bd3f288f79d50dd715456364bb8ec03de642bf40d99dc793b32ca",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "夜间配送常有起送额，自己只需要少量食品时，可以先比较是否有更方便的购买途径，而不是为了凑单再增加整份炸物与甜饮。若确实要订一份晚餐，就按晚餐来选主食、蔬菜和蛋豆肉鱼；若是正常晚餐后的少量加餐，就无需照搬一整套套餐。订单大小应服务于这次进食用途。"
+          ],
+          "rationale": "区分推迟的晚餐与正常晚餐后加餐，按真实用途选择完整餐或少量补充。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-024",
+      "inspectedKnowledgeIds": [
+        "e2e2fb397ffdf47867463ea4448bf96b72d683202335cbbdc83eba8e938b68ce",
+        "f02c1cae0a90dc1411bfaa01412f09bfead4916d54ca602125ccee3bc1e6f147"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "e2e2fb397ffdf47867463ea4448bf96b72d683202335cbbdc83eba8e938b68ce",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "餐盘里能看见主食、蔬菜与明确的蛋白质食品，可以支持对基础组合的观察。这与每种营养的精确总量、所有调味来源以及全天摄入是否适合本人，是不同问题。结构较完整的组合值得保留，但不能仅靠类别齐全就断言份量和所有营养都恰好合适。"
+          ],
+          "rationale": "直接说明主食蔬菜蛋白质三类基础角色，并用米饭豆腐青菜举例。",
+          "alternativeForGroups": [
+            0
+          ]
+        },
+        {
+          "knowledgeId": "f02c1cae0a90dc1411bfaa01412f09bfead4916d54ca602125ccee3bc1e6f147",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "两份餐盘即使分数一样，食物品种、份型、调味和获取条件仍可能相差很大。不能因为数字相同，就把其中一份的营养数值复制给另一份；也不能认为两种组合在预算、口味或个人限制上完全可交换。分数相同只提供一个系统判断结果，不能抹平实际差异。"
+          ],
+          "rationale": "解释同分餐盘实际差异，不替代组成证据。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-025",
+      "inspectedKnowledgeIds": [
+        "59cd3a00d5cb475337de183f789a0b66afa2335937ee8f79e6c343d9e1924e65",
+        "d2ce91d44df4818ba0a7efe0cce918be40adc1fad0eb1d10436a303cdc6d3722"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "59cd3a00d5cb475337de183f789a0b66afa2335937ee8f79e6c343d9e1924e65",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "照片只拍了面条而没拍旁边的配菜，系统可能只能看到单一主食；合照包括室友食品，又可能把不属于本人的内容算进去。核对时先问哪些确实吃过、哪些没有吃，再处理食物名称。不能为了让数字变好而把没吃的蔬菜补进表单。"
+          ],
+          "rationale": "直接说明拍摄范围不全、合照误含他人食品可能导致系统低分或误读。",
+          "alternativeForGroups": [
+            0
+          ]
+        },
+        {
+          "knowledgeId": "d2ce91d44df4818ba0a7efe0cce918be40adc1fad0eb1d10436a303cdc6d3722",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "某周平均分下降，可能同时发生了记录餐次增加、聚餐照片更多或识别更完整等变化。先核对比较的是哪些餐、数量多少、是否有明显缺录，再讨论具体行为。只有在基础相近时，才更容易判断重复问题是否真的增加。"
+          ],
+          "rationale": "周平均分的统计范围不同于单餐评分低的原因。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-026",
+      "inspectedKnowledgeIds": [
+        "b33958c3bf6703e27bfea9b85bb6d0f4a98f1a71bbdfe97789bfe27814c76004",
+        "ea8ce16008071eb8464711ce5b892024f801ae19f53858e4ef17aa7828894868"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "b33958c3bf6703e27bfea9b85bb6d0f4a98f1a71bbdfe97789bfe27814c76004",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "如果一周的主食已经有米饭、面条和玉米，而蛋白质来源几乎总是同一种加工肉，下一步可优先拓宽后者。反过来，蛋白质来源有几种但蔬菜总是相同一味，也可以只调整配菜。轮换计划应针对已经看到的集中处，而不是无差别要求所有食品同时更换。"
+          ],
+          "rationale": "针对实际集中在某种来源的薄弱位置轮换，不要求所有食品同时更换。",
+          "alternativeForGroups": [
+            0
+          ]
+        },
+        {
+          "knowledgeId": "ea8ce16008071eb8464711ce5b892024f801ae19f53858e4ef17aa7828894868",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "下一轮只需补充一个仍然薄弱的位置，例如为常吃的面条找到一种不同的配菜，而不是重做整份菜单。多样性改善的证据是确实拓宽并使用了合适的选择，不能从标题数或菜品照片数直接推断个人营养全面。仍有特殊需求时，应在此基础上结合具体情况寻求个体建议。"
+          ],
+          "rationale": "从稳定菜单加一种配菜，用实际拓宽的选择评价多样性。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-027",
+      "inspectedKnowledgeIds": [
+        "adb8aa3dab0a156229855517f54794cf8586c8a8be5612b908cff46c0e357dd2",
+        "da6aff4a55e8ca8b0e20ec6c49176faa086ba65172b2df3c7382db4fe6a24002"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "adb8aa3dab0a156229855517f54794cf8586c8a8be5612b908cff46c0e357dd2",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "多人吃烤肉时，可先点大家明确想吃的肉类和一种便于共享的蔬菜，再看是否需要米饭或其他普通主食。不要因为每个人都补点一份而重复出现多盘相同食品。第一轮上齐后，再根据实际吃完的速度决定下一轮，比一开始按促销套餐叠加更多肉盘和炸物更容易匹配人数。有人有明确原料限制时，点单前就应说明，不能等同一烤盘混合后再靠挑出食物解决。"
+          ],
+          "rationale": "直接安排烤肉与蔬菜，再看米饭或其他普通主食，避免重复点单。",
+          "alternativeForGroups": [
+            0
+          ]
+        },
+        {
+          "knowledgeId": "da6aff4a55e8ca8b0e20ec6c49176faa086ba65172b2df3c7382db4fe6a24002",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "喝一碗青菜汤时，汤中实际吃到的菜与整碗液体应分别理解；购买一大份炒青菜时，则要看同餐已有的米饭和蛋豆肉鱼。若蔬菜已经很多，但其他食品很少，下一步是完善其他组成，而不是再换一种颜色的菜。菜单上的蔬菜数量与这餐能否承担正常正餐用途，不能由同一个指标代替。"
+          ],
+          "rationale": "蔬菜与整餐通用关系，只作烤肉搭配背景。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-028",
+      "inspectedKnowledgeIds": [
+        "74842d48d059312a8b1e926da57fa18fbfe432955800ac75e55c6a5fed77830a",
+        "3fa6c370db2e22adf11fad5df33eb1814a3ff3a1b741ccba48aa9e62c3483412"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "74842d48d059312a8b1e926da57fa18fbfe432955800ac75e55c6a5fed77830a",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "红烧肉、肉末茄子和肉丸可能使用相近的主要肉类原料，只改变名称并不一定增加来源种类。做一周选择清单时，可以把原料展开成蛋、豆制品、鱼、不同肉类等自己能确认的类别，再看哪些来源一直没有机会选择。轮换不需要每日都不同，也不要求购买本人不接受的食品；重点是让备用方案真正覆盖不同可获得的来源。"
+          ],
+          "rationale": "从蛋豆鱼肉等真实原料轮换来源，回应长期只有鸡蛋的单一选择。",
+          "alternativeForGroups": [
+            0
+          ]
+        },
+        {
+          "knowledgeId": "3fa6c370db2e22adf11fad5df33eb1814a3ff3a1b741ccba48aa9e62c3483412",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "蛋白质来源多样，不等于同一顿饭必须同时买肉、鱼、蛋和豆腐。可以先确定这一餐真实需要、本人喜欢且价格可接受的一项，再在其他餐次轮换。已经有明确主菜时，是否再加蛋要结合自己的食量与其他安排；不能把更多种类直接等同于更好的分数，也不为了完成清单而在吃饱后继续增加食品。"
+          ],
+          "rationale": "来源轮换不等于单餐买齐，是否再加蛋看实际食量与安排。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-029",
+      "inspectedKnowledgeIds": [
+        "6ef73c068b1a889627c48532e7204fe0af0d24451e1869c39ed2a9c3a2a7f787",
+        "e09f29c6dace0dd504d60216ca6602068794de68fa7462007f9faa4b8f7b6997"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "6ef73c068b1a889627c48532e7204fe0af0d24451e1869c39ed2a9c3a2a7f787",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "确认鸡蛋、豆腐或肉鱼出现，是选餐层面的识别；评估个人长期是否摄入足够，则需要更完整的饮食、身体与活动情况。两类问题不能相互冒充。系统可以帮助本人发现多次记录中常见的缺项或单一选择，再提出可执行的餐食安排，却不能由某一份主菜照片给出适用于所有人的每日目标，也不能承诺某种搭配必然产生特定训练效果。"
+          ],
+          "rationale": "区分来源存在与长期需要满足，关注多次缺项，不由单餐诊断营养不足。",
+          "alternativeForGroups": [
+            0
+          ]
+        },
+        {
+          "knowledgeId": "e09f29c6dace0dd504d60216ca6602068794de68fa7462007f9faa4b8f7b6997",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "日常选项可以是常用窗口的鱼、肉、蛋或豆腐，应急选项则应考虑晚课、临时缺货和路线改变。两类清单分开后，既不会用偶尔买不到的食品规划每顿饭，也不会因为便利而长期只有一种应急产品。每项写清可取得地点和能搭配什么即可，清单不需要扩展成全食物排行榜，也不以食品名称数量来代替实际能否吃到。"
+          ],
+          "rationale": "正常与应急来源清单有助避免反复缺项，但非影响结论本身。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-030",
+      "inspectedKnowledgeIds": [
+        "e2e2fb397ffdf47867463ea4448bf96b72d683202335cbbdc83eba8e938b68ce"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "e2e2fb397ffdf47867463ea4448bf96b72d683202335cbbdc83eba8e938b68ce",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "餐盘里能看见主食、蔬菜与明确的蛋白质食品，可以支持对基础组合的观察。这与每种营养的精确总量、所有调味来源以及全天摄入是否适合本人，是不同问题。结构较完整的组合值得保留，但不能仅靠类别齐全就断言份量和所有营养都恰好合适。"
+          ],
+          "rationale": "支持三类角色及类别齐全的局限，未给出比例分配方法，不替代比例题证据。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。所读新片只有角色识别，没有比例分配方法。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-031",
+      "inspectedKnowledgeIds": [
+        "fc18b314275baedd69228a3da8edd40bdcb416196f0a72c2e1568913e3c00b16"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "fc18b314275baedd69228a3da8edd40bdcb416196f0a72c2e1568913e3c00b16",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "早课紧张时，可以先看起床后到出门前是否有能实际吃饭的时间，再看去教室路上是否有稳定食品来源。若总是在出门后才发现窗口排队过长，改进可能是提前决定购买位置或前一晚准备符合保存条件的食品，而不是继续给自己设一个只早几分钟但路线不变的提醒。"
+          ],
+          "rationale": "提前选购买位置、合规准备与课间备用机会，支持赶时间的早餐安排。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-032",
+      "inspectedKnowledgeIds": [
+        "fc3eb5b8f2ba1b1444c723bf48006ae18c03b83e223ca9c680a154ca17fb9eef",
+        "1b966da444be39784482fdeeff58fa3054f938652d2ba2637205b0845adda038"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "fc3eb5b8f2ba1b1444c723bf48006ae18c03b83e223ca9c680a154ca17fb9eef",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "下午感到疲劳或困倦可以作为体验，但不能只凭它判断午餐有某个营养问题。课程强度、睡眠和其他背景也可能需要了解，不能看到一份主食便把所有午后状态归因于它。餐次管理能做的是保证就餐机会、帮助回看时间与食物，而不是由某一时刻的感受直接给出健康诊断。"
+          ],
+          "rationale": "提供困倦不能仅归因午餐的边界，没有午餐少油的具体选法。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "1b966da444be39784482fdeeff58fa3054f938652d2ba2637205b0845adda038",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "学习困倦、运动后疲劳或不舒服，可能涉及多种条件，日志只能提供其中一部分背景。可以整理近期餐次、训练和睡眠等实际信息，帮助以后沟通，但不根据一张照片诊断缺乏某种营养，也不直接开出补充剂方案。若情况持续或明显影响日常，应获得适当帮助，不能用不断更换食品来替代对问题的评估。"
+          ],
+          "rationale": "补充不可由照片诊断或开补充剂的边界，不是午餐少油选法。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。困倦诊断边界不替代午餐少油选法。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-033",
+      "inspectedKnowledgeIds": [
+        "83c89df2b5bd7585f9060c837901971899bb9a2ef319513d01595edef044f07f",
+        "219b42fa3751a5ac8e5e9e252cae7c9af0e0046284e03b7e020d69f11eaf3f74"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "83c89df2b5bd7585f9060c837901971899bb9a2ef319513d01595edef044f07f",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "如果确实漏了一餐，下一次可以从容易获得的普通搭配开始，按当下需要安排，不必规定一次吃双倍作为补偿。过去的一餐无法通过修改文字补回来，也不需要将它视为接下来必须更严格限制的理由。更值得处理的是漏餐发生在哪个具体环节，以及下次同类日程能否有另一条可用路线。"
+          ],
+          "rationale": "直接说明恢复普通搭配、按当下需要安排，不规定双倍补偿。",
+          "alternativeForGroups": [
+            0
+          ]
+        },
+        {
+          "knowledgeId": "219b42fa3751a5ac8e5e9e252cae7c9af0e0046284e03b7e020d69f11eaf3f74",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "回看一天时，原定午餐晚一点吃到了，属于延迟；确实没有吃，才是漏餐；吃过但没有写下，是记录缺失。这三种情况对应的改进不同：延迟可能需要备用时段，漏餐可能要解决获取路线，未记录则只是补充实际信息。不能因为应用里中午空白，就推定本人一整天没有吃午餐。"
+          ],
+          "rationale": "漏餐延迟未记录的区别用于核对前提，未回答下一餐是否补吃。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": [
+        {
+          "knowledgeId": "83c89df2b5bd7585f9060c837901971899bb9a2ef319513d01595edef044f07f",
+          "kind": "MID_SENTENCE_PREFIX",
+          "detail": "开头从“餐可能要解决获取路线”接续前片，漏餐后恢复普通搭配的一段本身完整。"
+        }
+      ]
+    },
+    {
+      "caseId": "rag-034",
+      "inspectedKnowledgeIds": [
+        "6c0d521a0c13da1d193dcdc318b362536c9d823635d3ab580dd368e1ebc2f3e4"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "6c0d521a0c13da1d193dcdc318b362536c9d823635d3ab580dd368e1ebc2f3e4",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "固定套餐通常先看能否加独立配菜或选择饮品；盖饭可以询问酱汁是否另放、米饭有无不同份型；自选菜则在结账前检查基础组合。不同供餐方式能改的步骤不同，不能要求所有窗口接受同一种调整方法。"
+          ],
+          "rationale": "固定套餐可以加独立配菜，直接支持只有米饭和肉时补足结构。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-035",
+      "inspectedKnowledgeIds": [
+        "6c0d521a0c13da1d193dcdc318b362536c9d823635d3ab580dd368e1ebc2f3e4"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "6c0d521a0c13da1d193dcdc318b362536c9d823635d3ab580dd368e1ebc2f3e4",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "例如酱已混入的盖饭无法靠备注完全分离，店员明确说明后，可以换菜或保留实情。自选菜已经盛入餐盘的部分，也按窗口规则处理，避免把不需要的食品随意放回。操作方法要适应现场规则，不能只看理想清单。"
+          ],
+          "rationale": "可询问酱汁另放与饭量份型，已混酱时按真实限制换菜或保留实情。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-036",
+      "inspectedKnowledgeIds": [
+        "4dfae6eaea114c75202407f712467fdf858a244047729bef795273e8b4756fd4",
+        "b659c14a7f000817e045bdb16ce53f4d120d58c5482394a677b71c18a44fa169"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "4dfae6eaea114c75202407f712467fdf858a244047729bef795273e8b4756fd4",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "想安排一项蛋白质食品时，可以先找材料清楚且本人能吃的蛋、豆制品或其他选项。丸子、滑类虽然名字可能带鱼或肉，实际成分与比例仍需看具体产品，不能把整份重量视为纯肉，也不能因外形相似就套用另一种食品数据。"
+          ],
+          "rationale": "直接支持麻辣烫蛋白质与主食选择，未单独覆盖蔬菜，不作为完整组替代。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "b659c14a7f000817e045bdb16ce53f4d120d58c5482394a677b71c18a44fa169",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "可以选本人愿意吃的几种明确蔬菜，再看整餐是否已有其他食品角色。不同颜色有助于辨认，却不能保证出现了主食或蛋白质食品；反过来，不必为颜色更多而不断增加同一类食材。选择的目的在于形成可吃完的基础组合。"
+          ],
+          "rationale": "蔬菜不能只看颜色，独立不足以覆盖完整食材角色。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。新片分别支持蔬菜及蛋白质主食，单片不独立替代完整三类选材答案。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-037",
+      "inspectedKnowledgeIds": [
+        "42714620855df67746401662f507e02daa2b47672b2b385f9077893b20d6f156"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "42714620855df67746401662f507e02daa2b47672b2b385f9077893b20d6f156",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "饭摊成一层与堆成小山，可以占相近或完全不同的面积。叶菜、肉块和豆腐的堆叠方式也不一样，因此把照片分成几个面积区，并不能直接得出各类食物重量相同。面积适合提醒人某种食品是否明显缺席，以及食品放在哪里；要比较份量，还需要结合堆叠、餐具、实际取用情况和本人说明。"
+          ],
+          "rationale": "面积受高度密度和角度影响，可提示结构但不能直接换算重量。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-038",
+      "inspectedKnowledgeIds": [
+        "fe2ba41b58b920d91869008afa09e3d3746861b79e4d0410df68eacd94f987ec"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "fe2ba41b58b920d91869008afa09e3d3746861b79e4d0410df68eacd94f987ec",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "碎肉可能作为一份菜的主要原料，也可能只是给蔬菜或面条增加风味。选餐时可以看它是否有可单独辨认的主体，而不是让菜单里所有带肉字的食品都占据同样的主菜位置。若只确认少量肉末，建议可以是另选一项方便取得的蛋或豆制品；不需要先给肉末设定一个虚构重量，才能讨论这种搭配上的差别。"
+          ],
+          "rationale": "直接区分调味性肉末与独立主菜，可另选明确蛋豆来源，不虚构克数。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-039",
+      "inspectedKnowledgeIds": [
+        "01fa82e6f4f88fc6c184a7b1d4f095271b03811de336e4ce9386ff1089e596e8"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "01fa82e6f4f88fc6c184a7b1d4f095271b03811de336e4ce9386ff1089e596e8",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "相反，很饿时也可能因为没有食物、赶车或其他困难暂时没吃。此时有用的下一步是寻找可获得的安排，例如准备便携食品或调整采购，而不是批评感受。记录能暴露现实限制，但不能凭一次“很饿”就推断某种疾病或营养缺乏。若持续有困扰或明显不适，应该把情境与专业人员讨论，本条不通过打卡作个人诊断。"
+          ],
+          "rationale": "饥饿与现实获取限制的背景，没有回答吃完仍饿应先增加什么。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。所读新片未回答先加什么食品。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-040",
+      "inspectedKnowledgeIds": [
+        "fa1004e91760ece3ec1235bcd58a7b2bc416df95c365d9ccf003b2c43ba87726",
+        "3b78dcb40e2d1d0bcec1a73eb256c2fdb9809e240d07e3161a9e9dd88dad566e"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "fa1004e91760ece3ec1235bcd58a7b2bc416df95c365d9ccf003b2c43ba87726",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "训练前安排不应从一句所有人都要加餐开始，而应先看本人上一餐何时吃、接下来何时训练，以及路上是否还有正常进餐机会。时间线能帮助发现课程与训练之间的冲突，但不能单凭间隔长短就计算个人应吃多少。"
+          ],
+          "rationale": "提供上一餐和训练时间线，未针对距离训练很近的食品或份量安排。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "3b78dcb40e2d1d0bcec1a73eb256c2fdb9809e240d07e3161a9e9dd88dad566e",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "如果希望观察训练前怎样吃更适合自己的生活，可以先使用平常接受的食品，再看具体安排是否方便。一次同时换陌生食品、饮品和进食时间，之后就很难判断是哪一项改变了体验，未必适合用来修订日常方案。"
+          ],
+          "rationale": "熟悉食品的一般原则，未专门覆盖临近训练条件。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。临近训练这一条件的具体食物安排未覆盖。",
+      "chunkIssues": [
+        {
+          "knowledgeId": "fa1004e91760ece3ec1235bcd58a7b2bc416df95c365d9ccf003b2c43ba87726",
+          "kind": "MID_SENTENCE_PREFIX",
+          "detail": "片段开头分号续句，不宜将其孤立用于训练许可或个体摄入目标判断。"
+        }
+      ]
+    },
+    {
+      "caseId": "rag-041",
+      "inspectedKnowledgeIds": [
+        "019e7f1575c8af8d70f8d5d76d72b653b8fd51d7e5958b2039062523252c32c0"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "019e7f1575c8af8d70f8d5d76d72b653b8fd51d7e5958b2039062523252c32c0",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "蛋白粉、能量棒或其他补充产品是否适合个人，需要看具体产品、目的与条件，不能仅因训练就视为必需。一个包装产品可能解决携带或某项补充问题，却不自动构成完整正餐。若当天原本就能正常吃到饭，可以先把餐次安排稳定；需要具体补充方案时，再依据个人训练情况和专业意见，而不是靠广告替所有人决定。"
+          ],
+          "rationale": "直接说明不能只因训练认为补充品必需，能正常吃饭时先稳定餐次。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-042",
+      "inspectedKnowledgeIds": [
+        "56c4ad29b96f3676524c2fbb71c9a7d6eb73e84c0012dff2d67742b23c19ac75",
+        "608a9e9455641f8a4c98fa0918bf32bdddfa29d12edbd4b3ae46b45a06497fec"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "56c4ad29b96f3676524c2fbb71c9a7d6eb73e84c0012dff2d67742b23c19ac75",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "训练结束后若只买了一杯奶茶或其他饮品，可以先确认是不是因为正常供餐已经错过。若是时间问题，应改善下一次路线或备选，而不是仅把饮品换成另一杯宣传更专业的产品。饮品能否作为餐食的一部分，与能否组成整顿饭是不同问题；需要继续看主食、明确的蛋白质来源与其他实际食品，而不是只比较杯上的功能词。"
+          ],
+          "rationale": "饮品不能自动替代完整餐食，但不是考试周提神甜饮的具体调整依据。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "608a9e9455641f8a4c98fa0918bf32bdddfa29d12edbd4b3ae46b45a06497fec",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "有训练与没有训练的日子，都可以保留适合自己的正常餐次与常用搭配，再根据真实日程作调整。不需要把训练日规定为只吃肉、学习日规定为尽量不吃主食。稳定基础餐的好处，是减少每天重新做全部选择的负担；训练的额外具体需要若确实需要量化，再单独评估，不用把所有变化都压在一张单餐照片上。"
+          ],
+          "rationale": "学习日保留基础餐次，不是考试周提神或咖啡因的具体依据。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。所读新片未针对考试周提神或咖啡因。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-043",
+      "inspectedKnowledgeIds": [
+        "7093f4826975963c37b96bc63eb584ff40df9f9d92a344ac7ee45e4936468b53"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "7093f4826975963c37b96bc63eb584ff40df9f9d92a344ac7ee45e4936468b53",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "打开菜单时，可以先看主食、主要蛋白质食物与蔬菜是否能够组成本人愿意吃的一餐，再看商家使用了什么宣传名称。轻食、营养或健康餐不能自动说明具体配方与份量适合个人。反过来，普通盖饭或面食只要真实内容合适，也可以进入备选。选择应围绕自己能买到、吃得下并负担得起的食品，而不是只在标题里寻找某个词。"
+          ],
+          "rationale": "直接按真实食物角色检查套餐完整性，并核对默认附加项目。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-044",
+      "inspectedKnowledgeIds": [
+        "6399b6bd1483128a2023635989fb14bb0a6be3676c8990fd562aed2e71148126"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "6399b6bd1483128a2023635989fb14bb0a6be3676c8990fd562aed2e71148126",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "火锅中的蔬菜、肉、豆制品和主食可以分别识别，汤底颜色不能代替对这些内容的判断。点单时可先确保本人有可接受的原料，再决定额外加工食品和蘸料。食品应按安全要求充分处理，不能因赶时间忽略制作条件。个人描述以实际吃到的部分为主，不把整锅订单或汤的总体积作为自己的摄入量。"
+          ],
+          "rationale": "直接给出原料、加工食品和蘸料的选择次序，以实际吃到部分理解。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-045",
+      "inspectedKnowledgeIds": [
+        "3446af833cfe9671d1808fcabbf9bece47d387817d132aad21e574d058c1d7c4"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "3446af833cfe9671d1808fcabbf9bece47d387817d132aad21e574d058c1d7c4",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "外卖、共餐和旅行受到不同限制，可以各保留一套简短原则：外卖检查默认附加项，共餐先协调人数与限制，旅行先确认供应与保存条件。它们不需要复制同一张理想菜单，也不要求每次都完成所有改进。备选应能直接指导下一次决定，例如临时加人怎么续点、延迟送达怎么改计划，而不是只写以后更健康这样的抽象目标。"
+          ],
+          "rationale": "只是特殊场景原则与决策流程，没有便利店具体食物组合。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。便利店具体组合仍依赖原有核心锚点。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-046",
+      "inspectedKnowledgeIds": [
+        "00daf2cf26a7e3515ae8ad787030156f692ffb7bedb44099661318007c00b22c",
+        "ca6d662ee68e2b488717ce99fa86b74bcfa5c956df56ac0d0bcb47aec69ec7ab"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "00daf2cf26a7e3515ae8ad787030156f692ffb7bedb44099661318007c00b22c",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "多吃蔬菜或少喝甜饮很难直接核对，可以改写为某类晚餐选择带独立蔬菜的套餐，或在某个固定购买场景改选另一饮品。具体动作应来自本人能控制的环节，而不是要求每天所有餐食都完美。场景越贴近真实生活，越容易知道何时执行；同时不必用严格数量制造负担，目标大小可以随实际条件调整。"
+          ],
+          "rationale": "目标来自可控制的真实环节，而不是要求每天所有餐食完美。",
+          "alternativeForGroups": [
+            0
+          ]
+        },
+        {
+          "knowledgeId": "ca6d662ee68e2b488717ce99fa86b74bcfa5c956df56ac0d0bcb47aec69ec7ab",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "看到某一项建议后，先结合实际吃过的食品与当前需要判断是否执行。原餐已有主食却未被照片拍到时，补充记录即可，不需要为了让系统看见而再吃一份。原餐缺少某类食品，也可以在下一次可执行的点单里调整，而不是必须在吃饱后立刻追加。"
+          ],
+          "rationale": "已有食品不需再吃，吃饱后无需立刻追加成高分图案。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-047",
+      "inspectedKnowledgeIds": [
+        "32b1f381669ef0e826c0c95bd5b8088fd26475337b8b3abe36b0b458958f36d1",
+        "a4507087ef6de758a959dad0c7f4987e358a71661f0f92fa6bb4d9846a933df4",
+        "c3bc85d835a93deedf9c8f10eaa4dfa7e72b8f1843e51cf51ce25e7a286594cf",
+        "d6ec623f22d56733ad8e752ff49ed6593599cb2c22ae799b42e95c7621019b48"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "32b1f381669ef0e826c0c95bd5b8088fd26475337b8b3abe36b0b458958f36d1",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "多条记录可能同时出现饮料、配菜、预算和时间问题，先选择最常发生或最容易解决的一项，通常比同时重写全部菜单更容易执行。判断可以结合本人意愿与现实限制，不由系统单方面按分数排序。若最主要障碍是晚饭买不到，先解决路线；若是默认套餐总带不需要的饮料，先修改订单。不同问题需要不同动作。"
+          ],
+          "rationale": "只说明选目标与修改默认饮料订单，未给出奶茶与炸鸡两项具体替换，保留为实施方法背景。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "a4507087ef6de758a959dad0c7f4987e358a71661f0f92fa6bb4d9846a933df4",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "如果每次晚自习后都会顺路买炸物，可以先改变其中一次回宿舍的采购安排，或提前准备能替代该次购买的普通食物。若只是在同学聚餐偶尔吃一次，行动可以是下次不重复点炸配菜。两种情况所需改变不同，不必设一个对所有人相同的禁止天数。复盘时只核对计划改变的购买场景是否发生即可。"
+          ],
+          "rationale": "改变顺路炸物采购路线、提前准备普通食品，只覆盖炸鸡侧。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "c3bc85d835a93deedf9c8f10eaa4dfa7e72b8f1843e51cf51ce25e7a286594cf",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "经常在晚自习前、取外卖时或路过某门店买甜饮，适合把计划落在那个具体地点和时间。例如准备在出门前装好可用的饮水，或取餐时只取已经决定的餐食。与其写以后少喝，不如确定下一次在同一场景要采取的动作，同时保留正常吃饭和休息的安排。"
+          ],
+          "rationale": "准备饮水或只取正餐，只覆盖奶茶侧，不独立满足两类替换要求。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。三个片段分别支持方法、炸物、甜饮；任一片都未单独完整覆盖两类替换需求。 主代理与复核代理对旧核心补做全文复核，显式降级旧标注并建立两个必要证据面。",
+      "chunkIssues": [],
+      "priorTargetRevisions": [
+        {
+          "knowledgeId": "d6ec623f22d56733ad8e752ff49ed6593599cb2c22ae799b42e95c7621019b48",
+          "relevance": 1,
+          "rationale": "旧核心讲记录完整性与小目标复盘，没有奶茶或炸鸡的具体替换动作；主代理和复核代理全文复核后降为背景，不能独立满足任一必要证据面。"
+        }
+      ],
+      "coveragePlan": {
+        "groups": [
+          [
+            "c3bc85d835a93deedf9c8f10eaa4dfa7e72b8f1843e51cf51ce25e7a286594cf"
+          ],
+          [
+            "a4507087ef6de758a959dad0c7f4987e358a71661f0f92fa6bb4d9846a933df4"
+          ]
+        ],
+        "rationales": [
+          "减少甜饮：准备饮水或不额外购买饮品",
+          "减少炸物购买：改变采购场景、预备普通食品或不重复点炸配菜"
+        ],
+        "adjudicationReason": "原证据只提供方法框架，未覆盖具体购买替换；严格要求甜饮与炸物两个必要证据面共同出现，不声称炸物片提供了具名替代主菜。"
+      }
+    },
+    {
+      "caseId": "rag-048",
+      "inspectedKnowledgeIds": [
+        "d06396d216b540e8ecba0b79d17673164379599ecc4ed02ea6ce37631bd843bd"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "d06396d216b540e8ecba0b79d17673164379599ecc4ed02ea6ce37631bd843bd",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "准备总结这一周时，可以先列有记录的日期、餐次，以及哪些内容仍不清楚。若只有工作日午餐，结论就应围绕这些午餐，不扩展为全部饮食。若某几天信息特别完整，也不要让它们自动代表其余日期。覆盖检查并不要求填满所有空白，而是让读者知道总结来自哪些实际观察，避免被漂亮的周报格式误导。"
+          ],
+          "rationale": "周复盘先检查资料覆盖与行为执行，不把执行结果当身体结果。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-049",
+      "inspectedKnowledgeIds": [
+        "c6a8372a23793dd96cd740a28dbf856e180cef0b9aeecd8cce01b7f60b99053f"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "c6a8372a23793dd96cd740a28dbf856e180cef0b9aeecd8cce01b7f60b99053f",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "购买燕麦或麦片时，可先确认是单一燕麦产品还是多种材料混合的早餐食品，再查看糖、巧克力、奶精等是否出现在配料中。原味、果味和脆烤等名称可以提示口味，却不能替代配料表。若目的是自己决定添加什么，选择组成较明确的基底，再按需要搭配其他食品，操作上会更清楚。"
+          ],
+          "rationale": "直接区分单一燕麦与调味混合食品，查看糖巧克力奶精配料，另计冲调加料。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-050",
+      "inspectedKnowledgeIds": [
+        "a641e74a79ac6446a003e99fb3cdf08137d87abc9a27627192eea22ed7f7b56f"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "a641e74a79ac6446a003e99fb3cdf08137d87abc9a27627192eea22ed7f7b56f",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "喜欢豆沙口味时，可以把一款糕点作为计划中的口味选择，不必先证明它能替代某类正餐。若原来想买的是午餐，就另看是否取得主食之外的配菜和蛋豆肉鱼。两种购买目的可以同时存在，但不要让带豆的名称掩盖实际只有糕点这一项，也不需要因为其中有糖就否定偶尔选择的事实。"
+          ],
+          "rationale": "带豆糕点按完整成品用途理解，不能凭豆字替代正餐的其他来源。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-051",
+      "inspectedKnowledgeIds": [
+        "3512aa114defbf3a8dd8069e0bdd7cd1620a63fdb6e8867c59ce386062e2bf40"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "3512aa114defbf3a8dd8069e0bdd7cd1620a63fdb6e8867c59ce386062e2bf40",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "带去课间或出行时，可以用适合食品的容器分出当次准备使用的部分，并保留原包装信息以便知道产品和保存要求。和同学分享则先各自取用，再将未用部分收好；不需要为了分得绝对平均而逐颗计算营养。分装主要帮助区分当次使用与余量，不等于给所有人设定相同食量。"
+          ],
+          "rationale": "课间坚果分装并保留产品和保存信息，换口味时重新看原料。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-052",
+      "inspectedKnowledgeIds": [
+        "8683057d67bbd17c45bf5762fbae7653d1076b60c43bdee7f35a557db33fcf9c"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "8683057d67bbd17c45bf5762fbae7653d1076b60c43bdee7f35a557db33fcf9c",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "涂面包时可以先铺薄薄一层，再根据口味决定是否增加；拌面时先用一部分拌匀；蘸食时可将需要的量放进自己的小碟。三种方式都让追加成为有意识的动作，但不能用同一勺换算所有酱的重量。瓶中剩余、稀释后的液体和已经拌入食品的酱，也应分清楚是哪个对象。"
+          ],
+          "rationale": "主要讲使用量与追加，不列芝麻酱和花生酱应比较的配料。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。新片侧重用量，不是配料比较。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-053",
+      "inspectedKnowledgeIds": [
+        "503653486967e7869e6d6b483dfc279e2c5dd3013149032aaa3b148cc558b51d"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "503653486967e7869e6d6b483dfc279e2c5dd3013149032aaa3b148cc558b51d",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "不同口味、切法和包装规格的榨菜可能采用不同配方。比较钠等标签项目时，先把每份或每百克的计量基础统一，再看自己这次要吃多少。大袋分几次吃，不应每次都把整袋记为已吃；小袋一次用完，也不能因为袋子小就认定单位重量的钠低。包装大小与配方比较是两项判断。"
+          ],
+          "rationale": "完整段落讲标签与实际量，没有判断少量榨菜能否承担一餐蔬菜。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。开头残句涉及核心，完整段落只讨论标签。",
+      "chunkIssues": [
+        {
+          "knowledgeId": "503653486967e7869e6d6b483dfc279e2c5dd3013149032aaa3b148cc558b51d",
+          "kind": "MID_SENTENCE_PREFIX",
+          "detail": "开头逗号续句涉及腌菜不等于完成蔬菜安排，建议将该关键判断与完整前句放在同片。"
+        }
+      ]
+    },
+    {
+      "caseId": "rag-054",
+      "inspectedKnowledgeIds": [
+        "7ab5b072803063d95f136418729db8219ca7eac3a19dc7e2952242ee21a6f89c"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "7ab5b072803063d95f136418729db8219ca7eac3a19dc7e2952242ee21a6f89c",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "不同窗口的汤有不同配方，外观清澈、颜色浅或不辣，都不能直接决定哪一碗钠更少。若没有配方或可靠标签，适合比较的是能执行的要求，例如是否取消额外调料、是否可以分装，而不是从照片给两种汤排出精确高低。"
+          ],
+          "rationale": "直接说明清澈不辣不证明钠少，可控制额外添加；满碗也不证明实际全部喝下。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-055",
+      "inspectedKnowledgeIds": [
+        "b0482a8f4843b0033bbe26f701467ae254194c6118034f57e18620db0353a4b1"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "b0482a8f4843b0033bbe26f701467ae254194c6118034f57e18620db0353a4b1",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "早餐窗口每天只有咸蛋时，可以把普通鸡蛋安排在另一个方便的窗口或另一顿，而不强求当前商家临时改变做法。提前看清供应时间和食用条件，下一次才容易真正换到。轮换不代表普通蛋与每款调味蛋在所有营养项目上都构成固定差值，也不要求把喜欢的调味蛋永久移出个人菜单。"
+          ],
+          "rationale": "按实际供应在其他餐次轮换普通蛋，不虚构调味蛋固定营养差值。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-056",
+      "inspectedKnowledgeIds": [
+        "287503b921b9331ba0e2f16d36e42f3f79498225adf4755e37a372ad8cd09167"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "287503b921b9331ba0e2f16d36e42f3f79498225adf4755e37a372ad8cd09167",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "奶油夹层、巧克力涂层和内部果酱不一定能由外观完整看出。购买包装产品时看配料和本款标签，现制产品则先确认具体品名与能说明的材料。全麦、杂粮等词描述部分原料，不能让夹心和涂层在比较中消失。同样大小的普通面包也可能重量不同，不能只按体积决定哪个数值一定更低。"
+          ],
+          "rationale": "比较完整成品配料、当前标签与规格，不能凭面包体积判断营养。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-057",
+      "inspectedKnowledgeIds": [
+        "4e30cdbe3bb610bdbc0bf7dbd8f268a3071d7fd737fa0c64cb928dc3f361a516"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "4e30cdbe3bb610bdbc0bf7dbd8f268a3071d7fd737fa0c64cb928dc3f361a516",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "桌上醋、酱油和辣油可以自行选择，煎制过程中已加入的油则不是桌边蘸料。取消一碟辣油不能让煎饺自动成为蒸饺，蘸醋也不能抵消烹饪用油。可以保留自己喜欢的调味，并只调整一次明确的添加动作；比较下次是否容易坚持时，关注口味和取得条件即可。"
+          ],
+          "rationale": "区分煎制油与蘸料，取消辣油不能让煎饺等同蒸饺，同为十个不抹去做法差异。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-058",
+      "inspectedKnowledgeIds": [
+        "ca4adbb6d0fc0e7e68343c532b639b6f5d4bc5dfe7e0ef6ccaee7a1fd2edd357"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "ca4adbb6d0fc0e7e68343c532b639b6f5d4bc5dfe7e0ef6ccaee7a1fd2edd357",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "便利店饭团方便拿取，但货架可能只有少量蔬菜配料。若要用作午餐，可以同时查看现有蛋、豆制品或其他合适食品，以及能取得的蔬菜；如果本店选择有限，可换到有完整套餐的地点。不能只靠多买几个不同口味饭团，就认定已经解决所有搭配问题；购买数量仍按实际需要决定。"
+          ],
+          "rationale": "饭团午餐查看蛋豆等合适食品和可取得蔬菜，不靠增加口味数补齐结构。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-059",
+      "inspectedKnowledgeIds": [
+        "d67338176af6053aa30b3a7c1328a491979705941c7422ecba39244eff2219c5"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "d67338176af6053aa30b3a7c1328a491979705941c7422ecba39244eff2219c5",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "现制店允许自选时，可直接说需要哪种蛋肉、是否加蔬菜、酱能否另放，而不是只写健康一点。若产品已包装完成，临时备注不一定可改变配方，可以换选另一款。早餐和午餐需要的完整搭配也可能不同，额外食品依据当次用途选择，不把同一种三明治组合固定套到所有餐次。"
+          ],
+          "rationale": "补充定制夹层与餐次用途，未直接判断少量生菜是否足以组成完整饭。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。新片讲包装与定制，结构判断仍在原锚点。",
+      "chunkIssues": [
+        {
+          "knowledgeId": "d67338176af6053aa30b3a7c1328a491979705941c7422ecba39244eff2219c5",
+          "kind": "MID_SENTENCE_PREFIX",
+          "detail": "开头“安排了足够蔬菜”接续前片且涉及本题核心，不把残句当作新完整证据。"
+        }
+      ]
+    },
+    {
+      "caseId": "rag-060",
+      "inspectedKnowledgeIds": [
+        "965ceb4fa275ba343a0fe5a212199ebebacfa0e07dafe531ab95ec60c270a277"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "965ceb4fa275ba343a0fe5a212199ebebacfa0e07dafe531ab95ec60c270a277",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "芝士边、不同厚度饼底和额外蘸酱会形成不同产品组合。若有人留下饼边，可以描述实际吃法，但不能用整张数据直接扣一个通用的边缘比例。想让下一次选择更明确，可直接选不同饼底或不加某项附加物，并使用对应产品信息；比较的依据应与实际订单一致。"
+          ],
+          "rationale": "组成与剩余边缘不能按统一比例扣除，但未交代两片所需整饼尺寸和切法。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。新片讲组成与剩余，两片记录所需尺寸切法仍在原锚点。",
+      "chunkIssues": []
+    }
+  ],
+  "baseDatasetSha256": "7a3b81e279c1aca9c4c4f810fce03a52f961c67bc770d17cbb3e0d51e959d9fe"
+}

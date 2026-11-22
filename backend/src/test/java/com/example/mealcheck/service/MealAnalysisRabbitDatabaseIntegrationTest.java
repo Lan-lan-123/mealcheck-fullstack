@@ -179,9 +179,11 @@ class MealAnalysisRabbitDatabaseIntegrationTest {
         var old = store.takeMessage(eventId());
         assertThat(old).isNotNull();
         assertThat(store.takeMessage(eventId())).isNull();
+        var oldPrepared = analysis.prepareValidated(old.user(), store.loadImage(old), old.goal());
         jdbc.update("UPDATE meal_analysis_requests SET lease_until=CURRENT_TIMESTAMP-INTERVAL '1 minute'");
         publisher.publish(); listeners.start(); awaitSuccess();
-        store.complete(old.user(), old.key(), old.token(), analysis.prepareValidated(old.user(), old.image(), old.goal()));
+        assertThatThrownBy(() -> store.loadImage(old)).isInstanceOf(MealAnalysisRequestStore.WorkNoLongerOwnedException.class);
+        store.complete(old.user(), old.key(), old.token(), oldPrepared);
         assertThat(meals.count()).isEqualTo(1);
         assertThat(outboxCount()).isZero();
     }
@@ -228,13 +230,114 @@ class MealAnalysisRabbitDatabaseIntegrationTest {
         var first = outbox.claim();
         assertThat(outbox.claim()).isNull();
         due();
+        assertThat(outbox.confirmed(first)).isFalse(); // An expired claim cannot write, even before takeover.
         var recovered = outbox.claim();
         assertThat(recovered.eventId()).isEqualTo(first.eventId());
         assertThat(recovered.token()).isNotEqualTo(first.token());
-        outbox.confirmed(first);
+        assertThat(outbox.confirmed(first)).isFalse();
         assertThat(jdbc.queryForObject("SELECT published_at FROM meal_analysis_outbox", java.sql.Timestamp.class)).isNull();
-        outbox.confirmed(recovered);
+        assertThat(outbox.confirmed(recovered)).isTrue();
         assertThat(jdbc.queryForObject("SELECT published_at FROM meal_analysis_outbox", java.sql.Timestamp.class)).isNotNull();
+    }
+
+    @Test void multipleWindowsPublishDistinctPersistentMessagesAndDoNotReplayConfirmedBacklog() {
+        enqueueMultiple(12);
+        publisher.publish();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM meal_analysis_outbox WHERE published_at IS NOT NULL AND publish_attempts=1", Long.class)).isEqualTo(12);
+        var received = new HashSet<UUID>();
+        for (int i = 0; i < 12; i++) {
+            var message = rabbit.receive(QUEUE, 5000);
+            assertThat(message).isNotNull();
+            UUID event = UUID.fromString(new String(message.getBody(), StandardCharsets.UTF_8));
+            assertThat(received.add(event)).isTrue();
+            assertThat(message.getMessageProperties().getMessageId()).isEqualTo(event.toString());
+            assertThat(message.getMessageProperties().getReceivedDeliveryMode()).isEqualTo(MessageDeliveryMode.PERSISTENT);
+        }
+        due(); publisher.publish();
+        assertThat(outbox.claimBatch(8)).isEmpty();
+        assertThat(rabbit.receive(QUEUE)).isNull();
+    }
+
+    @Test void concurrentBatchClaimsSkipLockedRowsAndNeverShareDispatchOwnership() throws Exception {
+        enqueueMultiple(6);
+        var entered = new CountDownLatch(1);
+        var release = new CountDownLatch(1);
+        var executor = Executors.newFixedThreadPool(2);
+        try {
+            var first = executor.submit(() -> new TransactionTemplate(transactionManager).execute(tx -> {
+                var batch = outbox.claimBatch(3);
+                entered.countDown();
+                try { if (!release.await(5, TimeUnit.SECONDS)) throw new AssertionError("timeout"); }
+                catch (InterruptedException e) { Thread.currentThread().interrupt(); throw new IllegalStateException(e); }
+                return batch;
+            }));
+            assertThat(entered.await(5, TimeUnit.SECONDS)).isTrue();
+            var second = executor.submit(() -> outbox.claimBatch(3)).get(3, TimeUnit.SECONDS);
+            assertThat(second).hasSize(3);
+            release.countDown();
+            var original = first.get(3, TimeUnit.SECONDS);
+            assertThat(original).hasSize(3);
+            assertThat(original.stream().map(MealAnalysisOutboxStore.Dispatch::eventId).toList())
+                    .doesNotContainAnyElementsOf(second.stream().map(MealAnalysisOutboxStore.Dispatch::eventId).toList());
+            assertThat(outbox.claimBatch(3)).isEmpty();
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM meal_analysis_outbox WHERE publish_attempts=1 AND publish_token IS NOT NULL", Long.class)).isEqualTo(6);
+        } finally { release.countDown(); executor.shutdownNow(); }
+    }
+
+    @Test void batchClaimRollbackReleasesEveryRowAndRestoresAttemptCounters() {
+        enqueueMultiple(4);
+        new TransactionTemplate(transactionManager).executeWithoutResult(tx -> {
+            assertThat(outbox.claimBatch(3)).hasSize(3);
+            tx.setRollbackOnly();
+        });
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM meal_analysis_outbox WHERE publish_attempts=0 AND publish_token IS NULL", Long.class)).isEqualTo(4);
+        assertThat(outbox.claimBatch(3)).hasSize(3);
+        assertThat(outbox.claimBatch(3)).hasSize(1);
+        assertThat(outbox.claimBatch(3)).isEmpty();
+    }
+
+    private void enqueueMultiple(int count) {
+        for (int i = 0; i < count; i++) {
+            var user = new UserAccount(); user.setUsername("batch-user-" + i); user.setPasswordHash("hash");
+            requests.enqueue(new UserPrincipal(users.saveAndFlush(user)), KEY + "-batch-" + i, image, "current");
+        }
+    }
+
+    @Test void twoHundredBackloggedTasksSurviveWorkerPauseAndLeaseRecoveryWithoutDuplicateRecords() throws Exception {
+        org.springframework.test.util.ReflectionTestUtils.setField(store,"maxOutstanding",200);
+        requests.enqueue(principal,KEY,image,"current");
+        requests.enqueue(principal,KEY+"-second",image,"current");
+        assertThatThrownBy(() -> requests.enqueue(principal,KEY+"-third",image,"current"))
+                .isInstanceOf(AnalysisAdmissionException.class)
+                .extracting(error -> ((AnalysisAdmissionException)error).code()).isEqualTo("ANALYSIS_USER_BUSY");
+        enqueueMultiple(198);
+        var overflow = new UserAccount(); overflow.setUsername("queue-overflow"); overflow.setPasswordHash("hash");
+        var overflowPrincipal = new UserPrincipal(users.saveAndFlush(overflow));
+        assertThatThrownBy(() -> requests.enqueue(overflowPrincipal,KEY+"-overflow",image,"current"))
+                .isInstanceOf(AnalysisAdmissionException.class)
+                .extracting(error -> ((AnalysisAdmissionException)error).code()).isEqualTo("ANALYSIS_BUSY");
+        assertThat(requests.enqueue(principal,KEY,image,"current").stage()).isEqualTo("QUEUED");
+        assertThat(outboxCount()).isEqualTo(200);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM meal_analysis_requests WHERE input_image IS NOT NULL",Long.class)).isEqualTo(200);
+        // Simulate minutes of backlog: the execution deadline must start on consumption.
+        jdbc.update("UPDATE meal_analysis_outbox SET created_at=CURRENT_TIMESTAMP-INTERVAL '5 minutes'");
+        var abandoned = store.takeMessage(eventId());
+        jdbc.update("UPDATE meal_analysis_requests SET lease_until=CURRENT_TIMESTAMP-INTERVAL '1 second' WHERE request_key=?",KEY);
+        assertThat(requests.status(principal,KEY).message()).contains("自动恢复");
+        assertThatThrownBy(() -> store.loadImage(abandoned)).isInstanceOf(MealAnalysisRequestStore.WorkNoLongerOwnedException.class);
+        for (int i=0;i<10;i++) publisher.publish();
+        assertThat(admin.getQueueProperties(QUEUE).get("QUEUE_MESSAGE_COUNT")).isEqualTo(200);
+        due(); publisher.publish(); // Confirmed backlog must not be republished.
+        listeners.start();
+        await().atMost(Duration.ofSeconds(120)).untilAsserted(() -> assertThat(meals.count()).isEqualTo(200));
+        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+            assertThat(outboxCount()).isZero();
+            assertThat(admin.getQueueProperties(QUEUE).get("QUEUE_MESSAGE_COUNT")).isEqualTo(0);
+        });
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM meal_analysis_requests WHERE status='SUCCEEDED' AND input_image IS NULL",Long.class)).isEqualTo(200);
+        assertThat(jdbc.queryForObject("SELECT count(DISTINCT record_id) FROM meal_analysis_requests",Long.class)).isEqualTo(200);
+        verify(vision,times(200)).recognize(any(ValidatedImage.class));
+        assertThat(requests.enqueue(overflowPrincipal,KEY+"-after-drain",image,"current").status()).isEqualTo("PENDING");
     }
 
     private UUID eventId() { return jdbc.queryForObject("SELECT event_id FROM meal_analysis_outbox WHERE request_key=?", UUID.class, KEY); }

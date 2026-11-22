@@ -10,7 +10,9 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
+    env:
+      JAVA_TOOL_OPTIONS: -XX:ErrorFile=${{ github.workspace }}/logs/crash/hs_err_pid%p.log
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -26,17 +28,39 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Prepare evidence directory
+        shell: bash
+        run: |
+          evidence="$GITHUB_WORKSPACE/logs/deploy/ci-$(date -u +%Y%m%dT%H%M%SZ)-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          mkdir -p "$evidence" "$GITHUB_WORKSPACE/logs/crash"
+          echo "MEALCHECK_CI_EVIDENCE=$evidence" >> "$GITHUB_ENV"
       - name: Test backend
         working-directory: backend
         run: mvn --batch-mode --no-transfer-progress verify -Pintegration
+      - name: Require actual database integration execution
+        run: python -c "from pathlib import Path; from deploy.scripts.release_baseline import require_database_tests; print(require_database_tests(Path('.')))"
+      - name: Prepare offline evaluation fixtures
+        shell: bash
+        run: |
+          python -m pip install -r tools/requirements-ci.txt
+          python tools/evaluation/prepare_ci_fixtures.py --output "$MEALCHECK_CI_EVIDENCE/evaluation-fixtures"
+          echo "MEALCHECK_TEST_CHUNK_MANIFEST=$MEALCHECK_CI_EVIDENCE/evaluation-fixtures/chunks.json" >> "$GITHUB_ENV"
+          echo "MEALCHECK_TEST_SCREENING_PACKET=$MEALCHECK_CI_EVIDENCE/evaluation-fixtures/screening-packet" >> "$GITHUB_ENV"
       - name: Build frontend
         working-directory: frontend
-        run: npm ci && npm test && npm run build
+        run: npm ci && npm run typecheck && npm test && npm run build
       - name: Browser acceptance
         working-directory: frontend
         run: npx playwright install --with-deps chromium && npm run test:e2e
       - name: Operations and recognition evaluation contracts
-        run: python -m unittest discover -s tools -p test_operations.py -v
+        run: |
+          python -m unittest discover -s tools -p test_operations.py -v
+          python -m unittest discover -s tools -p test_lifecycle_backup.py -v
+          python -m unittest discover -s tools -p test_assistant_cluster.py -v
+          python -m unittest discover -s tools -p test_release_baseline.py -v
+          python -m unittest discover -s tools -p test_score_saved_assistant_answers.py -v
+          python -m unittest discover -s loadtests -p test_model_stub.py -v
+          python tools/evaluation/run_offline_unit_tests.py
       - name: Capacity acceptance contracts
         run: python -m unittest discover -s loadtests -p test_capacity_acceptance.py -v
       - name: Recovery storage and migration contracts
@@ -46,42 +70,49 @@ jobs:
       - uses: grafana/setup-k6-action@v1
       - name: Isolated capacity and dependency recovery acceptance
         run: |
-          python -m pip install Pillow
           test -s backend/target/mealcheck-backend.jar
           docker compose -p mealcheck-capacity-acceptance -f deploy/compose.acceptance.yml up -d --wait --wait-timeout 90
-          python loadtests/capacity_acceptance.py --output loadtests/results/ci-acceptance --fault-checks
+          python loadtests/capacity_acceptance.py --output "$MEALCHECK_CI_EVIDENCE/capacity" --fault-checks
       - name: Collect isolated capacity logs
         if: always()
         run: |
-          mkdir -p loadtests/results/ci-acceptance
-          docker compose -p mealcheck-capacity-acceptance -f deploy/compose.acceptance.yml logs --no-color --tail 300 > loadtests/results/ci-acceptance/compose.log 2>&1
+          mkdir -p "$MEALCHECK_CI_EVIDENCE/capacity"
+          docker compose -p mealcheck-capacity-acceptance -f deploy/compose.acceptance.yml logs --no-color --tail 300 > "$MEALCHECK_CI_EVIDENCE/capacity/compose.log" 2>&1
       - name: Cleanup isolated capacity stack
         if: always()
         run: docker compose -p mealcheck-capacity-acceptance -f deploy/compose.acceptance.yml down --volumes
+      # Both backend JVMs use the fixed JAR produced by backend verification.
+      - name: Assistant dual-backend ownership and recovery acceptance
+        run: python deploy/scripts/verify_assistant_cluster.py --output "$MEALCHECK_CI_EVIDENCE/assistant-cluster"
+      - name: Knowledge source dual-backend initialization and recovery acceptance
+        run: python deploy/scripts/verify_knowledge_cluster.py --output "$MEALCHECK_CI_EVIDENCE/knowledge-cluster"
       - name: Trusted proxy chain and forged header regression
         run: |
           sudo apt-get update
           sudo apt-get install -y nginx
           python tools/test_proxy_headers.py --nginx /usr/sbin/nginx
       - name: Validate analysis and backup alerts
-        run: docker run --rm --entrypoint promtool -v "$PWD/deploy/monitoring:/rules:ro" prom/prometheus:v3.5.0 check rules /rules/mealcheck-alerts.yml
+        run: |
+          docker run --rm --entrypoint promtool -v "$PWD/deploy/monitoring:/rules:ro" prom/prometheus:v3.5.0 check rules /rules/mealcheck-alerts.yml
+          docker run --rm --entrypoint promtool -w /rules -v "$PWD/deploy/monitoring:/rules:ro" prom/prometheus:v3.5.0 test rules lifecycle-alerts.test.yml
+          docker run --rm --entrypoint promtool -w /rules -v "$PWD/deploy/monitoring:/rules:ro" prom/prometheus:v3.5.0 test rules assistant-alerts.test.yml
       - name: Isolated database and image restore drill
         shell: bash
         run: |
-          mkdir -p deploy/recovery-results
-          python deploy/scripts/recovery.py self-test --migrations backend/src/main/resources/db/migration --output deploy/recovery-results/ci-self-test 2>&1 | tee deploy/recovery-results/ci-self-test.log
+          mkdir -p "$MEALCHECK_CI_EVIDENCE/recovery"
+          python tools/run_logged.py --group deploy --name ci-recovery-self-test -- python deploy/scripts/recovery.py self-test --migrations backend/src/main/resources/db/migration --output "$MEALCHECK_CI_EVIDENCE/recovery/self-test"
       - name: Production profile startup and HTTP smoke
         shell: bash
         run: |
           docker compose -p mealcheck-reliability-smoke --env-file deploy/smoke.env -f docker-compose.prod.yml -f deploy/compose.smoke.yml up --build -d --wait --wait-timeout 180
-          python deploy/scripts/smoke.py --base-url http://127.0.0.1:18080 2>&1 | tee deploy/recovery-results/ci-http-smoke.log
-          python deploy/scripts/recovery.py backup --project mealcheck-reliability-smoke --compose docker-compose.prod.yml --compose deploy/compose.smoke.yml --env-file deploy/smoke.env --output deploy/recovery-results/ci-stack-backup 2>&1 | tee deploy/recovery-results/ci-stack-backup.log
-          python deploy/scripts/recovery.py drill --backup deploy/recovery-results/ci-stack-backup --output deploy/recovery-results/ci-stack-restored 2>&1 | tee deploy/recovery-results/ci-stack-restored.log
+          python tools/run_logged.py --group deploy --name ci-http-smoke -- python deploy/scripts/smoke.py --base-url http://127.0.0.1:18080
+          python tools/run_logged.py --group deploy --name ci-stack-backup -- python deploy/scripts/recovery.py backup --project mealcheck-reliability-smoke --compose docker-compose.prod.yml --compose deploy/compose.smoke.yml --env-file deploy/smoke.env --output "$MEALCHECK_CI_EVIDENCE/recovery/stack-backup"
+          python tools/run_logged.py --group deploy --name ci-stack-restore -- python deploy/scripts/recovery.py drill --backup "$MEALCHECK_CI_EVIDENCE/recovery/stack-backup" --output "$MEALCHECK_CI_EVIDENCE/recovery/stack-restored"
       - name: Collect production smoke logs
         if: always()
         run: |
-          mkdir -p deploy/recovery-results
-          docker compose -p mealcheck-reliability-smoke --env-file deploy/smoke.env -f docker-compose.prod.yml -f deploy/compose.smoke.yml logs --no-color --tail 300 > deploy/recovery-results/ci-smoke-compose.log 2>&1
+          mkdir -p "$MEALCHECK_CI_EVIDENCE/recovery"
+          docker compose -p mealcheck-reliability-smoke --env-file deploy/smoke.env -f docker-compose.prod.yml -f deploy/compose.smoke.yml logs --no-color --tail 300 > "$MEALCHECK_CI_EVIDENCE/recovery/compose.log" 2>&1
       - name: Cleanup isolated smoke stack
         if: always()
         run: docker compose -p mealcheck-reliability-smoke --env-file deploy/smoke.env -f docker-compose.prod.yml -f deploy/compose.smoke.yml down --volumes
@@ -92,16 +123,12 @@ jobs:
           name: reliability-verification
           path: |
             backend/target/failsafe-reports/
+            backend/target/surefire-reports/
+            logs/deploy/ci-*/
+            logs/deploy/ci-*.log
             backend/target/trend-query-plans.txt
-            loadtests/results/**/acceptance.json
-            loadtests/results/**/queries.json
-            loadtests/results/**/queries.log
-            loadtests/results/**/query-plans.txt
-            loadtests/results/**/*-metrics.prom
-            loadtests/results/**/compose.log
             frontend/playwright-report/
-            deploy/recovery-results/*.log
-            deploy/recovery-results/**/verification.json
+            logs/crash/
       - name: Validate production compose file
         env:
           SPRING_DATASOURCE_PASSWORD: ci-database-password-not-for-production

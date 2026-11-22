@@ -1,4 +1,9 @@
 """Seed and verify only deploy/compose.acceptance.yml's scratch stack; never uses production credentials."""
+
+import sys as _auth_sys
+from pathlib import Path as _AuthPath
+_auth_sys.path.insert(0, str(_AuthPath(__file__).resolve().parents[1] / 'tools'))
+import cookie_http as _auth_http
 import argparse
 import base64
 import json
@@ -30,7 +35,7 @@ def http(path, token=None, body=None, base=BASE):
     if token: headers['Authorization'] = f'Bearer {token}'
     request = urllib.request.Request(base + path, headers=headers, data=None if body is None else json.dumps(body).encode())
     try:
-        with urllib.request.urlopen(request, timeout=10) as response:
+        with _auth_http.urlopen(request, timeout=10) as response:
             return response.status, json.loads(response.read())
     except urllib.error.HTTPError as error:
         try: return error.code, json.loads(error.read())
@@ -105,7 +110,7 @@ def seed(output, count, meals, messages):
 
 
 def scrape():
-    with urllib.request.urlopen('http://127.0.0.1:19091/actuator/prometheus', timeout=5) as response:
+    with _auth_http.urlopen('http://127.0.0.1:19091/actuator/prometheus', timeout=5) as response:
         return response.read().decode()
 
 
@@ -194,10 +199,14 @@ def run_k6(name, script, settings, output, backend):
 
 
 def dependency_fault(service, token):
+    if service not in ('redis', 'postgres'):
+        raise ValueError('Only isolated Redis/PostgreSQL faults are supported')
     command(COMPOSE + ['stop', service], timeout=45).check_returncode()
     try:
         status, body = http('/api/meals?size=1', token)
-        failed_closed = status == 503 and body.get('code') == 'AUTH_DEPENDENCY_UNAVAILABLE'
+        # Token revocation moved to PostgreSQL. Redis loss must preserve authenticated reads.
+        failed_closed = (status == 200 and isinstance(body.get('content'), list) and isinstance(body.get('totalElements'), int)
+                         if service == 'redis' else status == 503 and body.get('code') == 'AUTH_DEPENDENCY_UNAVAILABLE')
     finally:
         command(COMPOSE + ['start', service], timeout=45).check_returncode()
         wait_ready(token)

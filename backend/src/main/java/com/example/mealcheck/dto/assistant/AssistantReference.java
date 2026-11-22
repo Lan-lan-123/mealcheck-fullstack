@@ -11,7 +11,12 @@ public class AssistantReference {
         this(id, title, content, "", score);
     }
 
-    public AssistantReference(Long id, String title, String content, String category, double score) {
+    @com.fasterxml.jackson.annotation.JsonCreator
+    public AssistantReference(@com.fasterxml.jackson.annotation.JsonProperty("id") Long id,
+                              @com.fasterxml.jackson.annotation.JsonProperty("title") String title,
+                              @com.fasterxml.jackson.annotation.JsonProperty("content") String content,
+                              @com.fasterxml.jackson.annotation.JsonProperty("category") String category,
+                              @com.fasterxml.jackson.annotation.JsonProperty("score") double score) {
         this.id = id;
         this.title = title;
         this.content = content;

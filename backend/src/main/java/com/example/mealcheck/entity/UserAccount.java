@@ -32,6 +32,12 @@ public class UserAccount {
     private String role = "USER";
 
     @Column(nullable = false)
+    private boolean enabled = true;
+
+    @Column(name = "token_version", nullable = false)
+    private long tokenVersion;
+
+    @Column(nullable = false)
     private LocalDateTime createdAt = AppTime.now();
 
     // 最后一次上传图片时间
@@ -80,6 +86,22 @@ public class UserAccount {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public long getTokenVersion() {
+        return tokenVersion;
+    }
+
+    public void invalidateTokens() {
+        tokenVersion = Math.incrementExact(tokenVersion);
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {

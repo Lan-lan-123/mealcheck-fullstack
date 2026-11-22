@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/authTest.js'
 
 async function harness(page) {
   await page.route('**/api/auth/captcha', route => route.fulfill({ json: { captchaId: 'test', question: '1+1' } }))

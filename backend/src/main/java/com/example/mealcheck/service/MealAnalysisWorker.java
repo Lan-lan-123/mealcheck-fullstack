@@ -36,10 +36,12 @@ public class MealAnalysisWorker {
         long start=System.nanoTime();String outcome="failure";
         String phase="ANALYZE";
         try (var deadline=analysis.analysisDeadline(work.user()); var lease=leases.track(work)) {
-            var prepared=analysis.prepareValidated(work.user(),work.imageReference()==null?work.image():store.loadImage(work),work.goal());
+            var prepared=analysis.prepareValidated(work.user(),store.loadImage(work),work.goal());
             phase="SAVE";
             var result=store.complete(work.user(),work.key(),work.token(),prepared);
             outcome="SUCCEEDED".equals(result.status())?"success":"fenced";
+        } catch (MealAnalysisRequestStore.WorkNoLongerOwnedException obsolete) {
+            outcome="fenced";
         } catch (RuntimeException error) {
             store.fail(work.user().getId(),work.key(),work.token(),phase,error);
             // No image, model response, account or request key in operational logs.

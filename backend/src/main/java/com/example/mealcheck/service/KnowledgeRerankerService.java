@@ -39,12 +39,13 @@ public class KnowledgeRerankerService {
     }
 
     public List<KnowledgeSnippet> rerank(String query, List<KnowledgeSnippet> candidates, int limit) {
+        AiCallContext.checkExecution();
         int safeLimit = Math.max(1, limit);
         if (candidates == null || candidates.isEmpty()) {
             return List.of();
         }
         if (!isConfigured()) {
-            return withRoughRanks(candidates).stream().limit(safeLimit).toList();
+            return KnowledgeQueryFocus.rerank(query,withRoughRanks(candidates),rrfK()).stream().limit(safeLimit).toList();
         }
 
         long startedAt = observability.start();
@@ -52,10 +53,16 @@ public class KnowledgeRerankerService {
             List<String> documents = candidates.stream().map(this::documentText).toList();
             Map<String, Object> body = new LinkedHashMap<>();
             body.put("model", properties.getKnowledge().getRerankModel());
-            body.put("query", query == null ? "" : query);
-            body.put("documents", documents);
-            body.put("top_n", documents.size());
-            body.put("return_documents", false);
+            if (URI.create(properties.getKnowledge().getRerankUrl()).getPath()
+                    .endsWith("/services/rerank/text-rerank/text-rerank")) {
+                body.put("input", Map.of("query", query == null ? "" : query, "documents", documents));
+                body.put("parameters", Map.of("top_n", documents.size()));
+            } else {
+                body.put("query", query == null ? "" : query);
+                body.put("documents", documents);
+                body.put("top_n", documents.size());
+                body.put("return_documents", false);
+            }
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(properties.getKnowledge().getRerankUrl()))
@@ -69,14 +76,18 @@ public class KnowledgeRerankerService {
                 throw new IllegalStateException("rerank HTTP " + response.statusCode());
             }
 
-            List<KnowledgeSnippet> result = mergeScores(candidates, response.body(), safeLimit);
+            List<KnowledgeSnippet> result = mergeScores(candidates, response.body(), candidates.size());
             observability.recordRerank(startedAt, providerName(), "success", candidates.size());
-            return result;
+            return KnowledgeQueryFocus.rerank(query,result,rrfK()).stream().limit(safeLimit).toList();
         } catch (Exception e) {
+            // Cancellation belongs to the caller, never to a usable fallback result.
+            AiCallContext.checkExecution();
+            if (e instanceof java.util.concurrent.CancellationException cancelled) throw cancelled;
+            if (e instanceof RemoteCallGuard.RemoteCallDeadlineException deadline) throw deadline;
             observability.recordRerank(startedAt, providerName(), "fallback", candidates.size());
             log.warn("Knowledge rerank failed; keeping hybrid retrieval order. provider={}, type={}",
                     providerName(), e.getClass().getSimpleName());
-            return withRoughRanks(candidates).stream().limit(safeLimit).toList();
+            return KnowledgeQueryFocus.rerank(query,withRoughRanks(candidates),rrfK()).stream().limit(safeLimit).toList();
         }
     }
 
@@ -96,16 +107,17 @@ public class KnowledgeRerankerService {
 
     public String cacheSignature() {
         if (!isConfigured()) {
-            return "rerank:disabled";
+            return "rerank:"+KnowledgeQueryFocus.VERSION+":disabled:"+rrfK();
         }
-        return String.format(java.util.Locale.ROOT, "rerank:wrrf-v1:%s:%.4f:%d",
+        return String.format(java.util.Locale.ROOT, "rerank:"+KnowledgeQueryFocus.VERSION+":wrrf-v1:%s:%.4f:%d",
                 providerName(), modelWeight(), rrfK());
     }
 
     private List<KnowledgeSnippet> mergeScores(List<KnowledgeSnippet> candidates,
                                                String responseBody,
                                                int limit) throws Exception {
-        JsonNode results = objectMapper.readTree(responseBody).path("results");
+        JsonNode root = objectMapper.readTree(responseBody);
+        JsonNode results = root.has("output") ? root.path("output").path("results") : root.path("results");
         if (!results.isArray() || results.isEmpty()) {
             throw new IllegalStateException("rerank response missing results");
         }

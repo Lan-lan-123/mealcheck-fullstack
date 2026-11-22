@@ -21,6 +21,8 @@
 @import './progress.css';
 @import './nutrition.css';
 @import './journal.css';
+@import './buttons.css';
+@import './meal-planning.css';
  .ai-budget-notice {
    display: flex;
    flex-wrap: wrap;
@@ -34,4 +36,10 @@
    overflow-wrap: anywhere;
  }
  .ai-budget-notice small { flex-basis: 100%; color: #53635a; }
+ .personal-ai-budget-settings { flex-basis: 100%; min-width: 0; }
+ .ai-cost-settings-form { display: grid; gap: 14px; margin-top: 14px; min-width: 0; }
+ .ai-cost-settings-form p { margin: 0; overflow-wrap: anywhere; }
+ .ai-cost-settings-form .button-row { display: flex; flex-wrap: wrap; gap: 10px; }
+ .ai-cost-limits { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 12px; }
+ .ai-price-entry { display: grid; gap: 12px; min-width: 0; border: 1px solid #c7d8cd; border-radius: 8px; padding: 14px; }
  .ai-budget-notice button { border: 1px solid #c7d8cd; border-radius: 6px; padding: 0.25rem 0.5rem; cursor: pointer; }

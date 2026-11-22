@@ -18,6 +18,11 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "meal_records")
 public class MealRecord {
+    @Basic(fetch = FetchType.LAZY)
+    @Column(columnDefinition = "TEXT")
+    private String scoreBreakdownJson;
+    public String getScoreBreakdownJson() { return scoreBreakdownJson; }
+    public void setScoreBreakdownJson(String value) { scoreBreakdownJson = value; }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -53,6 +58,14 @@ public class MealRecord {
     @Column(columnDefinition = "TEXT")
     private String riskTagsJson;
 
+    @Column(nullable=false,length=32)
+    private String adviceStatus="LEGACY";
+    @Column(length=48)
+    private String adviceFailureCode;
+    public String getAdviceStatus() { return adviceStatus; }
+    public void setAdviceStatus(String value) { adviceStatus=value; }
+    public String getAdviceFailureCode() { return adviceFailureCode; }
+    public void setAdviceFailureCode(String value) { adviceFailureCode=value; }
     @Basic(fetch = FetchType.LAZY)
     @Column(columnDefinition = "TEXT")
     private String advice;

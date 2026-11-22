@@ -21,6 +21,25 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class WeeklyReportJobServiceTest {
+    @Test void executionLeaseCannotBeShorterThanTheOperationDeadlineAndCleanupMargin() {
+        var repository = mock(WeeklyReportJobRepository.class);
+        var properties = new AppProperties();
+        properties.getWeeklyReport().setStaleLeaseSeconds(60);
+        var service = new WeeklyReportJobService(repository, properties, mock(TaskFailureRecorder.class),
+                mock(com.example.mealcheck.repository.UserAccountRepository.class));
+        when(repository.beginExecution(eq(1L), eq(2), eq("token"), any(), any())).thenReturn(1);
+        assertThat(service.beginExecution(1L, 2, "token")).isTrue();
+        var cutoff = ArgumentCaptor.forClass(LocalDateTime.class);
+        var now = ArgumentCaptor.forClass(LocalDateTime.class);
+        verify(repository).beginExecution(eq(1L), eq(2), eq("token"), cutoff.capture(), now.capture());
+        assertThat(java.time.Duration.between(cutoff.getValue(), now.getValue())).isEqualTo(java.time.Duration.ofSeconds(150));
+        service.claimBatch(0);
+        var recoveryCutoff = ArgumentCaptor.forClass(LocalDateTime.class);
+        var recoveryNow = ArgumentCaptor.forClass(LocalDateTime.class);
+        verify(repository).recoverStale(recoveryCutoff.capture(), recoveryNow.capture(), eq(3));
+        assertThat(java.time.Duration.between(recoveryCutoff.getValue(), recoveryNow.getValue())).isEqualTo(java.time.Duration.ofSeconds(150));
+    }
+
     @Test void admissionFailuresWaitWithoutSpendingAttemptsAndConfigurationErrorsStopAutomaticRetry() {
         var repository=mock(WeeklyReportJobRepository.class);
         var users=mock(com.example.mealcheck.repository.UserAccountRepository.class);

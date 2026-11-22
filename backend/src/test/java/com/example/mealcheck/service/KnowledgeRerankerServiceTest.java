@@ -23,6 +23,37 @@ class KnowledgeRerankerServiceTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    void usesDashScopeNativeRequestAndResponse() throws Exception {
+        AppProperties properties = configuredProperties();
+        properties.getKnowledge().setRerankUrl("https://dashscope.aliyuncs.com/api/v1/services/rerank/text-rerank/text-rerank");
+        properties.getKnowledge().setRerankModel("qwen3.7-text-rerank");
+        ObjectMapper mapper = new ObjectMapper();
+        AiHttpTransport transport = mock(AiHttpTransport.class);
+        HttpResponse<String> response = mock(HttpResponse.class);
+        when(response.statusCode()).thenReturn(200);
+        when(response.body()).thenReturn("{\"output\":{\"results\":[{\"index\":1,\"relevance_score\":0.95},{\"index\":0,\"relevance_score\":0.1}]}}");
+        when(transport.send(org.mockito.ArgumentMatchers.eq("reranker"), any(HttpRequest.class), any(String.class)))
+                .thenAnswer(call -> {
+                    var body = mapper.readTree(call.getArgument(2, String.class));
+                    assertThat(body.path("model").asText()).isEqualTo("qwen3.7-text-rerank");
+                    assertThat(body.path("input").path("query").asText()).isEqualTo("query");
+                    assertThat(body.path("input").path("documents").size()).isEqualTo(2);
+                    assertThat(body.path("parameters").path("top_n").asInt()).isEqualTo(2);
+                    assertThat(body.has("query")).isFalse();
+                    assertThat(body.path("parameters").has("return_documents")).isFalse();
+                    return response;
+                });
+        var service = new KnowledgeRerankerService(properties, mapper, mock(ApplicationObservability.class), transport);
+        var result = service.rerank("query", List.of(
+                new KnowledgeSnippet(1L, "first", "content", 0.9),
+                new KnowledgeSnippet(2L, "second", "content", 0.8)), 2);
+        assertThat(result).extracting(KnowledgeSnippet::getId).containsExactly(2L, 1L);
+        assertThat(result).allMatch(KnowledgeSnippet::isReranked);
+        assertThat(result.get(0).getRerankerRawScore()).isEqualTo(0.95);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     void reranksCandidatesAndBlendsModelWithInitialScores() throws Exception {
         AppProperties properties = configuredProperties();
         HttpClient httpClient = mock(HttpClient.class);

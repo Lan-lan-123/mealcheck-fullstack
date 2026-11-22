@@ -12,6 +12,12 @@ public class RecognitionResult {
     private boolean foodImage = true;
     private String rejectionReason;
     private boolean demoMode;
+    private String imageQuality = "CLEAR";
+    private List<FoodItem> uncertainFoods = new ArrayList<>();
+    public String getImageQuality() { return imageQuality; }
+    public void setImageQuality(String value) { imageQuality = value; }
+    public List<FoodItem> getUncertainFoods() { return uncertainFoods; }
+    public void setUncertainFoods(List<FoodItem> value) { uncertainFoods = value; }
 
     public List<FoodItem> getFoods() { return foods; }
     public void setFoods(List<FoodItem> foods) { this.foods = foods; }

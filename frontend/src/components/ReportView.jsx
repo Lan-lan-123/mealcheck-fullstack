@@ -1,3 +1,4 @@
+import Button from './Button'
 import TrackingSummary from "./TrackingSummary"
 import { formatTime } from '../utils/time'
 import { reportGenerationLabel, reportReviewLabel } from '../utils/mealLabels'
@@ -7,9 +8,9 @@ export default function ReportView({ report, avgLabel, onOpenDetail, onGenerate,
   return (
     <div className="card">
       <h2>本周饮食概览</h2>
-      {onGenerate && <button className="secondary-btn" type="button" onClick={onGenerate} disabled={!!jobStatus}>
+      {onGenerate && <Button variant="secondary" className="secondary-btn" type="button" onClick={onGenerate} disabled={!!jobStatus}>
         {jobStatus === 'RETRY' ? '生成暂时失败，正在自动重试…' : jobStatus ? '周报生成中…' : '生成今日周报 / 查看进度'}
-      </button>}
+      </Button>}
       <WeeklyReportProgress task={jobProgress} />
       <div className="metrics">
         <div>
@@ -37,9 +38,9 @@ export default function ReportView({ report, avgLabel, onOpenDetail, onGenerate,
 
       <p className="hint">{report.periodStart} 至 {report.periodEnd} · 完整报告包含下周建议、风险统计和本期餐食明细。</p>
 
-      <button className="ghost detail-report-btn" onClick={onOpenDetail} type="button" disabled={!!jobStatus}>
+      <Button variant="ghost" className="ghost detail-report-btn" onClick={onOpenDetail} type="button" disabled={!!jobStatus}>
         查看周报详情
-      </button>
+      </Button>
 
     </div>
   )

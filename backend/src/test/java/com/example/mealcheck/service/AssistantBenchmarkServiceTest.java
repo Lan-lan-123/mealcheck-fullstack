@@ -31,6 +31,155 @@ import static org.mockito.Mockito.when;
 class AssistantBenchmarkServiceTest {
 
     @Test
+    void ragToolSuiteUsesAll200RulesWithoutJudgeOrLiveRetrieval() throws Exception {
+        runRagToolSuite(false);
+    }
+
+    @Test
+    void ragToolAccuracyCountsMissingForbiddenBadArgumentsAndExecutionErrors() throws Exception {
+        runRagToolSuite(true);
+    }
+
+    private void runRagToolSuite(boolean injectFailures) throws Exception {
+        runRagSuite(injectFailures, "RAG_TOOLS");
+    }
+
+    @Test void ragChainKeepsToolAndRetrievalFailuresSeparateAndPersistsEvidence() throws Exception {
+        runRagSuite(true, "RAG_CHAIN");
+    }
+
+    @Test void ragChainRunsAllCasesWithoutAnIndependentJudgeOrDuplicateSearch() throws Exception {
+        runRagSuite(false, "RAG_CHAIN");
+    }
+
+    @Test void queuedOldScoringVersionCannotSilentlyUseNewCoverageRules() throws Exception {
+        var history = mock(AssistantBenchmarkHistoryService.class);
+        var runner = mock(AssistantEvaluationRunner.class);
+        var tasks = mockTasks(history, definition -> definition.replace(RagChainAssessment.VERSION + "+", "rag-chain-v1+"));
+        var ai = mock(AiChatClient.class); when(ai.isConfigured()).thenReturn(true);
+        var executor = Executors.newSingleThreadExecutor();
+        try {
+            var service = new AssistantBenchmarkService(ai, mock(AssistantBenchmarkJudgeClient.class), history, runner,
+                    mock(PgVectorKnowledgeService.class), mock(KnowledgeRerankerService.class), mock(KnowledgeResultPostProcessor.class),
+                    new ObjectMapper(), configuredProperties(), executor, tasks);
+            service.start("RAG_CHAIN", "admin");
+            verify(tasks, org.mockito.Mockito.timeout(5000)).fail(any(), org.mockito.ArgumentMatchers.contains("判分版本"));
+            org.mockito.Mockito.verifyNoInteractions(runner);
+        } finally { executor.shutdownNow(); }
+    }
+
+    @Test void queuedOldCorpusDatasetVersionStopsBeforeAnyModelCalls() throws Exception {
+        var history = mock(AssistantBenchmarkHistoryService.class);
+        var runner = mock(AssistantEvaluationRunner.class);
+        var tasks = mockTasks(history, definition -> definition.replace(RagAgentEvaluationDataset.VERSION, "rag-obsolete+rag-tools-v2"));
+        var ai = mock(AiChatClient.class); when(ai.isConfigured()).thenReturn(true);
+        var executor = Executors.newSingleThreadExecutor();
+        try {
+            var service = new AssistantBenchmarkService(ai, mock(AssistantBenchmarkJudgeClient.class), history, runner,
+                    mock(PgVectorKnowledgeService.class), mock(KnowledgeRerankerService.class), mock(KnowledgeResultPostProcessor.class),
+                    new ObjectMapper(), configuredProperties(), executor, tasks);
+            service.start("RAG_CHAIN", "admin");
+            verify(tasks, org.mockito.Mockito.timeout(5000)).fail(any(), org.mockito.ArgumentMatchers.contains("判分版本"));
+            org.mockito.Mockito.verifyNoInteractions(runner);
+        } finally { executor.shutdownNow(); }
+    }
+
+    private void runRagSuite(boolean injectFailures, String mode) throws Exception {
+        boolean chain = "RAG_CHAIN".equals(mode);
+        var mapper = new ObjectMapper().findAndRegisterModules();
+        var definition = RagAgentEvaluationDataset.load(mapper, configuredProperties());
+        var expectedByQuestion = new HashMap<String, JsonNode>();
+        definition.cases().forEach(row -> expectedByQuestion.put(row.path("question").asText(), row));
+        var ai = mock(AiChatClient.class);
+        var judge = mock(AssistantBenchmarkJudgeClient.class); // deliberately unconfigured
+        var history = mock(AssistantBenchmarkHistoryService.class);
+        var runner = mock(AssistantEvaluationRunner.class);
+        var vectors = mock(PgVectorKnowledgeService.class);
+        when(ai.isConfigured()).thenReturn(true);
+        when(runner.run(anyString(), any(JsonNode.class), anyString())).thenAnswer(invocation -> {
+            JsonNode context = invocation.getArgument(1);
+            if (chain) {
+                assertThat(context.path("ragChainEvaluation").asBoolean()).isTrue();
+                assertThat(context.has("ragKnowledgeFixtures")).isFalse();
+                assertThat(context.has("ragToolEvaluation")).isFalse();
+            }
+            String question = invocation.getArgument(0);
+            var row = expectedByQuestion.get(question);
+            String id = row.path("id").asText();
+            if (injectFailures && "rag-001".equals(id)) throw new IllegalStateException("mock timeout");
+            boolean search = !row.path("expected").path("expectedTools").isEmpty();
+            if (injectFailures && "rag-002".equals(id)) search = false; // missing tool
+            String tool = search ? RagToolEvaluationRules.SEARCH : null;
+            if (injectFailures && "rag-158".equals(id)) tool = "get_my_recent_meals"; // forbidden on no-answer
+            String query = injectFailures && "rag-003".equals(id) ? "天气" : question;
+            String args = mapper.createObjectNode().put("query", query).put("limit", 5).toString();
+            List<String> called = tool == null ? List.of() : List.of(tool);
+            var trace = tool == null ? List.<AssistantFunctionCallingService.ToolCallTrace>of()
+                    : List.of(new AssistantFunctionCallingService.ToolCallTrace(tool, args, "SUCCESS", 1, 1L));
+            var searches = new java.util.ArrayList<com.example.mealcheck.dto.RagChainReport.Retrieval>();
+            if (chain && search) {
+                var hits = new java.util.ArrayList<com.example.mealcheck.dto.RagChainReport.Hit>();
+                for (var fixture : row.path("context").path("ragKnowledgeFixtures")) {
+                    String title = injectFailures && "rag-004".equals(id) ? "无关知识" : fixture.path("title").asText();
+                    String content = fixture.path("content").asText();
+                    hits.add(new com.example.mealcheck.dto.RagChainReport.Hit((long) hits.size() + 1, title, "general", .9,
+                            RagEvidenceLabels.contentId(title, content), content));
+                }
+                searches.add(new com.example.mealcheck.dto.RagChainReport.Retrieval("call", query, 5, "SUCCESS", 1,
+                        hits, null));
+            }
+            return new AssistantEvaluationRunner.EvaluationResult("测试回答", "PRODUCTION_FUNCTION_CALLING",
+                    "balanced-diet", called.isEmpty() ? 0 : 1, called, trace, searches);
+        });
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            var service = new AssistantBenchmarkService(ai, judge, history, runner, vectors,
+                    mock(KnowledgeRerankerService.class), mock(KnowledgeResultPostProcessor.class),
+                    mapper, configuredProperties(), executor, mockTasks(history));
+            assertThat(service.start(mode, "admin").caseCount()).isEqualTo(200);
+            await().atMost(Duration.ofSeconds(10)).until(() -> "COMPLETED".equals(service.status().status()));
+            var result = service.status();
+            int passed = injectFailures ? (chain ? 195 : 196) : 200;
+            int toolPassed = injectFailures ? 196 : 200;
+            assertThat(result.passedCount()).isEqualTo(passed);
+            assertThat(result.toolTracePassedCount()).isEqualTo(toolPassed);
+            double accuracy = Math.round(passed / 200.0 * 10_000.0) / 10_000.0;
+            assertThat(result.toolTracePassRate()).isEqualTo(Math.round(toolPassed / 200.0 * 10_000.0) / 10_000.0);
+            assertThat(result.passRate()).isEqualTo(accuracy);
+            assertThat(result.errorCount()).isEqualTo(injectFailures ? 1 : 0);
+            assertThat(result.failedCount()).isEqualTo(injectFailures ? (chain ? 4 : 3) : 0);
+            assertThat(result.verdict()).isEqualTo(injectFailures ? "INCOMPLETE" : chain ? "CHAIN_EVALUATED" : "TOOL_EVALUATED");
+            assertThat(result.judgeModel()).isNull();
+            assertThat(result.independentJudge()).isFalse();
+            assertThat(result.intentEvaluatedCount()).isZero();
+            assertThat(result.datasetVersion()).isEqualTo((chain ? RagChainAssessment.VERSION + "+" : "") + RagAgentEvaluationDataset.VERSION);
+            if (chain) {
+                assertThat(result.cases()).allSatisfy(item -> assertThat(item.ragChain()).isNotNull());
+                var restored = mapper.readValue(mapper.writeValueAsString(result), AssistantBenchmarkResponse.class);
+                assertThat(restored).isEqualTo(result);
+                if (injectFailures) {
+                    assertThat(result.cases().get(0).ragChain().retrievalStatus()).isEqualTo("NOT_CALLED");
+                    assertThat(result.cases().get(1).ragChain().retrievalStatus()).isEqualTo("NOT_CALLED");
+                    assertThat(result.cases().get(3).toolTracePassed()).isTrue();
+                    assertThat(result.cases().get(3).ragChain().retrievalStatus()).isEqualTo("UNJUDGED");
+                    assertThat(result.cases().get(3).passed()).isFalse();
+                }
+            }
+            assertThat(result.cases()).allSatisfy(item -> assertThat(item.dimensionScores()).isEmpty());
+            if (injectFailures) {
+                assertThat(result.cases().get(1).missingExpectedTools()).contains(RagToolEvaluationRules.SEARCH);
+                assertThat(result.cases().get(2).reason()).contains("主题组");
+                assertThat(result.cases().get(157).forbiddenCalledTools()).contains("get_my_recent_meals");
+                var category = result.categories().stream().filter(item -> "factual_grounding".equals(item.category())).findFirst().orElseThrow();
+                assertThat(category.passRate()).isEqualTo(Math.round((chain ? 176 : 177) / 180.0 * 10_000.0) / 10_000.0);
+            }
+            org.mockito.Mockito.verifyNoInteractions(judge, vectors);
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
     void runsAllCasesInBackgroundAndPublishesSummary() {
         AiChatClient aiChatClient = mock(AiChatClient.class);
         AssistantBenchmarkJudgeClient judgeClient = mock(AssistantBenchmarkJudgeClient.class);
@@ -491,6 +640,11 @@ class AssistantBenchmarkServiceTest {
     }
 
     private AssistantEvaluationTaskStore mockTasks(AssistantBenchmarkHistoryService history) {
+        return mockTasks(history, java.util.function.UnaryOperator.identity());
+    }
+
+    private AssistantEvaluationTaskStore mockTasks(AssistantBenchmarkHistoryService history,
+            java.util.function.UnaryOperator<String> transformDefinition) {
         var tasks = mock(AssistantEvaluationTaskStore.class);
         var state = new java.util.concurrent.atomic.AtomicReference<AssistantBenchmarkResponse>();
         var next = new java.util.concurrent.atomic.AtomicReference<AssistantEvaluationTaskStore.Work>();
@@ -500,7 +654,8 @@ class AssistantBenchmarkServiceTest {
             var response = (AssistantBenchmarkResponse) call.getArgument(0);
             state.set(response);
             history.saveSnapshot(response, call.getArgument(2));
-            next.set(new AssistantEvaluationTaskStore.Work(response.runId(), java.util.UUID.randomUUID(), call.getArgument(1), call.getArgument(2)));
+            next.set(new AssistantEvaluationTaskStore.Work(response.runId(), java.util.UUID.randomUUID(),
+                    transformDefinition.apply(call.getArgument(1)), call.getArgument(2)));
             return response;
         });
         when(tasks.claim()).thenAnswer(call -> next.getAndSet(null));

@@ -27,16 +27,75 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest({MealController.class, WeeklyReportJobController.class, AdminController.class, AiBudgetController.class, AiBudgetMonitoringController.class, AssistantMemoryMaintenanceController.class})
-@Import({SecurityConfig.class, JwtService.class, JwtAuthenticationFilter.class, CustomUserDetailsService.class,
+@WebMvcTest({MealController.class, MealQueryController.class, WeeklyReportJobController.class, AdminController.class, AiBudgetController.class, AiBudgetMonitoringController.class, AssistantMemoryMaintenanceController.class, DietPreferenceController.class, AiSettingsController.class})
+@Import({CsrfTestRequests.class,SecurityConfig.class, JwtService.class, JwtAuthenticationFilter.class, CustomUserDetailsService.class,
         MealAnalysisService.class, MealScoringService.class, ImageUploadValidationService.class,
         WeeklyReportRequestService.class})
 @EnableConfigurationProperties(AppProperties.class)
 class ApiSecurityAndMealFlowTest {
+    @MockBean AiSettingsService aiSettings;
+    @MockBean AiChatClient connectionClient;
+
+    @Test void onlyAdministratorsCanReadChangeResetOrTestAiConnections() throws Exception {
+        for(String path:List.of("/api/admin/ai-settings", "/api/admin/ai-settings/test", "/api/admin/ai-settings/reset")) {
+            http.perform(get(path)).andExpect(status().isUnauthorized());
+        }
+        http.perform(get("/api/admin/ai-settings").header("Authorization","Bearer "+token)).andExpect(status().isForbidden());
+        http.perform(put("/api/admin/ai-settings").header("Authorization","Bearer "+token).contentType("application/json")
+                .content("{\"model\":\"test\",\"baseUrl\":\"https://provider.test/v1\",\"version\":0}"))
+                .andExpect(status().isForbidden());
+        for(String action:List.of("test","reset")) http.perform(post("/api/admin/ai-settings/"+action)
+                .header("Authorization","Bearer "+token).contentType("application/json").content("{\"version\":0}"))
+                .andExpect(status().isForbidden());
+        verifyNoInteractions(aiSettings,connectionClient);
+        var manager=new UserAccount(); manager.setId(20L); manager.setUsername("settings-admin");
+        manager.setPasswordHash("hash"); manager.setRole("ADMIN");
+        when(users.findByUsername(manager.getUsername())).thenReturn(Optional.of(manager));
+        when(users.findById(20L)).thenReturn(Optional.of(manager));
+        String adminToken=jwt.generateToken(new UserPrincipal(manager));
+        var view=new AiSettingsService.View("qwen3.7-flash","https://provider.test/v1",true,"ADMIN",1,null);
+        when(aiSettings.view()).thenReturn(view);
+        when(aiSettings.save(any(),any())).thenReturn(view);
+        http.perform(get("/api/admin/ai-settings").header("Authorization","Bearer "+adminToken))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.model").value("qwen3.7-flash"))
+                .andExpect(jsonPath("$.apiKey").doesNotExist());
+        http.perform(put("/api/admin/ai-settings").header("Authorization","Bearer "+adminToken).contentType("application/json")
+                .content("{\"model\":\"qwen3.7-flash\",\"baseUrl\":\"https://provider.test/v1\",\"apiKey\":\"private-key\",\"version\":0}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.apiKey").doesNotExist());
+        verify(aiSettings).save(argThat(r->r.apiKey().equals("private-key")),argThat(p->p.getId().equals(20L)));
+        http.perform(put("/api/admin/ai-settings").header("Authorization","Bearer "+adminToken).contentType("application/json")
+                .content("{\"model\":\"\",\"baseUrl\":\"\",\"version\":-1}"))
+                .andExpect(status().isBadRequest());
+        when(connectionClient.completeWith(anyString(),anyString(),any(),any(),any(),anyInt(),anyList(),anyDouble()))
+                .thenThrow(new AiChatClient.AiClientException("PRIVATE_PROVIDER_PAYLOAD"));
+        http.perform(post("/api/admin/ai-settings/test").header("Authorization","Bearer "+adminToken)
+                .contentType("application/json").content("{\"version\":1}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.success").value(false))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("PRIVATE_PROVIDER_PAYLOAD"))));
+        assertThat(AiCallContext.capture()).isNull();
+    }
+    @MockBean DietPreferenceService dietPreferences;
+
+    @Test void dietSettingsUseOnlyAuthenticatedIdentityAndValidatePayloads() throws Exception {
+        when(dietPreferences.get(10L)).thenReturn(DietPreferences.defaults());
+        http.perform(get("/api/profile/diet-preferences?userId=999").header("Authorization","Bearer "+token))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.version").value(0));
+        verify(dietPreferences).get(10L);
+        http.perform(get("/api/profile/diet-preferences")).andExpect(status().isUnauthorized());
+        when(dietPreferences.save(eq(10L),any())).thenReturn(new DietPreferences(DietPreferences.Style.VEGAN,List.of("花生"),List.of(),1));
+        http.perform(put("/api/profile/diet-preferences?userId=999").header("Authorization","Bearer "+token)
+                .contentType("application/json").content("{\"style\":\"VEGAN\",\"avoidFoods\":[\"花生\"],\"dislikedFoods\":[],\"version\":0}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.version").value(1));
+        verify(dietPreferences).save(eq(10L),any());
+        http.perform(put("/api/profile/diet-preferences").header("Authorization","Bearer "+token)
+                .contentType("application/json").content("{\"style\":\"INVALID\",\"avoidFoods\":[],\"dislikedFoods\":[],\"version\":0}"))
+                .andExpect(status().isBadRequest());
+    }
     @Autowired MockMvc http;
     @Autowired JwtService jwt;
     @Autowired AppProperties properties;
     @MockBean BehaviorTrackingService tracking;
+    @MockBean UserMealQueryService mealQueries;
     @MockBean UserAccountRepository users;
     @MockBean MealRecordRepository meals;
     @MockBean WeeklyReportJobRepository jobs;
@@ -64,6 +123,24 @@ class ApiSecurityAndMealFlowTest {
     @MockBean AssistantEvaluationCandidateService candidates;
     UserAccount user;
     String token;
+
+    @Test void summaryReadsUseAuthenticatedOwnershipAndDetailsCannotExposeAnotherUsersMeal() throws Exception {
+        when(mealQueries.page(10L, 0, 10, null, null, null, null, null))
+                .thenReturn(new MealSummaryPageResponse(List.of(), 0, 0, 0, 10));
+        http.perform(get("/api/meals/summaries?userId=20").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.content").isArray());
+        verify(mealQueries).page(10L, 0, 10, null, null, null, null, null);
+        http.perform(get("/api/meals/summaries")).andExpect(status().isUnauthorized());
+        MealRecord record = new MealRecord(); record.setId(42L); record.setUser(user); record.setScore(88);
+        record.setDetectedFoodsJson("[]"); record.setCategoryCountsJson("{}"); record.setRiskTagsJson("[]");
+        record.setAdvice("完整餐食建议");
+        when(meals.findById(42L)).thenReturn(Optional.of(record));
+        http.perform(get("/api/meals/42").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.advice").value("完整餐食建议"));
+        UserAccount other = new UserAccount(); other.setId(20L); record.setUser(other);
+        http.perform(get("/api/meals/42").header("Authorization", "Bearer " + token))
+                .andExpect(status().isNotFound()).andExpect(jsonPath("$.advice").doesNotExist());
+    }
 
     @Test void cursorMealListingRequiresAdministratorAndPreservesCursorParameters() throws Exception {
         http.perform(get("/api/admin/meals/cursor").header("Authorization", "Bearer " + token))
@@ -150,12 +227,12 @@ class ApiSecurityAndMealFlowTest {
 
     @Test
     void authenticationDependenciesReturn503WithoutExecutingBusinessOperations() throws Exception {
-        when(blacklist.isBlacklisted(token)).thenThrow(new IllegalStateException("Redis unavailable"));
+        when(blacklist.isBlacklisted(jwt.extractIdentity(token).tokenId())).thenThrow(new IllegalStateException("Redis unavailable"));
         http.perform(get("/api/reports/weekly/latest").header("Authorization", "Bearer " + token))
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(jsonPath("$.code").value("AUTH_DEPENDENCY_UNAVAILABLE"))
                 .andExpect(header().string("Retry-After", "3"));
-        doReturn(false).when(blacklist).isBlacklisted(token);
+        doReturn(false).when(blacklist).isBlacklisted(jwt.extractIdentity(token).tokenId());
         when(users.findById(10L)).thenThrow(new org.springframework.dao.DataAccessResourceFailureException("DB unavailable"));
         http.perform(get("/api/reports/weekly/latest").header("Authorization", "Bearer " + token))
                 .andExpect(status().isServiceUnavailable());
@@ -208,7 +285,7 @@ class ApiSecurityAndMealFlowTest {
         } finally { properties.getJwt().setExpirationMinutes(old); }
         http.perform(get("/api/reports/weekly/latest").header("Authorization", "Bearer " + expired))
                 .andExpect(status().isUnauthorized());
-        when(blacklist.isBlacklisted(token)).thenReturn(true);
+        when(blacklist.isBlacklisted(jwt.extractIdentity(token).tokenId())).thenReturn(true);
         http.perform(get("/api/reports/weekly/latest").header("Authorization", "Bearer " + token))
                 .andExpect(status().isUnauthorized());
         verifyNoInteractions(reports);
@@ -218,11 +295,11 @@ class ApiSecurityAndMealFlowTest {
     void signedTokensWithoutImmutableIdentityOrExpirationAreRejected() throws Exception {
         var key = io.jsonwebtoken.security.Keys.hmacShaKeyFor(
                 properties.getJwt().getSecret().getBytes(java.nio.charset.StandardCharsets.UTF_8));
-        String missingId = io.jsonwebtoken.Jwts.builder().subject("alice")
+        String missingId = io.jsonwebtoken.Jwts.builder().id(java.util.UUID.randomUUID().toString()).claim("ver", 0L).subject("alice")
                 .expiration(java.util.Date.from(java.time.Instant.now().plusSeconds(60))).signWith(key).compact();
-        String missingExpiry = io.jsonwebtoken.Jwts.builder().subject("alice").claim("uid", 10L)
+        String missingExpiry = io.jsonwebtoken.Jwts.builder().id(java.util.UUID.randomUUID().toString()).claim("ver", 0L).subject("alice").claim("uid", 10L)
                 .signWith(key).compact();
-        String wrongSubject = io.jsonwebtoken.Jwts.builder().subject("bob").claim("uid", 10L)
+        String wrongSubject = io.jsonwebtoken.Jwts.builder().id(java.util.UUID.randomUUID().toString()).claim("ver", 0L).subject("bob").claim("uid", 10L)
                 .expiration(java.util.Date.from(java.time.Instant.now().plusSeconds(60))).signWith(key).compact();
         for (String invalid : List.of(missingId, missingExpiry, wrongSubject, token + "broken")) {
             http.perform(get("/api/reports/weekly/latest").header("Authorization", "Bearer " + invalid))
@@ -246,6 +323,33 @@ class ApiSecurityAndMealFlowTest {
     }
 
     @Test
+    void accountStatusChangesRequireAnAdministratorAndAnExplicitBoolean() throws Exception {
+        String path = "/api/admin/users/10/status";
+        http.perform(put(path).contentType("application/json").content("{\"enabled\":false}"))
+                .andExpect(status().isUnauthorized());
+        http.perform(put(path).header("Authorization", "Bearer " + token)
+                .contentType("application/json").content("{\"enabled\":false}"))
+                .andExpect(status().isForbidden());
+        verifyNoInteractions(admin);
+        var manager = new UserAccount(); manager.setId(20L); manager.setUsername("manager");
+        manager.setPasswordHash("hash"); manager.setRole("ADMIN");
+        when(users.findById(20L)).thenReturn(Optional.of(manager));
+        String adminToken = jwt.generateToken(new UserPrincipal(manager));
+        for (String payload : List.of("{}", "{\"enabled\":null}")) {
+            http.perform(put(path).header("Authorization", "Bearer " + adminToken)
+                    .contentType("application/json").content(payload)).andExpect(status().isBadRequest());
+        }
+        verifyNoInteractions(admin);
+        var response = new AdminUserResponse(10L, "alice", "Alice", "USER", user.getCreatedAt(), null);
+        response.setEnabled(false);
+        when(admin.setUserEnabled(eq(10L), eq(false), any())).thenReturn(response);
+        http.perform(put(path).header("Authorization", "Bearer " + adminToken)
+                .contentType("application/json").content("{\"enabled\":false}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.enabled").value(false));
+        verify(admin).setUserEnabled(eq(10L), eq(false), argThat(p -> p.getId().equals(20L)));
+    }
+
+    @Test
     void uploadsAreValidatedScoredAndPassedToTransactionalPersistence() throws Exception {
         var food = new RecognitionResult();
         food.setFoods(List.of(new FoodItem("米饭", "staple", .95, ""),
@@ -254,7 +358,7 @@ class ApiSecurityAndMealFlowTest {
         when(vision.recognize(any())).thenReturn(food);
         when(goals.effectiveGoal(user, "current")).thenReturn("balanced");
         when(knowledge.search(anyString(), anyInt())).thenReturn(List.of());
-        when(advice.generate(any(), any(), anyList(), anyString())).thenReturn("保持均衡搭配");
+        when(advice.generateResult(any(), any(), anyList(), anyString())).thenReturn(new AdviceGenerationService.Result("保持均衡搭配","MODEL",null));
         var bytes = new ByteArrayOutputStream();
         ImageIO.write(new BufferedImage(64, 64, BufferedImage.TYPE_INT_RGB), "png", bytes);
         var file = new MockMultipartFile("image", "meal.png", "image/png", bytes.toByteArray());

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,42 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class RagBenchmarkServiceTest {
+
+    @Test
+    void expandedCasesCoverEveryNewTopicWithDistinctQuestionsAndValidTargets() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        List<Map<String, Object>> cases;
+        try (var input = new ClassPathResource("knowledge/rag_eval_cases.json").getInputStream()) {
+            cases = mapper.readValue(input, new TypeReference<List<Map<String, Object>>>() {});
+        }
+        String markdown;
+        try (var input = new ClassPathResource("knowledge/diet_guides.md").getInputStream()) {
+            markdown = new String(input.readAllBytes(), StandardCharsets.UTF_8);
+        }
+        var chunks = new MarkdownKnowledgeChunker(new AppProperties()).split(markdown);
+        var titles = chunks.stream().map(PgVectorKnowledgeService.KnowledgeChunk::title).distinct().toList();
+        assertThat(cases).hasSize(200);
+        assertThat(cases.stream().map(item -> (String) item.get("question")))
+                .doesNotHaveDuplicates().allSatisfy(question -> assertThat(question).isNotBlank());
+        var answerable = cases.stream()
+                .filter(item -> !Boolean.TRUE.equals(item.get("expectNoAnswer"))).toList();
+        assertThat(answerable).hasSize(180);
+        for (var item : answerable) {
+            var keywords = (List<?>) item.get("expectedTitleKeywords");
+            assertThat(keywords).isNotEmpty();
+            assertThat(titles.stream().anyMatch(title -> keywords.stream()
+                    .anyMatch(keyword -> title.contains((String) keyword))))
+                    .as("Expected title exists for question: %s", item.get("question")).isTrue();
+        }
+        for (String title : titles.subList(100, 200)) {
+            assertThat(answerable.stream().filter(item ->
+                    ((List<?>) item.get("expectedTitleKeywords")).contains(title)).count())
+                    .as("Topic has at least one accepted source annotation: %s", title).isGreaterThanOrEqualTo(1L);
+        }
+        assertThat(cases.stream().filter(item -> Boolean.TRUE.equals(item.get("expectNoAnswer"))))
+                .hasSize(20).allSatisfy(item ->
+                        assertThat((List<?>) item.get("expectedTitleKeywords")).isEmpty());
+    }
 
     @Test
     void aggregatesBenchmarkMetricsFromConfiguredCases() {
@@ -35,10 +72,10 @@ class RagBenchmarkServiceTest {
                 new KnowledgeResultPostProcessor(properties), properties);
         RagBenchmarkResponse response = service.evaluate();
 
-        assertThat(response.getCaseCount()).isEqualTo(58);
-        assertThat(response.getAnswerableCaseCount()).isEqualTo(48);
-        assertThat(response.getNoAnswerCaseCount()).isEqualTo(10);
-        assertThat(response.getCases()).hasSize(58);
+        assertThat(response.getCaseCount()).isEqualTo(200);
+        assertThat(response.getAnswerableCaseCount()).isEqualTo(180);
+        assertThat(response.getNoAnswerCaseCount()).isEqualTo(20);
+        assertThat(response.getCases()).hasSize(200);
         assertThat(response.getHitAt3()).isGreaterThan(0.0);
         assertThat(response.getBaselineHitAt3()).isEqualTo(response.getHitAt3());
         assertThat(response.getBaselineMrr()).isEqualTo(response.getMrr());

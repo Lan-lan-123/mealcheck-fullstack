@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Check, CircleAlert, LoaderCircle } from 'lucide-react'
+import { analysisFailure } from '../utils/recognitionExplanation'
 
+/** @param {{label: string; title: string; description?: string; startedAt?: number; finishedAt?: number; active?: boolean; tone?: string; steps?: string[]; stepIndex?: number | null; longWaitMessage?: string}} props */
 export default function TaskProgress({ label, title, description, startedAt, finishedAt, active = true, tone = 'default', steps = [], stepIndex, longWaitMessage }) {
   const [now, setNow] = useState(Date.now)
   useEffect(() => {
@@ -34,24 +36,26 @@ export default function TaskProgress({ label, title, description, startedAt, fin
   </section>
 }
 
-const MEAL_STAGES = ['上传图片', '等待处理', '智能分析', '完成']
+const MEAL_STAGES = ['上传图片', '已接收', '排队中', '处理中', '完成']
 const MEAL_STATUS = {
   UPLOADING: ['正在上传图片', '图片接收后将开始分析。', 0],
   UPLOAD_RETRY: ['上传入口繁忙，正在自动重试', '请保留当前图片，等待重试。', 0],
   CHECKING: ['正在查询上次分析进度', '正在找回已提交的任务。', null],
-  PENDING: ['图片已接收，正在排队', '任务已提交，可以刷新页面继续查询。', 1],
-  PROCESSING: ['正在分析餐食', '正在识别食物、计算评分并生成饮食建议。', 2],
-  SUCCEEDED: ['餐食分析已完成', '评分与饮食建议已更新。', 3],
+  ACCEPTED: ['上传请求已接收', '正在校验图片并准备入队。', 1],
+  PENDING: ['图片已接收，正在排队', '高峰期可能需要几分钟，可以刷新页面继续查询，请勿重复提交。', 2],
+  PROCESSING: ['正在分析餐食', '正在识别食物、计算评分并生成饮食建议。', 3],
+  SUCCEEDED: ['餐食分析已完成', '评分与饮食建议已更新。', 4],
   INTERRUPTED: ['暂未取得分析结果', '请查询上次分析结果，或使用原图重试。', null]
 }
 
 export function MealAnalysisProgress({ task }) {
   if (!task) return null
-  const [title, description, stepIndex] = MEAL_STATUS[task.status] || MEAL_STATUS.CHECKING
+  const displayStatus = task.status === 'PROCESSING' && task.stage === 'ACCEPTED' ? 'ACCEPTED' : task.status
+  const [title, description, stepIndex] = MEAL_STATUS[displayStatus] || MEAL_STATUS.CHECKING
   const active = !['SUCCEEDED', 'INTERRUPTED'].includes(task.status)
   return <TaskProgress label="餐食分析进度" {...task} active={active}
-    title={task.connectionInterrupted ? '连接暂时中断，正在重新查询' : title}
-    description={task.message || (task.connectionInterrupted ? '任务状态暂时无法更新，正在自动重连。' : description)}
+    title={task.status === 'INTERRUPTED' ? analysisFailure(task.errorCode, task.message).title : task.connectionInterrupted ? '连接暂时中断，正在重新查询' : title}
+    description={task.status === 'INTERRUPTED' ? analysisFailure(task.errorCode, task.message).message : task.message || (task.connectionInterrupted ? '任务状态暂时无法更新，正在自动重连。' : description)}
     tone={!active && task.status !== 'SUCCEEDED' || task.connectionInterrupted || task.status === 'UPLOAD_RETRY' ? 'warning' : task.status === 'SUCCEEDED' ? 'success' : 'default'}
     steps={MEAL_STAGES} stepIndex={stepIndex}
     longWaitMessage={['PENDING', 'PROCESSING'].includes(task.status) ? '处理时间较长，可以刷新页面继续查询，请勿重复提交。' : '等待时间较长，请保留当前图片；稍后可查询上次分析结果。'} />
@@ -70,8 +74,10 @@ export function WeeklyReportProgress({ task }) {
   if (!task) return null
   const [title, description, stepIndex] = REPORT_STATUS[task.status] || REPORT_STATUS.SUBMITTING
   const active = !['SUCCEEDED', 'INTERRUPTED'].includes(task.status)
-  return <TaskProgress label="周报生成进度" {...task} active={active} title={title} description={task.message || description}
-    tone={task.status === 'SUCCEEDED' ? 'success' : ['RETRY', 'INTERRUPTED'].includes(task.status) ? 'warning' : 'default'}
+  return <TaskProgress label="周报生成进度" {...task} active={active}
+    title={active && task.connectionInterrupted ? '连接暂时中断，正在重新查询' : title}
+    description={task.message || (active && task.connectionInterrupted ? '任务状态暂时无法更新，正在自动重连。' : description)}
+    tone={task.status === 'SUCCEEDED' ? 'success' : task.connectionInterrupted || ['RETRY', 'INTERRUPTED'].includes(task.status) ? 'warning' : 'default'}
     steps={['提交请求', '等待处理', '生成周报', '完成']} stepIndex={stepIndex}
     longWaitMessage="生成时间较长，可以先查看其他栏目；返回后会继续显示进度。" />
 }

@@ -7,6 +7,14 @@ import org.springframework.web.server.ResponseStatusException;
 import static org.assertj.core.api.Assertions.*;
 
 class TaskFailureClassifierTest {
+    @Test void recognitionFailuresAreSpecificAndModelErrorsNeverExposeProviderContent() {
+        assertThat(TaskFailureClassifier.classify(RecognitionFailureException.unclear(), "ANALYZE").code()).isEqualTo("IMAGE_UNCLEAR");
+        var nonFood = new RecognitionFailureException("NON_FOOD", HttpStatus.BAD_REQUEST, "未识别到餐食");
+        assertThat(TaskFailureClassifier.classify(new IllegalStateException(nonFood), "ANALYZE").code()).isEqualTo("NON_FOOD");
+        var failure = TaskFailureClassifier.classify(new AiChatClient.AiClientException("secret provider payload"), "ANALYZE");
+        assertThat(failure.code()).isEqualTo("MODEL_SERVICE_ERROR");
+        assertThat(failure.summary()).doesNotContain("secret", "payload");
+    }
     @Test void uploadSaturationHasItsOwnRecoverableCategory() {
         var failure = TaskFailureClassifier.classify(new UploadBusyException(22), "VALIDATE");
         assertThat(failure.code()).isEqualTo("UPLOAD_BUSY");

@@ -1,6 +1,13 @@
 * { box-sizing: border-box; }
 body { margin: 0; }
 button, input, select, textarea { font: inherit; }
+button { border: 1px solid #dce6df; border-radius: 9px; padding: 10px 14px; background: #edf5ef; color: #46765a; font-size: 13px; font-weight: 550; cursor: pointer; }
+button:where(:not([class])):hover:not(:disabled) { background: #e1eee5; border-color: #aac5b4; }
+button:disabled { opacity: .65; cursor: not-allowed; }
+button:focus-visible { outline: 3px solid #75bda1; outline-offset: 3px; }
+.workspace-fallback { max-width: 640px; margin: 15vh auto; padding: 32px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--ink); }
+.workspace-fallback h1 { font-size: 20px; }
+.workspace-fallback p { color: var(--muted); line-height: 1.8; }
 label { display: grid; gap: 8px; margin-bottom: 14px; font-weight: 700; }
 input, select { width: 100%; border: 1px solid #dbe5d4; border-radius: 15px; padding: 12px 14px; background: #fff; outline: none; }
 .primary { width: 100%; border: 0; border-radius: 16px; background: #2f6b36; color: white; padding: 13px 18px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }

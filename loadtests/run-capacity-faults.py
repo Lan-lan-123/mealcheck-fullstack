@@ -1,4 +1,9 @@
 """Exercise restart, broker outage, bounded provider retry and timeout on the isolated stub stack."""
+
+import sys as _auth_sys
+from pathlib import Path as _AuthPath
+_auth_sys.path.insert(0, str(_AuthPath(__file__).resolve().parents[1] / 'tools'))
+import cookie_http as _auth_http
 import base64
 import importlib.util
 import json
@@ -7,7 +12,7 @@ import shutil
 import sys
 import threading
 import time
-import requests
+import cookie_http as requests
 import subprocess
 
 spec=importlib.util.spec_from_file_location('benchmark',Path(__file__).with_name('run-local-benchmark.py'))
@@ -38,9 +43,13 @@ def submit_to_worker(index,key):
     # Send fixture input over stdin, avoiding credentials/body in process arguments.
     source="""import base64,json,sys,urllib.request
 v=json.load(sys.stdin);boundary='capacity-fixture-boundary'
+with urllib.request.urlopen('http://mealcheck-capacity-backend-1:8080/api/auth/csrf',timeout=10) as csrf_response:
+    csrf=json.load(csrf_response)
+    csrf_cookie=next(value.split(';')[0] for value in csrf_response.headers.get_all('Set-Cookie') if value.startswith('mealcheck_csrf='))
 image=base64.b64decode(v['image'])
 body=('--'+boundary+'\\r\\nContent-Disposition: form-data; name="goal"\\r\\n\\r\\ncurrent\\r\\n--'+boundary+'\\r\\nContent-Disposition: form-data; name="image"; filename="meal.png"\\r\\nContent-Type: image/png\\r\\n\\r\\n').encode()+image+('\\r\\n--'+boundary+'--\\r\\n').encode()
 r=urllib.request.Request('http://mealcheck-capacity-backend-1:8080/api/meals/analysis-requests',data=body,headers={'Authorization':'Bearer '+v['token'],'Idempotency-Key':v['key'],'Content-Type':'multipart/form-data; boundary='+boundary})
+r.add_header('Cookie',csrf_cookie);r.add_header(csrf['headerName'],csrf['token'])
 print(urllib.request.urlopen(r,timeout=30).read().decode())
 """
     payload=json.dumps({'key':key,'token':accounts[index]['token'],'image':base64.b64encode(b.IMAGE.read_bytes()).decode()})

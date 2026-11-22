@@ -20,6 +20,8 @@ public class WeeklyReportJobService {
     private final AppProperties properties;
     private final TaskFailureRecorder failures;
     private final com.example.mealcheck.repository.UserAccountRepository users;
+    @org.springframework.beans.factory.annotation.Value("${mealcheck.ai-budget.operation-timeout-seconds:120}")
+    private int operationTimeoutSeconds = 120;
 
     public WeeklyReportJobService(WeeklyReportJobRepository repository, AppProperties properties,
             TaskFailureRecorder failures, com.example.mealcheck.repository.UserAccountRepository users) {
@@ -69,6 +71,12 @@ public class WeeklyReportJobService {
     public boolean releaseUndispatched(Long jobId, int attempt, String token) {
         return repository.releaseUndispatched(jobId, attempt, token,
                 AppTime.now().plusSeconds(5), AppTime.now(), java.util.UUID.randomUUID().toString()) == 1;
+    }
+
+    @Transactional
+    public boolean beginExecution(Long jobId, int attempt, String token) {
+        LocalDateTime now = AppTime.now();
+        return repository.beginExecution(jobId, attempt, token, now.minusSeconds(staleLeaseSeconds()), now) == 1;
     }
 
     @Transactional
@@ -125,7 +133,9 @@ public class WeeklyReportJobService {
     }
 
     private long staleLeaseSeconds() {
-        return Math.max(60L, Math.min(86_400L, properties.getWeeklyReport().getStaleLeaseSeconds()));
+        // Leave publication/cleanup time after the AI deadline, even for a short configured lease.
+        return Math.max(Math.max(1L, operationTimeoutSeconds) + 30L,
+                Math.max(60L, Math.min(86_400L, properties.getWeeklyReport().getStaleLeaseSeconds())));
     }
 
     private long retryDelaySeconds(int attempts) {

@@ -21,3 +21,32 @@ python tools/vision_evaluation.py --dataset tools/datasets/synthetic-meals-100/d
 调用正式识别服务时，先按项目运行说明配置 `MEALCHECK_EVALUATION_TOKEN`，再使用 `--run --base-url <服务地址>` 替代 `--predictions`。该操作会调用模型并产生供应商费用。合成数据不允许设置发布质量阈值。
 
 图片属于生成产物，默认不纳入 Git。保留本地 `images/`，以及提示词、校验清单和审核结果，即可复查样本来源与内容。当前生成任务只提供样本及工具，不包含正式供应商识别结果。
+
+## 2026-10-16 助手目视核对版
+
+原始 `dataset.json`、`prompts.json` 和原画廊保留不变。新增的
+`dataset.assistant-reviewed-v2.json` 来自同一批 100 张图片的助手目视核对，
+修正包子等可见差异，降低未确认做法/口味的标签粒度，补充明确的同义名称和切片形态。
+`label-audit-v2.json` 保存每组观察、存疑项及修订依据；`label-changes-v2.json`
+保留 50 张涉及名称或别名变化的逐项前后对照，其中 15 个食物主名称发生变化。
+全部图片的原始 SHA-256 不变。
+
+复核版仍是 `datasetKind=synthetic`、`independentlyAnnotated=false`，
+不是独立人工标注。具体做法、白色饮品成分、含糖状态及部分食材品种仍有待确认。
+`oily/fried` 与基础食物类别的维度冲突没有通过修改标签掩盖。
+不要把不同标签版本上的指标变化称为模型准确率提升。
+
+可重复构建（需要本地 `images/`；不调用模型；不覆盖原数据集）：
+
+```powershell
+python tools/evaluation/build_audited_labels.py
+```
+
+已有预测可直接使用上述 `vision_evaluation.py --predictions` 命令进行离线评分，
+将 `--dataset` 显式指向 `dataset.assistant-reviewed-v2.json`。
+以后运行 `prepare_synthetic_dataset.py` 只会重建原始 v1 文件，不会修改复核版；
+若 v1 哈希变化，需要重新审阅修订依据，构建器将拒绝套用旧审核。
+
+完整 100 张真实供应商组件测试与后续离线修复验证，分别见
+[全量测试报告](../../../deploy/FULL100_MEAL_QUALITY_20261016.md) 和
+[第一轮修复验证](../../../deploy/ROUND1_FIXES_VERIFICATION_20261016.md)。

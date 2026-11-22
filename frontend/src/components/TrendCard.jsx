@@ -1,3 +1,4 @@
+import Button from './Button'
 import TrackingSummary from "./TrackingSummary"
 import MiniBars from './MiniBars'
 import ScoreTrend from './ScoreTrend'
@@ -38,7 +39,7 @@ export default function TrendCard({ trend }) {
       <TrackingSummary summary={trend.tracking} />
       <SectionSwitcher label="饮食趋势分类" value={section} onChange={setSection} items={[["scores", "评分趋势"], ["foods", "常见食物"], ["risks", "常见风险"]]} />
       <div className="trend-chart"><h3>{active.title}</h3>{section === 'scores' ? <ScoreTrend items={previewItems} emptyText={active.empty} /> : <MiniBars items={previewItems} emptyText={active.empty} />}</div>
-      <div className="detail-entry"><span>{active.items.length > 7 ? (section === 'scores' ? '当前展示最近 7 个日期' : '当前展示前 7 项') : '当前展示全部项目'}</span><button className="secondary-btn" type="button" onClick={() => setShowDetails(true)}>查看全部趋势指标</button></div>
+      <div className="detail-entry"><span>{active.items.length > 7 ? (section === 'scores' ? '当前展示最近 7 个日期' : '当前展示前 7 项') : '当前展示全部项目'}</span><Button variant="secondary" className="secondary-btn" type="button" onClick={() => setShowDetails(true)}>查看全部趋势指标</Button></div>
       {showDetails && <DetailDrawer title="完整饮食趋势指标" onClose={() => setShowDetails(false)}>{Object.values(charts).map(chart => <section key={chart.title}><h3>{chart.title}</h3><MiniBars items={chart.items} emptyText={chart.empty} /></section>)}</DetailDrawer>}
     </div>
   )

@@ -1,4 +1,5 @@
 import http from 'k6/http'
+import { authHeaders } from './auth-headers.js'
 import { check, sleep } from 'k6'
 import { SharedArray } from 'k6/data'
 
@@ -13,7 +14,7 @@ export const options = {
 }
 export default function () {
   if (__VU > users.length) throw new Error('One isolated account per virtual user is required')
-  const headers = { Authorization: `Bearer ${users[__VU - 1].token}` }
+  const headers = authHeaders(base, users[__VU - 1].token)
   // Keep the existing replay workload by default; capacity uses analysis-capacity.js.
   const key = `mixed-${run}-${__VU}${__ENV.NEW_TASKS === 'true' ? `-${__ITER}` : ''}`
   const submit = http.post(`${base}/api/meals/analysis-requests`, { image: http.file(image, 'load.jpg', 'image/jpeg'), goal: 'current' },

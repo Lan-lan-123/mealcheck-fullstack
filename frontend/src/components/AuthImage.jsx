@@ -1,5 +1,5 @@
+import Button from './Button'
 import { useEffect, useState } from 'react'
-import { getToken } from '../api/client'
 
 function buildApiUrl(path) {
   if (!path) return ''
@@ -22,11 +22,10 @@ export default function AuthImage({ url, alt }) {
     let objectUrl = ''
     let active = true
     const controller = new AbortController()
-    const token = getToken()
     setImage({ url, src: '', status: 'loading' })
 
     fetch(buildApiUrl(url), {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      credentials: 'include',
       signal: controller.signal
     })
       .then(res => {
@@ -52,7 +51,7 @@ export default function AuthImage({ url, alt }) {
     return <div className="photo-placeholder" role="status">图片加载中</div>
   }
   if (image.status === 'error') return <div className="photo-placeholder" role="status">
-    <span>图片加载失败</span><button type="button" onClick={() => setRevision(value => value + 1)}>重新加载</button>
+    <span>图片加载失败</span><Button variant="secondary" className="secondary-btn" type="button" onClick={() => setRevision(value => value + 1)}>重新加载</Button>
   </div>
 
   return <img src={image.src} alt={alt} onError={() => {

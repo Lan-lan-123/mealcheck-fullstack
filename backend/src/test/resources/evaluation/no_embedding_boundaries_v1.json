@@ -1,0 +1,38 @@
+{
+  "version": "no-embedding-boundaries-v1",
+  "provenance": "Assistant-authored synthetic boundary cases, fixed before provider execution; not independent human gold labels or a holdout set. Values and assertions are test data, not dietary advice.",
+  "reviews": [
+    {"id":"causal-correlation","group":"claim","source":"观察数据表明，饮料摄入与体重变化相关。","question":"这些观察能证明饮料摄入造成体重变化吗？","claim":"饮料摄入造成体重变化。","expectedSupported":false},
+    {"id":"causal-negated","group":"claim","source":"目前尚不能确定两者之间存在因果关系。","question":"这能证明饮料导致变化吗？","claim":"饮料导致变化。","expectedSupported":false},
+    {"id":"causal-positive-control","group":"claim","source":"本测试材料明确记载：处理方式的改变导致了记录方式的变化。","question":"材料对处理方式和记录方式的关系如何描述？","claim":"处理方式的改变导致了记录方式的变化。","expectedSupported":true},
+    {"id":"degree-inflation","group":"claim","source":"两类产品的配料组成不同。","question":"材料能证明两类产品配料差异显著吗？","claim":"两类产品的配料差异显著。","expectedSupported":false},
+    {"id":"safety-inflation","group":"claim","source":"现有资料不能保证该产品更安全。","question":"材料能证明该产品更安全吗？","claim":"该产品更安全。","expectedSupported":false},
+    {"id":"condition-dropped","group":"claim","source":"仅在标签明确允许常温保存的条件下，该产品才可按标签要求常温保存。","question":"这段资料是否表示所有熟食均可常温保存？","claim":"所有熟食均可常温保存。","expectedSupported":false},
+    {"id":"condition-positive-control","group":"claim","source":"仅在标签明确允许常温保存的条件下，该产品才可按标签要求常温保存。","question":"材料规定这个产品在什么条件下可常温保存？","claim":"仅在标签明确允许常温保存的条件下，该产品才可按标签要求常温保存。","expectedSupported":true},
+    {"id":"unit-mismatch","group":"claim","source":"本测试标签记载每份100毫克。","question":"材料给出的每份数量是什么？","claim":"本测试标签记载每份100克。","expectedSupported":false,"expectedLocalBlocked":true},
+    {"id":"number-invented","group":"claim","source":"实际份量未知。","question":"材料提供实际食用克数了吗？","claim":"实际吃了100克。","expectedSupported":false,"expectedLocalBlocked":true},
+    {"id":"negative-causality-control","group":"claim","source":"观察到相关不代表一定导致变化。","question":"材料是否把相关当成了因果？","claim":"观察到相关不代表一定导致变化。","expectedSupported":true},
+    {"id":"missing-input","group":"information","source":"实际食用量需要实际称量记录或净含量及食用份数；缺少这些记录时，不能确定实际食用克数。","question":"这杯酸奶实际吃了多少克？我没有称量，也没有提供净含量或食用份数。","claim":"缺少这些记录时，不能确定实际食用克数。","expectedStatus":"MISSING_INPUT"},
+    {"id":"input-completed","group":"information","source":"已有实际称量记录时，按实际称量结果记录食用克数。","question":"我已称量这杯酸奶，实际吃了150克。请确认应当如何记录食用克数。","claim":"按实际称量结果记录食用克数。","expectedStatus":"SUFFICIENT"},
+    {"id":"general-method","group":"information","source":"记录食物时应分别填写产品名称和实际份量；暂时没有实际份量时保留未知，不填为零。","question":"不知道具体食用量时，饮食记录的一般方法是什么？","claim":"暂时没有实际份量时保留未知，不填为零。","expectedStatus":"SUFFICIENT"},
+    {"id":"missing-knowledge","group":"information","source":"请选择标签清晰的包装。","question":"营养标签中的NRV%具体代表什么？请只按当前来源解释。","claim":"请选择标签清晰的包装。","expectedStatus":"MISSING_KNOWLEDGE"},
+    {"id":"missing-both","group":"information","source":"请记录食品名称。","question":"这袋食品能否适合我本次的冷藏条件保存？我没提供标签要求，也没说明实际冷藏温度。请解释保存温度核对原则。","claim":"请记录食品名称。","expectedStatus":"MISSING_BOTH"},
+    {"id":"knowledge-completed-input-missing","group":"information","source":"食品应按包装要求的冷藏温度保存；判断实际保存条件是否合适，需要比较包装要求与实际冷藏温度。","question":"这袋食品能否适合我本次的冷藏条件保存？我没提供标签要求，也没说明实际冷藏温度。请解释保存温度核对原则。","claim":"判断实际保存条件是否合适，需要比较包装要求与实际冷藏温度。","expectedStatus":"MISSING_INPUT"},
+    {"id":"both-completed","group":"information","source":"食品应按包装要求的冷藏温度保存；判断实际保存条件是否合适，需要比较包装要求与实际冷藏温度。","question":"这袋食品标签写明需要冷藏于2至8摄氏度，我确认实际冷藏温度一直是4摄氏度。关于温度条件是否匹配，当前还缺信息吗？","claim":"判断实际保存条件是否合适，需要比较包装要求与实际冷藏温度。","expectedStatus":"SUFFICIENT"}
+  ],
+  "reranks": [
+    {"id":"rerank-oil","query":"能否仅凭照片确定这份沙拉的实际用油量？","expectedTopId":3,"documents":[{"id":1,"title":"包装保存","content":"购买包装食品时核对保存要求。"},{"id":2,"title":"简餐组合","content":"主食、蛋类和可获得的蔬菜可以组合简餐。"},{"id":3,"title":"照片中的用油判断","content":"照片不能可靠确定沙拉实际用油量。需要配方、实际用量记录或标签信息；未知时保留未知。"}]},
+    {"id":"rerank-convenience","query":"便利店简餐怎样组合并核对保存要求？","expectedTopId":2,"documents":[{"id":1,"title":"饮食记录","content":"实际用量未知时不应编造克数。"},{"id":2,"title":"便利店简餐","content":"便利店可将普通主食、蛋或豆制品与可获得的蔬菜水果分开选择，同时查看包装、储存要求和食用份数。"},{"id":3,"title":"拍摄方法","content":"在光线充足时拍摄餐食，避免遮挡。"}]},
+    {"id":"rerank-uncertain","query":"图片中看不清杯子内是什么饮料，该如何处理？","expectedTopId":3,"documents":[{"id":1,"title":"食品冷藏","content":"食品按标签要求保存。"},{"id":2,"title":"蔬菜搭配","content":"可记录可见的蔬菜名称。"},{"id":3,"title":"不确定饮品","content":"不透明杯中内容无法辨认时，应保留未确认饮品，不猜测配料、含糖量或精确营养值。"}]}
+  ],
+  "vision": [
+    {"id":"synth-001","foodImage":true,"minimumFoods":3,"description":"Multiple visible dishes; no inference of individual portion or grams."},
+    {"id":"synth-003","foodImage":true,"minimumFoods":3,"description":"Close meal with utensils nearby; visually inspected, not a severe occlusion case despite original scene label."},
+    {"id":"synth-056","foodImage":true,"minimumFoods":3,"requiresDrink":true,"description":"Fried food and dark drink; appearance cannot establish drink ingredients or sugar."},
+    {"id":"synth-081","foodImage":false,"minimumFoods":0,"description":"Clearly empty cafeteria tray."},
+    {"id":"synth-083","foodImage":false,"minimumFoods":0,"description":"Clearly empty tray with utensils nearby; contents remain visible."},
+    {"id":"synth-086","foodImage":false,"minimumFoods":0,"description":"Notebook, pen and phone; non-food control."}
+  ],
+  "uncoveredVisionScenes": ["small edible leftovers", "severe occlusion", "readable or unreadable packaged food", "opaque drink without visible contents"],
+  "limits": {"embeddingCalls":0,"maximumProviderRequests":32,"automaticRetries":0}
+}

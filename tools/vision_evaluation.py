@@ -1,6 +1,11 @@
 """Evaluate an independently annotated image dataset against the production recognizer.
 No model request is issued without --run; predictions can be scored offline.
 """
+
+import sys as _auth_sys
+from pathlib import Path as _AuthPath
+_auth_sys.path.insert(0, str(_AuthPath(__file__).resolve().parents[1] / 'tools'))
+import cookie_http as _auth_http
 import argparse
 import datetime as dt
 import hashlib
@@ -12,7 +17,8 @@ from pathlib import Path
 import re
 import time
 import unicodedata
-from urllib.request import Request, urlopen
+from urllib.request import Request
+urlopen = _auth_http.urlopen
 import uuid
 
 CATEGORIES = {'staple','protein','vegetable','fruit','dairy','soup','drink','dessert','fried','oily','other'}

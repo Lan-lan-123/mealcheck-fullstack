@@ -11,7 +11,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
 
 @Service
 public class WeeklyReportJobCompletionService {
@@ -45,7 +44,9 @@ public class WeeklyReportJobCompletionService {
         snapshot.setJobId(jobId);
         snapshot.setUser(users.getReferenceById(job.getUserId()));
         snapshot.setDays(job.getDays());
-        snapshot.setPeriodEnd(AppTime.businessDate(job.getCreatedAt()));
+        // Resumed dispatch can create a job days after its original report period.
+        snapshot.setPeriodEnd(job.getReportWeek() == null
+                ? AppTime.businessDate(job.getCreatedAt()) : job.getReportWeek());
         snapshot.setPeriodStart(snapshot.getPeriodEnd().minusDays(job.getDays() - 1L));
         report.setPeriodStart(snapshot.getPeriodStart());
         report.setPeriodEnd(snapshot.getPeriodEnd());

@@ -1,3 +1,4 @@
+import Button from './Button'
 import PlanSaveButton from "./PlanSaveButton"
 import TrackingSummary from "./TrackingSummary"
 import { formatTime } from '../utils/time'
@@ -35,9 +36,9 @@ export default function WeeklyReportDetail({ report, avgLabel, onClose }) {
             <p>{report.periodStart} 至 {report.periodEnd} · 餐食明细按报告日期独立查询。</p>
           </div>
 
-          <button className="modal-close" onClick={onClose} type="button">
+          <Button variant="plain" className="modal-close" onClick={onClose} type="button">
             返回周报概览
-          </button>
+          </Button>
         </div>
 
         <div className="metrics">
@@ -118,9 +119,9 @@ export default function WeeklyReportDetail({ report, avgLabel, onClose }) {
             !loading && !error && <Empty text="报告期间暂无饮食图片记录" />
           )}
           {!!data?.totalPages && <div className="record-pagination">
-            <button type="button" disabled={loading || page === 0} onClick={() => setPage(page - 1)}>上一页</button>
+            <Button variant="secondary" className="secondary-btn" type="button" disabled={loading || page === 0} onClick={() => setPage(page - 1)}>上一页</Button>
             <span>第 {page + 1} / {data.totalPages} 页 · 共 {data.totalElements} 条</span>
-            <button type="button" disabled={loading || page + 1 >= data.totalPages} onClick={() => setPage(page + 1)}>下一页</button>
+            <Button variant="secondary" className="secondary-btn" type="button" disabled={loading || page + 1 >= data.totalPages} onClick={() => setPage(page + 1)}>下一页</Button>
           </div>}
         </section>
     </div>

@@ -1,0 +1,3322 @@
+[
+  {
+    "case": 1,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.98,
+          "note": "可见红色番茄块与黄色炒蛋混合，带有汤汁，属于典型的炒制菜肴。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见绿色叶菜（类似上海青）和白色蒜片，表面有光泽，无明显油炸痕迹。",
+          "attributes": {
+            "fried": null,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": [
+            {
+              "code": "FRYING_CONFLICT",
+              "message": "油炸属性（模型标记为否）与名称或做法线索冲突，已保留未知；请核对是否经过油炸。"
+            }
+          ]
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.99,
+          "note": "碗中盛满白色米饭，颗粒分明，无油光。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "木桌上的家常餐食，包含番茄炒蛋、清炒青菜和白米饭。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 2,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.98,
+          "note": "可见明显的番茄块和炒制后的鸡蛋块，表面有酱汁光泽。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "深绿色叶菜，茎部呈浅绿色，表面有油光，形态符合炒青菜特征。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.99,
+          "note": "白色长粒米饭，颗粒分明，无油炸或高油特征。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含番茄炒蛋、清炒青菜和白米饭。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 3,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见明显的红色番茄块与黄色炒蛋混合，呈现典型炒制状态",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见深绿色叶菜（类似油菜或上海青），表面有光泽，呈炒熟状态",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见堆叠的白色米饭，颗粒分明",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一份包含番茄炒蛋、清炒青菜和白米饭的家常餐食",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 4,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.98,
+          "note": "可见红色番茄块与黄色炒蛋混合，带有汤汁",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "绿色叶菜（类似上海青），表面有光泽，可见蒜片",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.99,
+          "note": "白色蒸米饭，盛在碗中",
+          "attributes": {
+            "fried": null,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "木桌上的家常餐食，包含番茄炒蛋、清炒青菜和白米饭",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 5,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "白色颗粒状米饭，表面无明显油光。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "绿色叶菜（似上海青），表面有光泽，推测为清炒。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "黄色炒蛋块与红色番茄块混合，带有汤汁。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、炒青菜和番茄炒蛋。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 6,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "白色长粒米饭，颗粒分明",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "黄色炒蛋块与红色番茄块混合，可见汤汁",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "绿色叶菜，茎部呈浅绿色，表面有光泽",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、番茄炒蛋和清炒青菜。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 7,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "白色长粒米饭，颗粒分明",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "黄色炒蛋块与红色番茄块混合，表面有光泽",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "深绿色叶菜，茎部呈浅绿色，表面油亮",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、番茄炒蛋和清炒青菜。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 8,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "白色长粒米饭，颗粒分明",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "黄色炒蛋块与红色番茄块混合，带有汤汁",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "深绿色叶菜，茎部呈浅绿色，表面有光泽",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘包含白米饭、番茄炒蛋和炒青菜的家常餐食",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 9,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见白色颗粒状米饭，表面无油光。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见绿色叶菜（如油菜），表面有光泽，推测为清炒。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见黄色炒蛋块与红色番茄块混合，带有汤汁。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、炒青菜和番茄炒蛋。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 10,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见白色长粒米饭，颗粒分明",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见黄色炒蛋块与红色番茄块混合，表面有光泽",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见绿色叶菜（类似上海青），茎部呈半透明状",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、番茄炒蛋和清炒青菜。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 11,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见明显的番茄块与炒制后的鸡蛋块混合，呈典型炒制状态",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见深绿色叶菜（类似上海青），表面有光泽，呈炒熟状态",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见大量白色长粒米饭，颗粒分明",
+          "attributes": {
+            "fried": null,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含番茄炒蛋、炒青菜和白米饭",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 12,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.98,
+          "note": "可见明显的红色番茄块与黄色炒蛋混合，呈现典型炒制状态",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "深绿色叶菜，茎部呈浅绿色，表面有光泽，推测为炒制",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.99,
+          "note": "白色颗粒状主食，位于盘子下方",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一份包含番茄炒蛋、清炒青菜和白米饭的家常餐食",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 13,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.98,
+          "note": "可见红色番茄块与黄色炒蛋混合，带有汤汁",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "绿色叶菜（类似上海青），可见蒜片，表面有光泽",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.99,
+          "note": "白色蒸米饭，盛于碗中",
+          "attributes": {
+            "fried": null,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "包含番茄炒蛋、清炒青菜和白米饭的家常餐食",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 14,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.98,
+          "note": "可见明显的番茄块与炒制后的鸡蛋块，呈典型家常炒菜形态",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "深绿色叶菜，茎部呈浅绿色，表面有光泽，推测为炒制的小油菜或上海青",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.99,
+          "note": "白色颗粒分明的蒸米饭",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一份包含番茄炒蛋、炒青菜和白米饭的家常餐食",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 15,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.98,
+          "note": "可见红色番茄块与黄色炒蛋混合，带有汤汁",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见绿色叶菜（类似上海青）与蒜片，表面有光泽",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.99,
+          "note": "碗中盛满白色米饭，颗粒分明",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "包含番茄炒蛋、清炒青菜和白米饭的家常餐食",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 16,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见白色蒸米饭，颗粒分明",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "绿色叶菜，表面有光泽，推测为清炒",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见红色番茄块与黄色炒蛋混合",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、炒青菜和番茄炒蛋。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 17,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见白色米粒，颗粒分明",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见黄色炒蛋块与红色番茄块，表面有少量汤汁",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见绿色叶菜，茎部呈浅绿色，表面有油光",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、番茄炒蛋和炒青菜。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 18,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "白色蒸米饭，颗粒分明",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "绿色叶菜，表面有光泽，疑似油菜或上海青",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "黄色炒蛋块混合红色番茄块，带汤汁",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、炒青菜和番茄炒蛋。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 19,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.98,
+          "note": "可见明显的红色番茄块与黄色炒蛋块，带有汤汁，属于典型的家常炒菜。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见深绿色叶菜（类似上海青），表面有光泽，可见蒜片，烹饪方式为炒。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.99,
+          "note": "碗中盛满白色米饭，颗粒分明，无油炸或高油特征。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "木桌上摆放着三道家常菜：一碗番茄炒蛋、一盘清炒青菜和一碗白米饭。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 20,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.98,
+          "note": "可见明显的红色番茄块与黄色炒蛋混合，呈现典型的家常炒菜形态",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "深绿色叶菜，茎部呈浅绿色，表面有光泽，看起来是清炒或焯水后的青菜",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.99,
+          "note": "白色颗粒分明的蒸米饭，占据盘子下半部分",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一份包含番茄炒蛋、清炒青菜和白米饭的家常餐食",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 21,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见白色米饭颗粒，质地松软。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "绿色叶菜，表面有光泽，推测为清炒或焯水。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见黄色炒蛋块与红色番茄块混合，属于家常炒菜。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、清炒青菜和番茄炒蛋。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 22,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见白色米粒，表面无明显油光。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见红色番茄块与黄色炒蛋混合，属于典型的家常炒菜。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见绿色叶菜（类似油菜或上海青），茎部呈浅绿色。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、番茄炒蛋和清炒青菜。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 23,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见白色米粒，颗粒分明",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见黄色炒蛋块与红色番茄块，表面有少量汤汁",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见绿色叶菜，茎部呈浅绿色，表面有油光",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘包含白米饭、番茄炒蛋和炒青菜的家常餐食",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 24,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见白色米饭颗粒，位于盘子下方。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见绿色叶菜（类似油菜），表面有光泽，推测为清炒。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见黄色炒蛋块与红色番茄块混合，带有汤汁。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、清炒青菜和番茄炒蛋。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 25,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "白色颗粒状米饭，表面无明显油光",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见红色番茄块与黄色炒蛋混合，呈典型炒制状态",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "深绿色叶菜，茎部呈浅绿色，表面有少量油光",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘包含白米饭、番茄炒蛋和清炒青菜的家常餐食",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 26,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "白色长粒米饭，颗粒分明",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "黄色炒蛋块与红色番茄块混合，表面有光泽",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "深绿色叶菜，茎部呈浅绿色，表面有油光",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘包含白米饭、番茄炒蛋和炒青菜的家常餐食",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 27,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "白色长粒米饭，颗粒分明",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "黄色炒蛋块与红色番茄块混合，表面有光泽",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "深绿色叶菜，茎部呈浅绿色，表面有油光",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、番茄炒蛋和炒青菜。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 28,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.98,
+          "note": "可见明显的番茄块和炒制后的鸡蛋块，属于典型的家常炒菜。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "深绿色叶菜，茎部呈浅绿色，表面有光泽，看起来是炒制或焯水后的青菜。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.99,
+          "note": "位于盘子下方的白色米饭，颗粒分明。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含番茄炒蛋、清炒青菜和白米饭。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 29,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "白色颗粒状米饭，位于盘子下方",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "绿色叶菜，表面有光泽，位于盘子左侧",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "黄色鸡蛋块与红色番茄块混合，位于盘子右侧",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、炒青菜和番茄炒蛋。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 30,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "白色颗粒状米饭，位于盘子下方",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "绿色叶菜，表面有光泽，位于盘子左侧",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "黄色鸡蛋块与红色番茄块混合，位于盘子右侧",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、炒青菜和番茄炒蛋。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 31,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见白色米粒，颗粒分明",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见黄色炒蛋块与红色番茄块混合，表面有光泽",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见深绿色叶菜，茎部呈浅绿色，表面有油光",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一份包含白米饭、番茄炒蛋和炒青菜的家常餐食",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 32,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.98,
+          "note": "可见红色番茄块与黄色炒蛋混合，带有汤汁。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见绿色叶菜（如上海青）和蒜片，表面有光泽。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.99,
+          "note": "碗中盛满白色米饭，颗粒分明。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "木桌上的家常餐食，包含番茄炒蛋、清炒青菜和白米饭。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 33,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.98,
+          "note": "可见红色番茄块与黄色炒蛋混合，呈现典型炒制状态。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "深绿色叶菜，茎部呈浅绿色，表面有光泽，疑似油菜或上海青。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.99,
+          "note": "白色长粒米饭，颗粒分明，无油炸或高油特征。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含番茄炒蛋、清炒青菜和白米饭。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 34,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见白色米粒，颗粒分明",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见黄色炒蛋块与红色番茄块，表面有光泽",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见绿色叶菜，茎部呈浅绿色，表面有油光",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、番茄炒蛋和清炒青菜。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 35,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.98,
+          "note": "可见红色番茄块与黄色炒蛋混合，带有汤汁，属于典型的家常炒菜。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见绿色叶菜（类似上海青或油菜），表面有光泽，可见蒜片点缀。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.99,
+          "note": "碗中盛满白色米饭，颗粒分明。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "木桌上的家常餐食，包含番茄炒蛋、清炒青菜和白米饭。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 36,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "碗中盛满白色米饭，颗粒分明",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见红色番茄块与黄色炒蛋混合，带有汤汁",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "绿色叶菜（类似上海青），表面有光泽，可见蒜片",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "木桌上摆放着三道家常菜：一碗白米饭，一盘番茄炒蛋，以及一盘清炒青菜。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 61,
+    "goal": "balanced"
+  },
+  {
+    "case": 37,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.98,
+          "note": "可见红色番茄块与黄色炒蛋混合，带有汤汁，属于典型的家常炒菜。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见绿色叶菜（类似上海青或油菜），表面有光泽，可见蒜片点缀。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.99,
+          "note": "碗中盛满白色米饭，颗粒分明。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "木桌上摆放着三道家常菜：番茄炒蛋、清炒青菜和一碗白米饭。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 38,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "vegetable",
+          "confidence": 0.98,
+          "note": "可见红色番茄块与黄色炒蛋混合，带有汤汁，属于典型的家常炒菜。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见绿色叶菜（类似上海青或油菜），色泽翠绿，表面有少量油光，未见明显焦痕。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.99,
+          "note": "碗中盛满白色米饭，颗粒分明，无油光。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "木桌上摆放着三道家常菜：左上为番茄炒蛋，右上为清炒青菜，下方为一碗白米饭。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 61,
+    "goal": "balanced"
+  },
+  {
+    "case": 39,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见红色番茄块与黄色炒蛋混合，呈现典型炒制状态。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "深绿色叶菜，茎部呈浅绿色，表面有光泽，推测为炒制。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "白色颗粒状米饭，堆积在盘子下方。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含番茄炒蛋、清炒青菜和白米饭。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 40,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见白色长粒米饭，表面无明显油光。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见黄色炒蛋块与红色番茄块混合，属于典型炒菜。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见绿色叶菜（类似上海青），表面有光泽，推测为清炒。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、番茄炒蛋和清炒青菜。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 41,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见白色颗粒状米饭，表面无明显油光。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "绿色叶菜，表面有光泽，推测为清炒或焯水。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见黄色炒蛋块与红色番茄块混合，属于家常炒菜。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、炒青菜和番茄炒蛋。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 42,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见白色长粒米饭，表面无明显油光。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见红色番茄块与黄色炒蛋混合，属于典型的家常炒菜。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见深绿色叶菜（类似油菜或上海青），茎部呈浅绿色，表面有光泽。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、番茄炒蛋和清炒青菜。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 43,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见白色长粒米饭，表面无明显油光",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见红色番茄块与黄色炒蛋混合，呈典型炒制状态",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见深绿色叶菜，茎部呈浅绿色，表面有少量油光",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘包含白米饭、番茄炒蛋和炒青菜的家常餐食",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 44,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见白色长粒米饭，颗粒分明",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见黄色炒蛋块与红色番茄块混合，表面有少量汤汁",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见深绿色叶菜（类似油菜或上海青），茎部呈浅绿色",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘包含白米饭、番茄炒蛋和炒青菜的家常餐食",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 45,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见白色蒸米饭，颗粒分明",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见绿色叶菜，表面有光泽，推测为炒制",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见黄色炒蛋块与红色番茄块混合",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、炒青菜和番茄炒蛋。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 46,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.98,
+          "note": "可见明显的番茄块与炒制后的鸡蛋块，呈典型家常炒菜形态",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见绿叶蔬菜（如油菜或上海青），表面有光泽，呈炒制状态",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.99,
+          "note": "可见大量白色长粒米饭，颗粒分明",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含番茄炒蛋、清炒青菜和白米饭",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 47,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见明显的番茄块和炒散的鸡蛋，属于典型的家常炒菜。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "深绿色叶菜，茎部呈浅绿色，表面有光泽，看起来是清炒或焯水后的青菜。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "颗粒分明的白色米饭，占据盘子下半部分。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含番茄炒蛋、清炒青菜和白米饭。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 48,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "白色颗粒分明的熟米饭",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见红色番茄块与黄色炒蛋混合，呈典型炒制状态",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "深绿色叶菜，茎部呈浅绿色，表面有光泽",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘包含白米饭、番茄炒蛋和清炒青菜的家常餐食",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 49,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.98,
+          "note": "可见明显的番茄块与炒制后的鸡蛋块，属于典型的家常炒菜。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "深绿色叶菜，茎部呈浅绿色，表面有光泽，看起来是清炒或蒜蓉炒制。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.99,
+          "note": "颗粒分明的白色蒸米饭。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含番茄炒蛋、清炒青菜和白米饭。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 50,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "白色长粒米饭，颗粒分明",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "黄色炒蛋块与红色番茄块混合，表面有少量汤汁",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "深绿色叶菜，茎部呈浅绿色，表面有油光",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘包含白米饭、番茄炒蛋和炒青菜的家常餐食",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 51,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见白色长粒米饭，表面无明显油光。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见红色番茄块与黄色炒蛋混合，属于典型的家常炒菜。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见深绿色叶菜（类似上海青），茎部呈浅绿色，表面有光泽。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、番茄炒蛋和清炒青菜。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 52,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见明显的红色番茄块与黄色炒蛋混合，呈现典型的家常炒菜形态",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见深绿色叶菜（如油菜或上海青），茎部呈浅绿色，表面有光泽",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见堆叠的白色米饭，颗粒分明",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一份包含番茄炒蛋、清炒青菜和白米饭的家常餐食",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 53,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "位于盘子下方的白色米饭，颗粒分明。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "位于盘子左侧的绿色叶菜，表面有光泽，推测为油菜或上海青。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "位于盘子右侧，可见明显的红色番茄块和黄色炒蛋块。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、炒青菜和番茄炒蛋。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 54,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.98,
+          "note": "可见明显的番茄块和炒制后的鸡蛋块，呈典型家常炒菜形态",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见绿叶蔬菜（类似上海青），表面有光泽，呈炒制状态",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.99,
+          "note": "可见颗粒分明的白色米饭",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含番茄炒蛋、清炒青菜和白米饭",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 55,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见白色米饭颗粒，表面无明显油光。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "绿色叶菜，表面有光泽，推测为清炒或焯水。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见黄色炒蛋块与红色番茄块混合，属于家常炒菜。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、炒青菜和番茄炒蛋。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 56,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见白色颗粒状米饭，表面无明显油光。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "绿色叶菜，表面有光泽，推测为炒制，具体油量不可见。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见黄色炒蛋块与红色番茄块混合，属于炒制菜肴。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、炒青菜和番茄炒蛋。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 57,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.98,
+          "note": "可见明显的番茄块与炒制后的鸡蛋块，呈典型家常炒菜形态。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "绿色叶菜（类似上海青），表面有光泽，可见少量蒜末，为炒制蔬菜。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.99,
+          "note": "白色长粒米饭，颗粒分明，无油炸或高油特征。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含番茄炒蛋、清炒青菜和白米饭。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 58,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见白色长粒米饭，颗粒分明",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见黄色炒蛋块与红色番茄块混合，表面有酱汁",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见绿色叶菜（类似上海青），表面有油光",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、番茄炒蛋和清炒青菜。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 59,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "vegetable",
+          "confidence": 0.98,
+          "note": "可见红色番茄块与黄色炒蛋混合，带有汤汁，属于典型的家常炒菜。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见绿色叶菜（类似上海青或油菜）和白色蒜片，表面有光泽，为炒制蔬菜。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.99,
+          "note": "碗中盛满白色米饭，颗粒分明，无油炸或高油特征。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "木桌上摆放着三道家常菜：番茄炒蛋、清炒青菜和一碗白米饭。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 61,
+    "goal": "balanced"
+  },
+  {
+    "case": 60,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见白色长粒米饭，颗粒分明。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见黄色炒蛋块与红色番茄块混合，表面有酱汁光泽。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见绿色叶菜（类似上海青），表面有油光，呈炒制状态。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、番茄炒蛋和清炒青菜。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 61,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "可见白色米粒，颗粒分明",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "other",
+          "confidence": 0.95,
+          "note": "可见红色番茄块与黄色炒蛋混合，表面有少量汤汁",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见绿色叶菜，茎部呈浅绿色，表面有油光",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含白米饭、番茄炒蛋和清炒青菜。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 61,
+    "goal": "balanced"
+  },
+  {
+    "case": 62,
+    "recognition": {
+      "foods": [
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.98,
+          "note": "白色长粒米饭，颗粒分明",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.95,
+          "note": "可见黄色炒蛋块与红色番茄块混合，表面有少量汤汁",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "深绿色叶菜，茎部呈浅绿色，表面有油光",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘包含白米饭、番茄炒蛋和炒青菜的家常餐食",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 63,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.98,
+          "note": "可见红色番茄块与黄色炒蛋混合，带有汤汁",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "绿色叶菜（类似上海青），表面有光泽，可见蒜片",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.99,
+          "note": "白色蒸米饭，盛在碗中",
+          "attributes": {
+            "fried": null,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "包含番茄炒蛋、清炒青菜和白米饭的家常餐食",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 64,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.98,
+          "note": "可见明显的番茄块和炒制后的鸡蛋块，属于典型的家常炒菜。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见绿叶蔬菜（如上海青或油菜），表面有光泽，呈现炒制后的状态。",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.99,
+          "note": "可见颗粒分明的白色米饭，占据盘子下方大部分区域。",
+          "attributes": {
+            "fried": false,
+            "highOil": false
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "一盘家常餐食，包含番茄炒蛋、清炒青菜和白米饭。",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  },
+  {
+    "case": 65,
+    "recognition": {
+      "foods": [
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "confidence": 0.98,
+          "note": "可见红色番茄块与黄色炒蛋混合，带有汤汁",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "清炒青菜",
+          "category": "vegetable",
+          "confidence": 0.95,
+          "note": "可见绿色叶菜（类似上海青）及蒜片，表面有光泽",
+          "attributes": {
+            "fried": false,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        },
+        {
+          "name": "白米饭",
+          "category": "staple",
+          "confidence": 0.99,
+          "note": "碗中盛满白色米饭",
+          "attributes": {
+            "fried": null,
+            "highOil": null
+          },
+          "identityEvidence": "CONTENT_VISIBLE",
+          "reviewIssues": []
+        }
+      ],
+      "sceneSummary": "木桌上的家常餐食，包含番茄炒蛋、清炒青菜和白米饭",
+      "foodImage": true,
+      "rejectionReason": "",
+      "demoMode": false,
+      "imageQuality": "CLEAR",
+      "uncertainFoods": []
+    },
+    "oldScore": 90,
+    "goal": "balanced"
+  }
+]

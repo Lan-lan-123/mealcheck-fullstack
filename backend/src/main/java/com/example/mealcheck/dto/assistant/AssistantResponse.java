@@ -3,6 +3,25 @@ package com.example.mealcheck.dto.assistant;
 import java.util.List;
 
 public class AssistantResponse {
+    private String reviewStatus="NOT_APPLICABLE";
+    public String getReviewStatus() {return reviewStatus;}
+    public void setReviewStatus(String value) {reviewStatus=java.util.Set.of("VERIFIED","NOT_REVIEWED","UNAVAILABLE","NOT_APPLICABLE","UNKNOWN").contains(value==null?"":value)?value:"UNKNOWN";}
+    private String answerStatus="COMPLETE";
+    private String failureCode;
+    private Integer upstreamStatus;
+    private List<String> answerReasonCodes=List.of();
+    public List<String> getAnswerReasonCodes() {return answerReasonCodes;}
+    public void partial(List<String> reasons) {answerStatus="PARTIAL";answerReasonCodes=reasons==null?List.of():List.copyOf(reasons);}
+    public String getAnswerStatus() {return answerStatus;}
+    public String getFailureCode() {return failureCode;}
+    public Integer getUpstreamStatus() {return upstreamStatus;}
+    public void degraded(String code,Integer status) {answerStatus="DEGRADED";failureCode=code;upstreamStatus=status;}
+    public AssistantResponse copyOutcomeFrom(AssistantResponse source) {
+        answerStatus=source.answerStatus;answerReasonCodes=source.answerReasonCodes;failureCode=source.failureCode;upstreamStatus=source.upstreamStatus;reviewStatus=source.reviewStatus;return this;
+    }
+    private List<AssistantToolCall> toolCalls = List.of();
+    public List<AssistantToolCall> getToolCalls() { return toolCalls; }
+    public void setToolCalls(List<AssistantToolCall> value) { toolCalls = value == null ? List.of() : List.copyOf(value); }
     private Long messageId;
     private String requestId;
     private String deliveryStatus="COMPLETE";

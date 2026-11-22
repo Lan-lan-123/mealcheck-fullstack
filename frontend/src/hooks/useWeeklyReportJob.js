@@ -1,11 +1,13 @@
+// @ts-check
 import { useEffect, useRef, useState } from 'react'
 import { requestWeeklyReport, weeklyReportJob } from '../api/client'
 import { resolveWeeklyReportJob } from '../utils/weeklyReportJob'
 
+/** @param {(report: import('../api/contracts').WeeklyReport) => void} onReport @param {(message: string) => void} onMessage */
 export default function useWeeklyReportJob(onReport, onMessage) {
-  const controller = useRef(null)
+  const controller = useRef(/** @type {AbortController | null} */ (null))
   const [status, setStatus] = useState('')
-  const [progress, setProgress] = useState(null)
+  const [progress, setProgress] = useState(/** @type {import('../api/contracts').ProgressTask | null} */ (null))
   function cancel() {
     controller.current?.abort()
     controller.current = null
@@ -27,12 +29,12 @@ export default function useWeeklyReportJob(onReport, onMessage) {
         load: weeklyReportJob, signal: active.signal, onUpdate: next => {
           if (active.signal.aborted) return
           setStatus(next.status)
-          setProgress(task => ({ ...task, status: next.status }))
+          setProgress(task => ({ ...task, status: next.status, connectionInterrupted: next.connectionInterrupted }))
         }
       })
       if (active.signal.aborted) return
       onReport(report)
-      setProgress(task => ({ ...task, status: 'SUCCEEDED', finishedAt: Date.now() }))
+      setProgress(task => ({ ...task, status: 'SUCCEEDED', connectionInterrupted: false, finishedAt: Date.now() }))
       onMessage('周报已生成。同一天重复请求会复用这份报告。')
     } catch (error) {
       if (!active.signal.aborted && error.name !== 'AbortError') {

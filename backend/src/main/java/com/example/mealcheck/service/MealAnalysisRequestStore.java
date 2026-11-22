@@ -16,13 +16,15 @@ import java.util.Set;
 public class MealAnalysisRequestStore {
     @org.springframework.beans.factory.annotation.Value("${mealcheck.analysis.lease-seconds:90}")
     private int workerLeaseSeconds = 90;
-    @org.springframework.beans.factory.annotation.Value("${mealcheck.analysis.max-outstanding:32}")
-    private int maxOutstanding = 32;
+    @org.springframework.beans.factory.annotation.Value("${mealcheck.analysis.max-outstanding:200}")
+    private int maxOutstanding = 200;
+    @org.springframework.beans.factory.annotation.Value("${mealcheck.analysis.max-stored-image-bytes:536870912}")
+    private long maxStoredImageBytes = 536870912L;
     @org.springframework.beans.factory.annotation.Value("${mealcheck.analysis.max-outstanding-per-user:2}")
     private int maxOutstandingPerUser = 2;
     @jakarta.annotation.PostConstruct
     public void validateAdmission() {
-        if (maxOutstanding < 1 || maxOutstandingPerUser < 1 || maxOutstandingPerUser > maxOutstanding)
+        if (maxOutstanding < 1 || maxOutstandingPerUser < 1 || maxOutstandingPerUser > maxOutstanding || maxStoredImageBytes < 1)
             throw new IllegalArgumentException("Invalid analysis outstanding limits");
     }
     private final JdbcTemplate jdbc;
@@ -122,19 +124,28 @@ public class MealAnalysisRequestStore {
     }
     @Transactional(readOnly = true)
     public MealAnalysisRequestResponse status(UserPrincipal principal, String key) {
-        var rows = jdbc.queryForList("SELECT status,last_error,record_id,response_json,lease_until,lease_until > CURRENT_TIMESTAMP AS live FROM meal_analysis_requests WHERE user_id=? AND request_key=?", principal.getId(), key);
+        var rows = jdbc.queryForList("SELECT status,last_error,record_id,response_json,lease_until,lease_until > CURRENT_TIMESTAMP AS live, (input_image IS NOT NULL OR input_image_ref IS NOT NULL) AS has_input FROM meal_analysis_requests WHERE user_id=? AND request_key=?", principal.getId(), key);
         if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "分析请求不存在");
         var row = rows.get(0);
         String status = row.get("status").toString();
         if ("SUCCEEDED".equals(status) && row.get("record_id") == null) throw new ResponseStatusException(HttpStatus.GONE, "分析记录已删除");
-        if ("PROCESSING".equals(status) && !(boolean) row.get("live")) status = "RETRYABLE";
+        boolean recovering = "PROCESSING".equals(status) && !Boolean.TRUE.equals(row.get("live"))
+                && Boolean.TRUE.equals(row.get("has_input"));
+        if (recovering) status = "PENDING";
+        else if ("PROCESSING".equals(status) && !Boolean.TRUE.equals(row.get("live"))) status = "RETRYABLE";
         MealAnalysisResponse result = null;
         if ("SUCCEEDED".equals(status)) {
             try { result = mapper.readValue(row.get("response_json").toString(), MealAnalysisResponse.class); }
             catch (Exception error) { throw new IllegalStateException("无法读取分析结果", error); }
         }
-        String errorCode = "FAILED".equals(status) && Set.of("AI_BUDGET_EXCEEDED","AI_BUDGET_UNAVAILABLE","UPLOAD_BUSY").contains(String.valueOf(row.get("last_error")))
+        String errorCode = "FAILED".equals(status) && Set.of("AI_BUDGET_EXCEEDED","AI_BUDGET_UNAVAILABLE","UPLOAD_BUSY","ANALYSIS_STORAGE_BUSY",
+                "NON_FOOD","NON_FOOD_LIMIT","IMAGE_UNCLEAR","RECOGNITION_INCONSISTENT","MODEL_SERVICE_ERROR","MODEL_RESPONSE_INVALID","MODEL_REQUEST_LIMITED","REMOTE_TIMEOUT","REMOTE_CONFIGURATION",
+                "DEPENDENCY_BUSY","DEPENDENCY_UNAVAILABLE","DATABASE_UNAVAILABLE","RESULT_SAVE_FAILED","WORKER_INTERRUPTED","EXECUTION_FAILED").contains(String.valueOf(row.get("last_error")))
                 ? row.get("last_error").toString() : null;
+        if (recovering) return new MealAnalysisRequestResponse(key,status,null,3,null,"QUEUED",
+                "处理进程中断，任务已保留，正在等待自动恢复；请勿重新上传。" );
+        if ("PROCESSING".equals(status) && Boolean.FALSE.equals(row.get("has_input")))
+            return new MealAnalysisRequestResponse(key,status,null,3,null,"ACCEPTED","上传请求已接收，正在校验图片并准备入队。" );
         return new MealAnalysisRequestResponse(key, status, result, ("PROCESSING".equals(status) || "PENDING".equals(status)) ? 3 : 0, errorCode);
     }
 
@@ -153,6 +164,7 @@ public class MealAnalysisRequestStore {
         var limit = limits.consumeMealAnalysis(user.getUsername());
         if (limit.unavailable()) throw new IllegalStateException("限流服务暂时不可用，请稍后重试。");
         if (!limit.allowed()) throw new RateLimitExceededException("图片分析太频繁了，请稍后再试。",limit.limit(),limit.remaining(),limit.retryAfter());
+        admitImageBytes(user.getId(), key, image.size());
         jdbc.update("""
             INSERT INTO meal_analysis_requests(user_id,request_key,payload_hash,effective_goal,status,attempt_token,lease_until,
               input_image,input_content_type,input_extension,input_filename,input_width,input_height)
@@ -172,18 +184,46 @@ public class MealAnalysisRequestStore {
         return new MealAnalysisRequestResponse(key,"PENDING",null,3);
     }
 
-    public record Work(UserPrincipal user,String key,String token,String goal,ValidatedImage image,long queueWaitMillis,String imageReference) {
-        public Work(UserPrincipal user,String key,String token,String goal,ValidatedImage image) { this(user,key,token,goal,image,0,null); }
-        public Work(UserPrincipal user,String key,String token,String goal,ValidatedImage image,long queueWaitMillis) { this(user,key,token,goal,image,queueWaitMillis,null); }
+    /** The metadata has no image bytes; payloads are loaded after the claim transaction commits. */
+    public record Work(UserPrincipal user,String key,String token,String goal,ValidatedImage imageMetadata,long queueWaitMillis,String imageReference) {
+        public Work(UserPrincipal user,String key,String token,String goal,ValidatedImage imageMetadata) { this(user,key,token,goal,imageMetadata,0,null); }
+        public Work(UserPrincipal user,String key,String token,String goal,ValidatedImage imageMetadata,long queueWaitMillis) { this(user,key,token,goal,imageMetadata,queueWaitMillis,null); }
     }
+    /** Do not fetch payloads while an account/request lock is held by a caller transaction. */
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.NEVER)
     public ValidatedImage loadImage(Work work) {
-        if(work.imageReference()==null)return work.image();
-        if(images==null)throw new IllegalStateException("Image storage is unavailable");
         AiCallContext.checkExecution();
-        var metadata=work.image();
-        byte[] bytes=images.read(work.imageReference());
+        byte[] bytes;
+        if (work.imageReference() == null) {
+            var payloads = jdbc.query("""
+                SELECT input_image FROM meal_analysis_requests
+                WHERE user_id=? AND request_key=? AND attempt_token=? AND status='PROCESSING'
+                  AND lease_until>CURRENT_TIMESTAMP AND input_image_ref IS NULL AND input_image IS NOT NULL
+                """, (rs, row) -> rs.getBytes(1), work.user().getId(), work.key(), work.token());
+            if (payloads.isEmpty()) throw new WorkNoLongerOwnedException();
+            bytes = payloads.get(0);
+        } else {
+            requireLiveWork(work);
+            if (images == null) throw new IllegalStateException("Image storage is unavailable");
+            bytes = images.read(work.imageReference());
+        }
         AiCallContext.checkExecution();
+        // Deletion, expiry or replacement during the read must stop before model work.
+        requireLiveWork(work);
+        var metadata=work.imageMetadata();
         return new ValidatedImage(bytes,metadata.contentType(),metadata.extension(),metadata.width(),metadata.height(),metadata.originalFilename());
+    }
+    private void requireLiveWork(Work work) {
+        Long live = jdbc.queryForObject("""
+            SELECT count(*) FROM meal_analysis_requests
+            WHERE user_id=? AND request_key=? AND attempt_token=? AND status='PROCESSING'
+              AND lease_until>CURRENT_TIMESTAMP AND input_image_ref IS NOT DISTINCT FROM ?
+              AND (input_image IS NOT NULL OR input_image_ref IS NOT NULL)
+            """, Long.class, work.user().getId(), work.key(), work.token(), work.imageReference());
+        if (live == null || live != 1) throw new WorkNoLongerOwnedException();
+    }
+    public static final class WorkNoLongerOwnedException extends RuntimeException {
+        public WorkNoLongerOwnedException() { super("Analysis execution is no longer owned"); }
     }
     @Transactional
     public MealAnalysisRequestResponse enqueueClaimedReference(UserPrincipal principal,String key,String token,ValidatedImage image,String reference) {
@@ -206,6 +246,7 @@ public class MealAnalysisRequestStore {
     @Transactional
     public MealAnalysisRequestResponse enqueueClaimed(UserPrincipal principal, String key, String token, ValidatedImage image) {
         users.findByIdForUpdate(principal.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "用户不存在"));
+        admitImageBytes(principal.getId(), key, image.size());
         int changed = jdbc.update("""
                 UPDATE meal_analysis_requests SET status='PENDING',input_image=?,input_image_ref=NULL,input_content_type=?,input_extension=?,
                   input_filename=?,input_width=?,input_height=?,attempts=0,next_attempt_at=CURRENT_TIMESTAMP,
@@ -250,7 +291,9 @@ public class MealAnalysisRequestStore {
                 "SELECT count(*) FROM meal_analysis_outbox WHERE event_id=? AND user_id=? AND request_key=?",
                 Long.class, eventId, userId, key) == 0) return null;
         var rows=jdbc.queryForList("""
-            SELECT r.*,GREATEST(0,EXTRACT(EPOCH FROM (clock_timestamp()-coalesce(
+            SELECT r.attempts,r.attempt_token,r.effective_goal,r.input_image_ref,
+              r.input_content_type,r.input_extension,r.input_width,r.input_height,r.input_filename,
+              GREATEST(0,EXTRACT(EPOCH FROM (clock_timestamp()-coalesce(
                 (SELECT o.created_at FROM meal_analysis_outbox o WHERE o.user_id=r.user_id AND o.request_key=r.request_key),r.next_attempt_at)))) AS queue_wait_seconds
             FROM meal_analysis_requests r WHERE user_id=? AND request_key=? AND (input_image IS NOT NULL OR input_image_ref IS NOT NULL)
               AND next_attempt_at <= CURRENT_TIMESTAMP
@@ -269,7 +312,7 @@ public class MealAnalysisRequestStore {
         jdbc.update("UPDATE meal_analysis_requests SET status='PROCESSING',attempt_token=?,attempts=attempts+1,lease_until=CURRENT_TIMESTAMP + (? * INTERVAL '1 second'),updated_at=CURRENT_TIMESTAMP WHERE user_id=? AND request_key=?",
                 token,MealAnalysisLeaseService.boundedSeconds(workerLeaseSeconds),userId,key);
         return new Work(new UserPrincipal(user),key,token,row.get("effective_goal").toString(),new ValidatedImage(
-            row.get("input_image")==null?new byte[0]:(byte[])row.get("input_image"),row.get("input_content_type").toString(),row.get("input_extension").toString(),
+            new byte[0],row.get("input_content_type").toString(),row.get("input_extension").toString(),
             ((Number)row.get("input_width")).intValue(),((Number)row.get("input_height")).intValue(),row.get("input_filename").toString()),
             Math.round(((Number)row.get("queue_wait_seconds")).doubleValue()*1000),(String)row.get("input_image_ref"));
     }
@@ -293,5 +336,17 @@ public class MealAnalysisRequestStore {
     }
     private String json(Object value) {
         try { return mapper.writeValueAsString(value); } catch (Exception error) { throw new IllegalStateException("无法保存分析结果", error); }
+    }
+    private void admitImageBytes(Long userId, String key, long incomingBytes) {
+        // Use the same global lock as count admission. Failed payloads also occupy disk
+        // until retention removes them; replacement of this request is counted only once.
+        jdbc.queryForObject("SELECT pg_advisory_xact_lock(742019001)", (rs, n) -> 0);
+        Long stored = jdbc.queryForObject("""
+                SELECT coalesce(sum(octet_length(input_image)),0)::bigint FROM meal_analysis_requests
+                WHERE input_image IS NOT NULL AND NOT (user_id=? AND request_key=?)
+                """, Long.class, userId, key);
+        if (stored == null || incomingBytes < 0 || incomingBytes > maxStoredImageBytes
+                || stored > maxStoredImageBytes - incomingBytes)
+            throw new AnalysisAdmissionException("ANALYSIS_STORAGE_BUSY", "待处理图片存储空间繁忙，请等待已有任务完成后再试。");
     }
 }

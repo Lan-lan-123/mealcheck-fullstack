@@ -2,16 +2,14 @@
 import { chromium, expect } from '../../frontend/node_modules/@playwright/test/index.mjs'
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
+import { installBrowserSession } from './cookie-browser.mjs'
 let input = ''; for await (const chunk of process.stdin) input += chunk
 const config = JSON.parse(input), checks = []
 let passed = false
 const browser = await chromium.launch({ headless: true, ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE } : {}) })
 try {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } })
-  await page.addInitScript(auth => {
-    localStorage.setItem('mealcheck_token', auth.token)
-    localStorage.setItem('mealcheck_user', JSON.stringify({ username: auth.username, displayName: auth.displayName, role: 'USER' }))
-  }, config.auth)
+  await installBrowserSession(page.context(), config.baseUrl, config.auth.token)
   await page.goto(config.baseUrl + '/user/records')
   const meal = page.locator('.record-list .record').filter({ hasText: '青菜（部署验证）' })
   await expect(meal).toContainText('手动')

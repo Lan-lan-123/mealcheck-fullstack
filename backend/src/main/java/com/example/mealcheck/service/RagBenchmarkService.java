@@ -32,8 +32,18 @@ public class RagBenchmarkService {
     }
 
     public RagBenchmarkResponse evaluate() {
+        return evaluateQuestions(null);
+    }
+
+    /** A bounded internal evaluation keeps sample runs from querying the full dataset. */
+    RagBenchmarkResponse evaluateQuestions(java.util.Set<String> questions) {
         long startedAt = System.nanoTime();
         List<EvaluationCase> cases = loadCases();
+        if (questions != null) {
+            cases=cases.stream().filter(item->questions.contains(item.question())).toList();
+            if (questions.isEmpty() || cases.size()!=questions.size())
+                throw new IllegalArgumentException("评测抽样问题必须非空且来自现有评测集。");
+        }
         List<RagBenchmarkResponse.CaseResult> results = cases.stream()
                 .map(this::evaluateCase)
                 .toList();
@@ -261,6 +271,7 @@ public class RagBenchmarkService {
         return Math.round(value * 100.0) / 100.0;
     }
 
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown=true)
     private record EvaluationCase(String question,
                                   List<String> expectedTitleKeywords,
                                   String expectedCategory,

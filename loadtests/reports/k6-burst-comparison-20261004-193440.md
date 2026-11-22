@@ -1,5 +1,7 @@
 # 上传突发优化及消费者并发 2 / 4 对照（20261004-193440）
 
+> 2026-10-26 本地证据精简：以下批次保留原始汇总、日志和清单，已删除逐点采样与测试图片，不能再作为完整原始证据包：[20261004-173543](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-173543.md)；[20261004-193440](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-193440.md)。原验收结论与原清单校验值未改写。
+
 北京时间：2026-10-04T19:34:40.133660+08:00 至 2026-10-04T19:40:39.925357+08:00。
 
 ## 结论
@@ -64,12 +66,12 @@ python loadtests/write-burst-comparison-report.py loadtests/results/20261004-193
 ```
 
 - [本轮参数、镜像、验证与清理记录](../results/20261004-193440/manifest.json)
-- [容器与队列采样](../results/20261004-193440/resources.jsonl)
+- [容器与队列采样（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-193440.md)
 - [仅扩充本轮账号的 SQL](../results/20261004-193440/seed-records.sql)
 - [实测脚本及配置快照](../results/20261004-193440/scripts)
 - [上轮优化报告](k6-optimization-20261004-173543.md)；新一轮修改了后端实现，旧数据仅作背景，本轮并发对照以同一新镜像为准。
-- `seed`：[汇总](../results/20261004-193440/seed.json)、[日志](../results/20261004-193440/seed.log)、[时间序列](../results/20261004-193440/seed.timeseries.jsonl)，退出码 0。
-- `c2-warmup`：[汇总](../results/20261004-193440/c2-warmup.json)、[日志](../results/20261004-193440/c2-warmup.log)、[时间序列](../results/20261004-193440/c2-warmup.timeseries.jsonl)，退出码 0。
-- `c2-entry-20`：[汇总](../results/20261004-193440/c2-entry-20.json)、[日志](../results/20261004-193440/c2-entry-20.log)、[时间序列](../results/20261004-193440/c2-entry-20.timeseries.jsonl)，退出码 99。
+- `seed`：[汇总](../results/20261004-193440/seed.json)、[日志](../results/20261004-193440/seed.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-193440.md)，退出码 0。
+- `c2-warmup`：[汇总](../results/20261004-193440/c2-warmup.json)、[日志](../results/20261004-193440/c2-warmup.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-193440.md)，退出码 0。
+- `c2-entry-20`：[汇总](../results/20261004-193440/c2-entry-20.json)、[日志](../results/20261004-193440/c2-entry-20.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-193440.md)，退出码 99。
 
 账号文件含 JWT 与清理密码，禁止分享。原始证据在 Git 忽略目录，分享 Markdown 时需要另行保存证据。

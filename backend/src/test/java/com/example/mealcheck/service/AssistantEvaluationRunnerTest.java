@@ -60,7 +60,7 @@ class AssistantEvaluationRunnerTest {
 
         assertThat(result.executionPath()).isEqualTo("PRODUCTION_FUNCTION_CALLING");
         assertThat(result.selectedSkill()).isEqualTo("PERSONALIZED");
-        assertThat(result.answer()).contains("总结", "- 建议一", "本周趋势：记录不足");
+        assertThat(result.answer()).contains("总结", "- 建议一").doesNotContain("本周趋势");
         assertThat(result.calledTools()).containsExactly("get_my_recent_meals");
 
         ArgumentCaptor<String> prompt = ArgumentCaptor.forClass(String.class);

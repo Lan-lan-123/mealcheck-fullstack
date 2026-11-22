@@ -1,0 +1,4 @@
+# Knowledge manifests and source-bound annotations use reproducible file hashes.
+backend/src/main/resources/knowledge/*.md text eol=lf
+backend/src/main/resources/knowledge/*.json text eol=lf
+tools/evaluation/knowledge_longform_v8/*.md text eol=lf

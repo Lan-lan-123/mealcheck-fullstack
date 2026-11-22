@@ -5,11 +5,11 @@ ARG MAVEN_MIRROR_URL=https://repo.maven.apache.org/maven2
 COPY docker/maven-settings.xml /tmp/maven-settings.xml
 COPY pom.xml .
 RUN --mount=type=cache,target=/root/.m2 \
-    mvn -s /tmp/maven-settings.xml -q -DskipTests dependency:go-offline
+    mvn -s /tmp/maven-settings.xml -B -ntp -DskipTests dependency:go-offline
 
 COPY src ./src
 RUN --mount=type=cache,target=/root/.m2 \
-    mvn -s /tmp/maven-settings.xml -q -DskipTests package
+    mvn -s /tmp/maven-settings.xml -B -ntp -DskipTests package
 
 FROM eclipse-temurin:17-jre
 WORKDIR /app

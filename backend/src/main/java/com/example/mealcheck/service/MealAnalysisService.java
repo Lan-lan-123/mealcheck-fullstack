@@ -41,9 +41,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class MealAnalysisService {
-    @org.springframework.beans.factory.annotation.Value("${mealcheck.ai.model:unknown}")
-    private String recognitionModel = "unknown";
-
     private final BehaviorTrackingService tracking;
 
     private final UserAccountRepository userRepository;
@@ -122,7 +119,7 @@ public class MealAnalysisService {
         AiCallContext.checkExecution();
         UserAccount user = userRepository.findById(principal.getId()).orElseThrow();
         if (nonFoodUploadGuardService.isBlocked(user.getUsername())) {
-            throw new ResponseStatusException(
+            throw new RecognitionFailureException("NON_FOOD_LIMIT",
                     HttpStatus.TOO_MANY_REQUESTS,
                     "因连续上传非饮食图片，已临时限制上传。剩余 "
                             + nonFoodUploadGuardService.remainingBlockMinutes(user.getUsername()) + " 分钟后可再试。"
@@ -131,6 +128,7 @@ public class MealAnalysisService {
 
         AiCallContext.checkExecution();
         RecognitionResult recognition = recognitionService.recognize(validatedImage);
+        String recognitionModel=recognitionService.lastModel();
         AiCallContext.checkExecution();
         if (!recognition.isFoodImage()) {
             String reason = recognition.getRejectionReason() == null || recognition.getRejectionReason().isBlank()
@@ -139,20 +137,23 @@ public class MealAnalysisService {
             NonFoodUploadGuardService.NonFoodUploadDecision decision = nonFoodUploadGuardService.register(user, reason);
 
             if (decision.thresholdReached()) {
-                throw new ResponseStatusException(
+                throw new RecognitionFailureException("NON_FOOD_LIMIT",
                         HttpStatus.TOO_MANY_REQUESTS,
                         "因连续上传非饮食图片，已临时限制上传。系统已向管理员发出预警。剩余 "
                                 + nonFoodUploadGuardService.remainingBlockMinutes(user.getUsername()) + " 分钟后可再试。"
                 );
             }
 
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, reason);
+            throw new RecognitionFailureException("NON_FOOD", HttpStatus.BAD_REQUEST,
+                    "图片未识别为餐食，请选择包含食物或饮品的照片。" );
         }
 
         String normalizedGoal = userGoalService.effectiveGoal(user, goal);
         String originalFoods = Jsons.toJson(objectMapper, recognition.getFoods());
+        recognition.setUncertainFoods(MealScoringService.uncertainFoods(recognition.getFoods()));
         // Keep persisted foods and advice consistent with the facts used by scoring.
         recognition.setFoods(scoringService.acceptedFoods(recognition));
+        if (recognition.getFoods().isEmpty()) throw RecognitionFailureException.unclear();
         StructureEvaluation evaluation = scoringService.evaluate(recognition, normalizedGoal);
 
         String query = buildRagQuery(recognition, evaluation, normalizedGoal);
@@ -165,7 +166,8 @@ public class MealAnalysisService {
         ).stream().limit(4).collect(Collectors.toList());
 
         AiCallContext.checkExecution();
-        String advice = adviceGenerationService.generate(recognition, evaluation, snippets, normalizedGoal);
+        var adviceResult = adviceGenerationService.generateResult(recognition, evaluation, snippets, normalizedGoal);
+        String advice = adviceResult.text();
         AiCallContext.checkExecution();
 
         MealRecord record = new MealRecord();
@@ -173,11 +175,13 @@ public class MealAnalysisService {
         record.setOriginalFileName(validatedImage.originalFilename());
         record.setGoal(normalizedGoal);
         record.setScore(evaluation.getScore());
+        record.setScoreBreakdownJson(Jsons.toJson(objectMapper, evaluation.getScoreBreakdown()));
         record.setSummary(evaluation.getSummary());
         record.setDetectedFoodsJson(Jsons.toJson(objectMapper, recognition.getFoods()));
         record.setCategoryCountsJson(Jsons.toJson(objectMapper, evaluation.getCategoryCounts()));
         record.setRiskTagsJson(Jsons.toJson(objectMapper, evaluation.getRiskTags()));
         record.setAdvice(advice);
+        record.setAdviceStatus(adviceResult.status());record.setAdviceFailureCode(adviceResult.failureCode());
         record.setOriginalFoodsJson(originalFoods);
         record.setScoringVersion(MealScoringService.VERSION);
         record.setRecognitionModel(recognitionModel);
@@ -191,6 +195,7 @@ public class MealAnalysisService {
         response.setEvaluation(evaluation);
         response.setReferences(snippets);
         response.setAdvice(advice);
+        response.setAdviceStatus(record.getAdviceStatus());response.setAdviceFailureCode(record.getAdviceFailureCode());
         response.setScoringVersion(record.getScoringVersion());
         return new PreparedMeal(user, record, validatedImage, response);
     }
@@ -340,6 +345,14 @@ public class MealAnalysisService {
     }
 
     @Transactional(readOnly = true)
+    public MealRecordResponse detail(UserPrincipal principal, Long id) {
+        MealRecord record = mealRecordRepository.findById(id)
+                .filter(meal -> meal.getUser().getId().equals(principal.getId()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "饮食记录不存在"));
+        return toResponse(record);
+    }
+
+    @Transactional(readOnly = true)
     public Path getMealImagePath(UserPrincipal principal, Long id) {
         return imageStorageService.resolve(authorizedImageReference(principal,id));
     }
@@ -383,6 +396,10 @@ public class MealAnalysisService {
                 record.getDetectedFoodsJson(),
                 new TypeReference<java.util.List<com.example.mealcheck.dto.FoodItem>>() {}
         ));
+        if (record.getRevision() == 0 && record.getOriginalFoodsJson() != null) {
+            response.setUncertainFoods(MealScoringService.uncertainFoods(Jsons.fromJson(objectMapper,
+                    record.getOriginalFoodsJson(), new TypeReference<List<FoodItem>>() {})));
+        }
 
         response.setCategoryCounts(Jsons.readStringIntegerMap(
                 objectMapper,
@@ -396,8 +413,11 @@ public class MealAnalysisService {
         ));
 
         response.setAdvice(record.getAdvice());
+        response.setAdviceStatus(record.getAdviceStatus());response.setAdviceFailureCode(record.getAdviceFailureCode());
         response.setRevision(record.getRevision());
         response.setScoringVersion(record.getScoringVersion());
+        if (record.getScoreBreakdownJson() != null) response.setScoreBreakdown(Jsons.fromJson(objectMapper,
+                record.getScoreBreakdownJson(), com.example.mealcheck.dto.ScoreBreakdown.class));
 
         return response;
     }

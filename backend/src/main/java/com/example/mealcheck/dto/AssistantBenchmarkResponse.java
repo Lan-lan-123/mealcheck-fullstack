@@ -95,8 +95,23 @@ public record AssistantBenchmarkResponse(
             int toolRounds,
             boolean degraded,
             List<ToolCallResult> toolCalls,
-            long durationMs
+            long durationMs,
+            RagChainReport ragChain
     ) {
+        // Existing callers and saved runs need not provide linked RAG evidence.
+        public CaseResult(String id, String category, String riskLevel, String question,
+                          String status, boolean passed, double weightedScore, Map<String, Integer> dimensionScores,
+                          List<String> hardGateFailures, String reason, String answer, String executionPath,
+                          String selectedSkill, String expectedSkill, List<String> acceptableSkills,
+                          boolean intentMatched, boolean toolTracePassed, List<String> expectedTools,
+                          List<String> calledTools, List<String> missingExpectedTools, List<String> forbiddenCalledTools,
+                          int toolRounds, boolean degraded, List<ToolCallResult> toolCalls, long durationMs) {
+            this(id, category, riskLevel, question, status, passed, weightedScore, dimensionScores,
+                    hardGateFailures, reason, answer, executionPath, selectedSkill, expectedSkill,
+                    acceptableSkills, intentMatched, toolTracePassed, expectedTools, calledTools,
+                    missingExpectedTools, forbiddenCalledTools, toolRounds, degraded, toolCalls, durationMs, null);
+        }
+
         public CaseResult {
             dimensionScores = dimensionScores == null ? Map.of() : Map.copyOf(dimensionScores);
             hardGateFailures = hardGateFailures == null ? List.of() : List.copyOf(hardGateFailures);
@@ -114,7 +129,10 @@ public record AssistantBenchmarkResponse(
             String arguments,
             String status,
             int round,
-            long durationMs
+            long durationMs,String origin
     ) {
+        public ToolCallResult(String name,String arguments,String status,int round,long durationMs) {
+            this(name,arguments,status,round,durationMs,"MODEL");
+        }
     }
 }

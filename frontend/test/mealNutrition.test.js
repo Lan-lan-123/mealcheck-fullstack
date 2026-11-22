@@ -21,3 +21,14 @@ test('disabling clears all submitted data and never opts a meal in implicitly', 
   draft[0].grams = ' '
   assert.equal(nutritionPayload({ recordRevision: 0, version: 4 }, true, draft).items[0].grams, null)
 })
+
+test('invalid and nonfinite numeric inputs cannot silently become null during JSON serialization', () => {
+  for (const value of ['NaN', 'Infinity', '1e999', 'not-a-number']) {
+    const draft = nutritionDraft([{ foodIndex: 0, name: '食物', grams: null, per100g: null, source: null }])
+    draft[0].grams = value
+    assert.throws(() => nutritionPayload({ recordRevision: 0, version: 0 }, true, draft), /有效/)
+    draft[0].grams = ''
+    draft[0].per100g.energyKcal = value
+    assert.throws(() => nutritionPayload({ recordRevision: 0, version: 0 }, true, draft), /有效/)
+  }
+})

@@ -1,0 +1,31 @@
+# Apply after docker-compose.prod.yml, using a backend image built from the fixed code.
+# Compatibility profile: keeps the measured AI pace; backlog now allows 200 tasks.
+services:
+  backend:
+    environment:
+      MEALCHECK_ANALYSIS_CONCURRENCY: "40"
+      MEALCHECK_ANALYSIS_MAX_OUTSTANDING: "200"
+      MEALCHECK_ANALYSIS_MAX_STORED_IMAGE_BYTES: "536870912"
+      MEALCHECK_ANALYSIS_MAX_OUTSTANDING_PER_USER: "2"
+      MEALCHECK_UPLOAD_MAX_CONCURRENT_DECODES: "2"
+      MEALCHECK_UPLOAD_MAX_PENDING_DECODES: "62"
+      MEALCHECK_UPLOAD_DECODE_WAIT_MILLIS: "15000"
+      MEALCHECK_UPLOAD_TEMPORARY_MAX_BYTES: "1073741824"
+      MEALCHECK_AI_GLOBAL_MAX_CONCURRENT_CALLS: "42"
+      MEALCHECK_REMOTE_MAX_CONCURRENT_CALLS: "42"
+      MEALCHECK_AI_GLOBAL_MAX_STARTS_PER_MINUTE: "120"
+      MEALCHECK_AI_GLOBAL_MIN_START_INTERVAL_MILLIS: "400"
+      MEALCHECK_AI_VISION_THINKING_MODE: "off"
+      MEALCHECK_AI_ADVICE_THINKING_MODE: "off"
+    mem_limit: 1g
+    cpus: 1.5
+  frontend:
+    volumes:
+      - ./deploy/burst50/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    tmpfs: !override
+      - /tmp:size=1g,mode=1777,uid=101,gid=101
+      - /var/cache/nginx:size=32m,mode=0755,uid=101,gid=101
+      - /var/run:size=8m,mode=0755,uid=101,gid=101
+    mem_limit: 1536m
+    # The measured test did not impose a frontend CPU quota.
+    cpus: 0.0

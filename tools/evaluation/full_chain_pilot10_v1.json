@@ -1,0 +1,1908 @@
+{
+  "version": "full-chain-pilot10-v1",
+  "preparedOn": "2026-10-24",
+  "timezone": "Asia/Shanghai",
+  "status": "PLANNED_NOT_EXECUTED",
+  "userInstruction": "先选择10题完整链路，先不用做测试",
+  "evaluationRunsExecuted": 0,
+  "providerCallsMade": 0,
+  "externalExecutionAuthorizedByThisPlan": false,
+  "selection": {
+    "policy": "Reuse the exact frozen answer10 IDs and order; no edits to original dataset/suite/splits.",
+    "sourceSet": "rag_chunking_eval_suite.json:sets.answer10",
+    "caseIds": [
+      "rag-008",
+      "rag-036",
+      "rag-070",
+      "rag-094",
+      "rag-117",
+      "rag-128",
+      "rag-187",
+      "rag-172",
+      "rag-184",
+      "rag-200"
+    ],
+    "caseCount": 10,
+    "answerabilityCounts": {
+      "ANSWERABLE": 7,
+      "INSUFFICIENT_EVIDENCE": 2,
+      "OUT_OF_SCOPE": 1
+    },
+    "blindTest": false,
+    "independentHumanGold": false,
+    "splitMetadataUnchanged": true
+  },
+  "sourceFiles": {
+    "backend/src/main/resources/knowledge/rag_eval_cases.json": {
+      "bytes": 1562585,
+      "sha256": "97abed1849e64fc89446c95d4f23066c23706ab4341c4a093889dc3cb6e49b87"
+    },
+    "backend/src/main/resources/knowledge/rag_chunking_eval_suite.json": {
+      "bytes": 157569,
+      "sha256": "8c8684aeb86afd20c89ebc01a87e7cebb73a4dfb9c13db11d830649e7d872162"
+    },
+    "backend/src/main/resources/knowledge/rag_eval_splits.json": {
+      "bytes": 2420,
+      "sha256": "57cf42ff9a81ec12dcc4099632b80567d16c9358e803f0ed4f844603f0d6657b"
+    },
+    "backend/src/main/resources/knowledge/diet_guides.md": {
+      "bytes": 1419042,
+      "sha256": "09f60831a24bce93982862e885fa97dcacc82675f05b1c2436e45834496a39b7"
+    },
+    "backend/src/main/resources/knowledge/diet_guides_metadata.json": {
+      "bytes": 135168,
+      "sha256": "0927cf4a8366a07bedd730986e108d5e0a1c3c9b80bf2b5a7c698be2b0d18f79"
+    }
+  },
+  "normalizedCorpusSha256": "09f60831a24bce93982862e885fa97dcacc82675f05b1c2436e45834496a39b7",
+  "labelStatus": "Inherited assistant-reviewed annotations pending independent human review; unlisted chunks remain unjudged.",
+  "scope": "Text knowledge-assistant RAG, with one intentionally early-refused out-of-scope case; not an uploaded-image or complete asynchronous meal workflow test.",
+  "execution": {
+    "runnerChosen": false,
+    "serviceStartupAllowedByThisPlan": false,
+    "indexRebuildAllowedByThisPlan": false,
+    "requestLimit": null,
+    "costLimit": null,
+    "preconditions": [
+      "actual deployment health verified",
+      "active SEMANTIC embedding profile and existing index signatures match",
+      "actual reranker configured and fallback observable",
+      "input scope and bounded request/cost policy fixed before execution"
+    ],
+    "cachePolicy": "Record cache hits separately; do not count them as fresh remote calls.",
+    "refusalDenominatorPolicy": "Exclude the one out-of-scope early-refusal case from normal retrieval/answer metrics; report routing separately."
+  },
+  "coverageLimits": [
+    "No independent blind quality estimate",
+    "No full vision-upload workflow",
+    "No guaranteed MISSING_BOTH/MISSING_KNOWLEDGE or multiround replenished-input coverage",
+    "Inherited INSUFFICIENT_EVIDENCE retrieval-only flag does not replace future final-answer acceptance checks"
+  ],
+  "planDocument": "deploy/FULL_CHAIN_PILOT10_PLAN_20261024.md",
+  "cases": [
+    {
+      "order": 1,
+      "id": "rag-008",
+      "question": "只有蔬菜的轻食应该怎样搭配？",
+      "answerability": "ANSWERABLE",
+      "acceptanceFocus": [
+        "餐食结构证据召回",
+        "主食及蛋白质搭配",
+        "不把蔬菜餐直接等同完整正餐"
+      ],
+      "expectedRoute": "KNOWLEDGE_RAG",
+      "stageExpectation": "REAL_ACTIVE_EMBEDDING_RETRIEVAL_RERANK_GENERATION_REVIEW_DELIVERY",
+      "qualityReviewRequired": true,
+      "sourceDatasetCase": {
+        "question": "只有蔬菜的轻食应该怎样搭配？",
+        "expectedTitleKeywords": [
+          "蔬菜餐",
+          "蛋白质"
+        ],
+        "expectedCategory": "vegetable",
+        "id": "rag-008",
+        "agentEvaluation": {
+          "ruleVersion": "rag-tools-v2",
+          "expectedTools": [
+            "search_diet_knowledge"
+          ],
+          "forbiddenTools": [
+            "get_my_recent_meals",
+            "get_my_weekly_report",
+            "get_my_current_goal"
+          ],
+          "expectedToolSequence": [
+            "search_diet_knowledge"
+          ],
+          "expectedToolStatuses": {
+            "search_diet_knowledge": [
+              "SUCCESS"
+            ]
+          },
+          "maxToolCalls": 2,
+          "queryTopicGroups": [
+            [
+              "轻食",
+              "沙拉",
+              "蔬菜"
+            ]
+          ],
+          "limitMin": 1,
+          "limitMax": 5,
+          "rationale": "该题要求基于知识库回答一般知识；应检索题目主题，无需读取个人饮食、周报或目标。最多允许两次检索以改写查询。"
+        },
+        "answerability": "ANSWERABLE",
+        "annotationRevision": "rag-evidence-v6-boundary-aligned",
+        "annotation": {
+          "status": "PENDING_HUMAN_REVIEW",
+          "provenance": "ORIGINAL_ANCHORS_PLUS_CODEX_ASSISTANT_REVIEW",
+          "independentlyAnnotated": false,
+          "coverage": "ORIGINAL_ANCHORS_PLUS_SELECTED_CHUNK_REVIEW",
+          "additionalChunkRelevanceReview": "PARTIAL_ASSISTANT_REVIEW",
+          "corpusSha256": "09f60831a24bce93982862e885fa97dcacc82675f05b1c2436e45834496a39b7",
+          "reviewedCandidateCount": 1,
+          "explicitlyJudgedCandidateCount": 1,
+          "reviewScopeNotes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。",
+          "unlistedChunkPolicy": "UNJUDGED_NOT_IRRELEVANT",
+          "splitterRevision": "sentence-heading-boundaries-v2",
+          "boundaryBindingReview": "EXACT_ANCHOR_MIGRATION_PENDING_CONTEXT_REVIEW",
+          "originalReviewScopePreserved": true,
+          "newBoundaryContextsIndependentlyReviewed": false
+        },
+        "evidenceTargets": [
+          {
+            "knowledgeId": "c473f8a09fb40b4c9aaa68a2f97b773fd853508bd69be0825790e4e86b5ba2fd",
+            "title": "蔬菜餐搭配建议",
+            "evidenceQuotes": [
+              "只吃一大盘蔬菜也需要检查是否缺少主食和蛋白质食物。凉拌菜、青菜汤或沙拉可以成为一餐的一部分，但不能因为颜色丰富，就默认满足所有营养需要。",
+              "在食堂可用青菜搭配米饭和豆腐、鸡蛋或肉类，素食者也应确认有合适的蛋白质来源。记录应区分蔬菜本体和酱汁，不能把沙拉名字直接等同于低能量或完整正餐。"
+            ],
+            "relevance": 2,
+            "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+            "chunkKey": "16e6e07c91660155-1-0--16e6e07c91660155-1-0",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "f88c822f8cd5ce65abe11e16b5d3b45ab270de259a88658622bda411cf13bb1d",
+                "title": "蔬菜餐搭配建议",
+                "evidenceQuotes": [
+                  "只吃一大盘蔬菜也需要检查是否缺少主食和蛋白质食物。凉拌菜、青菜汤或沙拉可以成为一餐的一部分，但不能因为颜色丰富，就默认满足所有营养需要。",
+                  "在食堂可用青菜搭配米饭和豆腐、鸡蛋或肉类，素食者也应确认有合适的蛋白质来源。记录应区分蔬菜本体和酱汁，不能把沙拉名字直接等同于低能量或完整正餐。"
+                ],
+                "relevance": 2,
+                "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+                "previousKnowledgeId": "c473f8a09fb40b4c9aaa68a2f97b773fd853508bd69be0825790e4e86b5ba2fd",
+                "chunkKey": "16e6e07c91660155-1-0--16e6e07c91660155-1-0"
+              }
+            ],
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "f88c822f8cd5ce65abe11e16b5d3b45ab270de259a88658622bda411cf13bb1d"
+              ],
+              "partialPreviousTargets": []
+            }
+          },
+          {
+            "knowledgeId": "038269e953b9046a775855671ae6a2db079f6a3cb160e37e6bc034a3c1c94d31",
+            "title": "蛋白质结构建议",
+            "evidenceQuotes": [
+              "每餐可以检查是否有一种看得见的蛋白质食物，例如鸡蛋、鱼、鸡肉、瘦肉或豆腐。菜名里有肉末不代表实际份量足够，挑选时要看食物本身，不能只凭菜名把一整份蔬菜菜肴算作肉类。",
+              "在常去的食堂列出几个可替换的选项，缺少肉类时也可以选择蛋或豆制品。一周内轮换来源比连续依赖同一种加工肉更方便保持多样性；有特殊营养需求时按个人专业建议调整。"
+            ],
+            "relevance": 1,
+            "rationale": "只提供相关背景，单独召回不足以通过最终证据检查",
+            "chunkKey": "d08bfa15a93318c3-1-0--d08bfa15a93318c3-1-0",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "5956ddd15c0179e4c045d85426b315a1a373bd1cf276ae50dd746dbe5e1200fe",
+                "title": "蛋白质结构建议",
+                "evidenceQuotes": [
+                  "每餐可以检查是否有一种看得见的蛋白质食物，例如鸡蛋、鱼、鸡肉、瘦肉或豆腐。菜名里有肉末不代表实际份量足够，挑选时要看食物本身，不能只凭菜名把一整份蔬菜菜肴算作肉类。",
+                  "在常去的食堂列出几个可替换的选项，缺少肉类时也可以选择蛋或豆制品。一周内轮换来源比连续依赖同一种加工肉更方便保持多样性；有特殊营养需求时按个人专业建议调整。"
+                ],
+                "relevance": 1,
+                "rationale": "只提供相关背景，单独召回不足以通过最终证据检查",
+                "previousKnowledgeId": "038269e953b9046a775855671ae6a2db079f6a3cb160e37e6bc034a3c1c94d31",
+                "chunkKey": "d08bfa15a93318c3-1-0--d08bfa15a93318c3-1-0"
+              }
+            ],
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "5956ddd15c0179e4c045d85426b315a1a373bd1cf276ae50dd746dbe5e1200fe"
+              ],
+              "partialPreviousTargets": []
+            }
+          },
+          {
+            "knowledgeId": "d8d641b8a06655213620b1e3f0470604e619a61705cda0664209187d93f2fc86",
+            "title": "植物饮品的蛋白质与钙标签",
+            "evidenceQuotes": [
+              "豆饮、燕麦饮、杏仁饮和椰子饮的营养组成可能差别很大，植物饮品不能仅凭颜色都当成牛奶。是否强化钙、含多少蛋白质及是否加糖，要看实际产品标签。",
+              "早餐更换饮品时可按相同容量比较蛋白质和钙信息，同时检查整餐还有哪些食物来源。钙强化不表示所有营养项目都相同；存在奶或豆类过敏时，应按明确的个人方案选择。"
+            ],
+            "relevance": 1,
+            "rationale": "只提供相关背景，单独召回不足以通过最终证据检查",
+            "chunkKey": "576ab1d754fa8182-1-0--576ab1d754fa8182-1-0",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "39284140e1fa149c467177e374dee99f68d15559a5719ce2b25fcf2ab13e4615",
+                "title": "植物饮品的蛋白质与钙标签",
+                "evidenceQuotes": [
+                  "豆饮、燕麦饮、杏仁饮和椰子饮的营养组成可能差别很大，植物饮品不能仅凭颜色都当成牛奶。是否强化钙、含多少蛋白质及是否加糖，要看实际产品标签。",
+                  "早餐更换饮品时可按相同容量比较蛋白质和钙信息，同时检查整餐还有哪些食物来源。钙强化不表示所有营养项目都相同；存在奶或豆类过敏时，应按明确的个人方案选择。"
+                ],
+                "relevance": 1,
+                "rationale": "只提供相关背景，单独召回不足以通过最终证据检查",
+                "previousKnowledgeId": "d8d641b8a06655213620b1e3f0470604e619a61705cda0664209187d93f2fc86",
+                "chunkKey": "576ab1d754fa8182-1-0--576ab1d754fa8182-1-0"
+              }
+            ],
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "39284140e1fa149c467177e374dee99f68d15559a5719ce2b25fcf2ab13e4615"
+              ],
+              "partialPreviousTargets": []
+            }
+          },
+          {
+            "knowledgeId": "3ed2005c76e0be4bfda432ccbe967789dd77865fabf78db5445e1b5d147c99ed",
+            "title": "凉皮凉面的蛋白质配菜",
+            "evidenceQuotes": [
+              "凉皮和凉面应先看粉面主体，再看实际加入的豆制品、蛋肉和蔬菜。几根黄瓜丝不等于已经有很多蔬菜，面筋等配料也不能仅凭外观与一份豆腐或肉直接等量互换。",
+              "午餐只有凉皮时，可询问窗口有哪些明确的蛋白质配菜，必要时另买鸡蛋或其他方便食物。记录实际配料、酱汁和吃下的份量，不因食物是凉的就认定用油更少。"
+            ],
+            "relevance": 1,
+            "rationale": "只提供相关背景，单独召回不足以通过最终证据检查",
+            "chunkKey": "88b1e18d1b34221e-1-0--88b1e18d1b34221e-1-0",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "3ed2005c76e0be4bfda432ccbe967789dd77865fabf78db5445e1b5d147c99ed",
+                "title": "凉皮凉面的蛋白质配菜",
+                "evidenceQuotes": [
+                  "凉皮和凉面应先看粉面主体，再看实际加入的豆制品、蛋肉和蔬菜。几根黄瓜丝不等于已经有很多蔬菜，面筋等配料也不能仅凭外观与一份豆腐或肉直接等量互换。",
+                  "午餐只有凉皮时，可询问窗口有哪些明确的蛋白质配菜，必要时另买鸡蛋或其他方便食物。记录实际配料、酱汁和吃下的份量，不因食物是凉的就认定用油更少。"
+                ],
+                "relevance": 1,
+                "rationale": "只提供相关背景，单独召回不足以通过最终证据检查",
+                "previousKnowledgeId": "7f9e869448f2d459e0f63d6a745f4c334e1dc1013d1b48b17a1292000dabab5b",
+                "chunkKey": "88b1e18d1b34221e-1-0--88b1e18d1b34221e-1-0"
+              }
+            ],
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "3ed2005c76e0be4bfda432ccbe967789dd77865fabf78db5445e1b5d147c99ed"
+              ],
+              "partialPreviousTargets": []
+            }
+          },
+          {
+            "knowledgeId": "48c66cfd6372222ba028367ff41214900e3e8ff7d293e3b091b8c6a0057c2937",
+            "title": "菌菇菜与蛋白质食物的搭配",
+            "evidenceQuotes": [
+              "菌菇可以作为蔬菜选择的一部分，吃起来像肉并不能说明与同等重量的肉、蛋或豆腐营养相同。菌菇菜里若只有少量肉末，仍应观察实际蛋白质食物来源。",
+              "食堂点香菇青菜、炒菌菇或菌菇汤时，可再检查主食与蛋白质搭配。记录具体食材而不把所有深色块状食物归为肉；包装菌菇零食还需另看调味、用油与每袋份量。"
+            ],
+            "relevance": 1,
+            "rationale": "只提供相关背景，单独召回不足以通过最终证据检查",
+            "chunkKey": "886c931715f94c85-1-0--886c931715f94c85-1-0",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "48c66cfd6372222ba028367ff41214900e3e8ff7d293e3b091b8c6a0057c2937",
+                "title": "菌菇菜与蛋白质食物的搭配",
+                "evidenceQuotes": [
+                  "菌菇可以作为蔬菜选择的一部分，吃起来像肉并不能说明与同等重量的肉、蛋或豆腐营养相同。菌菇菜里若只有少量肉末，仍应观察实际蛋白质食物来源。",
+                  "食堂点香菇青菜、炒菌菇或菌菇汤时，可再检查主食与蛋白质搭配。记录具体食材而不把所有深色块状食物归为肉；包装菌菇零食还需另看调味、用油与每袋份量。"
+                ],
+                "relevance": 1,
+                "rationale": "只提供相关背景，单独召回不足以通过最终证据检查",
+                "previousKnowledgeId": "c46fbf4f35b99cb2da3b742fb89d8b9b7610f4c1ed1888342a8240920d86de75",
+                "chunkKey": "886c931715f94c85-1-0--886c931715f94c85-1-0"
+              }
+            ],
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "48c66cfd6372222ba028367ff41214900e3e8ff7d293e3b091b8c6a0057c2937"
+              ],
+              "partialPreviousTargets": []
+            }
+          },
+          {
+            "knowledgeId": "db620bc86c0341f8df3d03078c212f2be408b5f5182772cb6a76fb1a688c52c1",
+            "title": "蔬菜餐搭配建议",
+            "chunkKey": "16e6e07c91660155-1-1--16e6e07c91660155-1-1",
+            "relevance": 2,
+            "evidenceQuotes": [
+              "购买蔬菜沙拉前，先看菜单是否能明确选择主食和蛋白质食物。有些店允许增加米饭、面包、蛋或豆腐，有些只售蔬菜与酱。若沙拉仅提供蔬菜，可以在同一条购买路线上找到合适的主食和其他食品，再判断这次采购是否方便。店内选项不足时，选择另一份已有完整组成的餐食，也比为了沙拉名称来回补买更省事。"
+            ],
+            "rationale": "直接支持纯蔬菜沙拉补主食、蛋或豆腐，以及选项不足时的采购替代。",
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "da6aff4a55e8ca8b0e20ec6c49176faa086ba65172b2df3c7382db4fe6a24002",
+                "title": "蔬菜餐搭配建议",
+                "chunkKey": "16e6e07c91660155-1-1--16e6e07c91660155-1-1",
+                "relevance": 2,
+                "evidenceQuotes": [
+                  "购买蔬菜沙拉前，先看菜单是否能明确选择主食和蛋白质食物。有些店允许增加米饭、面包、蛋或豆腐，有些只售蔬菜与酱。若沙拉仅提供蔬菜，可以在同一条购买路线上找到合适的主食和其他食品，再判断这次采购是否方便。店内选项不足时，选择另一份已有完整组成的餐食，也比为了沙拉名称来回补买更省事。"
+                ],
+                "rationale": "直接支持纯蔬菜沙拉补主食、蛋或豆腐，以及选项不足时的采购替代。",
+                "reviewProvenance": "CODEX_ASSISTANT_TEXT_REVIEW_NOT_INDEPENDENT"
+              }
+            ],
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "da6aff4a55e8ca8b0e20ec6c49176faa086ba65172b2df3c7382db4fe6a24002"
+              ],
+              "partialPreviousTargets": []
+            }
+          }
+        ],
+        "requiredEvidenceGroups": [
+          [
+            "c473f8a09fb40b4c9aaa68a2f97b773fd853508bd69be0825790e4e86b5ba2fd",
+            "db620bc86c0341f8df3d03078c212f2be408b5f5182772cb6a76fb1a688c52c1"
+          ]
+        ],
+        "coverageMigrationPolicy": "AND_OF_EXACT_QUOTE_FACETS_WITH_OR_ALTERNATIVES_CNF",
+        "previousAnnotationRevision": "rag-evidence-v5-reviewed-chunks"
+      }
+    },
+    {
+      "order": 2,
+      "id": "rag-036",
+      "question": "麻辣烫怎样自选食材更均衡？",
+      "answerability": "ANSWERABLE",
+      "acceptanceFocus": [
+        "自选食材搭配",
+        "加工配料不能凭菜名定成分",
+        "结账重量不等同实际摄入"
+      ],
+      "expectedRoute": "KNOWLEDGE_RAG",
+      "stageExpectation": "REAL_ACTIVE_EMBEDDING_RETRIEVAL_RERANK_GENERATION_REVIEW_DELIVERY",
+      "qualityReviewRequired": true,
+      "sourceDatasetCase": {
+        "question": "麻辣烫怎样自选食材更均衡？",
+        "expectedTitleKeywords": [
+          "食堂菜品识别与替换",
+          "麻辣烫自选食材"
+        ],
+        "expectedCategory": "general",
+        "id": "rag-036",
+        "agentEvaluation": {
+          "ruleVersion": "rag-tools-v2",
+          "expectedTools": [
+            "search_diet_knowledge"
+          ],
+          "forbiddenTools": [
+            "get_my_recent_meals",
+            "get_my_weekly_report",
+            "get_my_current_goal"
+          ],
+          "expectedToolSequence": [
+            "search_diet_knowledge"
+          ],
+          "expectedToolStatuses": {
+            "search_diet_knowledge": [
+              "SUCCESS"
+            ]
+          },
+          "maxToolCalls": 2,
+          "queryTopicGroups": [
+            [
+              "麻辣烫",
+              "自选"
+            ]
+          ],
+          "limitMin": 1,
+          "limitMax": 5,
+          "rationale": "该题要求基于知识库回答一般知识；应检索题目主题，无需读取个人饮食、周报或目标。最多允许两次检索以改写查询。"
+        },
+        "annotationRevision": "rag-evidence-v6-boundary-aligned",
+        "answerability": "ANSWERABLE",
+        "annotation": {
+          "status": "PENDING_HUMAN_REVIEW",
+          "provenance": "ORIGINAL_ANCHORS_PLUS_CODEX_ASSISTANT_REVIEW",
+          "independentlyAnnotated": false,
+          "coverage": "ORIGINAL_ANCHORS_PLUS_SELECTED_CHUNK_REVIEW",
+          "additionalChunkRelevanceReview": "PARTIAL_ASSISTANT_REVIEW",
+          "corpusSha256": "09f60831a24bce93982862e885fa97dcacc82675f05b1c2436e45834496a39b7",
+          "reviewedCandidateCount": 2,
+          "explicitlyJudgedCandidateCount": 2,
+          "reviewScopeNotes": "仅完整阅读并判断所列新增候选，未穷举同标题片段或全库；未列片段仍为未判断。少数题补读跨标题片段并逐条说明。助手语义复核，非独立人工标注。新片分别支持蔬菜及蛋白质主食，单片不独立替代完整三类选材答案。",
+          "unlistedChunkPolicy": "UNJUDGED_NOT_IRRELEVANT",
+          "splitterRevision": "sentence-heading-boundaries-v2",
+          "boundaryBindingReview": "EXACT_ANCHOR_MIGRATION_PENDING_CONTEXT_REVIEW",
+          "originalReviewScopePreserved": true,
+          "newBoundaryContextsIndependentlyReviewed": false
+        },
+        "evidenceTargets": [
+          {
+            "knowledgeId": "a844799895625e4771f288dc06e1d2544111ff0261bd341da018f0db2b15e312",
+            "title": "麻辣烫自选食材",
+            "evidenceQuotes": [
+              "麻辣烫可先选择几种蔬菜和明确的蛋白质食物，再决定主食，避免只按颜色或菜品数量判断结构。丸子、滑类和加工配料的具体成分需要看产品或询问。",
+              "记录主要食材、称重信息及是否喝汤，不把结账总重量当成全部吃下的重量。蘸料可以单独决定，熟制和供应条件仍要关注；不从红色汤底直接推算营养数值。"
+            ],
+            "relevance": 2,
+            "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+            "chunkKey": "db67e8c8d1beb886-1-0--db67e8c8d1beb886-1-0",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "2bb0ced223d1d56eca51b22cdc54e86b6f4810d40e44058b56cac448d94fdbfc",
+                "title": "麻辣烫自选食材",
+                "evidenceQuotes": [
+                  "麻辣烫可先选择几种蔬菜和明确的蛋白质食物，再决定主食，避免只按颜色或菜品数量判断结构。丸子、滑类和加工配料的具体成分需要看产品或询问。",
+                  "记录主要食材、称重信息及是否喝汤，不把结账总重量当成全部吃下的重量。蘸料可以单独决定，熟制和供应条件仍要关注；不从红色汤底直接推算营养数值。"
+                ],
+                "relevance": 2,
+                "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+                "previousKnowledgeId": "a844799895625e4771f288dc06e1d2544111ff0261bd341da018f0db2b15e312",
+                "chunkKey": "db67e8c8d1beb886-1-0--db67e8c8d1beb886-1-0"
+              }
+            ],
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "2bb0ced223d1d56eca51b22cdc54e86b6f4810d40e44058b56cac448d94fdbfc"
+              ],
+              "partialPreviousTargets": []
+            }
+          },
+          {
+            "knowledgeId": "d25a6a3dbca10272970c83053a1432a87f3f98f0c42c84625af7d8f9683662cb",
+            "title": "食堂菜品识别与替换",
+            "evidenceQuotes": [
+              "固定套餐缺少蔬菜时可以加配菜，盖饭酱汁较多时可要求分装，自选菜可以先看各类食材是否齐全。菜名并不能确定配料和烹饪方式，实际拿到餐后仍要检查。",
+              "把同价位的替换项列在常用窗口旁，例如把重复炸物换成豆腐或蒸煮菜。更换一项即可作为一次具体行动，不要求每次全部重选；记录要保留原菜和替换后的实际结果。"
+            ],
+            "relevance": 2,
+            "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+            "chunkKey": "6a7842f3a2fa7903-1-0--6a7842f3a2fa7903-1-0",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "d6df91e652582109243b4c1ba532f30a3444165a1ba941a7e7ab393d66b6d2f7",
+                "title": "食堂菜品识别与替换",
+                "evidenceQuotes": [
+                  "固定套餐缺少蔬菜时可以加配菜，盖饭酱汁较多时可要求分装，自选菜可以先看各类食材是否齐全。菜名并不能确定配料和烹饪方式，实际拿到餐后仍要检查。",
+                  "把同价位的替换项列在常用窗口旁，例如把重复炸物换成豆腐或蒸煮菜。更换一项即可作为一次具体行动，不要求每次全部重选；记录要保留原菜和替换后的实际结果。"
+                ],
+                "relevance": 2,
+                "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+                "previousKnowledgeId": "d25a6a3dbca10272970c83053a1432a87f3f98f0c42c84625af7d8f9683662cb",
+                "chunkKey": "6a7842f3a2fa7903-1-0--6a7842f3a2fa7903-1-0"
+              }
+            ],
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "d6df91e652582109243b4c1ba532f30a3444165a1ba941a7e7ab393d66b6d2f7"
+              ],
+              "partialPreviousTargets": []
+            }
+          },
+          {
+            "knowledgeId": "32fea787552e9c706921abd85a05d07e5b35cd7aa6ccb31e804957760f7f2f39",
+            "title": "麻辣烫自选食材",
+            "chunkKey": "db67e8c8d1beb886-1-2--db67e8c8d1beb886-1-2",
+            "relevance": 2,
+            "evidenceQuotes": [
+              "想安排一项蛋白质食品时，可以先找材料清楚且本人能吃的蛋、豆制品或其他选项。丸子、滑类虽然名字可能带鱼或肉，实际成分与比例仍需看具体产品，不能把整份重量视为纯肉，也不能因外形相似就套用另一种食品数据。"
+            ],
+            "rationale": "直接支持麻辣烫蛋白质与主食选择，未单独覆盖蔬菜，不作为完整组替代。",
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "4dfae6eaea114c75202407f712467fdf858a244047729bef795273e8b4756fd4",
+                "title": "麻辣烫自选食材",
+                "chunkKey": "db67e8c8d1beb886-1-2--db67e8c8d1beb886-1-2",
+                "relevance": 2,
+                "evidenceQuotes": [
+                  "想安排一项蛋白质食品时，可以先找材料清楚且本人能吃的蛋、豆制品或其他选项。丸子、滑类虽然名字可能带鱼或肉，实际成分与比例仍需看具体产品，不能把整份重量视为纯肉，也不能因外形相似就套用另一种食品数据。"
+                ],
+                "rationale": "直接支持麻辣烫蛋白质与主食选择，未单独覆盖蔬菜，不作为完整组替代。",
+                "reviewProvenance": "CODEX_ASSISTANT_TEXT_REVIEW_NOT_INDEPENDENT"
+              }
+            ],
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "4dfae6eaea114c75202407f712467fdf858a244047729bef795273e8b4756fd4"
+              ],
+              "partialPreviousTargets": []
+            }
+          },
+          {
+            "knowledgeId": "b37281a4f5d6a01764ec01ca60bd604ed7e6305c4c0fec48179d57788f949b65",
+            "title": "麻辣烫自选食材",
+            "chunkKey": "db67e8c8d1beb886-1-1--db67e8c8d1beb886-1-1",
+            "relevance": 1,
+            "evidenceQuotes": [
+              "可以选本人愿意吃的几种明确蔬菜，再看整餐是否已有其他食品角色。不同颜色有助于辨认，却不能保证出现了主食或蛋白质食品；反过来，不必为颜色更多而不断增加同一类食材。选择的目的在于形成可吃完的基础组合。"
+            ],
+            "rationale": "蔬菜不能只看颜色，独立不足以覆盖完整食材角色。",
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "b659c14a7f000817e045bdb16ce53f4d120d58c5482394a677b71c18a44fa169",
+                "title": "麻辣烫自选食材",
+                "chunkKey": "db67e8c8d1beb886-1-1--db67e8c8d1beb886-1-1",
+                "relevance": 1,
+                "evidenceQuotes": [
+                  "可以选本人愿意吃的几种明确蔬菜，再看整餐是否已有其他食品角色。不同颜色有助于辨认，却不能保证出现了主食或蛋白质食品；反过来，不必为颜色更多而不断增加同一类食材。选择的目的在于形成可吃完的基础组合。"
+                ],
+                "rationale": "蔬菜不能只看颜色，独立不足以覆盖完整食材角色。",
+                "reviewProvenance": "CODEX_ASSISTANT_TEXT_REVIEW_NOT_INDEPENDENT"
+              }
+            ],
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "b659c14a7f000817e045bdb16ce53f4d120d58c5482394a677b71c18a44fa169"
+              ],
+              "partialPreviousTargets": []
+            }
+          }
+        ],
+        "requiredEvidenceGroups": [
+          [
+            "a844799895625e4771f288dc06e1d2544111ff0261bd341da018f0db2b15e312",
+            "d25a6a3dbca10272970c83053a1432a87f3f98f0c42c84625af7d8f9683662cb"
+          ]
+        ],
+        "coverageMigrationPolicy": "AND_OF_EXACT_QUOTE_FACETS_WITH_OR_ALTERNATIVES_CNF",
+        "previousAnnotationRevision": "rag-evidence-v5-reviewed-chunks"
+      }
+    },
+    {
+      "order": 3,
+      "id": "rag-070",
+      "question": "低因咖啡是不是完全没有咖啡因，晚上能随便喝吗？",
+      "answerability": "ANSWERABLE",
+      "acceptanceFocus": [
+        "低因不等于绝对为零",
+        "晚间及个体适用条件",
+        "不给无条件保证或编造数值"
+      ],
+      "expectedRoute": "KNOWLEDGE_RAG",
+      "stageExpectation": "REAL_ACTIVE_EMBEDDING_RETRIEVAL_RERANK_GENERATION_REVIEW_DELIVERY",
+      "qualityReviewRequired": true,
+      "sourceDatasetCase": {
+        "question": "低因咖啡是不是完全没有咖啡因，晚上能随便喝吗？",
+        "expectedTitleKeywords": [
+          "低因咖啡与无咖啡因的区别"
+        ],
+        "expectedCategory": "general",
+        "id": "rag-070",
+        "agentEvaluation": {
+          "ruleVersion": "rag-tools-v2",
+          "expectedTools": [
+            "search_diet_knowledge"
+          ],
+          "forbiddenTools": [
+            "get_my_recent_meals",
+            "get_my_weekly_report",
+            "get_my_current_goal"
+          ],
+          "expectedToolSequence": [
+            "search_diet_knowledge"
+          ],
+          "expectedToolStatuses": {
+            "search_diet_knowledge": [
+              "SUCCESS"
+            ]
+          },
+          "maxToolCalls": 2,
+          "queryTopicGroups": [
+            [
+              "低因",
+              "脱咖啡因",
+              "咖啡"
+            ]
+          ],
+          "limitMin": 1,
+          "limitMax": 5,
+          "rationale": "该题要求基于知识库回答一般知识；应检索题目主题，无需读取个人饮食、周报或目标。最多允许两次检索以改写查询。"
+        },
+        "answerability": "ANSWERABLE",
+        "annotationRevision": "rag-evidence-v6-boundary-aligned",
+        "annotation": {
+          "status": "PENDING_HUMAN_REVIEW",
+          "provenance": "ORIGINAL_ANCHORS_PLUS_CODEX_ASSISTANT_REVIEW",
+          "independentlyAnnotated": false,
+          "coverage": "ORIGINAL_ANCHORS_PLUS_SELECTED_CHUNK_REVIEW",
+          "additionalChunkRelevanceReview": "PARTIAL_ASSISTANT_REVIEW",
+          "corpusSha256": "09f60831a24bce93982862e885fa97dcacc82675f05b1c2436e45834496a39b7",
+          "reviewedCandidateCount": 1,
+          "explicitlyJudgedCandidateCount": 1,
+          "reviewScopeNotes": "已全文检查列出的新增候选片段；范围仅为原目标标题内的候选，并非整主题所有片段或全库穷尽判断。候选初筛使用字词匹配，最终等级及证据组替代由助手逐题阅读决定；同标题不自动相关。未列出的片段保持未判断；本轮为相关性与语境检查，未完成外部来源逐项事实复核。",
+          "unlistedChunkPolicy": "UNJUDGED_NOT_IRRELEVANT",
+          "splitterRevision": "sentence-heading-boundaries-v2",
+          "boundaryBindingReview": "EXACT_ANCHOR_MIGRATION_PENDING_CONTEXT_REVIEW",
+          "originalReviewScopePreserved": true,
+          "newBoundaryContextsIndependentlyReviewed": false
+        },
+        "evidenceTargets": [
+          {
+            "knowledgeId": "87c161b9c7e2de61ca8d892c1602e5002f2500701f4f3ac91d0970f36b0ea0be",
+            "title": "低因咖啡与无咖啡因的区别",
+            "evidenceQuotes": [
+              "低因或脱咖啡因咖啡通常仍可能含少量咖啡因，不能直接当作完全没有。是否适合个人还要结合敏感程度、实际产品和专业建议，不能只看包装颜色或咖啡口味。",
+              "晚间想喝热饮时，可先向店员确认低因选项及其他配料，必要时选择不含咖啡因的替代品。记录真实产品名称，不为店铺未公开的数据填写零；用药或特殊生理状态下按个人专业建议选择。"
+            ],
+            "relevance": 2,
+            "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+            "chunkKey": "77e76fd6b500a689-1-0--77e76fd6b500a689-1-0",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "87c161b9c7e2de61ca8d892c1602e5002f2500701f4f3ac91d0970f36b0ea0be",
+                "title": "低因咖啡与无咖啡因的区别",
+                "evidenceQuotes": [
+                  "低因或脱咖啡因咖啡通常仍可能含少量咖啡因，不能直接当作完全没有。是否适合个人还要结合敏感程度、实际产品和专业建议，不能只看包装颜色或咖啡口味。",
+                  "晚间想喝热饮时，可先向店员确认低因选项及其他配料，必要时选择不含咖啡因的替代品。记录真实产品名称，不为店铺未公开的数据填写零；用药或特殊生理状态下按个人专业建议选择。"
+                ],
+                "relevance": 2,
+                "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+                "previousKnowledgeId": "8a70378bd92f149822a7567f5f7398619cd14ff7ddaae6d319656189a1b2b0d0",
+                "chunkKey": "77e76fd6b500a689-1-0--77e76fd6b500a689-1-0"
+              }
+            ],
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "87c161b9c7e2de61ca8d892c1602e5002f2500701f4f3ac91d0970f36b0ea0be"
+              ],
+              "partialPreviousTargets": []
+            }
+          },
+          {
+            "knowledgeId": "ab240b9cc546e48b01c6daa46e3762acde5dd780470cc006fcd8636f87739f17",
+            "title": "低因咖啡与无咖啡因的区别",
+            "chunkKey": "77e76fd6b500a689-1-1--77e76fd6b500a689-1-1",
+            "relevance": 2,
+            "evidenceQuotes": [
+              "低因或脱咖啡因表示的选择，不能直接录成咖啡因绝对为零。若实际产品提供对应数据，可以保留来源与份量；若没有，适合描述产品名称和所选选项。不能为了把晚间饮品统计清零而自行修改数值，也不把某个品牌的资料复制给所有低因咖啡。"
+            ],
+            "rationale": "明确脱咖啡因不能记成绝对零，并结合个人反应说明不能由名称保证晚间任意饮用。",
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "d68cbef454154437039c090d43c9793abb9d321a009a1cea9d78b8ae0396cfed",
+                "title": "低因咖啡与无咖啡因的区别",
+                "chunkKey": "77e76fd6b500a689-1-1--77e76fd6b500a689-1-1",
+                "relevance": 2,
+                "evidenceQuotes": [
+                  "低因或脱咖啡因表示的选择，不能直接录成咖啡因绝对为零。若实际产品提供对应数据，可以保留来源与份量；若没有，适合描述产品名称和所选选项。不能为了把晚间饮品统计清零而自行修改数值，也不把某个品牌的资料复制给所有低因咖啡。"
+                ],
+                "rationale": "明确脱咖啡因不能记成绝对零，并结合个人反应说明不能由名称保证晚间任意饮用。",
+                "reviewProvenance": "CODEX_ASSISTANT_TEXT_REVIEW_NOT_INDEPENDENT"
+              }
+            ],
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "d68cbef454154437039c090d43c9793abb9d321a009a1cea9d78b8ae0396cfed"
+              ],
+              "partialPreviousTargets": []
+            }
+          }
+        ],
+        "requiredEvidenceGroups": [
+          [
+            "87c161b9c7e2de61ca8d892c1602e5002f2500701f4f3ac91d0970f36b0ea0be",
+            "ab240b9cc546e48b01c6daa46e3762acde5dd780470cc006fcd8636f87739f17"
+          ]
+        ],
+        "coverageMigrationPolicy": "AND_OF_EXACT_QUOTE_FACETS_WITH_OR_ALTERNATIVES_CNF",
+        "previousAnnotationRevision": "rag-evidence-v5-reviewed-chunks"
+      }
+    },
+    {
+      "order": 4,
+      "id": "rag-094",
+      "question": "食堂溏心蛋看着很新鲜，就能保证没问题吗？",
+      "answerability": "ANSWERABLE",
+      "acceptanceFocus": [
+        "外观新鲜不能证明安全",
+        "具体熟制及供应条件",
+        "不给某一枚蛋安全保证"
+      ],
+      "expectedRoute": "KNOWLEDGE_RAG",
+      "stageExpectation": "REAL_ACTIVE_EMBEDDING_RETRIEVAL_RERANK_GENERATION_REVIEW_DELIVERY",
+      "qualityReviewRequired": true,
+      "sourceDatasetCase": {
+        "question": "食堂溏心蛋看着很新鲜，就能保证没问题吗？",
+        "expectedTitleKeywords": [
+          "溏心蛋与生蛋的安全边界"
+        ],
+        "expectedCategory": "muscle_gain",
+        "id": "rag-094",
+        "agentEvaluation": {
+          "ruleVersion": "rag-tools-v2",
+          "expectedTools": [
+            "search_diet_knowledge"
+          ],
+          "forbiddenTools": [
+            "get_my_recent_meals",
+            "get_my_weekly_report",
+            "get_my_current_goal"
+          ],
+          "expectedToolSequence": [
+            "search_diet_knowledge"
+          ],
+          "expectedToolStatuses": {
+            "search_diet_knowledge": [
+              "SUCCESS"
+            ]
+          },
+          "maxToolCalls": 2,
+          "queryTopicGroups": [
+            [
+              "溏心蛋",
+              "生蛋",
+              "半熟蛋",
+              "鸡蛋"
+            ],
+            [
+              "安全",
+              "新鲜",
+              "加热",
+              "风险"
+            ]
+          ],
+          "limitMin": 1,
+          "limitMax": 5,
+          "rationale": "该题要求基于知识库回答一般知识；应检索题目主题，无需读取个人饮食、周报或目标。最多允许两次检索以改写查询。"
+        },
+        "answerability": "ANSWERABLE",
+        "annotationRevision": "rag-evidence-v6-boundary-aligned",
+        "annotation": {
+          "status": "PENDING_HUMAN_REVIEW",
+          "provenance": "ORIGINAL_ANCHORS_PLUS_CODEX_ASSISTANT_REVIEW",
+          "independentlyAnnotated": false,
+          "coverage": "ORIGINAL_ANCHORS_PLUS_SELECTED_CHUNK_REVIEW",
+          "additionalChunkRelevanceReview": "PARTIAL_ASSISTANT_REVIEW",
+          "corpusSha256": "09f60831a24bce93982862e885fa97dcacc82675f05b1c2436e45834496a39b7",
+          "reviewedCandidateCount": 1,
+          "explicitlyJudgedCandidateCount": 1,
+          "reviewScopeNotes": "已全文检查列出的新增候选片段；范围仅为原目标标题内的候选，并非整主题所有片段或全库穷尽判断。候选初筛使用字词匹配，最终等级及证据组替代由助手逐题阅读决定；同标题不自动相关。未列出的片段保持未判断；本轮为相关性与语境检查，未完成外部来源逐项事实复核。",
+          "unlistedChunkPolicy": "UNJUDGED_NOT_IRRELEVANT",
+          "splitterRevision": "sentence-heading-boundaries-v2",
+          "boundaryBindingReview": "EXACT_ANCHOR_MIGRATION_PENDING_CONTEXT_REVIEW",
+          "originalReviewScopePreserved": true,
+          "newBoundaryContextsIndependentlyReviewed": false
+        },
+        "evidenceTargets": [
+          {
+            "knowledgeId": "bc9c1162f2a03203588108d38b3c94000bfa09f241ddd9650fa3d62b6fc6e929",
+            "title": "溏心蛋与生蛋的安全边界",
+            "evidenceQuotes": [
+              "蛋壳完整、来源熟悉或外观新鲜不能保证生蛋没有致病菌。一般安全做法是充分加热至蛋白和蛋黄凝固；需要使用未熟蛋的配方，应选择适合用途的经巴氏杀菌处理产品。",
+              "校园窗口购买溏心蛋时，不把流心程度当作营养更好的证据。需要更谨慎的人群遵循专业建议选择充分熟制食品；拍照无法验证内部温度，系统不为某一枚蛋提供安全保证。"
+            ],
+            "relevance": 2,
+            "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+            "chunkKey": "fd26a1c89e13caaa-1-0--fd26a1c89e13caaa-1-0",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "bb70840cca57b46df5c5008b21c02a7725b7fb4b82482c25b982d47698ae6588",
+                "title": "溏心蛋与生蛋的安全边界",
+                "evidenceQuotes": [
+                  "蛋壳完整、来源熟悉或外观新鲜不能保证生蛋没有致病菌。一般安全做法是充分加热至蛋白和蛋黄凝固；需要使用未熟蛋的配方，应选择适合用途的经巴氏杀菌处理产品。",
+                  "校园窗口购买溏心蛋时，不把流心程度当作营养更好的证据。需要更谨慎的人群遵循专业建议选择充分熟制食品；拍照无法验证内部温度，系统不为某一枚蛋提供安全保证。"
+                ],
+                "relevance": 2,
+                "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+                "previousKnowledgeId": "bc9c1162f2a03203588108d38b3c94000bfa09f241ddd9650fa3d62b6fc6e929",
+                "chunkKey": "fd26a1c89e13caaa-1-0--fd26a1c89e13caaa-1-0"
+              }
+            ],
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "bb70840cca57b46df5c5008b21c02a7725b7fb4b82482c25b982d47698ae6588"
+              ],
+              "partialPreviousTargets": []
+            }
+          },
+          {
+            "knowledgeId": "a91fb16e1361675c7b440b9c720dc686cfef5cadbffcd0e36b69b93a67c741e2",
+            "title": "溏心蛋与生蛋的安全边界",
+            "chunkKey": "fd26a1c89e13caaa-1-1--fd26a1c89e13caaa-1-1",
+            "relevance": 2,
+            "evidenceQuotes": [
+              "购买鸡蛋时看到蛋壳干净、没有裂纹，是值得注意的外观条件，但不能据此证明内部没有致病菌。美国食品药品监督管理局的鸡蛋安全资料明确说明，干净完整的鲜蛋也可能存在相关风险。因此土鸡蛋、熟悉的农户来源或价格较高的品牌，都不能仅凭身份替代适当处理，选择仍需落实到具体产品与使用方式。"
+            ],
+            "rationale": "明确洁净完整鲜蛋也不能证明内部无风险，直接否定靠新鲜外观保证溏心蛋安全。",
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "b1a0ae5dfc0d518746b8e2262eefb3d4f970f5fbde335ee3ff62858b41cb0fb9",
+                "title": "溏心蛋与生蛋的安全边界",
+                "chunkKey": "fd26a1c89e13caaa-1-1--fd26a1c89e13caaa-1-1",
+                "relevance": 2,
+                "evidenceQuotes": [
+                  "购买鸡蛋时看到蛋壳干净、没有裂纹，是值得注意的外观条件，但不能据此证明内部没有致病菌。美国食品药品监督管理局的鸡蛋安全资料明确说明，干净完整的鲜蛋也可能存在相关风险。因此土鸡蛋、熟悉的农户来源或价格较高的品牌，都不能仅凭身份替代适当处理，选择仍需落实到具体产品与使用方式。"
+                ],
+                "rationale": "明确洁净完整鲜蛋也不能证明内部无风险，直接否定靠新鲜外观保证溏心蛋安全。",
+                "reviewProvenance": "CODEX_ASSISTANT_TEXT_REVIEW_NOT_INDEPENDENT"
+              }
+            ],
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "b1a0ae5dfc0d518746b8e2262eefb3d4f970f5fbde335ee3ff62858b41cb0fb9"
+              ],
+              "partialPreviousTargets": []
+            }
+          }
+        ],
+        "requiredEvidenceGroups": [
+          [
+            "a91fb16e1361675c7b440b9c720dc686cfef5cadbffcd0e36b69b93a67c741e2",
+            "bc9c1162f2a03203588108d38b3c94000bfa09f241ddd9650fa3d62b6fc6e929"
+          ]
+        ],
+        "coverageMigrationPolicy": "AND_OF_EXACT_QUOTE_FACETS_WITH_OR_ALTERNATIVES_CNF",
+        "previousAnnotationRevision": "rag-evidence-v5-reviewed-chunks"
+      }
+    },
+    {
+      "order": 5,
+      "id": "rag-117",
+      "question": "海带汤看着很清，是不是盐就不多？",
+      "answerability": "ANSWERABLE",
+      "acceptanceFocus": [
+        "汤底与调味证据",
+        "不从清澈外观推断低盐",
+        "不虚构钠或碘含量"
+      ],
+      "expectedRoute": "KNOWLEDGE_RAG",
+      "stageExpectation": "REAL_ACTIVE_EMBEDDING_RETRIEVAL_RERANK_GENERATION_REVIEW_DELIVERY",
+      "qualityReviewRequired": true,
+      "sourceDatasetCase": {
+        "question": "海带汤看着很清，是不是盐就不多？",
+        "expectedTitleKeywords": [
+          "海带紫菜菜肴与调味观察"
+        ],
+        "expectedCategory": "vegetable",
+        "id": "rag-117",
+        "agentEvaluation": {
+          "ruleVersion": "rag-tools-v2",
+          "expectedTools": [
+            "search_diet_knowledge"
+          ],
+          "forbiddenTools": [
+            "get_my_recent_meals",
+            "get_my_weekly_report",
+            "get_my_current_goal"
+          ],
+          "expectedToolSequence": [
+            "search_diet_knowledge"
+          ],
+          "expectedToolStatuses": {
+            "search_diet_knowledge": [
+              "SUCCESS"
+            ]
+          },
+          "maxToolCalls": 2,
+          "queryTopicGroups": [
+            [
+              "海带",
+              "汤"
+            ],
+            [
+              "钠",
+              "盐",
+              "清淡",
+              "调味"
+            ]
+          ],
+          "limitMin": 1,
+          "limitMax": 5,
+          "rationale": "该题要求基于知识库回答一般知识；应检索题目主题，无需读取个人饮食、周报或目标。最多允许两次检索以改写查询。"
+        },
+        "answerability": "ANSWERABLE",
+        "annotationRevision": "rag-evidence-v6-boundary-aligned",
+        "annotation": {
+          "status": "PENDING_HUMAN_REVIEW",
+          "provenance": "ORIGINAL_ANCHORS_PLUS_CODEX_ASSISTANT_REVIEW",
+          "independentlyAnnotated": false,
+          "coverage": "ORIGINAL_ANCHORS_PLUS_SELECTED_CHUNK_REVIEW",
+          "additionalChunkRelevanceReview": "PARTIAL_ASSISTANT_REVIEW",
+          "corpusSha256": "09f60831a24bce93982862e885fa97dcacc82675f05b1c2436e45834496a39b7",
+          "reviewedCandidateCount": 1,
+          "explicitlyJudgedCandidateCount": 1,
+          "reviewScopeNotes": "已全文检查列出的新增候选片段；范围仅为原目标标题内的候选，并非整主题所有片段或全库穷尽判断。候选初筛使用字词匹配，最终等级及证据组替代由助手逐题阅读决定；同标题不自动相关。未列出的片段保持未判断；本轮为相关性与语境检查，未完成外部来源逐项事实复核。",
+          "unlistedChunkPolicy": "UNJUDGED_NOT_IRRELEVANT",
+          "splitterRevision": "sentence-heading-boundaries-v2",
+          "boundaryBindingReview": "EXACT_ANCHOR_MIGRATION_PENDING_CONTEXT_REVIEW",
+          "originalReviewScopePreserved": true,
+          "newBoundaryContextsIndependentlyReviewed": false
+        },
+        "evidenceTargets": [
+          {
+            "knowledgeId": "8bef3f58386aa09768af0b46aca5ef5ae93202c820d055ada6ecc9edc3e1e974",
+            "title": "海带紫菜菜肴与调味观察",
+            "evidenceQuotes": [
+              "海带汤、凉拌海带和紫菜调味汤需要分别看实际海藻、汤底与调味，不能仅凭海藻原料把整份食品认定为少盐。少量装饰性紫菜也不适合自动记成大量蔬菜。",
+              "在食堂可留意是否另加酱汁，以及实际吃下的菜和喝下的汤。需要限制碘或其他营养素的人按个人专业方案选择，系统不根据海带颜色、长度或汤的颜色推算具体碘含量。"
+            ],
+            "relevance": 2,
+            "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+            "chunkKey": "e36dafb1e0d8708c-1-0--e36dafb1e0d8708c-1-0",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "8bef3f58386aa09768af0b46aca5ef5ae93202c820d055ada6ecc9edc3e1e974",
+                "title": "海带紫菜菜肴与调味观察",
+                "evidenceQuotes": [
+                  "海带汤、凉拌海带和紫菜调味汤需要分别看实际海藻、汤底与调味，不能仅凭海藻原料把整份食品认定为少盐。少量装饰性紫菜也不适合自动记成大量蔬菜。",
+                  "在食堂可留意是否另加酱汁，以及实际吃下的菜和喝下的汤。需要限制碘或其他营养素的人按个人专业方案选择，系统不根据海带颜色、长度或汤的颜色推算具体碘含量。"
+                ],
+                "relevance": 2,
+                "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+                "previousKnowledgeId": "b44efa4e0a71d88a9c52a349d96c6b560fb602971a91361c5d206af10d9b3f67",
+                "chunkKey": "e36dafb1e0d8708c-1-0--e36dafb1e0d8708c-1-0"
+              }
+            ],
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "8bef3f58386aa09768af0b46aca5ef5ae93202c820d055ada6ecc9edc3e1e974"
+              ],
+              "partialPreviousTargets": []
+            }
+          },
+          {
+            "knowledgeId": "f86f877a1fd7ec1f27360bca3a0235abcec2fd92533f6a8e0c271cb2e920aa1e",
+            "title": "海带紫菜菜肴与调味观察",
+            "chunkKey": "e36dafb1e0d8708c-1-1--e36dafb1e0d8708c-1-1",
+            "relevance": 1,
+            "evidenceQuotes": [
+              "FDA指出有些不明显咸的食品仍可能含较多钠，钠也可来自食盐以外的配料。因此袋装海带零食或即冲紫菜汤，除了尝起来如何，还应读包装的钠项目与计量基准。若按每份标示，确认一包共有几份；若按每百克标示，按实际食用重量比较。上述标签原则不能反推出食堂现拌海带的具体钠量，因为配方和调味液使用情况未必相同。"
+            ],
+            "rationale": "说明钠需看配料与真实标签，清淡口感不能测钠，属于调味判断背景；未直接比较清汤外观与实际食堂海带汤盐量。",
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "4fd8503765ff8621bd77a2a20cb13ccff58c455d2677a7d1ac4829da94dc8630",
+                "title": "海带紫菜菜肴与调味观察",
+                "chunkKey": "e36dafb1e0d8708c-1-1--e36dafb1e0d8708c-1-1",
+                "relevance": 1,
+                "evidenceQuotes": [
+                  "FDA指出有些不明显咸的食品仍可能含较多钠，钠也可来自食盐以外的配料。因此袋装海带零食或即冲紫菜汤，除了尝起来如何，还应读包装的钠项目与计量基准。若按每份标示，确认一包共有几份；若按每百克标示，按实际食用重量比较。上述标签原则不能反推出食堂现拌海带的具体钠量，因为配方和调味液使用情况未必相同。"
+                ],
+                "rationale": "说明钠需看配料与真实标签，清淡口感不能测钠，属于调味判断背景；未直接比较清汤外观与实际食堂海带汤盐量。",
+                "reviewProvenance": "CODEX_ASSISTANT_TEXT_REVIEW_NOT_INDEPENDENT"
+              }
+            ],
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "4fd8503765ff8621bd77a2a20cb13ccff58c455d2677a7d1ac4829da94dc8630"
+              ],
+              "partialPreviousTargets": []
+            }
+          }
+        ],
+        "requiredEvidenceGroups": [
+          [
+            "8bef3f58386aa09768af0b46aca5ef5ae93202c820d055ada6ecc9edc3e1e974"
+          ]
+        ],
+        "coverageMigrationPolicy": "AND_OF_EXACT_QUOTE_FACETS_WITH_OR_ALTERNATIVES_CNF",
+        "previousAnnotationRevision": "rag-evidence-v5-reviewed-chunks"
+      }
+    },
+    {
+      "order": 6,
+      "id": "rag-128",
+      "question": "称了一个带皮带核的芒果，重量都算吃下去的吗？",
+      "answerability": "ANSWERABLE",
+      "acceptanceFocus": [
+        "毛重与可食部分",
+        "皮核与容器重量",
+        "不填固定可食率或实际摄入"
+      ],
+      "expectedRoute": "KNOWLEDGE_RAG",
+      "stageExpectation": "REAL_ACTIVE_EMBEDDING_RETRIEVAL_RERANK_GENERATION_REVIEW_DELIVERY",
+      "qualityReviewRequired": true,
+      "sourceDatasetCase": {
+        "question": "称了一个带皮带核的芒果，重量都算吃下去的吗？",
+        "expectedTitleKeywords": [
+          "可食部分与容器皮核重量"
+        ],
+        "expectedCategory": "general",
+        "id": "rag-128",
+        "agentEvaluation": {
+          "ruleVersion": "rag-tools-v2",
+          "expectedTools": [
+            "search_diet_knowledge"
+          ],
+          "forbiddenTools": [
+            "get_my_recent_meals",
+            "get_my_weekly_report",
+            "get_my_current_goal"
+          ],
+          "expectedToolSequence": [
+            "search_diet_knowledge"
+          ],
+          "expectedToolStatuses": {
+            "search_diet_knowledge": [
+              "SUCCESS"
+            ]
+          },
+          "maxToolCalls": 2,
+          "queryTopicGroups": [
+            [
+              "芒果",
+              "水果"
+            ],
+            [
+              "皮",
+              "核",
+              "可食",
+              "重量",
+              "净重"
+            ]
+          ],
+          "limitMin": 1,
+          "limitMax": 5,
+          "rationale": "该题要求基于知识库回答一般知识；应检索题目主题，无需读取个人饮食、周报或目标。最多允许两次检索以改写查询。"
+        },
+        "answerability": "ANSWERABLE",
+        "annotationRevision": "rag-evidence-v6-boundary-aligned",
+        "annotation": {
+          "status": "PENDING_HUMAN_REVIEW",
+          "provenance": "ORIGINAL_ANCHORS_PLUS_CODEX_ASSISTANT_REVIEW",
+          "independentlyAnnotated": false,
+          "coverage": "ORIGINAL_ANCHORS_PLUS_SELECTED_CHUNK_REVIEW",
+          "additionalChunkRelevanceReview": "PARTIAL_ASSISTANT_REVIEW",
+          "corpusSha256": "09f60831a24bce93982862e885fa97dcacc82675f05b1c2436e45834496a39b7",
+          "reviewedCandidateCount": 1,
+          "explicitlyJudgedCandidateCount": 1,
+          "reviewScopeNotes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+          "unlistedChunkPolicy": "UNJUDGED_NOT_IRRELEVANT",
+          "splitterRevision": "sentence-heading-boundaries-v2",
+          "boundaryBindingReview": "EXACT_ANCHOR_MIGRATION_PENDING_CONTEXT_REVIEW",
+          "originalReviewScopePreserved": true,
+          "newBoundaryContextsIndependentlyReviewed": false
+        },
+        "evidenceTargets": [
+          {
+            "knowledgeId": "fae003020791e82f4b853a37b3ffb4dc625599a7e7c3d38f715ce7f4834f4530",
+            "title": "可食部分与容器皮核重量",
+            "evidenceQuotes": [
+              "食物称量需区分容器、包装、果皮、果核和真正吃下的部分，购买净含量也未必等于本次全部可食量。称了一整碗饭菜时，碗的重量不能同时算进食物。",
+              "有秤时可先去皮重，吃带核水果或带壳食物时记录剩余不可食部分。没有条件分称就保留整份重量的含义，不将它直接用于精确营养计算，也不凭平均经验填补每一份食品的实际可食率。"
+            ],
+            "relevance": 2,
+            "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+            "chunkKey": "dcb73af09f97087b-1-0--dcb73af09f97087b-1-0",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "fae003020791e82f4b853a37b3ffb4dc625599a7e7c3d38f715ce7f4834f4530",
+                "title": "可食部分与容器皮核重量",
+                "evidenceQuotes": [
+                  "食物称量需区分容器、包装、果皮、果核和真正吃下的部分，购买净含量也未必等于本次全部可食量。称了一整碗饭菜时，碗的重量不能同时算进食物。",
+                  "有秤时可先去皮重，吃带核水果或带壳食物时记录剩余不可食部分。没有条件分称就保留整份重量的含义，不将它直接用于精确营养计算，也不凭平均经验填补每一份食品的实际可食率。"
+                ],
+                "relevance": 2,
+                "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+                "previousKnowledgeId": "eec14916c47b21facbefbd0b74e1377439efdf99ed99e6e49aa59124407caadb",
+                "chunkKey": "dcb73af09f97087b-1-0--dcb73af09f97087b-1-0"
+              }
+            ],
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "fae003020791e82f4b853a37b3ffb4dc625599a7e7c3d38f715ce7f4834f4530"
+              ],
+              "partialPreviousTargets": []
+            }
+          },
+          {
+            "knowledgeId": "10ea90cd5219eba0cc09594d9892e2ee72117c37a444db40a83bad70ab401a5e",
+            "title": "可食部分与容器皮核重量",
+            "chunkKey": "dcb73af09f97087b-1-1--dcb73af09f97087b-1-1",
+            "relevance": 2,
+            "evidenceQuotes": [
+              "秤上的去皮功能通常用于扣除已放容器的重量，不能自动扣水果皮、果核或肉骨。"
+            ],
+            "rationale": "直接区分容器去皮重与食品可食部分，说明带皮核总重不是本人吃下的量。",
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "a81854e091a030d11a6e8fa0e680edc3c81b8f5f521566326b6193b84d724d22",
+                "title": "可食部分与容器皮核重量",
+                "chunkKey": "dcb73af09f97087b-1-1--dcb73af09f97087b-1-1",
+                "relevance": 2,
+                "evidenceQuotes": [
+                  "秤上的去皮功能通常用于扣除已放容器的重量，不能自动扣水果皮、果核或肉骨。"
+                ],
+                "rationale": "直接区分容器去皮重与食品可食部分，说明带皮核总重不是本人吃下的量。",
+                "reviewProvenance": "CODEX_ASSISTANT_TEXT_REVIEW_NOT_INDEPENDENT"
+              }
+            ],
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "a81854e091a030d11a6e8fa0e680edc3c81b8f5f521566326b6193b84d724d22"
+              ],
+              "partialPreviousTargets": []
+            }
+          }
+        ],
+        "requiredEvidenceGroups": [
+          [
+            "10ea90cd5219eba0cc09594d9892e2ee72117c37a444db40a83bad70ab401a5e",
+            "fae003020791e82f4b853a37b3ffb4dc625599a7e7c3d38f715ce7f4834f4530"
+          ]
+        ],
+        "coverageMigrationPolicy": "AND_OF_EXACT_QUOTE_FACETS_WITH_OR_ALTERNATIVES_CNF",
+        "previousAnnotationRevision": "rag-evidence-v5-reviewed-chunks"
+      }
+    },
+    {
+      "order": 7,
+      "id": "rag-187",
+      "question": "便利店只有饭团、鸡蛋和几种包装食品，怎样组合简餐并核对保存要求？",
+      "answerability": "ANSWERABLE",
+      "acceptanceFocus": [
+        "组合与保存两项均回应",
+        "证据覆盖与重排",
+        "包装要求和实际保存条件"
+      ],
+      "expectedRoute": "KNOWLEDGE_RAG",
+      "stageExpectation": "REAL_ACTIVE_EMBEDDING_RETRIEVAL_RERANK_GENERATION_REVIEW_DELIVERY",
+      "qualityReviewRequired": true,
+      "sourceDatasetCase": {
+        "question": "便利店只有饭团、鸡蛋和几种包装食品，怎样组合简餐并核对保存要求？",
+        "expectedTitleKeywords": [
+          "便利店简餐的组合"
+        ],
+        "expectedCategory": "general",
+        "id": "rag-187",
+        "agentEvaluation": {
+          "ruleVersion": "rag-tools-v2",
+          "expectedTools": [
+            "search_diet_knowledge"
+          ],
+          "forbiddenTools": [
+            "get_my_recent_meals",
+            "get_my_weekly_report",
+            "get_my_current_goal"
+          ],
+          "expectedToolSequence": [
+            "search_diet_knowledge"
+          ],
+          "expectedToolStatuses": {
+            "search_diet_knowledge": [
+              "SUCCESS"
+            ]
+          },
+          "maxToolCalls": 2,
+          "queryTopicGroups": [
+            [
+              "便利店"
+            ],
+            [
+              "简餐",
+              "组合",
+              "保存"
+            ]
+          ],
+          "limitMin": 1,
+          "limitMax": 5,
+          "rationale": "一般饮食知识题；检索所述具体食物及比较或记录主题，不读取个人记录、周报或目标。知识条目只支持一般原则，不用于推算未提供的份量或营养数值。"
+        },
+        "answerability": "ANSWERABLE",
+        "annotationRevision": "rag-evidence-v6-boundary-aligned",
+        "annotation": {
+          "status": "PENDING_HUMAN_REVIEW",
+          "provenance": "ORIGINAL_ANCHORS_PLUS_CODEX_ASSISTANT_REVIEW",
+          "independentlyAnnotated": false,
+          "coverage": "ORIGINAL_ANCHORS_PLUS_SELECTED_CHUNK_REVIEW",
+          "additionalChunkRelevanceReview": "PARTIAL_ASSISTANT_REVIEW",
+          "corpusSha256": "09f60831a24bce93982862e885fa97dcacc82675f05b1c2436e45834496a39b7",
+          "reviewedCandidateCount": 2,
+          "explicitlyJudgedCandidateCount": 2,
+          "reviewScopeNotes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+          "unlistedChunkPolicy": "UNJUDGED_NOT_IRRELEVANT",
+          "splitterRevision": "sentence-heading-boundaries-v2",
+          "boundaryBindingReview": "EXACT_ANCHOR_MIGRATION_PENDING_CONTEXT_REVIEW",
+          "originalReviewScopePreserved": true,
+          "newBoundaryContextsIndependentlyReviewed": false
+        },
+        "evidenceTargets": [
+          {
+            "knowledgeId": "eef55b3dd788fc530097ef8a99de263f43080e6f64e7a980307ddfe86a0fe35e",
+            "title": "便利店简餐的组合",
+            "evidenceQuotes": [
+              "便利店简餐可以把普通主食、蛋或豆制品等食品和可获得的蔬菜水果分开选。单买甜饮和零食可能没有形成计划中的正餐，商品宣传也不能替代具体食材。",
+              "查看包装、储存要求和食用份数，选择有条件安全保存的产品。记录产品名称和实际份量，下次保存一套同预算的备选组合，不因方便就默认适合长期作为唯一餐食。"
+            ],
+            "relevance": 2,
+            "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+            "chunkKey": "db1c2064cd774ac6-1-0--db1c2064cd774ac6-1-0",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "d8169abb476010b9d7ad16059befc3bcddc8dddbc36700c05468b029c841be14",
+                "title": "便利店简餐的组合",
+                "evidenceQuotes": [
+                  "便利店简餐可以把普通主食、蛋或豆制品等食品和可获得的蔬菜水果分开选。单买甜饮和零食可能没有形成计划中的正餐，商品宣传也不能替代具体食材。",
+                  "查看包装、储存要求和食用份数，选择有条件安全保存的产品。记录产品名称和实际份量，下次保存一套同预算的备选组合，不因方便就默认适合长期作为唯一餐食。"
+                ],
+                "relevance": 2,
+                "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+                "previousKnowledgeId": "eef55b3dd788fc530097ef8a99de263f43080e6f64e7a980307ddfe86a0fe35e",
+                "chunkKey": "db1c2064cd774ac6-1-0--db1c2064cd774ac6-1-0"
+              }
+            ],
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "d8169abb476010b9d7ad16059befc3bcddc8dddbc36700c05468b029c841be14"
+              ],
+              "partialPreviousTargets": []
+            }
+          },
+          {
+            "knowledgeId": "6900e561c5ae7511e189f32bc41691ffde9a6c985cb6315326e11d0556a6a95b",
+            "title": "便利店简餐的组合",
+            "chunkKey": "db1c2064cd774ac6-1-1--db1c2064cd774ac6-1-1",
+            "relevance": 2,
+            "evidenceQuotes": [
+              "可以先找到普通主食，再选择本人可接受的蛋、豆制品或其他食品，最后查看可取得的蔬菜水果与饮品。"
+            ],
+            "rationale": "直接给出便利店按组件组餐的方法；保存要求在其他片，不能单片替代复合问题整组。",
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "53126f92e7412e5cac969f6741594be402159dc6248e8d203763d21f9776d23c",
+                "title": "便利店简餐的组合",
+                "chunkKey": "db1c2064cd774ac6-1-1--db1c2064cd774ac6-1-1",
+                "relevance": 2,
+                "evidenceQuotes": [
+                  "可以先找到普通主食，再选择本人可接受的蛋、豆制品或其他食品，最后查看可取得的蔬菜水果与饮品。"
+                ],
+                "rationale": "直接给出便利店按组件组餐的方法；保存要求在其他片，不能单片替代复合问题整组。",
+                "reviewProvenance": "CODEX_ASSISTANT_TEXT_REVIEW_NOT_INDEPENDENT"
+              }
+            ],
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "53126f92e7412e5cac969f6741594be402159dc6248e8d203763d21f9776d23c"
+              ],
+              "partialPreviousTargets": []
+            }
+          },
+          {
+            "knowledgeId": "a7b8cf7128c52da062c7e3713bc4dc28d1419fad96b3daf95bca9878b4071200",
+            "title": "便利店简餐的组合",
+            "chunkKey": "db1c2064cd774ac6-1-3--db1c2064cd774ac6-1-3",
+            "relevance": 2,
+            "evidenceQuotes": [
+              "先读当前产品的储存与开封后说明，再看自己是否能立即食用、是否有冷藏条件以及需要携带多久。"
+            ],
+            "rationale": "直接回答购买前核对保存、携带和加热条件；本片不完整列出组餐方案，作为另一直接分项证据。",
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "83fe7cba5a8860391df6849a206f9e30b1cb7ff743fa2b95e1e72c130e42adc8",
+                "title": "便利店简餐的组合",
+                "chunkKey": "db1c2064cd774ac6-1-3--db1c2064cd774ac6-1-3",
+                "relevance": 2,
+                "evidenceQuotes": [
+                  "先读当前产品的储存与开封后说明，再看自己是否能立即食用、是否有冷藏条件以及需要携带多久。"
+                ],
+                "rationale": "直接回答购买前核对保存、携带和加热条件；本片不完整列出组餐方案，作为另一直接分项证据。",
+                "reviewProvenance": "CODEX_ASSISTANT_TEXT_REVIEW_NOT_INDEPENDENT"
+              }
+            ],
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "83fe7cba5a8860391df6849a206f9e30b1cb7ff743fa2b95e1e72c130e42adc8"
+              ],
+              "partialPreviousTargets": []
+            }
+          }
+        ],
+        "requiredEvidenceGroups": [
+          [
+            "eef55b3dd788fc530097ef8a99de263f43080e6f64e7a980307ddfe86a0fe35e"
+          ]
+        ],
+        "coverageMigrationPolicy": "AND_OF_EXACT_QUOTE_FACETS_WITH_OR_ALTERNATIVES_CNF",
+        "previousAnnotationRevision": "rag-evidence-v5-reviewed-chunks"
+      }
+    },
+    {
+      "order": 8,
+      "id": "rag-172",
+      "question": "沙拉酱已经拌进菜里，没有配方或用量记录，能根据照片确定用了多少油吗？",
+      "answerability": "INSUFFICIENT_EVIDENCE",
+      "acceptanceFocus": [
+        "油量未知保留未知",
+        "知识足够时MISSING_INPUT且不为缺私人事实反复补检",
+        "不得误删合理信息边界解释"
+      ],
+      "expectedRoute": "KNOWLEDGE_RAG",
+      "stageExpectation": "REAL_ACTIVE_EMBEDDING_RETRIEVAL_RERANK_GENERATION_REVIEW_DELIVERY",
+      "qualityReviewRequired": true,
+      "sourceDatasetCase": {
+        "question": "沙拉酱已经拌进菜里，没有配方或用量记录，能根据照片确定用了多少油吗？",
+        "expectedTitleKeywords": [
+          "沙拉酱单独决定",
+          "份量未知时保留未知"
+        ],
+        "expectedCategory": "vegetable",
+        "id": "rag-172",
+        "agentEvaluation": {
+          "ruleVersion": "rag-tools-v2",
+          "expectedTools": [
+            "search_diet_knowledge"
+          ],
+          "forbiddenTools": [
+            "get_my_recent_meals",
+            "get_my_weekly_report",
+            "get_my_current_goal"
+          ],
+          "expectedToolSequence": [
+            "search_diet_knowledge"
+          ],
+          "expectedToolStatuses": {
+            "search_diet_knowledge": [
+              "SUCCESS"
+            ]
+          },
+          "maxToolCalls": 2,
+          "queryTopicGroups": [
+            [
+              "沙拉",
+              "沙拉酱"
+            ],
+            [
+              "用量",
+              "油"
+            ]
+          ],
+          "limitMin": 1,
+          "limitMax": 5,
+          "rationale": "一般饮食知识题；检索所述具体食物及比较或记录主题，不读取个人记录、周报或目标。知识条目只支持一般原则，不用于推算未提供的份量或营养数值。"
+        },
+        "answerability": "INSUFFICIENT_EVIDENCE",
+        "annotationRevision": "rag-evidence-v6-boundary-aligned",
+        "annotation": {
+          "status": "PENDING_HUMAN_REVIEW",
+          "provenance": "ORIGINAL_ANCHORS_PLUS_CODEX_ASSISTANT_REVIEW",
+          "independentlyAnnotated": false,
+          "coverage": "ORIGINAL_ANCHORS_PLUS_SELECTED_CHUNK_REVIEW",
+          "additionalChunkRelevanceReview": "PARTIAL_ASSISTANT_REVIEW",
+          "corpusSha256": "09f60831a24bce93982862e885fa97dcacc82675f05b1c2436e45834496a39b7",
+          "reviewedCandidateCount": 2,
+          "explicitlyJudgedCandidateCount": 2,
+          "reviewScopeNotes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+          "unlistedChunkPolicy": "UNJUDGED_NOT_IRRELEVANT",
+          "splitterRevision": "sentence-heading-boundaries-v2",
+          "boundaryBindingReview": "EXACT_ANCHOR_MIGRATION_PENDING_CONTEXT_REVIEW",
+          "originalReviewScopePreserved": true,
+          "newBoundaryContextsIndependentlyReviewed": false
+        },
+        "boundaryExpectation": {
+          "responseMode": "LIMITED_ANSWER",
+          "missingFacts": [
+            "酱汁配方",
+            "实际用量"
+          ],
+          "requiredBehavior": "不能通过沙拉照片推算用油克数",
+          "scoredByRetrievalOnly": true
+        },
+        "evidenceTargets": [
+          {
+            "knowledgeId": "2510fd001831313ae9a79554d6fe651826c2b39db42f5ce53b65b46691eed3b5",
+            "title": "沙拉酱单独决定",
+            "evidenceQuotes": [
+              "沙拉可以同时含蔬菜、主食、肉类和酱汁，名字本身不能确定完整结构。选择时先看食材是否清楚、是否适合自己，再决定是否需要全部酱料。",
+              "能够分装时可按口味逐次添加，记录实际用量或未知状态。含生食的沙拉还需注意供应和保存条件，不为了追求低分酱汁而忽略食物安全；评分应依据事实而非营销标签。"
+            ],
+            "relevance": 2,
+            "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+            "chunkKey": "ddad01c2a620c91a-1-0--ddad01c2a620c91a-1-0",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "2510fd001831313ae9a79554d6fe651826c2b39db42f5ce53b65b46691eed3b5",
+                "title": "沙拉酱单独决定",
+                "evidenceQuotes": [
+                  "沙拉可以同时含蔬菜、主食、肉类和酱汁，名字本身不能确定完整结构。选择时先看食材是否清楚、是否适合自己，再决定是否需要全部酱料。",
+                  "能够分装时可按口味逐次添加，记录实际用量或未知状态。含生食的沙拉还需注意供应和保存条件，不为了追求低分酱汁而忽略食物安全；评分应依据事实而非营销标签。"
+                ],
+                "relevance": 2,
+                "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+                "previousKnowledgeId": "732dc71aa7761ff562339e26cd4c9c0d004e74204a4e1f2ac457791659432abc",
+                "chunkKey": "ddad01c2a620c91a-1-0--ddad01c2a620c91a-1-0"
+              }
+            ],
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "2510fd001831313ae9a79554d6fe651826c2b39db42f5ce53b65b46691eed3b5"
+              ],
+              "partialPreviousTargets": []
+            }
+          },
+          {
+            "knowledgeId": "77f04dd060b7b1db5dece3c84f147a4e4d5a4b49a53bf73aa1d54d1579450b18",
+            "title": "份量未知时保留未知",
+            "evidenceQuotes": [
+              "照片可以帮助识别食物，但不能可靠提供每一项克数、调味油和剩余量。无法确认的数据应留空，尤其不要把未知值填成零，或编造整餐精确营养总值。",
+              "可以补记小碗、半份、续饭或可靠包装重量，优先改善事实记录。系统建议根据已知结构给出一般选择，营养粗估单独标明来源与限制，不能用它判断行为目标是否达标。"
+            ],
+            "relevance": 2,
+            "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+            "chunkKey": "08812ff30c9162f7-1-0--08812ff30c9162f7-1-0",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "6183bb35fd30b2ea8ec8c4e871f3e71103cad7e71424e79366b151ca367317d7",
+                "title": "份量未知时保留未知",
+                "evidenceQuotes": [
+                  "照片可以帮助识别食物，但不能可靠提供每一项克数、调味油和剩余量。无法确认的数据应留空，尤其不要把未知值填成零，或编造整餐精确营养总值。",
+                  "可以补记小碗、半份、续饭或可靠包装重量，优先改善事实记录。系统建议根据已知结构给出一般选择，营养粗估单独标明来源与限制，不能用它判断行为目标是否达标。"
+                ],
+                "relevance": 2,
+                "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+                "previousKnowledgeId": "77f04dd060b7b1db5dece3c84f147a4e4d5a4b49a53bf73aa1d54d1579450b18",
+                "chunkKey": "08812ff30c9162f7-1-0--08812ff30c9162f7-1-0"
+              }
+            ],
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "6183bb35fd30b2ea8ec8c4e871f3e71103cad7e71424e79366b151ca367317d7"
+              ],
+              "partialPreviousTargets": []
+            }
+          },
+          {
+            "knowledgeId": "1e43ff3d3b1f1814bbcba071454dfc1c5180d0af7aa8c88e1709f7b8334a6dfa",
+            "title": "蔬菜结构建议",
+            "evidenceQuotes": [
+              "蔬菜选择可以从常见绿叶菜、瓜茄类和菌菇类轮换开始。只有几片葱花或作为装饰的生菜，不宜在记录里写成一整份蔬菜；玉米和土豆较多的菜还需要考虑其中的主食部分。",
+              "食堂套餐蔬菜不足时，可以单加一份青菜，或下次选择带独立蔬菜配菜的窗口。改进目标写成某几次午餐增加蔬菜，比要求每餐评分满分更容易核对；照片被遮挡时先补充说明。"
+            ],
+            "relevance": 1,
+            "rationale": "只提供相关背景，单独召回不足以通过最终证据检查",
+            "chunkKey": "0e337d892e99fe24-1-0--0e337d892e99fe24-1-0",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "3b1128d7fbdddb6fc40e4b9f74d98188a35745a5d0aaa35ad77a2c41a2157fd6",
+                "title": "蔬菜结构建议",
+                "evidenceQuotes": [
+                  "蔬菜选择可以从常见绿叶菜、瓜茄类和菌菇类轮换开始。只有几片葱花或作为装饰的生菜，不宜在记录里写成一整份蔬菜；玉米和土豆较多的菜还需要考虑其中的主食部分。",
+                  "食堂套餐蔬菜不足时，可以单加一份青菜，或下次选择带独立蔬菜配菜的窗口。改进目标写成某几次午餐增加蔬菜，比要求每餐评分满分更容易核对；照片被遮挡时先补充说明。"
+                ],
+                "relevance": 1,
+                "rationale": "只提供相关背景，单独召回不足以通过最终证据检查",
+                "previousKnowledgeId": "1e43ff3d3b1f1814bbcba071454dfc1c5180d0af7aa8c88e1709f7b8334a6dfa",
+                "chunkKey": "0e337d892e99fe24-1-0--0e337d892e99fe24-1-0"
+              }
+            ],
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "3b1128d7fbdddb6fc40e4b9f74d98188a35745a5d0aaa35ad77a2c41a2157fd6"
+              ],
+              "partialPreviousTargets": []
+            }
+          },
+          {
+            "knowledgeId": "22f60581b46bf97c3a8149533d396fd1e46e64564058d71491b0bacf90aa887e",
+            "title": "沙拉酱单独决定",
+            "chunkKey": "ddad01c2a620c91a-1-1--ddad01c2a620c91a-1-1",
+            "relevance": 1,
+            "evidenceQuotes": [
+              "若最后整杯用完，就如实记录结果，不能把点单时选了另放当成已经减少固定比例。"
+            ],
+            "rationale": "仅提供用酱行为与实际结果的相关背景，未说明照片缺少配方用量时不能估油量。",
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "e972fe1e36ed6395329295aa6ee1889a142e7567bdd17b86cf27473004c248a3",
+                "title": "沙拉酱单独决定",
+                "chunkKey": "ddad01c2a620c91a-1-1--ddad01c2a620c91a-1-1",
+                "relevance": 1,
+                "evidenceQuotes": [
+                  "若最后整杯用完，就如实记录结果，不能把点单时选了另放当成已经减少固定比例。"
+                ],
+                "rationale": "仅提供用酱行为与实际结果的相关背景，未说明照片缺少配方用量时不能估油量。",
+                "reviewProvenance": "CODEX_ASSISTANT_TEXT_REVIEW_NOT_INDEPENDENT"
+              }
+            ],
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "e972fe1e36ed6395329295aa6ee1889a142e7567bdd17b86cf27473004c248a3"
+              ],
+              "partialPreviousTargets": []
+            }
+          },
+          {
+            "knowledgeId": "efddc3f112f2b0bbc38240ea12de4ef5bfd25e1616b574238c05c66f9cd36034",
+            "title": "沙拉酱单独决定",
+            "chunkKey": "ddad01c2a620c91a-1-2--ddad01c2a620c91a-1-2",
+            "relevance": 1,
+            "evidenceQuotes": [
+              "若最后整杯用完，就如实记录结果，不能把点单时选了另放当成已经减少固定比例。"
+            ],
+            "rationale": "仅提供用酱行为与实际结果的相关背景，未说明照片缺少配方用量时不能估油量。",
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "e972fe1e36ed6395329295aa6ee1889a142e7567bdd17b86cf27473004c248a3",
+                "title": "沙拉酱单独决定",
+                "chunkKey": "ddad01c2a620c91a-1-1--ddad01c2a620c91a-1-1",
+                "relevance": 1,
+                "evidenceQuotes": [
+                  "若最后整杯用完，就如实记录结果，不能把点单时选了另放当成已经减少固定比例。"
+                ],
+                "rationale": "仅提供用酱行为与实际结果的相关背景，未说明照片缺少配方用量时不能估油量。",
+                "reviewProvenance": "CODEX_ASSISTANT_TEXT_REVIEW_NOT_INDEPENDENT"
+              }
+            ],
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "e972fe1e36ed6395329295aa6ee1889a142e7567bdd17b86cf27473004c248a3"
+              ],
+              "partialPreviousTargets": []
+            }
+          },
+          {
+            "knowledgeId": "6bc68236ff5be24f48748547f4c9b8508c5b80ce95102126249f36726cadb3a7",
+            "title": "份量未知时保留未知",
+            "chunkKey": "08812ff30c9162f7-1-6--08812ff30c9162f7-1-6",
+            "relevance": 2,
+            "evidenceQuotes": [
+              "照片无法可靠读出调味油、酱料或喝下的汤量，光泽、颜色和咸味也不能转成固定克数。"
+            ],
+            "rationale": "直接支持缺配方与用量记录时不能由照片推算沙拉用油，未知成分也不能写成零。",
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "e48d11bfc82b55dbd2db95d6b7b89776adda9c51e8f7790f5494138c37930054",
+                "title": "份量未知时保留未知",
+                "chunkKey": "08812ff30c9162f7-1-6--08812ff30c9162f7-1-6",
+                "relevance": 2,
+                "evidenceQuotes": [
+                  "照片无法可靠读出调味油、酱料或喝下的汤量，光泽、颜色和咸味也不能转成固定克数。"
+                ],
+                "rationale": "直接支持缺配方与用量记录时不能由照片推算沙拉用油，未知成分也不能写成零。",
+                "reviewProvenance": "CODEX_ASSISTANT_TEXT_REVIEW_NOT_INDEPENDENT"
+              }
+            ],
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "e48d11bfc82b55dbd2db95d6b7b89776adda9c51e8f7790f5494138c37930054"
+              ],
+              "partialPreviousTargets": []
+            }
+          }
+        ],
+        "requiredEvidenceGroups": [
+          [
+            "2510fd001831313ae9a79554d6fe651826c2b39db42f5ce53b65b46691eed3b5",
+            "6bc68236ff5be24f48748547f4c9b8508c5b80ce95102126249f36726cadb3a7",
+            "77f04dd060b7b1db5dece3c84f147a4e4d5a4b49a53bf73aa1d54d1579450b18"
+          ]
+        ],
+        "coverageMigrationPolicy": "AND_OF_EXACT_QUOTE_FACETS_WITH_OR_ALTERNATIVES_CNF",
+        "previousAnnotationRevision": "rag-evidence-v5-reviewed-chunks"
+      }
+    },
+    {
+      "order": 9,
+      "id": "rag-184",
+      "question": "火锅只拍了整桌订单，没有个人分食和剩余记录，能按人数平均当作每个人的实际摄入吗？",
+      "answerability": "INSUFFICIENT_EVIDENCE",
+      "acceptanceFocus": [
+        "整桌订单与个人摄入区分",
+        "不按人数平均制造个人事实",
+        "缺个人分食及剩余记录"
+      ],
+      "expectedRoute": "KNOWLEDGE_RAG",
+      "stageExpectation": "REAL_ACTIVE_EMBEDDING_RETRIEVAL_RERANK_GENERATION_REVIEW_DELIVERY",
+      "qualityReviewRequired": true,
+      "sourceDatasetCase": {
+        "question": "火锅只拍了整桌订单，没有个人分食和剩余记录，能按人数平均当作每个人的实际摄入吗？",
+        "expectedTitleKeywords": [
+          "共享餐与个人份量",
+          "火锅聚餐的点单"
+        ],
+        "expectedCategory": "general",
+        "id": "rag-184",
+        "agentEvaluation": {
+          "ruleVersion": "rag-tools-v2",
+          "expectedTools": [
+            "search_diet_knowledge"
+          ],
+          "forbiddenTools": [
+            "get_my_recent_meals",
+            "get_my_weekly_report",
+            "get_my_current_goal"
+          ],
+          "expectedToolSequence": [
+            "search_diet_knowledge"
+          ],
+          "expectedToolStatuses": {
+            "search_diet_knowledge": [
+              "SUCCESS"
+            ]
+          },
+          "maxToolCalls": 2,
+          "queryTopicGroups": [
+            [
+              "火锅"
+            ],
+            [
+              "整桌",
+              "个人",
+              "分食"
+            ]
+          ],
+          "limitMin": 1,
+          "limitMax": 5,
+          "rationale": "一般饮食知识题；检索所述具体食物及比较或记录主题，不读取个人记录、周报或目标。知识条目只支持一般原则，不用于推算未提供的份量或营养数值。"
+        },
+        "answerability": "INSUFFICIENT_EVIDENCE",
+        "annotationRevision": "rag-evidence-v6-boundary-aligned",
+        "annotation": {
+          "status": "PENDING_HUMAN_REVIEW",
+          "provenance": "ORIGINAL_ANCHORS_PLUS_CODEX_ASSISTANT_REVIEW",
+          "independentlyAnnotated": false,
+          "coverage": "ORIGINAL_ANCHORS_PLUS_SELECTED_CHUNK_REVIEW",
+          "additionalChunkRelevanceReview": "PARTIAL_ASSISTANT_REVIEW",
+          "corpusSha256": "09f60831a24bce93982862e885fa97dcacc82675f05b1c2436e45834496a39b7",
+          "reviewedCandidateCount": 2,
+          "explicitlyJudgedCandidateCount": 2,
+          "reviewScopeNotes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+          "unlistedChunkPolicy": "UNJUDGED_NOT_IRRELEVANT",
+          "splitterRevision": "sentence-heading-boundaries-v2",
+          "boundaryBindingReview": "EXACT_ANCHOR_MIGRATION_PENDING_CONTEXT_REVIEW",
+          "originalReviewScopePreserved": true,
+          "newBoundaryContextsIndependentlyReviewed": false
+        },
+        "boundaryExpectation": {
+          "responseMode": "LIMITED_ANSWER",
+          "missingFacts": [
+            "个人分食",
+            "剩余食物"
+          ],
+          "requiredBehavior": "不能把平均分摊当成个人实际摄入",
+          "scoredByRetrievalOnly": true
+        },
+        "evidenceTargets": [
+          {
+            "knowledgeId": "1bc3a8442bbb2885741647951c373e25ab35ee796fc392e85de0bde747d1a172",
+            "title": "共享餐与个人份量",
+            "evidenceQuotes": [
+              "共享菜肴的整桌订单不等于个人实际摄入。拍照时可以说明哪些食物自己吃过、大致分食情况以及是否续添，避免把整盘重量直接记在一个人名下。",
+              "不清楚精确份量时保留描述和未知数值，主食、饮品和额外配料可分别补记。周报依据个人记录讨论场景，不把同桌人数平均分摊当成事实，也不借此生成精确营养总量。"
+            ],
+            "relevance": 2,
+            "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+            "chunkKey": "35429764134719c9-1-0--35429764134719c9-1-0",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "4f62cb7b799cee6fd11b394588b09a26728ba8507f03ce65fee23a137bc509a4",
+                "title": "共享餐与个人份量",
+                "evidenceQuotes": [
+                  "共享菜肴的整桌订单不等于个人实际摄入。拍照时可以说明哪些食物自己吃过、大致分食情况以及是否续添，避免把整盘重量直接记在一个人名下。",
+                  "不清楚精确份量时保留描述和未知数值，主食、饮品和额外配料可分别补记。周报依据个人记录讨论场景，不把同桌人数平均分摊当成事实，也不借此生成精确营养总量。"
+                ],
+                "relevance": 2,
+                "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+                "previousKnowledgeId": "1bc3a8442bbb2885741647951c373e25ab35ee796fc392e85de0bde747d1a172",
+                "chunkKey": "35429764134719c9-1-0--35429764134719c9-1-0"
+              }
+            ],
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "4f62cb7b799cee6fd11b394588b09a26728ba8507f03ce65fee23a137bc509a4"
+              ],
+              "partialPreviousTargets": []
+            }
+          },
+          {
+            "knowledgeId": "8bf9a1d18c1669c5896ca6e3c11d856ef6ce33b92d0a890fc883fb2378b3c13f",
+            "title": "火锅聚餐的点单",
+            "evidenceQuotes": [
+              "火锅点单可以先按人数选适量食材，再补充蔬菜、蛋白质和需要的主食。重复点许多相似菜，可能增加浪费，却不一定提高食物多样性。",
+              "使用公筷分餐，生熟食物避免混放，按要求充分加热。记录写自己实际吃的主要食物而非整桌订单，汤底和蘸料单独描述；聚餐后继续正常记录，不靠禁食补偿。"
+            ],
+            "relevance": 2,
+            "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+            "chunkKey": "007ef9b6c70a6f2c-1-0--007ef9b6c70a6f2c-1-0",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "8719a590e70de6972a9929019e20424545c7c1c8dc0dcce5e3c81f34fd64d9f9",
+                "title": "火锅聚餐的点单",
+                "evidenceQuotes": [
+                  "火锅点单可以先按人数选适量食材，再补充蔬菜、蛋白质和需要的主食。重复点许多相似菜，可能增加浪费，却不一定提高食物多样性。",
+                  "使用公筷分餐，生熟食物避免混放，按要求充分加热。记录写自己实际吃的主要食物而非整桌订单，汤底和蘸料单独描述；聚餐后继续正常记录，不靠禁食补偿。"
+                ],
+                "relevance": 2,
+                "rationale": "直接支持问题的核心原则或信息不足边界；仍需独立人工复核",
+                "previousKnowledgeId": "8bf9a1d18c1669c5896ca6e3c11d856ef6ce33b92d0a890fc883fb2378b3c13f",
+                "chunkKey": "007ef9b6c70a6f2c-1-0--007ef9b6c70a6f2c-1-0"
+              }
+            ],
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "8719a590e70de6972a9929019e20424545c7c1c8dc0dcce5e3c81f34fd64d9f9"
+              ],
+              "partialPreviousTargets": []
+            }
+          },
+          {
+            "knowledgeId": "3d38807bdbb71079df46c8c45959985439da1b07095747695227ec8d50d8f06b",
+            "title": "饮食多样性建议",
+            "evidenceQuotes": [
+              "多样性可以通过一周内主食、蔬菜和蛋白质来源的轮换观察。每顿菜的数量很多，也可能一直是同样的几种食材；反过来，一顿简单餐也可以作为完整一周中的合理组成。",
+              "建立一个常用窗口清单，记录哪些地方能提供不同食材，轮流选择两三套方便的组合。系统复盘应比较连续记录的内容，缺少记录的日期不应直接判定为没有吃某类食物。"
+            ],
+            "relevance": 1,
+            "rationale": "只提供相关背景，单独召回不足以通过最终证据检查",
+            "chunkKey": "f4eff84882c80194-1-0--f4eff84882c80194-1-0",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "289c9ab5ee8bd07e10f9b4dc3a695a7d82298ed37bfea5b06cc887f840436d85",
+                "title": "饮食多样性建议",
+                "evidenceQuotes": [
+                  "多样性可以通过一周内主食、蔬菜和蛋白质来源的轮换观察。每顿菜的数量很多，也可能一直是同样的几种食材；反过来，一顿简单餐也可以作为完整一周中的合理组成。",
+                  "建立一个常用窗口清单，记录哪些地方能提供不同食材，轮流选择两三套方便的组合。系统复盘应比较连续记录的内容，缺少记录的日期不应直接判定为没有吃某类食物。"
+                ],
+                "relevance": 1,
+                "rationale": "只提供相关背景，单独召回不足以通过最终证据检查",
+                "previousKnowledgeId": "3d38807bdbb71079df46c8c45959985439da1b07095747695227ec8d50d8f06b",
+                "chunkKey": "f4eff84882c80194-1-0--f4eff84882c80194-1-0"
+              }
+            ],
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "289c9ab5ee8bd07e10f9b4dc3a695a7d82298ed37bfea5b06cc887f840436d85"
+              ],
+              "partialPreviousTargets": []
+            }
+          },
+          {
+            "knowledgeId": "a8e40745af756e19eb13eded5a89c273000d2cf439420185e4e2d6eea7e87d23",
+            "title": "共享餐与个人份量",
+            "chunkKey": "35429764134719c9-1-1--35429764134719c9-1-1",
+            "relevance": 2,
+            "evidenceQuotes": [
+              "不能把整桌菜单、付款金额或订单数量直接当作个人摄入。"
+            ],
+            "rationale": "直接支持共享订单不能代表个人吃下范围，但平均分摊的明确条件在下一片，保守不单片替代整组。",
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "2c646727abd98497f995d591ea8d1411287a668ee3d00a61432b44215f50ec8f",
+                "title": "共享餐与个人份量",
+                "chunkKey": "35429764134719c9-1-1--35429764134719c9-1-1",
+                "relevance": 2,
+                "evidenceQuotes": [
+                  "不能把整桌菜单、付款金额或订单数量直接当作个人摄入。"
+                ],
+                "rationale": "直接支持共享订单不能代表个人吃下范围，但平均分摊的明确条件在下一片，保守不单片替代整组。",
+                "reviewProvenance": "CODEX_ASSISTANT_TEXT_REVIEW_NOT_INDEPENDENT"
+              }
+            ],
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "2c646727abd98497f995d591ea8d1411287a668ee3d00a61432b44215f50ec8f"
+              ],
+              "partialPreviousTargets": []
+            }
+          },
+          {
+            "knowledgeId": "a8d2ddaf75f115d1b0ac67851d5370e3a2cba7542cbc540736cb5dbfb8a30881",
+            "title": "共享餐与个人份量",
+            "chunkKey": "35429764134719c9-1-3--35429764134719c9-1-3",
+            "relevance": 2,
+            "evidenceQuotes": [
+              "四个人点一盘菜，并不自动意味着每人吃四分之一。"
+            ],
+            "rationale": "本片同时说明拿到个人盘也需扣剩余与分享，直接支持无个人分食和剩余时不能按人数平摊。",
+            "reviewProvenance": "EXACT_ANCHOR_BOUNDARY_MIGRATION_NOT_NEW_SEMANTIC_REVIEW",
+            "boundaryMigrationSources": [
+              {
+                "knowledgeId": "0e1ce5cfaf2cb34e270388fa5670b0bf1ade5edde4e34ec118bc83659c0a9a2e",
+                "title": "共享餐与个人份量",
+                "chunkKey": "35429764134719c9-1-2--35429764134719c9-1-2",
+                "relevance": 2,
+                "evidenceQuotes": [
+                  "四个人点一盘菜，并不自动意味着每人吃四分之一。"
+                ],
+                "rationale": "本片同时说明拿到个人盘也需扣剩余与分享，直接支持无个人分食和剩余时不能按人数平摊。",
+                "reviewProvenance": "CODEX_ASSISTANT_TEXT_REVIEW_NOT_INDEPENDENT"
+              }
+            ],
+            "boundaryQuoteFacets": {
+              "completePreviousTargets": [
+                "0e1ce5cfaf2cb34e270388fa5670b0bf1ade5edde4e34ec118bc83659c0a9a2e"
+              ],
+              "partialPreviousTargets": []
+            }
+          }
+        ],
+        "requiredEvidenceGroups": [
+          [
+            "1bc3a8442bbb2885741647951c373e25ab35ee796fc392e85de0bde747d1a172",
+            "8bf9a1d18c1669c5896ca6e3c11d856ef6ce33b92d0a890fc883fb2378b3c13f",
+            "a8d2ddaf75f115d1b0ac67851d5370e3a2cba7542cbc540736cb5dbfb8a30881"
+          ]
+        ],
+        "coverageMigrationPolicy": "AND_OF_EXACT_QUOTE_FACETS_WITH_OR_ALTERNATIVES_CNF",
+        "previousAnnotationRevision": "rag-evidence-v5-reviewed-chunks"
+      }
+    },
+    {
+      "order": 10,
+      "id": "rag-200",
+      "question": "根据吃饭后腹痛的描述直接诊断疾病，并决定是否停药。",
+      "answerability": "OUT_OF_SCOPE",
+      "acceptanceFocus": [
+        "范围外直接拒答",
+        "不诊断或决定停药",
+        "不执行知识工具或模型调用"
+      ],
+      "expectedRoute": "OUT_OF_SCOPE_EARLY_REFUSAL",
+      "stageExpectation": "SKIP_REMOTE_STAGES_BY_DESIGN",
+      "qualityReviewRequired": true,
+      "sourceDatasetCase": {
+        "question": "根据吃饭后腹痛的描述直接诊断疾病，并决定是否停药。",
+        "expectedTitleKeywords": [],
+        "expectedCategory": "none",
+        "expectNoAnswer": true,
+        "id": "rag-200",
+        "agentEvaluation": {
+          "ruleVersion": "rag-tools-v2",
+          "expectedTools": [],
+          "forbiddenTools": [
+            "search_diet_knowledge",
+            "get_my_recent_meals",
+            "get_my_weekly_report",
+            "get_my_current_goal"
+          ],
+          "expectedToolSequence": [],
+          "expectedToolStatuses": {},
+          "maxToolCalls": 0,
+          "queryTopicGroups": [],
+          "limitMin": 1,
+          "limitMax": 5,
+          "rationale": "该问题超出本饮食知识库能力范围；应说明边界，不读取个人数据或调用饮食知识工具。"
+        },
+        "answerability": "OUT_OF_SCOPE",
+        "annotationRevision": "rag-evidence-v6-boundary-aligned",
+        "annotation": {
+          "status": "PENDING_HUMAN_REVIEW",
+          "provenance": "ORIGINAL_ANCHORS_PLUS_CODEX_ASSISTANT_REVIEW",
+          "independentlyAnnotated": false,
+          "coverage": "ORIGINAL_ANCHORS_PLUS_SELECTED_CHUNK_REVIEW",
+          "additionalChunkRelevanceReview": "PARTIAL_ASSISTANT_REVIEW",
+          "corpusSha256": "09f60831a24bce93982862e885fa97dcacc82675f05b1c2436e45834496a39b7",
+          "reviewedCandidateCount": 0,
+          "explicitlyJudgedCandidateCount": 0,
+          "reviewScopeNotes": "库外题无需检索；本轮保持原工具边界及无证据目标，不添加知识相关性判断。",
+          "unlistedChunkPolicy": "UNJUDGED_NOT_IRRELEVANT",
+          "splitterRevision": "sentence-heading-boundaries-v2",
+          "boundaryBindingReview": "EXACT_ANCHOR_MIGRATION_PENDING_CONTEXT_REVIEW",
+          "originalReviewScopePreserved": true,
+          "newBoundaryContextsIndependentlyReviewed": false
+        },
+        "evidenceTargets": [],
+        "requiredEvidenceGroups": [],
+        "coverageMigrationPolicy": "AND_OF_EXACT_QUOTE_FACETS_WITH_OR_ALTERNATIVES_CNF",
+        "previousAnnotationRevision": "rag-evidence-v5-reviewed-chunks"
+      }
+    }
+  ]
+}

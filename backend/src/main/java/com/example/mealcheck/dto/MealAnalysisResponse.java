@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MealAnalysisResponse {
+    public record ScoreChange(int before, int after, String previousVersion, String currentVersion) { }
+    private ScoreChange scoreChange;
+    public ScoreChange getScoreChange() { return scoreChange; }
+    public void setScoreChange(ScoreChange value) { scoreChange = value; }
     private java.time.LocalDateTime occurredAt;
     private String mealType,recordSource,note;
     private boolean timeConfirmed;
@@ -27,6 +31,12 @@ public class MealAnalysisResponse {
     private RecognitionResult recognition;
     private StructureEvaluation evaluation;
     private List<KnowledgeSnippet> references = new ArrayList<>();
+    private String adviceStatus="LEGACY";
+    private String adviceFailureCode;
+    public String getAdviceStatus() { return adviceStatus; }
+    public void setAdviceStatus(String value) { adviceStatus=value; }
+    public String getAdviceFailureCode() { return adviceFailureCode; }
+    public void setAdviceFailureCode(String value) { adviceFailureCode=value; }
     private String advice;
     private long revision;
     private String scoringVersion;

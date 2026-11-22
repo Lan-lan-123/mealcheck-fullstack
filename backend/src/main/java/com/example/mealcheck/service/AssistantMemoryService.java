@@ -55,7 +55,7 @@ public class AssistantMemoryService {
 
         String activeTopic = activeTopic(question, deduplicated);
         String state = "intent=" + safeIntent(intentCode) + "; activeTopic=" + activeTopic;
-        String standaloneQuestion = rewriteFollowUp(question, activeTopic, summary);
+        String standaloneQuestion = rewriteFollowUp(question, activeTopic);
         List<AssistantChatMessage> working = selectWorkingMessages(standaloneQuestion, deduplicated);
         int estimatedTokens = estimateTokens(working);
 
@@ -204,17 +204,13 @@ public class AssistantMemoryService {
         return compact(normalizedQuestion, 240);
     }
 
-    private String rewriteFollowUp(String question, String activeTopic, String summary) {
+    private String rewriteFollowUp(String question, String activeTopic) {
         String safeQuestion = question == null ? "" : question.trim();
         if (!isFollowUp(safeQuestion) || activeTopic.isBlank() || activeTopic.equals(safeQuestion)) {
             return safeQuestion;
         }
-        StringBuilder rewritten = new StringBuilder(safeQuestion)
-                .append("；当前对话主题：").append(activeTopic);
-        if (!summary.isBlank()) {
-            rewritten.append("；历史摘要：").append(compact(summary, 320));
-        }
-        return rewritten.toString();
+        // The full summary stays in the answer prompt; unrelated history must not become search terms.
+        return safeQuestion + "；当前对话主题：" + activeTopic;
     }
 
     private boolean isFollowUp(String question) {
@@ -285,7 +281,7 @@ public class AssistantMemoryService {
         return messages.stream()
                 .filter(Objects::nonNull)
                 .filter(message -> message.getText() != null && !message.getText().isBlank())
-                .filter(message -> !"assistant".equalsIgnoreCase(message.getRole()) || message.getDeliveryStatus()==null || "COMPLETE".equals(message.getDeliveryStatus()))
+                .filter(message -> !"assistant".equalsIgnoreCase(message.getRole()) || (message.getDeliveryStatus()==null || "COMPLETE".equals(message.getDeliveryStatus())) && "COMPLETE".equals(message.getAnswerStatus()) && !"NOT_REVIEWED".equals(message.getReviewStatus()))
                 .toList();
     }
 

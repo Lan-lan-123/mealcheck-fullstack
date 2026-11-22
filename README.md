@@ -1,7 +1,73 @@
-# MealCheck Fullstack
+# MealCheck Fullstack 2.0.0
+
+Version 2.0.0 is being prepared locally. See [2.0.0 release notes](deploy/RELEASE_NOTES_2.0.0.md) for changes and upgrade requirements.
+
+The [local CI preflight](deploy/CI_PREFLIGHT_2.0.0_20261030.md) records additional database, Linux image, dual-backend, capacity and recovery checks, including the startup and fixture defects found and fixed before upload. Remote CI for the final commit remains required.
+
+## 2.0.0 Local Verification — 2026-10-30
+
+| Check | Recorded result |
+| --- | --- |
+| Backend unit tests | 860 passed, 8 conditionally skipped (868 total; Linux archive verification) |
+| PostgreSQL/RabbitMQ integration | 213 passed, 1 conditionally skipped (214 total) |
+| Frontend | 102 unit tests passed; type checks and production build passed |
+| Browser acceptance | 167 passed after updating obsolete progress-text assertions and covering both FAST and REVIEWED modes |
+| Offline evaluation utilities | 120 tests passed; 1,351 knowledge chunks regenerated from production splitter code without real model calls |
+| Dual-backend recovery | 16 assistant checks and 14 knowledge-source checks passed |
+| Capacity and dependency faults | All 7 scenarios passed, including Redis/PostgreSQL outage behavior |
+| Linux deployment and operations | Frontend/backend source images, production HTTP smoke, backup/restore, trusted proxy checks and alert tests passed |
+
+These are local results from multiple runs. The latest backend unit totals were verified from a source archive on Linux after the root-directory fix; database integration totals refer to the preceding local Docker integration run. The Vite 8.3.5 patch passed Linux frontend checks and all 167 browser cases, with no vulnerabilities reported by the subsequent npm audit. See the [Linux archive verification](deploy/LINUX_ARCHIVE_VERIFICATION_20261030.md) and [CI preflight report](deploy/CI_PREFLIGHT_2.0.0_20261030.md) for inputs, initial failures and exact scope.
+
+The separate saved-answer evaluation passed **46/50 FAST (92%)** and **49/50 REVIEWED (98%)**, with mean scores **3.768/4** and **3.927/4**. These are Kimi judge quality pass rates, not expert-validated factual accuracy; see the [grading report](deploy/KIMI_PAIRED50_GRADING_20261030.md).
 
 ## Change Summary
 
+- **2026-10-30:** Updated Vite from 8.3.1 to 8.3.5 after an npm audit finding, synchronized the lockfile, and bounded CI browser concurrency at two workers. Linux backend tests (860 passed, 8 skipped), Linux frontend tests (102 passed), type/build checks and 167 browser cases passed. See [verification and dependency audit](deploy/LINUX_ARCHIVE_VERIFICATION_20261030.md).
+
+- **2026-10-30:** Fixed a diagnostic-service startup failure when a container's working directory is the filesystem root. Updated stale Redis-outage expectations, assistant provider fixtures and knowledge-source chunk-count checks; completed the additional local CI verification summarized above. See [findings, fixes and evidence](deploy/CI_PREFLIGHT_2.0.0_20261030.md).
+
+- **2026-10-30:** Prepared version **2.0.0**, synchronized backend/frontend/MCP defaults, moved new release/CI evidence under `logs/`, and added release export guards and reproducible offline evaluation fixtures. The saved 50-question paired run received separate Kimi quality grades: FAST 46/50, REVIEWED 49/50; these are judge pass rates, not expert-validated accuracy. See [grading methods and limits](deploy/KIMI_PAIRED50_GRADING_20261030.md).
+
+- **2026-10-30:** Connected Alibaba Cloud `kimi-k3` as the separate evaluation judge, isolated its thinking parameters and credentials from production Qwen answers, and completed deployment plus one structured-scoring API check. See [Kimi judge integration](deploy/KIMI_JUDGE_20261030.md).
+
+- **2026-10-29:** Extracted assistant response mapping and frontend HTTP, SSE and administrator API modules while preserving existing client exports. Added strict checking for the entire API directory and compile-time input contracts. Verified backend tests (855 passed, 8 skipped), 96 frontend tests and 11 browser cases. See [Maintainability improvements](deploy/MAINTAINABILITY_20261029.md).
+
+- **2026-10-25:** Coordinated RAG deadlines and cancellation, stopped caching rerank fallback results, derived information status from independent input/evidence gaps, constrained hidden-package scoring, and persisted answer references in conversation history (V48). The fixed pilot reached embedding, reranking, generation and review for all nine knowledge questions; further wording/fragment defects were retained and fixed with separate checks. See [RAG chain recovery and validation](deploy/RAG_CHAIN_RECOVERY_20261025.md) for evidence and limits.
+
+- **2026-10-24:** Executed the frozen 10-question pilot against the deployed BGE-M3 1024-dimensional index: all nine knowledge queries retrieved evidence but reranking was cancelled by the 2500 ms tool deadline; the out-of-scope case correctly refused without model calls. The deployed RAG chain did not pass. See [Full-chain pilot results](deploy/FULL_CHAIN_PILOT10_RESULTS_20261024.md).
+
+- **2026-10-24:** Added 18 visually inspected synthetic images for leftovers, occlusion and packaging. Live vision evaluation passed 16/18 first-pass images and 20/26 predefined runs; opaque unlabelled packaging and a closed paper cup failed consistently. Local preflight and browser feedback checks passed. See [Vision boundary evaluation](deploy/VISION_EDGE_EVALUATION_20261024.md).
+
+- **2026-10-24:** Ran live text, vision and rerank evaluation without embeddings: 25/26 new fixed boundary cases passed, and both existing production question cases passed. Found a missed combined information gap and an over-strict causal-word rule; neither has been fixed in this evaluation run. Local failure/UI checks also passed. See [No-embedding live evaluation](deploy/NO_EMBEDDING_LIVE_EVALUATION_20261024.md).
+
+- **2026-10-23:** Hardened claim/evidence boundaries, four-way information sufficiency review, food-scene uncertainty handling, and model failure explanations. Verified 198 distinct backend tests, 37 frontend tests and 12 browser cases using local substitutes, then updated the local deployment. See [Four boundary optimizations](deploy/FOUR_BOUNDARY_OPTIMIZATIONS_20261023.md) for evidence and the remaining real-model validation scope.
+
+- **2026-10-23:** Deployed citation and recognition fixes, required information-status fields on new evidence reviews, enabled native JSON output for non-streaming Qwen assistant calls, and blocked repeated primary searches before query expansion. Verified 86 backend regressions plus fixed production-code text/vision cases without embedding calls. See [Evidence and recognition fixes](deploy/EVIDENCE_RECOGNITION_FIXES_20261023.md) for staged results and remaining full-retrieval validation.
+
+- **2026-10-23:** Selected `qwen3.8-flash` for text generation and image recognition and `qwen3.7-text-rerank` for reranking, with DashScope native rerank protocol support and a separate vision model setting. See [Model selection](deploy/MODEL_SELECTION_20261023.md) for validation and deployment status.
+
+- **2026-10-22:** Added knowledge rebuild impact previews, content version history and recovery, and optimistic edit/delete conflict protection. See [Knowledge maintenance](deploy/KNOWLEDGE_MAINTENANCE_20261022.md) for migration V44, API changes and verification.
+
+- **2026-10-18:** Added administrator-managed AI model, Base URL and write-only API Key settings with encrypted persistence, live activation, connection testing and deployment-default recovery. The local deployment now uses `qwen3.7-flash`. See [Admin AI settings](deploy/ADMIN_AI_SETTINGS_20261018.md).
+
+- **2026-10-18:** Added a daily meal overview with meal-slot states, review shortcuts and pending-plan completion, plus constrained next-meal suggestions that apply dietary preferences, current goals and recent records. Recommendations use a maintained local catalog with explicit reference costs and preparation assumptions. See [Daily overview and next-meal planning](deploy/DAILY_MEAL_PLANNING_20261018.md).
+
+- **2026-10-18:** Fixed false rejection of explicit unknown risk statements and removed unsupported cooking-risk review requests while preserving useful advice. See [advice review fixes and offline regression](deploy/ADVICE_REVIEW_FIX_20261018.md).
+- **2026-10-17:** Clarified deep-frying and food-group prompts, preserved tri-state risk facts, added semantic conflict review and targeted advice consistency checks without changing scoring weights. See [semantic fixes and offline verification](deploy/MEAL_SEMANTIC_FIXES_20261017.md).
+- **2026-10-17:** Added quick review for ambiguous food identity and unknown cooking risks, persisted score-rule breakdowns with correction score comparisons, and editable dietary preferences used by meal advice, assistant replies and weekly reports. See [review, score details and preferences](deploy/MEAL_REVIEW_SCORE_PREFERENCES_20261017.md) for behavior, V34/V35 migrations, verification and limitations.
+
+- **2026-10-17:** Coordinated knowledge source initialization and admin reindexing across backend instances, with source fingerprints, leases, atomic publication, and manual-edit protection. See [Knowledge Source Coordination](deploy/KNOWLEDGE_CLUSTER_20261017.md) for upgrade behavior and verification.
+- **2026-10-16:** Added PostgreSQL coordination for assistant admission, cancellation, leases, and conversation publication across backend instances. Sync and streaming routes share the same task lifecycle. See [Assistant Instance Coordination](deploy/ASSISTANT_CLUSTER_20261016.md) for fault acceptance and upgrade boundaries.
+- **2026-10-15:** Frontend and backend now start by default with `docker compose up -d --build`; starting only infrastructure requires naming `postgres redis rabbitmq` explicitly.
+- **2026-10-16:** Raised unfinished image capacity to 200 with 2 per user and a 512 MiB stored-image payload budget. Added explicit progress stages, recovery status, and a read-only storage preflight. Upload concurrency remains 64; AI pace remains unchanged. See [200-task capacity](deploy/QUEUE200.md). Existing deployments require rebuilding and recreating containers.
+- **2026-10-15:** Promoted the verified 50-person burst settings to application, development Compose, and production defaults: 40 image consumers, 64 unfinished tasks, 42 shared AI permits, 400 ms model-start spacing, and matching upload buffers. See [capacity defaults](deploy/CAPACITY-GUARDRAILS.md). Existing deployments require rebuilding and recreating containers.
+- **2026-10-14:** Batched Outbox claims into bounded RabbitMQ confirmation windows and unified image/report polling with backoff, jitter, visibility recovery, cancellation, deadlines, and transient network recovery. See [Outbox and Task Polling](deploy/OUTBOX_AND_TASK_POLLING_20261014.md).
+- **2026-10-14:** Made corrected-meal profile updates incremental and moved task image reads out of claim transactions with lease/token checks. See [Concurrency Code Optimizations](deploy/CONCURRENCY_CODE_OPTIMIZATIONS_20261014.md).
+- **2026-10-14:** Added low-confidence food review, separately displayed unscored candidates, and failure-specific photo/retry guidance. See [Recognition Explanation](deploy/RECOGNITION_EXPLANATION_20261014.md).
+- **2026-10-14:** Extended strict frontend checks to the user workspace, assistant, and optional nutrition form, and validated their critical API responses before rendering. See [Frontend Type and API Validation](deploy/FRONTEND_TYPE_API_VALIDATION_20261014.md).
+- **2026-10-14:** Completed database verification through V32, corrected cache-trigger compatibility with embedding type changes, added incremental type checks to CI/release verification, split admin pages and state modules, and migrated action controls to a shared Button. See [Engineering Verification](deploy/FRONTEND_ENGINEERING_VERIFICATION.md).
+- **2026-10-14:** Added lazy workspace loading, cancellable page reads, lightweight user meal summaries with on-demand details, transactional knowledge-cache revisions, and shared action-button styling. See [Frontend and Query Optimizations](deploy/FRONTEND_QUERY_OPTIMIZATIONS.md) for verification and remaining database-test limitations.
 - **2026-10-13:** Expanded the bundled knowledge guide to 100 curated topics; improved journal pagination, cache invalidation, assistant cancellation, report history, and query/service organization.
 - **2026-10-11:** Added meal times and types, manual records, recording goals, action plans, coverage statistics, streaming assistant replies, and optional nutrition estimates; fixed legacy account-deletion constraints.
 - **2026-10-04:** Added shared AI deadlines, retries and budgets, cursor-based conversation history, aggregate trend queries, resumable long-term memory rebuilds, and capacity/recovery tooling.
@@ -20,7 +86,8 @@ MealCheck is a meal image analysis system. Users can upload meal photos, get foo
 - Vector Search: pgvector
 - Cache & Session: Redis
 - Image analysis messaging: RabbitMQ + PostgreSQL transactional outbox
-- Authentication: JWT
+- Authentication: JWT in HttpOnly cookies, CSRF protection, and PostgreSQL-backed logout revocations
+- Cookie security, account bans, authentication generations, upgrade requirements and recovery: [Authentication operations](deploy/AUTHENTICATION_COOKIE_20261026.md).
 - AI Vision: Qwen VL API
 - AI Assistant: LangChain4j + RAG + optional Function Calling
 - Weekly Report Multi-Agent: LangGraph4j orchestration + LangChain4j agents
@@ -92,9 +159,21 @@ See [Code Optimizations](deploy/CODE_OPTIMIZATIONS.md) for APIs, statistics, cac
 
 ## Curated Knowledge Source
 
-The `v3-curated-100` source retains the original 26 topics and adds 74 independent entries covering staples and protein, vegetables and fruit, beverages and labels, eating-out budgets, food safety, and recording/review practices. Each entry includes public references; campus examples are application suggestions, not individual diagnoses or nutrition prescriptions.
+The `v8-longform-200` source preserves all 200 original topics with literal, topic-specific explanations and examples. The corrected sentence/heading boundaries produce **1,351 default chunks**. All 40/60/60/40 topics meet their respective 2–3/4–6/7–10/12–20 ranges. Corpus bytes are unchanged; independent content and relevance review remains pending. See `deploy/RAG_CHUNK_BOUNDARIES_20261021.md`.
 
-The leading `<!-- mealcheck:independent-topics -->` marker preserves topic boundaries: short topics are not merged and unrelated overlap is not added between topics. An individual long topic still splits at the maximum token limit. At default settings, 100 topics produce 100 system knowledge chunks, with manually added administrator entries counted separately. Source synchronization replaces old system chunks while preserving `source=admin` entries. The detailed vector, chunk metadata, retrieval, and benchmark behavior is retained in Notes below.
+RAG evaluation v7 rebinds the v6 selected assistant judgments to the corrected chunks, preserving exact quotes and evidence-group logic. Three expanded negative contexts were explicitly reread: one is now background and two remain irrelevant. Three compound questions still require both evidence facets; unlisted chunks remain unjudged. Live index synchronization has not been performed.
+
+The leading `<!-- mealcheck:independent-topics -->` marker preserves topic boundaries: short topics are not merged and unrelated overlap is not added between topics. At default settings, 200 topics produce 1,351 system chunks, with administrator entries counted separately. Sentence-aligned overlap treats 50 estimated tokens as a target; actual context can be shorter or longer to keep complete boundaries and a valid final chunk. Source synchronization preserves `source=admin` entries. After deployment, explicitly synchronize with source version `v8-longform-200-boundary-v2`; changing these files alone does not rebuild an existing database index.
+
+Administrators can select **local hash vectors** or **semantic model vectors** in RAG knowledge maintenance and start a background rebuild. Both choices use the same Markdown topic splitter. The semantic default is `qwen3.7-text-embedding-flash` at 512 dimensions. Configure `MEALCHECK_KNOWLEDGE_EMBEDDING_API_KEY`, `MEALCHECK_KNOWLEDGE_EMBEDDING_BASE_URL` and optionally `MEALCHECK_KNOWLEDGE_EMBEDDING_MODEL`; with both dedicated key and URL empty, the existing Aliyun DashScope/MAAS chat endpoint and key can be reused. Credentials from other chat providers are not reused, and the browser never receives keys.
+
+The **embedding model configuration** inside the vector workbench also supports administrator-managed model names, Base URLs, API keys and dimensions (1–2000) for OpenAI-compatible Embeddings APIs. Save a draft, test the saved connection, and apply it to queue a complete rebuild. Disable “request specified dimensions” for providers that only support their default output size; the actual returned dimension must still match the configured dimension. Secrets are encrypted using the stable `MEALCHECK_AI_SETTINGS_ENCRYPTION_KEY` (the JWT secret is the fallback), never returned to the browser, and retained when the key field is blank. Changing the endpoint requires entering its key again. Apply database migration V41 before enabling this UI on all instances.
+
+For environment-configured `BAAI/bge-m3`, set the dimension to `1024` and `MEALCHECK_KNOWLEDGE_EMBEDDING_SEND_DIMENSIONS=false`; the SiliconFlow Base URL is `https://api.siliconflow.cn/v1`. An active administrator profile takes precedence over these deployment defaults. Semantic responses must be finite and nonzero, and are normalized for cosine retrieval before storage to avoid half-precision overflow/underflow. Local hash generation does not load semantic credentials. Searches retry once if the active vector space changes during a request, and cache namespaces include that space. Every explicit resubmission requires a fresh preview token; applying a saved draft remains a separate, preview-bound operation.
+
+Draft edits do not affect retrieval. Each configuration rebuild references an immutable profile, including its credentials, so editing another draft during a rebuild cannot change the running job. The completed knowledge vectors and active connection switch in one database transaction; failed or cancelled jobs leave the previous connection and vectors active. A tested credential update for the same endpoint/model/dimension can be applied without rebuilding. On activation, assistant memory maintenance rebuilds for the new signature and dimension, fences obsolete memory jobs, and preserves original text recall while its vectors are unavailable. A shared encryption key is required across replicas and restarts.
+
+`GET /api/admin/knowledge/indexing` returns the active mode, model availability and latest durable job; `POST` with `{"mode":"LOCAL"}` or `{"mode":"SEMANTIC"}` queues/reuses a job. The worker first synchronizes the bundled source using the active provider, then stages vectors for **all** system and manually added chunks in batches of five. V37 persists the selected mode; it is activated in the same transaction as the complete vector switch. Queries retain the previous provider until activation. Failures retain the previous mode and staged progress; explicitly submitting the same target again resumes a failed job. The UI shows progress and resumes polling after reload. Changing mode does not rewrite deployment secrets or properties. Apply V37 to every instance before enabling this UI, and keep endpoint/model/dimension settings consistent across instances.
 
 ## Workspace and Request Behavior
 
@@ -106,7 +185,7 @@ The leading `<!-- mealcheck:independent-topics -->` marker preserves topic bound
 
 ## Asynchronous Image Analysis and User Corrections
 
-- RabbitMQ handles image analysis: tasks and outbox entries are persisted in the same transaction; publisher confirms and unroutable-message checks support redelivery. Consumers default to concurrency 8 per instance and prefetch 1, with at most 32 unfinished tasks globally. Messages are acknowledged after the result transaction commits. Dead-letter queues, execution-lease recovery, and duplicate-delivery isolation are supported. See [RabbitMQ Operations](deploy/RABBITMQ.md).
+- RabbitMQ handles image analysis: tasks and outbox entries are persisted in the same transaction; publisher confirms and unroutable-message checks support redelivery. Consumers default to concurrency 40 per instance and prefetch 1, with at most 200 unfinished tasks globally and 2 per user, subject to a 512 MiB retained database image-payload budget. All AI features share 42 concurrent permits, 120 starts per rolling minute, and 400 ms minimum start spacing. Upload admission allows 64 concurrent requests, with 2 image decodes and 62 waiting slots; frontend buffers default to 1 GiB with a 1.5 GiB memory limit and no CPU quota. Messages are acknowledged after the result transaction commits. Dead-letter queues, execution-lease recovery, and duplicate-delivery isolation are supported. See [200-task capacity and preflight](deploy/QUEUE200.md), [RabbitMQ Operations](deploy/RABBITMQ.md), and the [50-person acceptance scope](loadtests/reports/real-capacity-fixed-20261015.md); a single successful burst does not establish sustained throughput.
 - `POST /api/meals/analysis-requests` accepts an image, a goal, and `Idempotency-Key`; a new task returns `202 / PENDING`. `GET /api/meals/analysis-requests/{key}` returns the authenticated user's progress and result. `/api/meals/analyze` remains available for synchronous clients.
 - Images are decoded, dimension-checked, and normalized before entering the durable queue. Independent workers claim tasks; expired leases can be recovered, attempt tokens fence old executions, and queued images are removed after success.
 - A request identifier is bound to the image and goal. Repeated submissions reuse the request; changed content returns a conflict. Successful results, meal records, and profile updates are published in one transaction to avoid duplicate meals. Crash recovery may still call the model again, so provider billing is not guaranteed to occur exactly once.
@@ -135,7 +214,7 @@ Detailed definitions are in [Assistant Evaluation](backend/src/test/resources/ev
 ## Operations, Security, and Release Verification
 
 - Production Compose, production configuration validation, non-root containers, health checks, and Nginx reverse-proxy configuration are provided. The frontend uses Docker DNS to resolve backend addresses dynamically, supporting access after backend container recreation.
-- JWT validation checks immutable user ID, username, expiration, and account state. A deleted account's old token cannot authenticate a new account with the same username. Users can delete their own accounts after password verification, cleaning up associated data, images, and caches.
+- JWT validation checks immutable user ID, username, expiration, account state/version, authentication generation and durable logout revocations. Redis loss cannot restore a revoked credential. Browser login responses set HttpOnly cookies without returning JWTs in JSON; write operations require CSRF tokens. A deleted account's old token cannot authenticate a new account with the same username. Users can delete their own accounts after password verification, cleaning up associated data, images, and caches.
 - Passwords are limited to 72 UTF-8 bytes. Concurrent registration with the same username returns 409. AI budget and timeout errors retain the appropriate status; error responses and shared health states use safe summaries. See [Password and Error Contract](backend/ERROR_CONTRACT.md).
 - Metrics cover analysis failure rate, duration, queue backlog, tokens, and estimated cost. The initial monitoring configuration includes 15 alert rules with Prometheus, Alertmanager, and webhook notification configuration; budget and other extensions are detailed below.
 - Database/image-consistent backup, rclone crypt encrypted copying, content verification, isolated restore drills, and systemd configuration for daily backups and weekly restore drills are provided.
@@ -173,6 +252,7 @@ Image analysis and AI weekly reports primarily use asynchronous tasks, while syn
 - Trusted usage with configured input/output prices matching the model and API is settled according to token usage. Other providers, missing usage, or failures with uncertain results are conservatively charged at the reserved amount. Unsent reservations are released. After process interruption, recovery reclaims reservations older than 10 minutes; attempts already marked sent retain call counts and estimated costs. Ledger entries are retained for 30 days and cascade-delete with the user account.
 - Cost units follow the configured per-million-token prices, and monetary limits are disabled by default. Monetary budgets are **estimated quotas**: input is conservatively estimated from request length, and image Base64 may inflate reservations; actual provider billing, hidden tokens, or missing usage can differ. These budgets are not a hard cap on provider invoices.
 - `GET /api/profile/ai-budget` returns only the authenticated user's daily call count, remaining quota, settled cost, reserved cost, and reset time. Exhaustion returns `429 / AI_BUDGET_EXCEEDED` with `Retry-After`; unavailable budget storage rejects new model calls with `503 / AI_BUDGET_UNAVAILABLE`. Direct-processing endpoint timeouts return `504 / AI_DEADLINE_EXCEEDED`; existing assistant, report, and reranking fallback paths may still return local results.
+- Monetary limits are opt-in. Administrators can edit shared limits and model prices in System monitoring → AI calls; users can set a tighter personal limit from the daily-quota notice. Changes persist without resetting daily usage. See [Web AI cost settings](deploy/AI_COST_SETTINGS.md).
 
 Common configuration settings are included in both environment examples and Compose:
 
@@ -191,6 +271,10 @@ Common configuration settings are included in both environment examples and Comp
 | `MEALCHECK_AI_BUDGET_ZONE` | `Asia/Shanghai` | Timezone for daily quota resets |
 
 Prices are configured through `MEALCHECK_AI_INPUT_COST_PER_MILLION` / `MEALCHECK_AI_OUTPUT_COST_PER_MILLION`. Both total timeouts accept 1–300 seconds; output limits accept 1–32,768 tokens. Invalid budget configuration prevents startup. Flyway **V21** creates the budget ledger and query indexes. Disabling budgets skips ledger limits only; deadlines, retries, and output limits remain active.
+
+For Qwen3.8 Max/Flash models, shared transport applies task-specific `off` (default), `low`, or `provider` thinking modes to direct HTTP, SDK, and streaming calls. `MEALCHECK_AI_VISION_THINKING_MODE`, `MEALCHECK_AI_ADVICE_THINKING_MODE`, `MEALCHECK_AI_ASSISTANT_THINKING_MODE`, and `MEALCHECK_AI_WEEKLY_THINKING_MODE` select each profile; low mode uses `MEALCHECK_AI_THINKING_BUDGET_TOKENS` (default 512, bounded to half the completion allowance). These models use `max_completion_tokens` to include reasoning in the output cap. Vision and weekly-agent calls request JSON Object output; truncated responses are failures, with known usage still settled. Other model families retain their request vocabulary. See [AI fixes and verification](deploy/AI_FIXES_20261015.md) for scoring-language parity, local black-image rejection, and real-provider evidence.
+
+Image admission estimates for these verified models separate image token allowances from Base64 payload length; settlement uses provider usage when available. The correction dialog shows the photo and requires confirmation of low-confidence foods before saving. Weekly planning and review share the same bounded retrieval excerpts. See [image/weekly optimization and paired thinking-mode evaluation](deploy/IMAGE_WEEKLY_OPTIMIZATION_20261015.md) for implementation details, remaining quality limitations, and real end-to-end evidence.
 
 ### Cursor pagination for long conversations
 
@@ -249,16 +333,16 @@ Run from the repository root:
 
 ```powershell
 # Build a new version using distinct image tags configured in .env.
-docker compose --env-file .env -p mealcheck-fullstack -f docker-compose.yml -f deploy/compose.local.yml --profile fullstack build backend frontend
+docker compose --env-file .env -p mealcheck-fullstack -f docker-compose.yml -f deploy/compose.local.yml build backend frontend
 
 # Start the backend first and wait for dependencies and migrations.
-docker compose --env-file .env -p mealcheck-fullstack -f docker-compose.yml -f deploy/compose.local.yml --profile fullstack up -d --no-build --wait --wait-timeout 120 backend
+docker compose --env-file .env -p mealcheck-fullstack -f docker-compose.yml -f deploy/compose.local.yml up -d --no-build --wait --wait-timeout 120 backend
 
 # Start the frontend.
-docker compose --env-file .env -p mealcheck-fullstack -f docker-compose.yml -f deploy/compose.local.yml --profile fullstack up -d --no-build --wait --wait-timeout 60 frontend
+docker compose --env-file .env -p mealcheck-fullstack -f docker-compose.yml -f deploy/compose.local.yml up -d --no-build --wait --wait-timeout 60 frontend
 
 # Inspect status and backend logs.
-docker compose --env-file .env -p mealcheck-fullstack -f docker-compose.yml -f deploy/compose.local.yml --profile fullstack ps
+docker compose --env-file .env -p mealcheck-fullstack -f docker-compose.yml -f deploy/compose.local.yml ps
 docker compose --env-file .env -p mealcheck-fullstack -f docker-compose.yml -f deploy/compose.local.yml logs --tail 100 backend
 ```
 
@@ -309,7 +393,7 @@ mealcheck-fullstack/
   tools/                Vision evaluation, comparison and operations checks
   loadtests/            k6 load tests and mixed workload scenarios
   .github/workflows/    CI build, tests, smoke checks and restore drills
-  docker-compose.yml    PostgreSQL + Redis + optional full-stack services
+  docker-compose.yml    PostgreSQL + Redis + RabbitMQ + backend + frontend by default
   docker-compose.prod.yml    Production application stack
   docker-compose.mirror.yml  Optional Maven mirror for Docker builds
   .env.example          Environment variable example
@@ -325,7 +409,7 @@ Use [.env.example](.env.example) as the configuration reference. Docker Compose 
 ### 1. Start only infrastructure services for local development
 
 ```bash
-docker compose up -d
+docker compose up -d postgres redis rabbitmq
 ```
 
 This starts only:
@@ -361,13 +445,15 @@ Default frontend URL:
 http://localhost:5173
 ```
 
-### Optional: start the whole stack with Docker
+### Start the whole stack with Docker (default Compose services)
 
 ```bash
-docker compose --profile fullstack up --build -d
+docker compose up -d --build
 ```
 
 This starts PostgreSQL, Redis, RabbitMQ, backend, and frontend together.
+
+Frontend and backend have no profile restriction. Rebuild after source changes with the same command; `--profile fullstack` is no longer required. To run the backend and frontend directly with Maven and Vite, start only the named infrastructure services as shown above.
 
 If Docker Hub times out while fetching the frontend's Nginx image, fetch the
 same image tag through the DaoCloud proxy and add the local tag expected by the
@@ -382,12 +468,12 @@ If Maven Central also fails with a TLS handshake error during the backend build,
 use the optional build-only Aliyun Maven mirror override:
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.mirror.yml --profile fullstack up --build -d
+docker compose -f docker-compose.yml -f docker-compose.mirror.yml up -d --build
 ```
 
 The regular Docker build still defaults to Maven Central. BuildKit caches Maven
 dependencies between builds. Neither workaround changes global Docker proxy or
-Maven settings. Verify startup with `docker compose --profile fullstack ps`, then
+Maven settings. Verify startup with `docker compose ps`, then
 open `http://localhost:5173`; the backend API is exposed at
 `http://localhost:8080`. Registry proxy syntax is documented by
 [DaoCloud](https://github.com/DaoCloud/public-image-mirror), and the Maven mirror
@@ -431,10 +517,10 @@ MEALCHECK_KNOWLEDGE_CHUNK_MIN_TOKENS=300
 MEALCHECK_KNOWLEDGE_CHUNK_MAX_TOKENS=500
 MEALCHECK_KNOWLEDGE_CHUNK_OVERLAP_TOKENS=50
 MEALCHECK_KNOWLEDGE_SPLITTER_STRATEGY=recursive-markdown
-MEALCHECK_KNOWLEDGE_SOURCE_VERSION=v3-curated-100
+MEALCHECK_KNOWLEDGE_SOURCE_VERSION=v8-longform-200-boundary-v2
 MEALCHECK_MCP_ENABLED=true
 MEALCHECK_MCP_ENDPOINT=/mcp
-MEALCHECK_ASSISTANT_FUNCTION_CALLING_ENABLED=false
+MEALCHECK_ASSISTANT_FUNCTION_CALLING_ENABLED=true
 MEALCHECK_ASSISTANT_FUNCTION_CALLING_MAX_TOOL_ROUNDS=3
 MEALCHECK_ASSISTANT_FUNCTION_CALLING_MAX_TOOL_CALLS=6
 MEALCHECK_ASSISTANT_FUNCTION_CALLING_TOTAL_TIMEOUT_SECONDS=30
@@ -468,15 +554,17 @@ See [`deploy/RELIABILITY.md`](deploy/RELIABILITY.md) for meal-analysis idempoten
 - Knowledge embeddings use pgvector `halfvec` storage by default. For 512 dimensions this reduces the raw vector payload from 2,056 bytes to 1,032 bytes (about 49.8%); set `MEALCHECK_KNOWLEDGE_VECTOR_STORAGE=vector` to keep 32-bit vectors.
 - A same-dimension migration from `vector` to `halfvec` casts existing values without calling the embedding API again. A dimension change still regenerates embeddings to preserve correctness.
 - Each knowledge vector stores an embedding signature. Switching between the hash fallback and a semantic model automatically refreshes stale vectors instead of mixing embedding spaces.
-- The bundled guide contains **100 independently curated topics** (`v3-curated-100`), each with a public reference and practical campus examples. Its leading `<!-- mealcheck:independent-topics -->` marker preserves heading boundaries: short topics are neither merged nor prefixed with unrelated topics. At default settings the guide produces exactly 100 database chunks, each title plus body embedded as one vector. Long individual topics still split at the configured maximum with internal overlap.
-- For ordinary Markdown without the marker, `recursive-markdown` still uses heading, paragraph, line, sentence and token-window boundaries, approximately 300–500 tokens and 50-token overlap; `legacy-window` remains available. Curated short topics may be under 300 tokens.
-- Admin counts database chunks rather than evaluation questions: the separate assistant evaluation set has 200 cases (50 base + 150 expansion). Rebuilding the backend and synchronizing the knowledge source updates the 100 system entries while preserving `source=admin` entries. A configured source version in `.env` overrides the new default; set `MEALCHECK_KNOWLEDGE_SOURCE_VERSION=v3-curated-100` to label this corpus correctly.
+- The bundled guide contains **200 source-referenced longform topics** (`v8-longform-200`); independent review remains pending. With corrected boundaries it produces **1,351 chunks**, each title plus chunk body embedded as one vector when indexed. `diet_guides_metadata.json` records actual counts, sources, the unchanged corpus hash, splitter revision and satisfied length ranges.
+- `recursive-markdown` prefers complete sentence/paragraph boundaries and keeps a standalone heading with its following body. The 300–500 estimated-token budget is unchanged; the 50-token overlap is aligned to complete sentences and can vary for tail constraints. Oversized unpunctuated units still have a bounded token fallback. `legacy-window` remains available for comparison. Independent topics never carry unrelated context.
+- The admin knowledge workbench offers four splitter buttons: A `recursive-markdown` (existing implementation), B `langchain4j-recursive` (LangChain4j within each topic), C `structural-markdown` (bold subsection headings and whole paragraph/list blocks, with recursive fallback for oversized blocks), and D `langchain4j-enhanced` (B with A's heading/body protection). D moves standalone trailing headings to the following body within the same topic; only newly oversized blocks use A's recursive boundaries and sentence-aligned overlap. A heading with no following body is preserved in its original topic. All four use the same approximate token estimator; B/C/D allow chunks below the configured minimum. D does not pad every short block or force overlap throughout B's windows. The default remains A. Select a method, then submit a full rebuild; selected-chunk vector updates never resplit content. The job persists the chosen strategy for retries, and the source records it atomically when new chunks are published, so application restarts retain the choice. Source splitting becomes effective on successful source synchronization; a requested embedding-mode switch becomes effective when vector rebuilding finishes. Administrator-added chunks are preserved. Migration V45 permits D in persisted source/job selections without changing existing selections. Adding D does not trigger a rebuild or model call.
+- Admin counts database chunks rather than evaluation questions: the separate assistant evaluation set has 200 cases (50 base + 150 expansion). Synchronization produces 1,351 system chunks at defaults while preserving `source=admin` entries. A configured source version in `.env` overrides the default; use `MEALCHECK_KNOWLEDGE_SOURCE_VERSION=v8-longform-200-boundary-v2` for this splitter revision. Editing these resources alone does not rebuild a running database index.
 - References provide general food principles; campus menus and recordkeeping examples are editorial applications, not medical prescriptions or measured nutrition data. Real model answer quality remains a separate verification task.
 - Each chunk stores its source, category, source version, token count, update timestamps, stable chunk key, and SHA-256 content hash. Reindexing only regenerates vectors for new or changed chunks; unchanged chunks keep their existing vectors and hit statistics.
+- Chunk `token_count` remains an estimate of the body for splitting. Semantic embedding calls also capture `usage.prompt_tokens` (or `usage.input_tokens`) and `usage.total_tokens` from the same response as the vector. The admin list, details and vector inventory show estimated body length separately from reported usage of the title-plus-body input. Missing, invalid, historical or local-hash usage remains NULL, not zero. Usage is staged and published with its vector, preserved when a vector is reused, and replaced or cleared when regenerated. These fields describe the successful call that generated the current vector, not cumulative usage or a billing ledger; no extra counting request is sent. Regenerate selected vectors or rebuild the knowledge base to populate historical rows.
 - RAG entries manually added by administrators are stored in the database and preserved separately.
 - Hybrid retrieval independently ranks pgvector, title pg_trgm, and content pg_trgm candidates, then combines their ranks with weighted Reciprocal Rank Fusion (`k=60`) plus a small category prior. The normalized fusion score remains compatible with confidence metrics.
 - Optional second-stage reranking expands Top-K weighted-RRF candidates by four and calls a query-document relevance model. Rough rank and reranker rank are fused with Weighted RRF; rough score/rank, raw reranker score/rank, and final score are retained separately. A timeout or provider failure automatically keeps the rough ranking.
-- The 58-case admin RAG benchmark contains 48 answerable and 10 no-answer questions. It reports Hit@3, Hit@5, MRR, nDCG@5, category accuracy, no-answer accuracy, false-positive rate, layered scores, per-stage latency, and an automatic regression result.
+- The 200-case admin RAG dataset contains 168 answerable, 12 in-domain insufficient-evidence and 20 out-of-scope questions. The default [RAG chain evaluation](deploy/RAG_CHAIN_EVALUATION_20261019.md) checks tool orchestration and actual retrieval in one background run, preserving first-query ranking separately from final source-bound evidence coverage across supplemental searches. The proposed evidence labels await independent human review. Standalone retrieval remains an optional title-based diagnostic with Hit@3/5, MRR, nDCG@5, category accuracy, no-answer accuracy, false-positive rate and score-layer details. Neither workflow's retrieval metrics establish final-answer correctness.
 - When reranking is active, candidates below `MEALCHECK_KNOWLEDGE_RERANKER_MIN_SCORE` are rejected before context injection; this raw-score threshold must be calibrated against the no-answer benchmark for the selected provider.
 - Final RAG results use a configurable absolute score floor plus a relative-to-Top1 floor, then remove near-duplicate chunks with lexical Jaccard similarity before context injection.
 - Assistant history remains intact in PostgreSQL. Redis keys include both username and conversation ID, preventing working-memory leakage between separate conversations.
@@ -484,7 +572,7 @@ See [`deploy/RELIABILITY.md`](deploy/RELIABILITY.md) for meal-analysis idempoten
 - Prompt memory is selected by token budget rather than a fixed message count: the most recent messages are retained, relevant older messages are selected, and evicted history is compressed into a rolling summary. Follow-up questions are expanded with the active conversation topic before RAG retrieval.
 - Explicit user goals, preferences, allergies, and restrictions are stored as deduplicated long-term memory vectors. Recall combines semantic similarity, 90-day recency decay, and a same-conversation boost before facts enter the prompt.
 - Recent meals, current goal, weekly report, RAG, and long-term memory are fetched concurrently with independent timeouts and graceful per-source fallback. DB, RAG, and background writes use separate fixed-size bounded executors; a request-wide deadline actively cancels timed-out tasks. Proactive advice reuses the already loaded meal records.
-- Function Calling is disabled by default. When enabled, the model can select only four read-only tools: dietary knowledge search, recent meals, latest weekly report, and current goal. Model HTTP calls, DB tools, and RAG tools run in separate bounded pools; tool rounds, total tool calls, arguments, result sizes, and the end-to-end deadline are bounded. Any failure returns to the existing deterministic orchestration path.
+- Function Calling defaults to enabled in development and disabled in the production configuration. Five read-only tools are available, with a per-intent allow-list: dietary knowledge search, recent meals, latest weekly report, current goal, and catalog-backed next-meal recommendations. Model HTTP calls, DB tools, and RAG tools run in separate bounded pools; tool rounds, total tool calls, arguments, result sizes, and the end-to-end deadline are bounded. Personal-data requests retain deterministic fallback; failed conversational meal planning returns an explicit unavailable response instead of inventing candidates.
 - RAG and admin-stat caches use jittered TTLs and single-flight refresh. Empty RAG results receive a shorter TTL, while a stale copy lets concurrent followers avoid stampeding the database or model provider during refresh.
 - Weekly report generation reuses the durable database job/worker boundary. LangGraph4j manages the internal parallel branches and review loop, while LangChain4j performs the three role-specific model calls. The review loop is bounded by `MEALCHECK_WEEKLY_REPORT_MAX_REVIEW_REVISIONS`, and each Agent call has an independent `MEALCHECK_WEEKLY_REPORT_AGENT_TIMEOUT_SECONDS` timeout.
 - Remote AI, embedding, and reranker calls use configurable exponential-backoff retry, circuit breaking, and semaphore concurrency isolation in addition to HTTP timeouts.
@@ -540,7 +628,7 @@ prints a summary, and can save a JWT-free request/response transcript.
 
 ## Function Calling and MCP
 
-Set `MEALCHECK_ASSISTANT_FUNCTION_CALLING_ENABLED=true` to enable the learning/demo Function Calling path. The flow is:
+Development configuration enables Function Calling by default; set `MEALCHECK_ASSISTANT_FUNCTION_CALLING_ENABLED=true` explicitly when using production configuration. A model supporting tool calls must be configured. The flow is:
 
 ```text
 assistant request -> model receives tool schemas -> model returns tool_calls
@@ -549,6 +637,10 @@ assistant request -> model receives tool schemas -> model returns tool_calls
 ```
 
 The in-process assistant deliberately does not make an HTTP request to its own `/mcp` endpoint. Function Calling and the MCP server reuse the same underlying MealCheck services: Function Calling is the model-to-tool interaction inside this application, while MCP is the standardized boundary for external AI clients. This keeps the monolith efficient while still making the tools available to external MCP hosts.
+
+Conversational next-meal planning works through the browser's existing SSE chat endpoint as well as `/api/assistant/ask`. Ask “晚餐在家做，预算25元，30分钟内准备好，推荐下一餐搭配”, then “改成外卖，预算还是25元”. The model supplies structured arguments to `recommend_next_meal`; the existing `NextMealService` enforces catalog, budget, preparation-time and saved-preference constraints. Costs are reference ranges, not live prices, and time excludes queues and delivery. Missing constraints prompt clarification; no matches prompt an explicit adjustment request rather than silently relaxing constraints. This feature does not save plans or place orders.
+
+The expandable tool-call record shows actual tool names, arguments, origin (`MODEL` or `ORCHESTRATOR`), outcome, round, duration and a bounded result summary. It is returned on completion and preserved with conversation history by Flyway migration V46. It displays execution evidence, not internal model reasoning. See [the demo and verification guide](deploy/FUNCTION_CALLING_MEAL_PLANNING.md).
 
 ## Verification and Operations Guides
 
@@ -592,6 +684,10 @@ Browser tests use deterministic API fixtures. Real PostgreSQL tests validate per
 Image-analysis capacity tests use `loadtests/analysis-capacity.js`, supporting a fixed new-task arrival rate, burst submissions, independent idempotency keys, polling until task completion, and end-to-end P95/P99. Results also check failures, rejections, timeouts, unfinished work, and dropped iterations. The guide includes model stubs, bulk account preparation, and comparisons at concurrency 2/4/8. Stub-based tests do not establish real model-provider capacity.
 
 Flyway migrations now include V7–V18 for evaluation history, coordination tracking, snapshot fencing, corrections, durable analysis and the RabbitMQ outbox. V16 changes the weekly-job unique index; V17 adds the async queue and evaluation snapshots; V18 adds transactional dispatch and backfills unfinished image tasks. Before rolling back, stop new submissions, handle pending tasks, and follow the compatible-version or consistent-backup restore procedure in the guides.
+
+## Local logs
+
+New local development, build, and test logs must be stored under `logs/`. Use `python tools/run_logged.py --group frontend --name build --cwd frontend -- npm run build` to capture command output with a unique timestamp and preserve its exit code. For tools that write their own evidence, also select an output directory under `logs/`. See [log storage conventions](logs/README.md) and [project instructions](AGENTS.md). Historical test-result directories retain their original structure.
 
 ## Pictures
 

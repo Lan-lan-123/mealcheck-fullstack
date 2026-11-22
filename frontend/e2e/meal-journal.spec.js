@@ -1,11 +1,11 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/authTest.js'
 import { createServer } from 'node:http'
 
 async function fixture(page) {
   const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai' }).format(new Date())
   const state = { records: [], goals: [], plans: [], feedback: null, skipped: false, writes: [], cancelled: [], reads: [] }
   const summary = () => ({ periodStart: today, periodEnd: today, totalMeals: state.records.length, recordedDays: state.records.length ? 1 : 0, days: 1, coveragePercent: state.records.length ? 100 : 0, confirmedSkippedSlots: state.skipped ? 1 : 0, unknownSlots: 3, goals: [], plans: { OPEN: 0, DONE: 0, SKIPPED: 0 }, explanation: '未记录表示未知；营养估算不参与达标判断。', daily: [{ day: today, meals: state.records.length, slots: { BREAKFAST: state.skipped ? 'SKIPPED' : 'UNKNOWN', LUNCH: 'UNKNOWN', DINNER: 'UNKNOWN', SNACK: 'UNKNOWN' } }] })
-  await page.addInitScript(() => { localStorage.setItem('mealcheck_token', 'journal-fixture-token'); localStorage.setItem('mealcheck_user', JSON.stringify({ username: 'journal', displayName: '测试用户', role: 'USER' })) })
+  await page.addInitScript(() => { localStorage.setItem('mealcheck_token', 'journal-fixture-token'); sessionStorage.setItem('mealcheck_fixture_user', JSON.stringify({ username: 'journal', displayName: '测试用户', role: 'USER' })) })
   await page.route('**/api/**', async route => {
     const request = route.request(), path = new URL(request.url()).pathname, method = request.method()
     if (!path.startsWith('/api/')) return route.continue()
@@ -16,7 +16,8 @@ async function fixture(page) {
       const body = request.postDataJSON(); state.records.push({ ...body, id: 1, occurredAt: `${body.occurredAt}:00+08:00`, createdAt: new Date().toISOString(), score: 80, summary: '手动餐食', recordSource: 'MANUAL', timeConfirmed: true, metadataVersion: 0, revision: 0, advice: '午餐加一份蔬菜', categoryCounts: {}, riskTags: [] }); return send(state.records[0])
     }
     if (path === '/api/meals/1/metadata') { const body = request.postDataJSON(); state.records[0] = { ...state.records[0], ...body, occurredAt: `${body.occurredAt}:00+08:00`, metadataVersion: state.records[0].metadataVersion + 1 }; return send(state.records[0]) }
-    if (path === '/api/meals') return send({ content: state.records, totalElements: state.records.length, totalPages: 1, page: 0 })
+    if (path === '/api/meals/1' && request.method() === 'GET') return send(state.records[0])
+    if (['/api/meals', '/api/meals/summaries'].includes(path)) return send({ content: state.records, totalElements: state.records.length, totalPages: 1, page: 0 })
     if (path === '/api/meals/skipped') { state.skipped = method !== 'DELETE'; return send(null) }
     if (path === '/api/meals/coverage') return send(summary())
     const paged = items => { const query = new URL(request.url()).searchParams, page = Number(query.get('page') || 0), size = Number(query.get('size') || 20); return { content: items.slice(page * size, (page + 1) * size), page, size, totalElements: items.length, totalPages: Math.ceil(items.length / size) } }
@@ -53,8 +54,15 @@ test('manual backdate, metadata edit and explicit skipped slot are separate flow
   await modal.getByLabel('餐次', { exact: true }).selectOption('LUNCH')
   await modal.getByLabel('手动食物名称 1').fill('青菜')
   await modal.getByLabel('手动食物分类 1').selectOption('vegetable')
+  await modal.getByLabel('手动食物 1 油炸做法', { exact: true }).selectOption('false')
+  await modal.getByLabel('手动食物 1 高油风险', { exact: true }).selectOption('true')
+  await modal.getByLabel('手动食物名称 1').fill('炒青菜')
+  await expect(modal.getByLabel('手动食物 1 高油风险', { exact: true })).toHaveValue('unknown')
+  await modal.getByLabel('手动食物 1 油炸做法', { exact: true }).selectOption('false')
+  await modal.getByLabel('手动食物 1 高油风险', { exact: true }).selectOption('true')
   await modal.getByRole('button', { name: '保存用餐记录' }).click()
   await expect(page.locator('.record-list')).toContainText('手动餐食')
+  expect(state.writes.find(w => w.path.endsWith('/manual')).body.foods[0].attributes).toEqual({ fried: false, highOil: true })
   await page.getByRole('button', { name: '修改用餐信息' }).click()
   const edit = page.getByRole('dialog', { name: '修改用餐信息' })
   await edit.getByLabel('餐次', { exact: true }).selectOption('DINNER')
@@ -63,7 +71,7 @@ test('manual backdate, metadata edit and explicit skipped slot are separate flow
   expect(state.writes.find(w => w.path.endsWith('/metadata')).body.expectedVersion).toBe(0)
   expect(state.writes.some(w => w.path.includes('/analysis'))).toBe(false)
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
-  await page.screenshot({ path: 'test-results/journal-mobile.png', fullPage: true })
+  await page.screenshot({ path: test.info().outputPath('journal-mobile.png'), fullPage: true })
 })
 
 test('behavior goal and suggestion plan support saving, completion, skipping and adjustment', async ({ page }) => {
@@ -120,7 +128,7 @@ test('SSE is visible before completion and finished answer can receive feedback 
     await page.locator('.assistant-fab').click()
     await page.getByPlaceholder('问问怎么吃更合适').fill('午餐怎么吃')
     await page.getByRole('button', { name: '发送问题' }).click()
-    await expect(page.locator('.assistant-message').last()).toContainText('正在整理饮食建议')
+    await expect(page.locator('.assistant-message').last()).toContainText('正在生成并复核回答')
     await expect(page.getByText('先看到这部分建议', { exact: true })).toBeVisible()
     await expect(page.getByRole('button', { name: '取消等待' })).toBeVisible()
     expect(state.feedback).toBe(null)
@@ -134,6 +142,7 @@ test('SSE is visible before completion and finished answer can receive feedback 
     expect(state.feedback.category).toBe('INCORRECT')
     await page.getByRole('button', { name: '加入计划' }).click()
     await page.getByRole('button', { name: '保存行动计划' }).click()
+    await expect.poll(() => state.plans.length).toBe(1)
     expect(state.plans[0].sourceMessageId).toBe(9)
   } finally { await stream.close() }
 })

@@ -38,4 +38,4 @@ API 的 LocalDateTime 时间点统一输出带偏移的 ISO 8601。反序列化�
 
 本次工作区验收：后端全量单元测试 225 项、全量数据库集成测试 64 项均通过；前端单元测试 22 项、浏览器回归 45 项均通过，生产构建通过。最后补充的失败任务筛选时间解析通过 11 项专项后端测试；页面时间标签更新后，4 项相关浏览器测试再次通过。
 
-证据：`backend/target/three-fixes-final-unit.log`、`backend/target/three-fixes-verification.log`、`backend/target/time-filter-verification.log`、`frontend/three-fixes-e2e.log`、`frontend/time-filter-e2e.log`。沙箱内首次 Java 测试受 loopback 权限限制；在允许本机测试网络及隔离容器的环境复测通过。一次最终前端专项 npm 启动器异常退出，随后直接运行 Playwright 完成复测；没有放宽测试断言。
+证据：`backend/target/three-fixes-final-unit.log`、`backend/target/three-fixes-verification.log`、`backend/target/time-filter-verification.log`、`logs/frontend/three-fixes-e2e.log`、`logs/frontend/time-filter-e2e.log`。沙箱内首次 Java 测试受 loopback 权限限制；在允许本机测试网络及隔离容器的环境复测通过。一次最终前端专项 npm 启动器异常退出，随后直接运行 Playwright 完成复测；没有放宽测试断言。

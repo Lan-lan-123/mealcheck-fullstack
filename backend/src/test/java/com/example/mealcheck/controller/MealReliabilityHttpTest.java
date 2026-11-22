@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest({MealAnalysisRequestController.class,MealCorrectionController.class,MealCorrectionEvaluationController.class,VisionEvaluationController.class,TaskFailureAdminController.class})
-@Import({SecurityConfig.class,JwtService.class,JwtAuthenticationFilter.class,CustomUserDetailsService.class})
+@Import({CsrfTestRequests.class,SecurityConfig.class,JwtService.class,JwtAuthenticationFilter.class,CustomUserDetailsService.class})
 @EnableConfigurationProperties(AppProperties.class)
 class MealReliabilityHttpTest {
     @Test void failureTimeFiltersConvertBusinessTimeAndRejectMalformedInput() throws Exception {

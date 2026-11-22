@@ -34,6 +34,8 @@ public final class AiCallContext {
         return context == null ? () -> {} : restore(new Context(context.userId(), context.deadlineNanos(), context.dispatchGuard(), true));
     }
     public static void checkExecution() {
+        if (Thread.currentThread().isInterrupted())
+            throw new RemoteCallGuard.RemoteCallRejectedException("AI operation interrupted");
         var context = capture();
         if (context != null && System.nanoTime() >= context.deadlineNanos())
             throw new RemoteCallGuard.RemoteCallDeadlineException("AI operation deadline exceeded");

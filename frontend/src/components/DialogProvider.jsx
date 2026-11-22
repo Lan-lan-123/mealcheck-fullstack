@@ -1,7 +1,8 @@
+import Button from './Button'
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-const DialogContext = createContext(null)
+const DialogContext = createContext(/** @type {import('../api/contracts').DialogApi | null} */ (null))
 
 export function DialogProvider({ children }) {
   const [request, setRequest] = useState(null)
@@ -37,7 +38,11 @@ export function DialogProvider({ children }) {
   return <DialogContext.Provider value={value}>{children}{request && createPortal(<AppDialog key={request.id} request={request} finish={finish} />, document.body)}</DialogContext.Provider>
 }
 
-export function useDialog() { return useContext(DialogContext) }
+export function useDialog() {
+  const dialog = useContext(DialogContext)
+  if (!dialog) throw new Error('DialogProvider is required')
+  return dialog
+}
 
 function AppDialog({ request, finish }) {
   const ref = useRef(null)
@@ -59,8 +64,8 @@ function AppDialog({ request, finish }) {
         ? <textarea required={request.required !== false} value={answer} onChange={event => setAnswer(event.target.value)} />
         : <input type={request.inputType || 'text'} autoComplete={request.inputType === 'password' ? 'current-password' : 'off'} required={request.required !== false} value={answer} onChange={event => setAnswer(event.target.value)} />}</label>}
       <div className="app-dialog-actions">
-        {request.kind !== 'notify' && <button className="secondary-btn" type="button" data-initial-focus onClick={cancel}>取消</button>}
-        <button className={request.danger ? 'danger-btn' : 'secondary-btn'} type="submit" data-initial-focus={request.kind === 'notify' ? '' : undefined}>{request.confirmText || (request.kind === 'notify' ? '知道了' : '确认')}</button>
+        {request.kind !== 'notify' && <Button variant="secondary" className="secondary-btn" type="button" data-initial-focus onClick={cancel}>取消</Button>}
+        <Button variant="plain" className={request.danger ? 'danger-btn' : 'secondary-btn'} type="submit" data-initial-focus={request.kind === 'notify' ? '' : undefined}>{request.confirmText || (request.kind === 'notify' ? '知道了' : '确认')}</Button>
       </div>
     </form>
   </dialog>

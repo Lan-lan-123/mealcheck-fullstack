@@ -85,7 +85,7 @@ class AssistantMemoryDatabaseIntegrationTest {
         var user=new UserAccount();user.setId(userId);var conversation=new AssistantConversation();conversation.setId(conversationId);
         assertThat(memory.recall(user,conversation,"忌口",5)).extracting(AssistantLongTermMemoryService.MemoryFact::text).containsExactly("我对花生过敏");
         jdbc.update("UPDATE assistant_memory_version SET signature='new:vector-v1'");
-        when(embedding.embed(anyString())).thenThrow(new IllegalStateException("offline"));
+        when(embedding.embedForSignature(anyString(),anyString())).thenThrow(new IllegalStateException("offline"));
         assertThat(memory.remember(user,conversation,"我不喜欢香菜")).isEqualTo(1);
         assertThat(memory.recall(user,conversation,"喜欢",5)).hasSize(2);
         var other=new UserAccount();other.setId(-1L);assertThat(memory.recall(other,conversation,"喜欢",5)).isEmpty();

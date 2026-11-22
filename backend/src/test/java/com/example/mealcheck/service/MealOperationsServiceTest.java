@@ -9,6 +9,19 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.assertj.core.api.Assertions.*;
 
 class MealOperationsServiceTest {
+    @Test void failureAndRecoveryUpdateHealthWithoutErasingLastSuccess() {
+        var jdbc=mock(JdbcTemplate.class); var metrics=new SimpleMeterRegistry();
+        var service=new MealOperationsService(jdbc,metrics,new BackgroundTaskDispatcher(Runnable::run));
+        ReflectionTestUtils.setField(service,"retentionEnabled",true);
+        service.retain();
+        double success=metrics.get("mealcheck.retention.last.success.timestamp.seconds").gauge().value();
+        when(jdbc.update(anyString())).thenThrow(new IllegalStateException("offline"));
+        assertThatThrownBy(service::retain).isInstanceOf(IllegalStateException.class);
+        assertThat(metrics.get("mealcheck.retention.healthy").gauge().value()).isZero();
+        assertThat(metrics.get("mealcheck.retention.last.success.timestamp.seconds").gauge().value()).isEqualTo(success);
+        doReturn(0).when(jdbc).update(anyString()); service.resumeRetention();
+        assertThat(metrics.get("mealcheck.retention.healthy").gauge().value()).isOne();
+    }
     @Test void resumesFullBatchesAndStopsAfterTheBacklogIsDrained() {
         var jdbc = mock(JdbcTemplate.class);
         var service = new MealOperationsService(jdbc, new SimpleMeterRegistry(), new BackgroundTaskDispatcher(Runnable::run));

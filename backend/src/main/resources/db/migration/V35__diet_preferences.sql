@@ -1,0 +1,8 @@
+CREATE TABLE user_diet_preferences (
+    user_id BIGINT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    style VARCHAR(20) NOT NULL DEFAULT 'OMNIVORE' CHECK (style IN ('OMNIVORE','VEGETARIAN','VEGAN')),
+    avoid_foods_json TEXT NOT NULL DEFAULT '[]',
+    disliked_foods_json TEXT NOT NULL DEFAULT '[]',
+    version BIGINT NOT NULL DEFAULT 0,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

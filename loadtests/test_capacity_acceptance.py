@@ -13,6 +13,16 @@ spec.loader.exec_module(acceptance)
 
 
 class AcceptanceSafetyTest(unittest.TestCase):
+    def test_dependency_outages_follow_the_current_authentication_storage_contract(self):
+        for service, status, body, expected in [
+            ('redis', 200, {'content': [], 'totalElements': 0}, True),
+            ('redis', 503, {'code': 'AUTH_DEPENDENCY_UNAVAILABLE'}, False),
+            ('postgres', 503, {'code': 'AUTH_DEPENDENCY_UNAVAILABLE'}, True),
+            ('postgres', 200, {'content': [], 'totalElements': 0}, False)]:
+            with self.subTest(service=service, status=status), patch.object(acceptance, 'command'), \
+                 patch.object(acceptance, 'http', return_value=(status, body)), patch.object(acceptance, 'wait_ready'):
+                self.assertEqual(acceptance.dependency_fault(service, 'fixture')['passed'], expected)
+
     def test_non_fixture_stack_is_rejected_before_seeding_or_faults(self):
         container = {'Id': 'fake-backend', 'Config': {'Labels': {'com.docker.compose.project': 'production', 'com.docker.compose.service': 'backend'}, 'Env': []}}
         replies = [SimpleNamespace(stdout='a b', returncode=0), SimpleNamespace(stdout=json.dumps([container]), returncode=0)]

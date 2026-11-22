@@ -1,0 +1,2199 @@
+{
+  "source": "random10-flash-20261017-213614",
+  "sourceSha256": "a1d9f121e19c2e73e88995b9f0472d282613ff22a8517c1ebdf4c836639e026b",
+  "independentlyAnnotated": false,
+  "cases": [
+    {
+      "id": "synth-044",
+      "recognition": {
+        "foods": [
+          {
+            "name": "玉米棒",
+            "category": "staple",
+            "confidence": 0.98,
+            "note": "黄白双色玉米，表面可见黑胡椒颗粒，无油炸或油光特征",
+            "attributes": {
+              "fried": false,
+              "highOil": false
+            },
+            "reviewIssues": []
+          },
+          {
+            "name": "炒鸡蛋",
+            "category": "protein",
+            "confidence": 0.95,
+            "note": "块状炒蛋，质地蓬松，表面有黑胡椒，未见明显油炸痕迹",
+            "attributes": {
+              "fried": false,
+              "highOil": null
+            },
+            "reviewIssues": []
+          },
+          {
+            "name": "煎蘑菇",
+            "category": "vegetable",
+            "confidence": 0.92,
+            "note": "褐色口蘑切片及整颗，表面湿润反光但非油炸质感，疑似煎制或烤制",
+            "attributes": {
+              "fried": false,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "sceneSummary": "白色圆盘盛放的一餐，包含一根带黑胡椒的煮玉米、一份炒鸡蛋和一堆煎蘑菇。",
+        "foodImage": true,
+        "rejectionReason": "",
+        "demoMode": false,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "本餐识别出玉米棒作为主食、炒鸡蛋作为蛋白质来源，以及煎蘑菇作为蔬菜，整体搭配较为均衡。由于炒鸡蛋和煎蘑菇的高油风险状态为“未知”，建议您在后续饮食中留意烹饪用油量，尽量保持清淡以优化健康指标。若希望进一步丰富营养结构，可在下一餐考虑增加绿叶蔬菜或轮换其他类型的豆制品与肉类。",
+      "previousDisplayedAdvice": "本餐识别到：玉米棒、炒鸡蛋、煎蘑菇。\n结构评价：本餐在均衡饮食目标下整体表现较好，主食、蛋白质和蔬菜搭配较完整。\n建议：保持主食、优质蛋白和蔬菜的搭配，减少高油、高糖或重口味食物的频率。\n参考依据：主食结构建议、蛋白质结构建议、蔬菜结构建议。\n\n提示：AI 建议与已知信息不一致，当前展示的是本地规则建议。",
+      "group": "recorded_regression",
+      "provenance": "recorded-provider-response",
+      "scenario": "高油状态未知的合理表述应原样保留",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "本餐识别出玉米棒作为主食、炒鸡蛋作为蛋白质来源，以及煎蘑菇作为蔬菜，整体搭配较为均衡。由于炒鸡蛋和煎蘑菇的高油风险状态为“未知”，建议您在后续饮食中留意烹饪用油量，尽量保持清淡以优化健康指标。若希望进一步丰富营养结构，可在下一餐考虑增加绿叶蔬菜或轮换其他类型的豆制品与肉类。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "玉米棒",
+            "fried": false,
+            "highOil": false
+          },
+          {
+            "food": "炒鸡蛋",
+            "fried": false,
+            "highOil": true
+          },
+          {
+            "food": "煎蘑菇",
+            "fried": false,
+            "highOil": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "synth-074",
+      "recognition": {
+        "foods": [
+          {
+            "name": "燕麦粥",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "可见明显的燕麦颗粒和粘稠的粥状质地，无油炸或高油迹象",
+            "attributes": {
+              "fried": false,
+              "highOil": false
+            },
+            "reviewIssues": []
+          },
+          {
+            "name": "香蕉",
+            "category": "fruit",
+            "confidence": 0.98,
+            "note": "左侧排列着多片新鲜切片的香蕉，呈淡黄色圆形",
+            "attributes": {
+              "fried": null,
+              "highOil": null
+            },
+            "reviewIssues": []
+          },
+          {
+            "name": "水煮蛋",
+            "category": "protein",
+            "confidence": 0.98,
+            "note": "右侧有两个对半切开的熟鸡蛋，蛋白凝固，蛋黄呈亮黄色且完全熟透，无油炸特征",
+            "attributes": {
+              "fried": false,
+              "highOil": false
+            },
+            "reviewIssues": []
+          }
+        ],
+        "sceneSummary": "一碗盛在白色碗中的燕麦粥，上面铺有切片香蕉和两半煮鸡蛋，放置在木质桌面上。",
+        "foodImage": true,
+        "rejectionReason": "",
+        "demoMode": false,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "本餐已包含燕麦粥、香蕉和水煮蛋，提供了主食、水果和蛋白质来源，但当前未识别到蔬菜。为了优化饮食结构，建议下一餐增加一份绿叶菜或瓜茄类蔬菜，以补充膳食纤维和维生素。同时，请核对香蕉的具体处理方式，确认其是否涉及高油风险。通过在不同餐次轮换食物种类，有助于实现更均衡的营养摄入。",
+      "previousDisplayedAdvice": "本餐已包含燕麦粥、香蕉和水煮蛋，提供了主食、水果和蛋白质来源，但当前未识别到蔬菜。为了优化饮食结构，建议下一餐增加一份绿叶菜或瓜茄类蔬菜，以补充膳食纤维和维生素。同时，请核对香蕉的具体处理方式，确认其是否涉及高油风险。通过在不同餐次轮换食物种类，有助于实现更均衡的营养摄入。",
+      "group": "recorded_regression",
+      "provenance": "recorded-provider-response",
+      "scenario": "删除没有高油线索的香蕉核对句并保留其余建议",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "本餐已包含燕麦粥、香蕉和水煮蛋，提供了主食、水果和蛋白质来源，但当前未识别到蔬菜。为了优化饮食结构，建议下一餐增加一份绿叶菜或瓜茄类蔬菜，以补充膳食纤维和维生素。通过在不同餐次轮换食物种类，有助于实现更均衡的营养摄入。",
+        "filteredConsistent": true,
+        "outcome": "FILTER",
+        "reviewEligibility": [
+          {
+            "food": "燕麦粥",
+            "fried": false,
+            "highOil": false
+          },
+          {
+            "food": "香蕉",
+            "fried": false,
+            "highOil": false
+          },
+          {
+            "food": "水煮蛋",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "unknown-high-oil",
+      "group": "unknown_negation_future",
+      "scenario": "未知高油不能被误拦",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": null,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "面条的高油风险状态为“未知”。下一餐可轮换食材。",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "面条的高油风险状态为“未知”。下一餐可轮换食材。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "unknown-frying",
+      "group": "unknown_negation_future",
+      "scenario": "油炸属性未确认不等于油炸断言",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": null,
+              "highOil": false
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "面条的油炸属性尚未确认。",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "面条的油炸属性尚未确认。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "uncertain-wording",
+      "group": "unknown_negation_future",
+      "scenario": "不确定是有效的未知表达",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": null,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "面条高油风险为不确定。",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "面条高油风险为不确定。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "explicit-negative",
+      "group": "unknown_negation_future",
+      "scenario": "明确否定油炸可以保留",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": false,
+              "highOil": false
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "面条油炸状态为否。",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "面条油炸状态为否。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "cannot-determine",
+      "group": "unknown_negation_future",
+      "scenario": "无法判断是否油炸不构成确定断言",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": null,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "无法判断面条是否油炸。",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "无法判断面条是否油炸。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "not-fried",
+      "group": "unknown_negation_future",
+      "scenario": "不是油炸食物的否定表达",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": false,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "面条不是油炸食物。",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "面条不是油炸食物。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "future-prevention",
+      "group": "unknown_negation_future",
+      "scenario": "下一餐的预防建议不能当作本餐事实",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": null,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "下一餐避免油炸面条，选择水煮面条。",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "下一餐避免油炸面条，选择水煮面条。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "unknown-then-future",
+      "group": "unknown_negation_future",
+      "scenario": "未知事实和未来建议可并存",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": false,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "面条高油未知，下一餐选择清淡做法。",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "面条高油未知，下一餐选择清淡做法。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "confirmed-fried",
+      "group": "confirmed_and_conflicting_risks",
+      "scenario": "确认油炸允许明确陈述",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": true,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "面条经过油炸，下一餐可轮换做法。",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "面条经过油炸，下一餐可轮换做法。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "confirmed-high-oil",
+      "group": "confirmed_and_conflicting_risks",
+      "scenario": "确认高油允许明确陈述",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "红烧肉",
+            "category": "protein",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": false,
+              "highOil": true
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "红烧肉存在高油风险。",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "红烧肉存在高油风险。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "红烧肉",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "either-fried-only",
+      "group": "confirmed_and_conflicting_risks",
+      "scenario": "油炸为真即可支持组合风险",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": true,
+              "highOil": false
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "面条存在油炸或高油风险。",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "面条存在油炸或高油风险。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "either-high-oil-only",
+      "group": "confirmed_and_conflicting_risks",
+      "scenario": "高油为真即可支持组合风险",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "红烧肉",
+            "category": "protein",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": false,
+              "highOil": true
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "红烧肉存在油炸或高油风险。",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "红烧肉存在油炸或高油风险。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "红烧肉",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "false-fried-assertion",
+      "group": "confirmed_and_conflicting_risks",
+      "scenario": "油炸为否不能声称经过油炸",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": false,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "面条经过油炸。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "面条经过油炸。",
+        "filteredConsistent": false,
+        "outcome": "FALLBACK",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "unknown-oil-assertion",
+      "group": "confirmed_and_conflicting_risks",
+      "scenario": "高油未知不能断言存在风险",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": null,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "面条存在高油风险。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "面条存在高油风险。",
+        "filteredConsistent": false,
+        "outcome": "FALLBACK",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "both-false-either",
+      "group": "confirmed_and_conflicting_risks",
+      "scenario": "两个属性均否不能声称组合风险",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": false,
+              "highOil": false
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "面条存在油炸或高油风险。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "面条存在油炸或高油风险。",
+        "filteredConsistent": false,
+        "outcome": "FALLBACK",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "not-unknown-assertion",
+      "group": "confirmed_and_conflicting_risks",
+      "scenario": "不是未知不能被当作未知限定语",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": false,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "面条的高油状态不是未知而是明确存在。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "面条的高油状态不是未知而是明确存在。",
+        "filteredConsistent": false,
+        "outcome": "FALLBACK",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "review-oily-mushrooms",
+      "group": "justified_review",
+      "scenario": "油亮煎制线索支持未知高油核对",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "煎蘑菇",
+            "category": "vegetable",
+            "confidence": 0.95,
+            "note": "油亮反光",
+            "attributes": {
+              "fried": false,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "请核对煎蘑菇是否有高油风险。",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "请核对煎蘑菇是否有高油风险。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "煎蘑菇",
+            "fried": false,
+            "highOil": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "review-frying-conflict",
+      "group": "justified_review",
+      "scenario": "本地油炸冲突支持核对",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "豆腐",
+            "category": "protein",
+            "confidence": 0.95,
+            "note": "做法不清",
+            "attributes": {
+              "fried": null,
+              "highOil": null
+            },
+            "reviewIssues": [
+              {
+                "code": "FRYING_CONFLICT",
+                "message": "本地语义冲突待核对"
+              }
+            ]
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "请核对豆腐是否油炸。",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "请核对豆腐是否油炸。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "豆腐",
+            "fried": true,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "review-oil-conflict",
+      "group": "justified_review",
+      "scenario": "本地高油冲突支持核对",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "豆腐",
+            "category": "protein",
+            "confidence": 0.95,
+            "note": "做法不清",
+            "attributes": {
+              "fried": false,
+              "highOil": null
+            },
+            "reviewIssues": [
+              {
+                "code": "OIL_CONFLICT",
+                "message": "本地语义冲突待核对"
+              }
+            ]
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "建议核对豆腐是否高油。",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "建议核对豆腐是否高油。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "豆腐",
+            "fried": false,
+            "highOil": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "review-either-cooking",
+      "group": "justified_review",
+      "scenario": "两种做法线索允许组合核对",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "烧茄子",
+            "category": "vegetable",
+            "confidence": 0.95,
+            "note": "油亮",
+            "attributes": {
+              "fried": null,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "请核对烧茄子是否涉及油炸或高油风险。",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "请核对烧茄子是否涉及油炸或高油风险。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "烧茄子",
+            "fried": true,
+            "highOil": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "review-battered-noodles",
+      "group": "justified_review",
+      "scenario": "裹粉酥脆线索支持油炸核对而非高油断言",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "裹粉酥脆",
+            "attributes": {
+              "fried": null,
+              "highOil": false
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "请核对面条是否油炸。",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "请核对面条是否油炸。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": true,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "review-fatty-pork",
+      "group": "justified_review",
+      "scenario": "肥瘦线索支持高油核对",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "五花肉",
+            "category": "protein",
+            "confidence": 0.95,
+            "note": "肥瘦相间",
+            "attributes": {
+              "fried": false,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "请核对五花肉是否高油。",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "请核对五花肉是否高油。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "五花肉",
+            "fried": false,
+            "highOil": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "review-two-conflicts",
+      "group": "justified_review",
+      "scenario": "两个独立冲突分别保留核对",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "豆腐",
+            "category": "protein",
+            "confidence": 0.95,
+            "note": "做法不清",
+            "attributes": {
+              "fried": null,
+              "highOil": null
+            },
+            "reviewIssues": [
+              {
+                "code": "FRYING_CONFLICT",
+                "message": "本地语义冲突待核对"
+              },
+              {
+                "code": "OIL_CONFLICT",
+                "message": "本地语义冲突待核对"
+              }
+            ]
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "请核对豆腐是否油炸。请核对豆腐是否高油。",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "请核对豆腐是否油炸。请核对豆腐是否高油。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "豆腐",
+            "fried": true,
+            "highOil": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "review-english-battered",
+      "group": "justified_review",
+      "scenario": "英文烹饪线索支持油炸核对",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "豆腐",
+            "category": "protein",
+            "confidence": 0.95,
+            "note": "battered",
+            "attributes": {
+              "fried": null,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "请核对豆腐是否油炸。",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "请核对豆腐是否油炸。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "豆腐",
+            "fried": true,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "filter-fresh-banana",
+      "group": "unnecessary_review",
+      "scenario": "新鲜水果未知属性不自动要求核对",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "香蕉",
+            "category": "fruit",
+            "confidence": 0.95,
+            "note": "新鲜切片",
+            "attributes": {
+              "fried": null,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "本餐识别到香蕉。请核对香蕉是否高油。下一餐可轮换食材。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "本餐识别到香蕉。下一餐可轮换食材。",
+        "filteredConsistent": true,
+        "outcome": "FILTER",
+        "reviewEligibility": [
+          {
+            "food": "香蕉",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "filter-plain-water",
+      "group": "unnecessary_review",
+      "scenario": "白水无需油炸核对",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "白水",
+            "category": "drink",
+            "confidence": 0.95,
+            "note": "透明饮用水",
+            "attributes": {
+              "fried": null,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "本餐包含白水。请核对白水是否油炸。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "本餐包含白水。",
+        "filteredConsistent": true,
+        "outcome": "FILTER",
+        "reviewEligibility": [
+          {
+            "food": "白水",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "filter-plain-milk",
+      "group": "unnecessary_review",
+      "scenario": "普通饮品未知属性不自动要求核对",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "牛奶",
+            "category": "protein",
+            "confidence": 0.95,
+            "note": "原味饮品",
+            "attributes": {
+              "fried": null,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "请核对牛奶是否高油。下一餐可轮换食材。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "下一餐可轮换食材。",
+        "filteredConsistent": true,
+        "outcome": "FILTER",
+        "reviewEligibility": [
+          {
+            "food": "牛奶",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "filter-known-negative",
+      "group": "unnecessary_review",
+      "scenario": "确认否的属性无需重复核实",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "苹果",
+            "category": "fruit",
+            "confidence": 0.95,
+            "note": "新鲜水果",
+            "attributes": {
+              "fried": false,
+              "highOil": false
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "建议核实苹果是否油炸。下一餐可轮换食材。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "下一餐可轮换食材。",
+        "filteredConsistent": true,
+        "outcome": "FILTER",
+        "reviewEligibility": [
+          {
+            "food": "苹果",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "filter-known-positive",
+      "group": "unnecessary_review",
+      "scenario": "已确认油炸的加工香蕉无需再问是否油炸",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "香蕉",
+            "category": "fruit",
+            "confidence": 0.95,
+            "note": "加工脆片",
+            "attributes": {
+              "fried": true,
+              "highOil": true
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "请核对香蕉是否油炸。下一餐可轮换食材。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "下一餐可轮换食材。",
+        "filteredConsistent": true,
+        "outcome": "FILTER",
+        "reviewEligibility": [
+          {
+            "food": "香蕉",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "filter-wrong-attribute",
+      "group": "unnecessary_review",
+      "scenario": "高油待核对不代表油炸也待核对",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "煎蘑菇",
+            "category": "vegetable",
+            "confidence": 0.95,
+            "note": "油亮",
+            "attributes": {
+              "fried": false,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "请核对煎蘑菇是否油炸。下一餐可轮换食材。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "下一餐可轮换食材。",
+        "filteredConsistent": true,
+        "outcome": "FILTER",
+        "reviewEligibility": [
+          {
+            "food": "煎蘑菇",
+            "fried": false,
+            "highOil": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "filter-resolved-conflict",
+      "group": "unnecessary_review",
+      "scenario": "属性已为否时旧冲突不应要求再次核对",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "豆腐",
+            "category": "protein",
+            "confidence": 0.95,
+            "note": "做法不清",
+            "attributes": {
+              "fried": null,
+              "highOil": false
+            },
+            "reviewIssues": [
+              {
+                "code": "OIL_CONFLICT",
+                "message": "本地语义冲突待核对"
+              }
+            ]
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "请核对豆腐是否高油。下一餐可轮换食材。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "下一餐可轮换食材。",
+        "filteredConsistent": true,
+        "outcome": "FILTER",
+        "reviewEligibility": [
+          {
+            "food": "豆腐",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "filter-negated-english-cues",
+      "group": "unnecessary_review",
+      "scenario": "否定英文线索不能触发高油核对",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "白水",
+            "category": "drink",
+            "confidence": 0.95,
+            "note": "not fried; no oil",
+            "attributes": {
+              "fried": null,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "请检查白水是否高油。下一餐可轮换食材。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "下一餐可轮换食材。",
+        "filteredConsistent": true,
+        "outcome": "FILTER",
+        "reviewEligibility": [
+          {
+            "food": "白水",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "isolate-valid-oil",
+      "group": "food_attribute_meal_isolation",
+      "scenario": "一个食物未知不影响另一食物确认高油",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": false,
+              "highOil": null
+            },
+            "reviewIssues": []
+          },
+          {
+            "name": "红烧肉",
+            "category": "protein",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": false,
+              "highOil": true
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "面条高油未知，红烧肉存在高油风险。",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "面条高油未知，红烧肉存在高油风险。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": false,
+            "highOil": false
+          },
+          {
+            "food": "红烧肉",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "isolate-invalid-oil",
+      "group": "food_attribute_meal_isolation",
+      "scenario": "红烧肉高油不能转移到面条",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": false,
+              "highOil": null
+            },
+            "reviewIssues": []
+          },
+          {
+            "name": "红烧肉",
+            "category": "protein",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": false,
+              "highOil": true
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "红烧肉油炸未知，面条存在高油风险。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "红烧肉油炸未知，面条存在高油风险。",
+        "filteredConsistent": false,
+        "outcome": "FALLBACK",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": false,
+            "highOil": false
+          },
+          {
+            "food": "红烧肉",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "isolate-two-attributes",
+      "group": "food_attribute_meal_isolation",
+      "scenario": "高油未知不能掩盖同食物的油炸错误",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": false,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "面条高油未知，但面条经过油炸。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "面条高油未知，但面条经过油炸。",
+        "filteredConsistent": false,
+        "outcome": "FALLBACK",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "isolate-frying-from-oil",
+      "group": "food_attribute_meal_isolation",
+      "scenario": "油炸未知不能掩盖高油确定断言",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": null,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "面条油炸未知且高油风险明确存在。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "面条油炸未知且高油风险明确存在。",
+        "filteredConsistent": false,
+        "outcome": "FALLBACK",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "isolate-either-from-fried",
+      "group": "food_attribute_meal_isolation",
+      "scenario": "组合风险有效不代表油炸已确认",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "红烧肉",
+            "category": "protein",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": false,
+              "highOil": true
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "红烧肉有油炸或高油风险并经过油炸。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "红烧肉有油炸或高油风险并经过油炸。",
+        "filteredConsistent": false,
+        "outcome": "FALLBACK",
+        "reviewEligibility": [
+          {
+            "food": "红烧肉",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "meal-either-confirmed",
+      "group": "food_attribute_meal_isolation",
+      "scenario": "整餐组合风险由任一食物确认即可支持",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": false,
+              "highOil": null
+            },
+            "reviewIssues": []
+          },
+          {
+            "name": "红烧肉",
+            "category": "protein",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": false,
+              "highOil": true
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "本餐包含面条和红烧肉，系统提示存在油炸或高油风险。",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "本餐包含面条和红烧肉，系统提示存在油炸或高油风险。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": false,
+            "highOil": false
+          },
+          {
+            "food": "红烧肉",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "meal-fried-unconfirmed",
+      "group": "food_attribute_meal_isolation",
+      "scenario": "整餐无确认油炸不能由高油代替",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": false,
+              "highOil": null
+            },
+            "reviewIssues": []
+          },
+          {
+            "name": "红烧肉",
+            "category": "protein",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": false,
+              "highOil": true
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "面条高油未知，但本餐包含油炸食物。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "面条高油未知，但本餐包含油炸食物。",
+        "filteredConsistent": false,
+        "outcome": "FALLBACK",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": false,
+            "highOil": false
+          },
+          {
+            "food": "红烧肉",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "two-foods-two-risks",
+      "group": "food_attribute_meal_isolation",
+      "scenario": "两种食物各自确认不同风险",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": true,
+              "highOil": null
+            },
+            "reviewIssues": []
+          },
+          {
+            "name": "豆腐",
+            "category": "protein",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": null,
+              "highOil": true
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "面条经过油炸，豆腐存在高油风险。",
+      "expected": {
+        "rawConsistent": true,
+        "filteredAdvice": "面条经过油炸，豆腐存在高油风险。",
+        "filteredConsistent": true,
+        "outcome": "KEEP",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": false,
+            "highOil": false
+          },
+          {
+            "food": "豆腐",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "empty-after-filter",
+      "group": "filter_and_fallback_boundaries",
+      "scenario": "唯一内容是不必要核对时回退",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "香蕉",
+            "category": "fruit",
+            "confidence": 0.95,
+            "note": "新鲜切片",
+            "attributes": {
+              "fried": null,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "请核对香蕉是否高油。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "",
+        "filteredConsistent": false,
+        "outcome": "FALLBACK",
+        "reviewEligibility": [
+          {
+            "food": "香蕉",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "same-sentence-conflict",
+      "group": "filter_and_fallback_boundaries",
+      "scenario": "同句事实错误不能被删除核对句掩盖",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "香蕉",
+            "category": "fruit",
+            "confidence": 0.95,
+            "note": "新鲜切片",
+            "attributes": {
+              "fried": null,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "香蕉经过油炸，请核对香蕉是否高油。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "香蕉经过油炸，请核对香蕉是否高油。",
+        "filteredConsistent": false,
+        "outcome": "FALLBACK",
+        "reviewEligibility": [
+          {
+            "food": "香蕉",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "remaining-meat-conflict",
+      "group": "filter_and_fallback_boundaries",
+      "scenario": "删除核对句后蛋类肉类错误仍须回退",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "香蕉",
+            "category": "fruit",
+            "confidence": 0.95,
+            "note": "新鲜切片",
+            "attributes": {
+              "fried": null,
+              "highOil": null
+            },
+            "reviewIssues": []
+          },
+          {
+            "name": "鸡蛋",
+            "category": "protein",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": false,
+              "highOil": false
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "请核对香蕉是否高油。鸡蛋属于肉类。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "鸡蛋属于肉类。",
+        "filteredConsistent": false,
+        "outcome": "FALLBACK",
+        "reviewEligibility": [
+          {
+            "food": "香蕉",
+            "fried": false,
+            "highOil": false
+          },
+          {
+            "food": "鸡蛋",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "remaining-intake-conflict",
+      "group": "filter_and_fallback_boundaries",
+      "scenario": "删除核对句后无依据摄入不足仍须回退",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "香蕉",
+            "category": "fruit",
+            "confidence": 0.95,
+            "note": "新鲜切片",
+            "attributes": {
+              "fried": null,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "请核对香蕉是否高油。本餐蔬菜明显不足。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "本餐蔬菜明显不足。",
+        "filteredConsistent": false,
+        "outcome": "FALLBACK",
+        "reviewEligibility": [
+          {
+            "food": "香蕉",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "unknown-does-not-hide-meat",
+      "group": "filter_and_fallback_boundaries",
+      "scenario": "未知词不能掩盖非风险事实错误",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": false,
+              "highOil": null
+            },
+            "reviewIssues": []
+          },
+          {
+            "name": "鸡蛋",
+            "category": "protein",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": false,
+              "highOil": false
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "面条油炸属性未知，鸡蛋属于肉类。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "面条油炸属性未知，鸡蛋属于肉类。",
+        "filteredConsistent": false,
+        "outcome": "FALLBACK",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": false,
+            "highOil": false
+          },
+          {
+            "food": "鸡蛋",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "keep-justified-after-filter",
+      "group": "filter_and_fallback_boundaries",
+      "scenario": "删除无依据核对后保留有依据核对",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "香蕉",
+            "category": "fruit",
+            "confidence": 0.95,
+            "note": "新鲜切片",
+            "attributes": {
+              "fried": null,
+              "highOil": null
+            },
+            "reviewIssues": []
+          },
+          {
+            "name": "煎蘑菇",
+            "category": "vegetable",
+            "confidence": 0.95,
+            "note": "油亮",
+            "attributes": {
+              "fried": false,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "请核对香蕉是否高油。请核对煎蘑菇是否高油。下一餐可轮换食材。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "请核对煎蘑菇是否高油。下一餐可轮换食材。",
+        "filteredConsistent": true,
+        "outcome": "FILTER",
+        "reviewEligibility": [
+          {
+            "food": "香蕉",
+            "fried": false,
+            "highOil": false
+          },
+          {
+            "food": "煎蘑菇",
+            "fried": false,
+            "highOil": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "semicolon-newline-filter",
+      "group": "filter_and_fallback_boundaries",
+      "scenario": "分号与换行分隔的多个无依据核对",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "香蕉",
+            "category": "fruit",
+            "confidence": 0.95,
+            "note": "新鲜切片",
+            "attributes": {
+              "fried": null,
+              "highOil": null
+            },
+            "reviewIssues": []
+          },
+          {
+            "name": "白水",
+            "category": "drink",
+            "confidence": 0.95,
+            "note": "透明饮用水",
+            "attributes": {
+              "fried": null,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": "请核对香蕉是否高油；下一餐可轮换食材。\n请核对白水是否油炸。",
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "下一餐可轮换食材。",
+        "filteredConsistent": true,
+        "outcome": "FILTER",
+        "reviewEligibility": [
+          {
+            "food": "香蕉",
+            "fried": false,
+            "highOil": false
+          },
+          {
+            "food": "白水",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "null-provider-answer",
+      "group": "filter_and_fallback_boundaries",
+      "scenario": "模型空回答不能当作有效建议",
+      "provenance": "authored-synthetic-rule-case",
+      "goal": "balanced",
+      "recognition": {
+        "foods": [
+          {
+            "name": "面条",
+            "category": "staple",
+            "confidence": 0.95,
+            "note": "",
+            "attributes": {
+              "fried": null,
+              "highOil": null
+            },
+            "reviewIssues": []
+          }
+        ],
+        "foodImage": true,
+        "imageQuality": "CLEAR",
+        "uncertainFoods": []
+      },
+      "rawAdvice": null,
+      "expected": {
+        "rawConsistent": false,
+        "filteredAdvice": "",
+        "filteredConsistent": false,
+        "outcome": "FALLBACK",
+        "reviewEligibility": [
+          {
+            "food": "面条",
+            "fried": false,
+            "highOil": false
+          }
+        ]
+      }
+    }
+  ],
+  "datasetVersion": "advice-unknown-review-v2-50",
+  "schemaVersion": 2,
+  "description": "本地建议风险核对、过滤和回退的离线回归集；2 条历史供应商回答与 48 条显式编写的合成规则样本。顶层 source/sourceSha256 仅对应两条历史记录，不表示新增样本来自供应商或独立人工标注。",
+  "expectedCaseCount": 50
+}

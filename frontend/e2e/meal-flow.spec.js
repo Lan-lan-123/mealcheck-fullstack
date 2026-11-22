@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/authTest.js'
+import { readFile } from 'node:fs/promises'
 
 // Browser tests use a deterministic API contract. Real persistence, authorization,
 // concurrency and migrations are covered separately by the backend tests.
@@ -9,7 +10,7 @@ const report = { periodStart: '2025-01-01', periodEnd: '2025-01-07', days: 7, to
 const meal = { id: 1, revision: 0, foods, score: 21, summary: '列表当前页餐食', createdAt: '2026-09-30T12:00:00' }
 
 async function fixture(page, options = {}) {
-  let currentResult = structuredClone(result), record = structuredClone(meal), key, posts = 0, reads = 0
+  let currentResult = structuredClone(options.analysisResult || result), record = structuredClone(meal), key, posts = 0, reads = 0
   const periodQueries = []
   await page.route('**/api/**', async route => {
     const request = route.request(), url = new URL(request.url()), path = url.pathname
@@ -18,6 +19,7 @@ async function fixture(page, options = {}) {
     if (path === '/api/auth/captcha') return send({ captchaId: 'test', question: '1 + 2 = ?' })
     if (path === '/api/auth/login') return send({ token: 'fixture-token', username: 'alice', role: 'USER', displayName: '测试用户' })
     if (path === '/api/auth/logout') return send(null)
+    if (path === '/api/meals/1/image') return route.fulfill({ contentType: 'image/png', body: await readFile(new URL('../../tools/datasets/synthetic-meals-100/images/synth-005.png', import.meta.url)) })
     if (path === '/api/meals/analysis-requests') {
       posts++; key = request.headers()['idempotency-key']; expect(key).toMatch(/^[\w-]{16,80}$/)
       if (options.lostResponse) return send({ message: '响应传输失败' }, 502)
@@ -32,7 +34,8 @@ async function fixture(page, options = {}) {
       return send(currentResult)
     }
     if (path === '/api/meals/1' && request.method() === 'DELETE') { record = null; return route.fulfill({ status: 204 }) }
-    if (path === '/api/meals') {
+    if (path === '/api/meals/1' && request.method() === 'GET') return send(record)
+    if (['/api/meals', '/api/meals/summaries'].includes(path)) {
       if (options.expired?.()) return send({ message: '登录已失效' }, 401)
       if (url.searchParams.has('from')) {
         periodQueries.push(Object.fromEntries(url.searchParams))
@@ -83,6 +86,39 @@ test('login, upload, correct, weekly detail and delete remain consistent', async
   await page.getByRole('dialog', { name: '确认操作' }).getByRole('button', { name: '确认删除' }).click()
   await expect(page.getByText('暂无饮食记录', { exact: true })).toBeVisible()
   expect(state.posts()).toBe(1)
+})
+
+test('low-confidence foods need confirmation and excluded candidates can be added after inspection', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  const uncertain = { name: '鸡肉', category: 'protein', confidence: .3, note: '被配菜遮挡' }
+  await fixture(page, { analysisResult: { ...result, recognition: { foods: [{ name: '米饭', category: 'staple', confidence: .7, note: '边缘模糊' }], uncertainFoods: [uncertain] } } })
+  await page.locator('input[type=file]').setInputFiles({ name: 'meal.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('fixture') })
+  await page.getByRole('button', { name: '开始分析', exact: true }).click()
+  await page.getByRole('button', { name: '纠正识别结果', exact: true }).click()
+  const dialog = page.getByRole('dialog', { name: '纠正识别结果' })
+  await expect(dialog).toContainText('边缘模糊')
+  await expect(dialog).toContainText('被配菜遮挡')
+  await expect(dialog.getByRole('img', { name: '待核对的餐食图片' })).toBeVisible()
+  const bounds = await dialog.boundingBox()
+  expect(bounds.x).toBeGreaterThanOrEqual(0)
+  expect(bounds.x + bounds.width).toBeLessThanOrEqual(390)
+  await dialog.screenshot({ path: testInfo.outputPath('low-confidence-confirmation.png') })
+  const save = dialog.getByRole('button', { name: '保存并重新评分' })
+  await expect(save).toBeDisabled()
+  await dialog.getByRole('checkbox', { name: '确认食物 1 已核对', exact: true }).check()
+  await expect(save).toBeEnabled()
+  await dialog.getByRole('textbox', { name: '食物名称 1' }).fill('杂粮饭')
+  await expect(save).toBeDisabled()
+  await dialog.getByRole('checkbox', { name: '确认食物 1 已核对', exact: true }).check()
+  await dialog.getByRole('button', { name: '确认并添加：鸡肉', exact: true }).click()
+  await expect(dialog.getByRole('checkbox', { name: '确认食物 2 已核对', exact: true })).toBeChecked()
+  await dialog.getByRole('textbox', { name: '修改原因' }).fill('已对照照片核对两项食物')
+  const request = page.waitForRequest(r => r.url().endsWith('/corrections') && r.method() === 'POST')
+  await save.click()
+  expect((await request).postDataJSON().foods).toEqual([
+    { name: '杂粮饭', category: 'staple', attributes: { fried: null, highOil: null } },
+    { name: '鸡肉', category: 'protein', attributes: { fried: null, highOil: null } }])
+  await expect(dialog).not.toBeVisible()
 })
 
 test('reload recovers a saved analysis after a lost response without resubmission', async ({ page }) => {

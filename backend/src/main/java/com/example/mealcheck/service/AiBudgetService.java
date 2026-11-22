@@ -18,6 +18,8 @@ public class AiBudgetService {
     private final BackgroundTaskDispatcher background;
     @org.springframework.beans.factory.annotation.Autowired(required=false)
     private ModelPriceCatalog priceCatalog;
+    @org.springframework.beans.factory.annotation.Autowired(required=false)
+    private AiCostSettingsService costSettings;
     private final java.util.concurrent.atomic.AtomicReference<java.util.Map<String,Object>> globalSnapshot=new java.util.concurrent.atomic.AtomicReference<>(java.util.Map.of());
     private final java.util.concurrent.atomic.AtomicReference<java.util.Map<String,Object>> recoverySnapshot=new java.util.concurrent.atomic.AtomicReference<>(java.util.Map.of());
     private final java.util.concurrent.atomic.AtomicInteger monitorHealthy=new java.util.concurrent.atomic.AtomicInteger();
@@ -53,7 +55,7 @@ public class AiBudgetService {
         Long userId=currentUser();
         var now=ZonedDateTime.now(ZoneId.of(config.getZone()));
         try {
-            return store.reserve(key(userId),userId,now.toLocalDate(),callLimit(userId),costLimit(userId),
+            return store.reserve(key(userId),userId,now.toLocalDate(),callLimit(userId),defaultCostLimit(userId),
                     money(estimate.max(config.getReservationCost())),retryAfter(now));
         } catch (BudgetExceededException exceeded) {
             metrics.counter("mealcheck.ai.budget.rejected").increment(); throw exceeded;
@@ -81,6 +83,7 @@ public class AiBudgetService {
         result.put("enabled",config.isEnabled());result.put("day",now.toLocalDate());
         result.put("resetAt",now.toLocalDate().plusDays(1).atStartOfDay(now.getZone()).toInstant());
         result.put("callLimit",callLimit(userId));result.put("costLimit",costLimit(userId));
+        if(costSettings!=null)result.put("currency",costSettings.currency());
         var usage=config.isEnabled()?store.usage(key(userId),now.toLocalDate()):java.util.Map.<String,Object>of("attempts",0,"spent",BigDecimal.ZERO,"reserved",BigDecimal.ZERO);
         result.putAll(usage);
         result.put("remainingCalls",Math.max(0,callLimit(userId)-((Number)usage.get("attempts")).intValue()));
@@ -123,7 +126,11 @@ public class AiBudgetService {
     }
     private String key(Long userId) { return userId==null?"system":"user:"+userId; }
     private int callLimit(Long userId) { return Math.max(1,userId==null?properties.getAiBudget().getSystemDailyCalls():properties.getAiBudget().getDailyCalls()); }
-    private BigDecimal costLimit(Long userId) { return userId==null?properties.getAiBudget().getSystemDailyCost():properties.getAiBudget().getDailyCost(); }
+    private BigDecimal costLimit(Long userId) {
+        var fallback=defaultCostLimit(userId);
+        return costSettings==null?fallback:costSettings.limits(userId,BigDecimal.ZERO,fallback,false).quota();
+    }
+    private BigDecimal defaultCostLimit(Long userId) { return userId==null?properties.getAiBudget().getSystemDailyCost():properties.getAiBudget().getDailyCost(); }
     public static BigDecimal money(BigDecimal value) { return value.max(BigDecimal.ZERO).setScale(6,RoundingMode.CEILING); }
     private long retryAfter(ZonedDateTime now) { return Math.max(1,Duration.between(now,now.toLocalDate().plusDays(1).atStartOfDay(now.getZone())).toSeconds()); }
     public static class BudgetExceededException extends RemoteCallGuard.NonRetryableRemoteCallException {

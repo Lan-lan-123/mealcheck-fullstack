@@ -1,5 +1,7 @@
 # 上传突发优化及消费者并发 2 / 4 对照（20261004-195236）
 
+> 2026-10-26 本地证据精简：以下批次保留原始汇总、日志和清单，已删除逐点采样与测试图片，不能再作为完整原始证据包：[20261004-173543](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-173543.md)；[20261004-193440](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-193440.md)；[20261004-195236](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-195236.md)；[20261004-204434](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-204434.md)；[20261004-210906](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-210906.md)。原验收结论与原清单校验值未改写。
+
 北京时间：2026-10-04T19:52:36.770585+08:00 至 2026-10-04T20:39:18.733441+08:00。
 
 ## 结论
@@ -116,30 +118,30 @@ python loadtests/write-burst-comparison-report.py loadtests/results/20261004-195
 ```
 
 - [本轮参数、镜像、验证与清理记录](../results/20261004-195236/manifest.json)
-- [容器与队列采样](../results/20261004-195236/resources.jsonl)
+- [容器与队列采样（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-195236.md)
 - [仅扩充本轮账号的 SQL](../results/20261004-195236/seed-records.sql)
 - [实测脚本及配置快照](../results/20261004-195236/scripts)
 - [上轮优化报告](k6-optimization-20261004-173543.md)；新一轮修改了后端实现，旧数据仅作背景，本轮并发对照以同一新镜像为准。
 - [3 秒等待校准的失败记录](k6-burst-comparison-20261004-193440.md)：20 张中 19 张接收成功，1 张受控拒绝；随后调整为 5 秒，未删除或混入该轮结果。
-- `seed`：[汇总](../results/20261004-195236/seed.json)、[日志](../results/20261004-195236/seed.log)、[时间序列](../results/20261004-195236/seed.timeseries.jsonl)，退出码 0。
-- `c2-warmup`：[汇总](../results/20261004-195236/c2-warmup.json)、[日志](../results/20261004-195236/c2-warmup.log)、[时间序列](../results/20261004-195236/c2-warmup.timeseries.jsonl)，退出码 0。
-- `c2-entry-20`：[汇总](../results/20261004-195236/c2-entry-20.json)、[日志](../results/20261004-195236/c2-entry-20.log)、[时间序列](../results/20261004-195236/c2-entry-20.timeseries.jsonl)，退出码 0。
-- `c2-boundary-20`：[汇总](../results/20261004-195236/c2-boundary-20.json)、[日志](../results/20261004-195236/c2-boundary-20.log)、[时间序列](../results/20261004-195236/c2-boundary-20.timeseries.jsonl)，退出码 0。
-- `c2-overload-50`：[汇总](../results/20261004-195236/c2-overload-50.json)、[日志](../results/20261004-195236/c2-overload-50.log)、[时间序列](../results/20261004-195236/c2-overload-50.timeseries.jsonl)，退出码 0。
-- `c2-large-10`：[汇总](../results/20261004-195236/c2-large-10.json)、[日志](../results/20261004-195236/c2-large-10.log)、[时间序列](../results/20261004-195236/c2-large-10.timeseries.jsonl)，退出码 0。
-- `c2-burst-20-r1`：[汇总](../results/20261004-195236/c2-burst-20-r1.json)、[日志](../results/20261004-195236/c2-burst-20-r1.log)、[时间序列](../results/20261004-195236/c2-burst-20-r1.timeseries.jsonl)，退出码 99。
-- `c2-burst-20-r2`：[汇总](../results/20261004-195236/c2-burst-20-r2.json)、[日志](../results/20261004-195236/c2-burst-20-r2.log)、[时间序列](../results/20261004-195236/c2-burst-20-r2.timeseries.jsonl)，退出码 99。
-- `c2-arrival-20-long`：[汇总](../results/20261004-195236/c2-arrival-20-long.json)、[日志](../results/20261004-195236/c2-arrival-20-long.log)、[时间序列](../results/20261004-195236/c2-arrival-20-long.timeseries.jsonl)，退出码 99。
-- `c2-mixed-20`：[汇总](../results/20261004-195236/c2-mixed-20.json)、[日志](../results/20261004-195236/c2-mixed-20.log)、[时间序列](../results/20261004-195236/c2-mixed-20.timeseries.jsonl)，退出码 99。
-- `c4-warmup`：[汇总](../results/20261004-195236/c4-warmup.json)、[日志](../results/20261004-195236/c4-warmup.log)、[时间序列](../results/20261004-195236/c4-warmup.timeseries.jsonl)，退出码 0。
-- `c4-entry-20`：[汇总](../results/20261004-195236/c4-entry-20.json)、[日志](../results/20261004-195236/c4-entry-20.log)、[时间序列](../results/20261004-195236/c4-entry-20.timeseries.jsonl)，退出码 0。
-- `c4-boundary-20`：[汇总](../results/20261004-195236/c4-boundary-20.json)、[日志](../results/20261004-195236/c4-boundary-20.log)、[时间序列](../results/20261004-195236/c4-boundary-20.timeseries.jsonl)，退出码 0。
-- `c4-overload-50`：[汇总](../results/20261004-195236/c4-overload-50.json)、[日志](../results/20261004-195236/c4-overload-50.log)、[时间序列](../results/20261004-195236/c4-overload-50.timeseries.jsonl)，退出码 0。
-- `c4-large-10`：[汇总](../results/20261004-195236/c4-large-10.json)、[日志](../results/20261004-195236/c4-large-10.log)、[时间序列](../results/20261004-195236/c4-large-10.timeseries.jsonl)，退出码 0。
-- `c4-burst-20-r1`：[汇总](../results/20261004-195236/c4-burst-20-r1.json)、[日志](../results/20261004-195236/c4-burst-20-r1.log)、[时间序列](../results/20261004-195236/c4-burst-20-r1.timeseries.jsonl)，退出码 0。
-- `c4-burst-20-r2`：[汇总](../results/20261004-195236/c4-burst-20-r2.json)、[日志](../results/20261004-195236/c4-burst-20-r2.log)、[时间序列](../results/20261004-195236/c4-burst-20-r2.timeseries.jsonl)，退出码 0。
-- `c4-arrival-20-long`：[汇总](../results/20261004-195236/c4-arrival-20-long.json)、[日志](../results/20261004-195236/c4-arrival-20-long.log)、[时间序列](../results/20261004-195236/c4-arrival-20-long.timeseries.jsonl)，退出码 0。
-- `c4-mixed-20`：[汇总](../results/20261004-195236/c4-mixed-20.json)、[日志](../results/20261004-195236/c4-mixed-20.log)、[时间序列](../results/20261004-195236/c4-mixed-20.timeseries.jsonl)，退出码 0。
+- `seed`：[汇总](../results/20261004-195236/seed.json)、[日志](../results/20261004-195236/seed.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-195236.md)，退出码 0。
+- `c2-warmup`：[汇总](../results/20261004-195236/c2-warmup.json)、[日志](../results/20261004-195236/c2-warmup.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-195236.md)，退出码 0。
+- `c2-entry-20`：[汇总](../results/20261004-195236/c2-entry-20.json)、[日志](../results/20261004-195236/c2-entry-20.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-195236.md)，退出码 0。
+- `c2-boundary-20`：[汇总](../results/20261004-195236/c2-boundary-20.json)、[日志](../results/20261004-195236/c2-boundary-20.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-195236.md)，退出码 0。
+- `c2-overload-50`：[汇总](../results/20261004-195236/c2-overload-50.json)、[日志](../results/20261004-195236/c2-overload-50.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-195236.md)，退出码 0。
+- `c2-large-10`：[汇总](../results/20261004-195236/c2-large-10.json)、[日志](../results/20261004-195236/c2-large-10.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-195236.md)，退出码 0。
+- `c2-burst-20-r1`：[汇总](../results/20261004-195236/c2-burst-20-r1.json)、[日志](../results/20261004-195236/c2-burst-20-r1.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-195236.md)，退出码 99。
+- `c2-burst-20-r2`：[汇总](../results/20261004-195236/c2-burst-20-r2.json)、[日志](../results/20261004-195236/c2-burst-20-r2.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-195236.md)，退出码 99。
+- `c2-arrival-20-long`：[汇总](../results/20261004-195236/c2-arrival-20-long.json)、[日志](../results/20261004-195236/c2-arrival-20-long.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-195236.md)，退出码 99。
+- `c2-mixed-20`：[汇总](../results/20261004-195236/c2-mixed-20.json)、[日志](../results/20261004-195236/c2-mixed-20.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-195236.md)，退出码 99。
+- `c4-warmup`：[汇总](../results/20261004-195236/c4-warmup.json)、[日志](../results/20261004-195236/c4-warmup.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-195236.md)，退出码 0。
+- `c4-entry-20`：[汇总](../results/20261004-195236/c4-entry-20.json)、[日志](../results/20261004-195236/c4-entry-20.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-195236.md)，退出码 0。
+- `c4-boundary-20`：[汇总](../results/20261004-195236/c4-boundary-20.json)、[日志](../results/20261004-195236/c4-boundary-20.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-195236.md)，退出码 0。
+- `c4-overload-50`：[汇总](../results/20261004-195236/c4-overload-50.json)、[日志](../results/20261004-195236/c4-overload-50.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-195236.md)，退出码 0。
+- `c4-large-10`：[汇总](../results/20261004-195236/c4-large-10.json)、[日志](../results/20261004-195236/c4-large-10.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-195236.md)，退出码 0。
+- `c4-burst-20-r1`：[汇总](../results/20261004-195236/c4-burst-20-r1.json)、[日志](../results/20261004-195236/c4-burst-20-r1.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-195236.md)，退出码 0。
+- `c4-burst-20-r2`：[汇总](../results/20261004-195236/c4-burst-20-r2.json)、[日志](../results/20261004-195236/c4-burst-20-r2.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-195236.md)，退出码 0。
+- `c4-arrival-20-long`：[汇总](../results/20261004-195236/c4-arrival-20-long.json)、[日志](../results/20261004-195236/c4-arrival-20-long.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-195236.md)，退出码 0。
+- `c4-mixed-20`：[汇总](../results/20261004-195236/c4-mixed-20.json)、[日志](../results/20261004-195236/c4-mixed-20.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-195236.md)，退出码 0。
 - [最终健康与清理验证](../results/20261004-195236/final-health.json)。
 - [上传临时存储验证](../results/20261004-195236/storage.json)。
 
@@ -177,25 +179,25 @@ python loadtests/write-burst-comparison-report.py loadtests/results/20261004-195
 内存补测清理验证：六个容器健康、无 OOM 与重启；本轮账号数据、队列、Outbox 和 multipart 临时文件均已清空。峰值来自间隔采样，不能当作更大图片分布或更长运行的硬上界。
 
 - [补测参数、运行配置与清理](../results/20261004-204434/manifest.json)
-- [补测资源采样](../results/20261004-204434/resources.jsonl)
+- [补测资源采样（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-204434.md)
 - [补测最终健康](../results/20261004-204434/final-health.json)
 - [补测临时存储](../results/20261004-204434/storage.json)
 - 复现：`python loadtests/run-burst-comparison.py --memory-check`，再执行本轮的健康收集；生成报告时增加 `--memory-evidence <补测目录>`。
-- `seed`：[汇总](../results/20261004-204434/seed.json)、[日志](../results/20261004-204434/seed.log)、[时间序列](../results/20261004-204434/seed.timeseries.jsonl)。
-- `c2-warmup`：[汇总](../results/20261004-204434/c2-warmup.json)、[日志](../results/20261004-204434/c2-warmup.log)、[时间序列](../results/20261004-204434/c2-warmup.timeseries.jsonl)。
-- `c2-entry-20`：[汇总](../results/20261004-204434/c2-entry-20.json)、[日志](../results/20261004-204434/c2-entry-20.log)、[时间序列](../results/20261004-204434/c2-entry-20.timeseries.jsonl)。
-- `c2-boundary-20`：[汇总](../results/20261004-204434/c2-boundary-20.json)、[日志](../results/20261004-204434/c2-boundary-20.log)、[时间序列](../results/20261004-204434/c2-boundary-20.timeseries.jsonl)。
-- `c2-overload-50`：[汇总](../results/20261004-204434/c2-overload-50.json)、[日志](../results/20261004-204434/c2-overload-50.log)、[时间序列](../results/20261004-204434/c2-overload-50.timeseries.jsonl)。
-- `c2-large-10`：[汇总](../results/20261004-204434/c2-large-10.json)、[日志](../results/20261004-204434/c2-large-10.log)、[时间序列](../results/20261004-204434/c2-large-10.timeseries.jsonl)。
-- `c2-burst-20-r1`：[汇总](../results/20261004-204434/c2-burst-20-r1.json)、[日志](../results/20261004-204434/c2-burst-20-r1.log)、[时间序列](../results/20261004-204434/c2-burst-20-r1.timeseries.jsonl)。
-- `c4-warmup`：[汇总](../results/20261004-204434/c4-warmup.json)、[日志](../results/20261004-204434/c4-warmup.log)、[时间序列](../results/20261004-204434/c4-warmup.timeseries.jsonl)。
-- `c4-entry-20`：[汇总](../results/20261004-204434/c4-entry-20.json)、[日志](../results/20261004-204434/c4-entry-20.log)、[时间序列](../results/20261004-204434/c4-entry-20.timeseries.jsonl)。
-- `c4-boundary-20`：[汇总](../results/20261004-204434/c4-boundary-20.json)、[日志](../results/20261004-204434/c4-boundary-20.log)、[时间序列](../results/20261004-204434/c4-boundary-20.timeseries.jsonl)。
-- `c4-overload-50`：[汇总](../results/20261004-204434/c4-overload-50.json)、[日志](../results/20261004-204434/c4-overload-50.log)、[时间序列](../results/20261004-204434/c4-overload-50.timeseries.jsonl)。
-- `c4-large-10`：[汇总](../results/20261004-204434/c4-large-10.json)、[日志](../results/20261004-204434/c4-large-10.log)、[时间序列](../results/20261004-204434/c4-large-10.timeseries.jsonl)。
-- `c4-burst-20-r1`：[汇总](../results/20261004-204434/c4-burst-20-r1.json)、[日志](../results/20261004-204434/c4-burst-20-r1.log)、[时间序列](../results/20261004-204434/c4-burst-20-r1.timeseries.jsonl)。
-- `c4-arrival-20-long`：[汇总](../results/20261004-204434/c4-arrival-20-long.json)、[日志](../results/20261004-204434/c4-arrival-20-long.log)、[时间序列](../results/20261004-204434/c4-arrival-20-long.timeseries.jsonl)。
-- `c4-mixed-20`：[汇总](../results/20261004-204434/c4-mixed-20.json)、[日志](../results/20261004-204434/c4-mixed-20.log)、[时间序列](../results/20261004-204434/c4-mixed-20.timeseries.jsonl)。
+- `seed`：[汇总](../results/20261004-204434/seed.json)、[日志](../results/20261004-204434/seed.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-204434.md)。
+- `c2-warmup`：[汇总](../results/20261004-204434/c2-warmup.json)、[日志](../results/20261004-204434/c2-warmup.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-204434.md)。
+- `c2-entry-20`：[汇总](../results/20261004-204434/c2-entry-20.json)、[日志](../results/20261004-204434/c2-entry-20.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-204434.md)。
+- `c2-boundary-20`：[汇总](../results/20261004-204434/c2-boundary-20.json)、[日志](../results/20261004-204434/c2-boundary-20.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-204434.md)。
+- `c2-overload-50`：[汇总](../results/20261004-204434/c2-overload-50.json)、[日志](../results/20261004-204434/c2-overload-50.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-204434.md)。
+- `c2-large-10`：[汇总](../results/20261004-204434/c2-large-10.json)、[日志](../results/20261004-204434/c2-large-10.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-204434.md)。
+- `c2-burst-20-r1`：[汇总](../results/20261004-204434/c2-burst-20-r1.json)、[日志](../results/20261004-204434/c2-burst-20-r1.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-204434.md)。
+- `c4-warmup`：[汇总](../results/20261004-204434/c4-warmup.json)、[日志](../results/20261004-204434/c4-warmup.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-204434.md)。
+- `c4-entry-20`：[汇总](../results/20261004-204434/c4-entry-20.json)、[日志](../results/20261004-204434/c4-entry-20.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-204434.md)。
+- `c4-boundary-20`：[汇总](../results/20261004-204434/c4-boundary-20.json)、[日志](../results/20261004-204434/c4-boundary-20.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-204434.md)。
+- `c4-overload-50`：[汇总](../results/20261004-204434/c4-overload-50.json)、[日志](../results/20261004-204434/c4-overload-50.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-204434.md)。
+- `c4-large-10`：[汇总](../results/20261004-204434/c4-large-10.json)、[日志](../results/20261004-204434/c4-large-10.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-204434.md)。
+- `c4-burst-20-r1`：[汇总](../results/20261004-204434/c4-burst-20-r1.json)、[日志](../results/20261004-204434/c4-burst-20-r1.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-204434.md)。
+- `c4-arrival-20-long`：[汇总](../results/20261004-204434/c4-arrival-20-long.json)、[日志](../results/20261004-204434/c4-arrival-20-long.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-204434.md)。
+- `c4-mixed-20`：[汇总](../results/20261004-204434/c4-mixed-20.json)、[日志](../results/20261004-204434/c4-mixed-20.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-204434.md)。
 - [两次建连超时的时间序列证据](../results/20261004-204434/connection-diagnostics.json)。
 
 ## 明确 IPv4 地址的持续与混合复测
@@ -212,13 +214,13 @@ python loadtests/write-burst-comparison-report.py loadtests/results/20261004-195
 IPv4 复测通过，原有两次建连超时仍作为失败证据保留；一次复测不能证明 localhost/DNS 就是根因。最终六个容器健康，本轮数据和临时文件清理完成，队列及 Outbox 为 0。
 
 - [IPv4 复测参数及清理](../results/20261004-210906/manifest.json)
-- [IPv4 复测资源采样](../results/20261004-210906/resources.jsonl)
+- [IPv4 复测资源采样（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-210906.md)
 - [IPv4 复测最终健康](../results/20261004-210906/final-health.json)
 - [IPv4 复测临时存储](../results/20261004-210906/storage.json)
 - 复现：`python loadtests/run-burst-comparison.py --continuous-only`，执行健康收集后生成报告时增加 `--confirmation-evidence <IPv4 复测目录>`。
-- `seed`：[汇总](../results/20261004-210906/seed.json)、[日志](../results/20261004-210906/seed.log)、[时间序列](../results/20261004-210906/seed.timeseries.jsonl)。
-- `c4-warmup`：[汇总](../results/20261004-210906/c4-warmup.json)、[日志](../results/20261004-210906/c4-warmup.log)、[时间序列](../results/20261004-210906/c4-warmup.timeseries.jsonl)。
-- `c4-arrival-20-long`：[汇总](../results/20261004-210906/c4-arrival-20-long.json)、[日志](../results/20261004-210906/c4-arrival-20-long.log)、[时间序列](../results/20261004-210906/c4-arrival-20-long.timeseries.jsonl)。
-- `c4-mixed-20`：[汇总](../results/20261004-210906/c4-mixed-20.json)、[日志](../results/20261004-210906/c4-mixed-20.log)、[时间序列](../results/20261004-210906/c4-mixed-20.timeseries.jsonl)。
+- `seed`：[汇总](../results/20261004-210906/seed.json)、[日志](../results/20261004-210906/seed.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-210906.md)。
+- `c4-warmup`：[汇总](../results/20261004-210906/c4-warmup.json)、[日志](../results/20261004-210906/c4-warmup.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-210906.md)。
+- `c4-arrival-20-long`：[汇总](../results/20261004-210906/c4-arrival-20-long.json)、[日志](../results/20261004-210906/c4-arrival-20-long.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-210906.md)。
+- `c4-mixed-20`：[汇总](../results/20261004-210906/c4-mixed-20.json)、[日志](../results/20261004-210906/c4-mixed-20.log)、[时间序列（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-210906.md)。
 
 账号文件含 JWT 与清理密码，禁止分享。原始证据在 Git 忽略目录，分享 Markdown 时需要另行保存证据。

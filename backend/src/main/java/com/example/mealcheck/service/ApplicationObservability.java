@@ -19,6 +19,11 @@ public class ApplicationObservability {
     public long start() {
         return System.nanoTime();
     }
+    void recordMealAdviceValidation(java.util.Set<MealAdviceConsistency.Reason> reasons,boolean accepted) {
+        String outcome=accepted?"accepted":"rule_fallback";
+        if(reasons.isEmpty())counter("mealcheck.meal.advice.validation","reason","PASS","outcome",outcome).increment();
+        else for(var reason:reasons)counter("mealcheck.meal.advice.validation","reason",reason.name(),"outcome",outcome).increment();
+    }
 
     public void recordEmbedding(long startedAt, String provider, String outcome) {
         timer("mealcheck.knowledge.embedding.duration", "provider", provider, "outcome", outcome)
@@ -110,6 +115,9 @@ public class ApplicationObservability {
     public void recordAiUsageAvailability(String operation,boolean known,boolean priced) {
         if (!known) counter("mealcheck.ai.usage.missing","operation",safeOperation(operation)).increment();
         if (!priced) counter("mealcheck.ai.cost.unpriced","operation",safeOperation(operation)).increment();
+    }
+    public void recordAiHttpFailure(String operation,String reason) {
+        counter("mealcheck.ai.http.failures","operation",safeOperation(operation),"reason",reason).increment();
     }
 
     public void recordWeeklyReport(String outcome, int count) {
@@ -214,7 +222,7 @@ public class ApplicationObservability {
             return "unknown";
         }
         return switch (operation) {
-            case "vision-recognition", "meal-advice", "diet-assistant",
+            case "vision-recognition", "meal-advice", "diet-assistant", "embedding", "reranker", "diet-assistant-evidence-review",
                  "diet-assistant-function-calling", "weekly-report-trend-agent",
                  "weekly-report-plan-agent", "weekly-report-review-agent" -> operation;
             default -> "other";

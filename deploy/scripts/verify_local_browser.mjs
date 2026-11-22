@@ -3,6 +3,7 @@
 import { chromium, expect } from '../../frontend/node_modules/@playwright/test/index.mjs'
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
+import { installBrowserSession } from './cookie-browser.mjs'
 
 let input = ''
 for await (const chunk of process.stdin) input += chunk
@@ -13,10 +14,7 @@ const browser = await chromium.launch({ headless: true,
   ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE } : {}) })
 try {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } })
-  await page.addInitScript(auth => {
-    localStorage.setItem('mealcheck_token', auth.token)
-    localStorage.setItem('mealcheck_user', JSON.stringify({ username: auth.username, displayName: auth.displayName, role: auth.role || 'USER' }))
-  }, config.auth)
+  await installBrowserSession(page.context(), config.baseUrl, config.auth.token)
   await page.goto(config.baseUrl + '/user/records')
   await page.getByRole('button', { name: '查看餐食详情', exact: true }).click()
   const panel = page.getByRole('region', { name: '可选份量与营养估算' })

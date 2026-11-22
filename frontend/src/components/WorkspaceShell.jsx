@@ -1,3 +1,4 @@
+import Button from './Button'
 import { useEffect, useRef, useState } from 'react'
 import { ArrowUpRight, ChevronDown, ChevronLeft, ChevronRight, Leaf, LogOut, Menu, X } from 'lucide-react'
 
@@ -75,26 +76,26 @@ export default function WorkspaceShell({ mode = 'user', user, items, activeKey, 
         <div className="workspace-brand">
           <span className="workspace-logo"><Leaf size={24} strokeWidth={1.8} /></span>
           <div className="sidebar-label"><strong>MealCheck<span>.</span></strong><small>{admin ? '管理工作台' : '让每一餐更有营养'}</small></div>
-          {mobile && <button className="icon-button sidebar-close" type="button" aria-label="关闭导航菜单" onClick={() => setOpen(false)}><X size={20} /></button>}
+          {mobile && <Button variant="plain" className="icon-button sidebar-close" type="button" aria-label="关闭导航菜单" onClick={() => setOpen(false)}><X size={20} /></Button>}
         </div>
         <nav className="workspace-nav" aria-label={admin ? '管理页面切换' : '用户页面切换'}>
           {groups.map((group, groupIndex) => <div className="workspace-nav-group" key={group}>
             <div className="nav-group">
-              {collapsed && !mobile ? null : <button type="button" aria-expanded={!closedGroups[group]} aria-controls={`nav-group-${groupIndex}`}
+              {collapsed && !mobile ? null : <Button variant="plain" type="button" aria-expanded={!closedGroups[group]} aria-controls={`nav-group-${groupIndex}`}
                 onClick={() => setClosedGroups(current => ({ ...current, [group]: !current[group] }))}>
                 <span>{group}</span><ChevronDown size={13} className={closedGroups[group] ? 'group-is-closed' : ''} />
-              </button>}
+              </Button>}
             </div>
             <div id={`nav-group-${groupIndex}`} className="section-panel" hidden={closedGroups[group] && !(collapsed && !mobile)}>
           {items.filter(item => item.group === group).map(item => {
             const Icon = item.icon
             return <div key={item.key}>
-              <button type="button" className={`workspace-nav-item${item.key === activeKey ? ' active' : ''}`}
+              <Button variant="plain" type="button" className={`workspace-nav-item${item.key === activeKey ? ' active' : ''}`}
                 aria-current={item.key === activeKey ? 'page' : undefined} aria-label={item.label}
                 title={collapsed && !mobile ? item.label : undefined} onClick={() => navigate(item.key)}>
                 <Icon size={20} strokeWidth={1.7} /><span className="sidebar-label">{item.label}</span>
                 {item.key === activeKey && <span className="nav-active-dot" aria-hidden="true" />}
-              </button>
+              </Button>
             </div>
           })}
             </div>
@@ -102,21 +103,21 @@ export default function WorkspaceShell({ mode = 'user', user, items, activeKey, 
         </nav>
         <div className="sidebar-bottom">
           <div className="sidebar-note sidebar-label"><Leaf size={19} /><strong>{admin ? '有序管理，安心运行' : '好好吃饭，从这一餐开始'}</strong><p>{admin ? '用户、内容与运行状态，一处掌握。' : '记录每一餐，发现饮食习惯里的小进步。'}</p></div>
-          {switchAction && <button className="workspace-nav-item" type="button" aria-label={switchAction.label} title={switchAction.label} onClick={switchAction.onClick}><ArrowUpRight size={20} /><span className="sidebar-label">{switchAction.label}</span></button>}
+          {switchAction && <Button variant="plain" className="workspace-nav-item" type="button" aria-label={switchAction.label} title={switchAction.label} onClick={switchAction.onClick}><ArrowUpRight size={20} /><span className="sidebar-label">{switchAction.label}</span></Button>}
           <div className="sidebar-account">
             <span className="workspace-avatar" aria-hidden="true">{name.slice(0, 1).toUpperCase()}</span>
             <div className="sidebar-label"><strong title={name}>{name}</strong><small>{admin ? '管理员' : '个人空间'}</small></div>
-            {onLogout && <button className="icon-button" type="button" onClick={onLogout} aria-label={admin ? '退出登录' : '退出'} title="退出登录"><LogOut size={18} /></button>}
+            {onLogout && <Button variant="plain" className="icon-button" type="button" onClick={onLogout} aria-label={admin ? '退出登录' : '退出'} title="退出登录"><LogOut size={18} /></Button>}
           </div>
-          {!mobile && <button className="sidebar-collapse" type="button" onClick={toggleCollapsed} aria-label={collapsed ? '展开侧栏' : '折叠侧栏'} aria-expanded={!collapsed} aria-controls="workspace-sidebar" title={collapsed ? '展开侧栏' : '折叠侧栏'}>
+          {!mobile && <Button variant="plain" className="sidebar-collapse" type="button" onClick={toggleCollapsed} aria-label={collapsed ? '展开侧栏' : '折叠侧栏'} aria-expanded={!collapsed} aria-controls="workspace-sidebar" title={collapsed ? '展开侧栏' : '折叠侧栏'}>
             {collapsed ? <ChevronRight size={18} /> : <><ChevronLeft size={18} /><span>折叠侧栏</span></>}
-          </button>}
+          </Button>}
         </div>
       </aside>
       <div className="workspace-frame" inert={mobile && open}>
         <header className="workspace-topbar">
           <div className="workspace-breadcrumb">
-            {mobile && <button className="icon-button" type="button" aria-label="打开导航菜单" aria-expanded={open} aria-controls="workspace-sidebar" onClick={() => setOpen(true)}><Menu size={22} /></button>}
+            {mobile && <Button variant="plain" className="icon-button" type="button" aria-label="打开导航菜单" aria-expanded={open} aria-controls="workspace-sidebar" onClick={() => setOpen(true)}><Menu size={22} /></Button>}
             <span>{admin ? '管理工作台' : '我的饮食空间'}</span><ChevronRight size={14} /><strong>{active.label}</strong>
           </div>
           <div className="workspace-topbar-actions">{actions}<span className="workspace-role">{admin ? '管理员' : '健康饮食 · 每一天'}</span></div>

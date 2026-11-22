@@ -27,6 +27,7 @@ import static org.mockito.Mockito.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 @SpringBootTest(properties={"mealcheck.analysis.dispatch=database","mealcheck.analysis.worker-enabled=false",
     "mealcheck.mcp.enabled=false","mealcheck.knowledge.auto-index=false","mealcheck.ai.api-key=",
@@ -140,10 +141,10 @@ class MealJournalDatabaseIntegrationTest {
         assertThat(conversations.detail(users.findById(alice.getId()).orElseThrow(),conversation.getId()).getMessages()).anySatisfy(m->{assertThat(m.getRequestId()).isEqualTo("cancel-request");assertThat(m.getDeliveryStatus()).isEqualTo("CANCELLED");});
     }
     @Test void manualHttpValidationAndAuthorizationAndLocalStreamRoundTrip() throws Exception {
-        http.perform(post("/api/meals/manual").contentType("application/json").content("{}")).andExpect(status().isUnauthorized());
+        http.perform(post("/api/meals/manual").with(csrf()).contentType("application/json").content("{}")).andExpect(status().isUnauthorized());
         String token=jwt.generateToken(alice);
-        http.perform(post("/api/meals/manual").header("Authorization","Bearer "+token).contentType("application/json").content("{\"occurredAt\":\"invalid\",\"mealType\":\"BREAKFAST\",\"goal\":\"current\",\"foods\":[]}")).andExpect(status().isBadRequest());
-        var response=http.perform(post("/api/assistant/stream").header("Authorization","Bearer "+token).contentType("application/json").content("{\"question\":\"午餐如何搭配\"}")).andExpect(request().asyncStarted()).andReturn();
+        http.perform(post("/api/meals/manual").with(csrf()).header("Authorization","Bearer "+token).contentType("application/json").content("{\"occurredAt\":\"invalid\",\"mealType\":\"BREAKFAST\",\"goal\":\"current\",\"foods\":[]}")).andExpect(status().isBadRequest());
+        var response=http.perform(post("/api/assistant/stream").with(csrf()).header("Authorization","Bearer "+token).contentType("application/json").content("{\"question\":\"午餐如何搭配\"}")).andExpect(request().asyncStarted()).andReturn();
         String body=http.perform(asyncDispatch(response)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
         assertThat(body).contains("event:queued","event:meta","event:delta","event:complete","requestId","messageId");
         assertThat(body.indexOf("event:queued")).isLessThan(body.indexOf("event:meta"));

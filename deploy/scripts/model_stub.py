@@ -22,11 +22,57 @@ calls_lock = threading.Lock()
 
 def fixture_response(request):
     """Exercise the real parsers; plain text would silently test weekly fallbacks."""
+    if 'input' in request and 'dimensions' in request:
+        dimension=int(request['dimensions'])
+        if not 1 <= dimension <= 2000: raise ValueError('Invalid fixture embedding dimension')
+        return 'embedding', {'object':'list','data':[{'index':0,'embedding':[1.0]+[0.0]*(dimension-1)}],
+                             'usage':{'prompt_tokens':10,'total_tokens':10}}
     messages = request.get('messages', [])
     if any(isinstance(item.get('content'), list) and any(part.get('type') == 'image_url' for part in item['content'] if isinstance(part, dict)) for item in messages):
         return 'visual', json.dumps({'foodImage': True, 'foods': [{'name': '米饭', 'category': 'staple', 'confidence': .9}]}, ensure_ascii=False)
     prompt = '\n'.join('\n'.join(str(part.get('text', '')) for part in item['content'] if isinstance(part, dict))
                        if isinstance(item.get('content'), list) else str(item.get('content', '')) for item in messages)
+    if '你是逐分句证据核验器' in prompt and '回答：' in prompt:
+        answer, _ = json.JSONDecoder().raw_decode(prompt.rsplit('回答：', 1)[1].lstrip())
+        quotes = {q['id']: q['text'] for q in answer.get('quoteTexts', [])}
+        claims = []
+        for claim in answer.get('claims', []):
+            bindings = claim.get('evidence', [])
+            texts = [quotes[q] for b in bindings for q in b.get('quoteIds', []) if q in quotes]
+            judgments = []
+            for assertion in claim.get('assertions', []):
+                supported = bool(assertion.get('text')) and any(assertion['text'] in text for text in texts)
+                judgments.append({'id': assertion['id'], 'supported': supported, 'standalone': supported,
+                                  'checks': dict.fromkeys(('fact','degree','causality','conditions'), supported),
+                                  'evidenceIds': [b['id'] for b in bindings] if supported else [], 'reason': '' if supported else 'not verbatim'})
+            claims.append({'id': claim['id'], 'assertions': judgments})
+        return 'assistant-evidence-review', json.dumps({'inputMissing': [], 'knowledgeMissing': [], 'searchQuery': '',
+            'answersQuestion': bool(claims) and all(a['supported'] for c in claims for a in c['assertions']), 'claims': claims}, ensure_ascii=False)
+    if 'Return ONLY the following JSON protocol' in prompt:
+        # Knowledge fixtures quote only passages actually delivered by the production retrieval tool.
+        sources = []
+        for message in reversed(messages):
+            content = message.get('content', '')
+            if isinstance(content, str):
+                for index, char in enumerate(content):
+                    if char != '{': continue
+                    try:
+                        payload, _ = json.JSONDecoder().raw_decode(content[index:])
+                        if isinstance(payload, dict) and isinstance(payload.get('results'), list):
+                            sources = payload['results']
+                            break
+                    except (ValueError, TypeError):
+                        pass
+                if sources: break
+        claims = []
+        for source in sources:
+            for passage in source.get('passages', []):
+                text = passage.get('text', '')
+                if text and len(text) <= 120 and not text.startswith('且'):
+                    claims = [{'kind': 'ANSWER', 'text': text, 'evidence': [{'sourceId': source['id'], 'passageIds': [passage['id']]}]}]
+                    break
+            if claims: break
+        return 'assistant-knowledge', json.dumps({'claims': claims}, ensure_ascii=False)
     if '饮食趋势分析 Agent' in prompt:
         kind, data = 'weekly-trend', {'summary': '测试趋势：饮食记录以主食为主。', 'findings': ['建议增加食物种类'], 'focusKeywords': ['均衡饮食']}
     elif '饮食教练 Agent' in prompt:
@@ -85,11 +131,11 @@ class Handler(BaseHTTPRequestHandler):
             fail = calls <= ERROR_FIRST_N or (ERROR_EVERY_N > 0 and calls % ERROR_EVERY_N == 0)
             delay, status, retry = DELAY_SECONDS, ERROR_STATUS, RETRY_AFTER
         try:
-            self.send_fixture(content, fail, delay, status, retry)
+            self.send_fixture(content, fail, delay, status, retry, stream=request.get('stream') is True)
         finally:
             with calls_lock: active_calls -= 1
 
-    def send_fixture(self, content, fail, delay, status, retry):
+    def send_fixture(self, content, fail, delay, status, retry, stream=False):
         time.sleep(delay)
         if fail:
             # This fixture is exposed only on loopback by the isolated acceptance Compose.
@@ -101,6 +147,27 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             try: self.wfile.write(data)
             except (BrokenPipeError, ConnectionResetError): pass
+            return
+        if isinstance(content,dict):
+            self.send_json(200,content)
+            return
+        if stream:
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/event-stream')
+            self.send_header('Connection', 'close')
+            self.end_headers()
+            events = [
+                {'id': 'capacity-stub', 'choices': [{'index': 0, 'delta': {'content': content}, 'finish_reason': None}]},
+                {'id': 'capacity-stub', 'choices': [{'index': 0, 'delta': {}, 'finish_reason': 'stop'}],
+                 'usage': {'prompt_tokens': 100, 'completion_tokens': 20, 'total_tokens': 120}}
+            ]
+            try:
+                for event in events:
+                    self.wfile.write(('data: ' + json.dumps(event, ensure_ascii=False) + '\n\n').encode())
+                self.wfile.write(b'data: [DONE]\n\n')
+                self.wfile.flush()
+            except (BrokenPipeError, ConnectionResetError):
+                pass
             return
         self.send_json(200, {'id': 'capacity-stub', 'object': 'chat.completion', 'model': 'capacity-stub',
             'choices': [{'index': 0, 'finish_reason': 'stop', 'message': {'role': 'assistant', 'content': content}}],

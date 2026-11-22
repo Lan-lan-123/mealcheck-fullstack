@@ -29,4 +29,9 @@ public class KnowledgeController {
                                                @RequestParam(value = "limit", defaultValue = "5") int limit) {
         return new KnowledgeDtos.SearchResponse(knowledgeIndexService.search(q, Math.max(1, Math.min(limit, 10))));
     }
+    @GetMapping("/sync/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public java.util.List<java.util.Map<String,Object>> syncStatus() {
+        return knowledgeIndexService.sourceSyncStatus();
+    }
 }

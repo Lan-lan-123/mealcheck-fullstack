@@ -38,6 +38,18 @@ public class AssistantConversationMessage {
     private String requestId;
     @Column(nullable=false,length=16)
     private String deliveryStatus="COMPLETE";
+    @Column(columnDefinition = "TEXT")
+    private String toolCallsJson;
+    @Column(columnDefinition = "TEXT")
+    private String referencesJson;
+    @Column(columnDefinition = "TEXT")
+    private String outcomeJson;
+    public String getOutcomeJson() {return outcomeJson;}
+    public void setOutcomeJson(String value) {outcomeJson=value;}
+    public String getReferencesJson() { return referencesJson; }
+    public void setReferencesJson(String value) { referencesJson = value; }
+    public String getToolCallsJson() { return toolCallsJson; }
+    public void setToolCallsJson(String value) { toolCallsJson = value; }
     public String getRequestId() { return requestId; }
     public void setRequestId(String v) { requestId=v; }
     public String getDeliveryStatus() { return deliveryStatus; }

@@ -143,6 +143,7 @@ public class AuthDtos {
             this.role = role;
         }
 
+        @com.fasterxml.jackson.annotation.JsonIgnore
         public String getToken() {
             return token;
         }

@@ -18,6 +18,16 @@ import org.springframework.web.server.ResponseStatusException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    @ExceptionHandler(com.example.mealcheck.service.TokenBlacklistService.UnavailableException.class)
+    public ResponseEntity<ApiErrorResponse> logoutUnavailable(com.example.mealcheck.service.TokenBlacklistService.UnavailableException ex) {
+        return ResponseEntity.status(503).header("Retry-After","3")
+                .body(new ApiErrorResponse(503,"Service Unavailable","AUTH_DEPENDENCY_UNAVAILABLE",ex.getMessage(),AppTime.now()));
+    }
+
+    @ExceptionHandler(com.example.mealcheck.service.RecognitionFailureException.class)
+    public ResponseEntity<ApiErrorResponse> recognition(com.example.mealcheck.service.RecognitionFailureException ex) {
+        return error(HttpStatus.valueOf(ex.getStatusCode().value()), ex.code(), ex.getReason());
+    }
 
     @ExceptionHandler(com.example.mealcheck.service.UsernameConflictException.class)
     public ResponseEntity<ApiErrorResponse> usernameConflict(com.example.mealcheck.service.UsernameConflictException ex) {
@@ -69,6 +79,11 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.UNAUTHORIZED, "AUTH_BAD_CREDENTIALS", safeMessage(ex, "用户名或密码错误。"));
     }
 
+    @ExceptionHandler(org.springframework.security.authentication.DisabledException.class)
+    public ResponseEntity<ApiErrorResponse> accountDisabled(org.springframework.security.authentication.DisabledException ex) {
+        return error(HttpStatus.UNAUTHORIZED, "AUTH_ACCOUNT_DISABLED", "账号已被封禁，请联系管理员。");
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiErrorResponse> badRequest(IllegalArgumentException ex) {
         return error(HttpStatus.BAD_REQUEST, "BAD_REQUEST", safeMessage(ex, "请求参数不正确。"));
@@ -96,6 +111,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AiChatClient.AiClientException.class)
     public ResponseEntity<ApiErrorResponse> aiClient(AiChatClient.AiClientException ex) {
         log.warn("AI client error type={}", ex.getClass().getSimpleName());
+        var failure=com.example.mealcheck.service.TaskFailureClassifier.classify(ex,"ANALYZE");
+        if(java.util.Set.of("MODEL_RESPONSE_INVALID","MODEL_REQUEST_LIMITED","REMOTE_TIMEOUT","REMOTE_CONFIGURATION").contains(failure.code())) {
+            HttpStatus status="REMOTE_TIMEOUT".equals(failure.code())?HttpStatus.GATEWAY_TIMEOUT
+                    :"MODEL_REQUEST_LIMITED".equals(failure.code())?HttpStatus.TOO_MANY_REQUESTS:HttpStatus.BAD_GATEWAY;
+            return error(status,failure.code(),failure.summary());
+        }
         return error(HttpStatus.BAD_GATEWAY, "AI_CALL_FAILED", "AI 服务调用失败，请稍后重试。");
     }
 
@@ -117,6 +138,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiErrorResponse> illegalState(IllegalStateException ex) {
         log.warn("Service dependency unavailable type={}", ex.getClass().getSimpleName());
         return error(HttpStatus.SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", "服务依赖暂时不可用，请稍后重试。");
+    }
+
+    @ExceptionHandler(java.util.concurrent.CancellationException.class)
+    public ResponseEntity<ApiErrorResponse> assistantCancelled(java.util.concurrent.CancellationException ex) {
+        return error(HttpStatus.CONFLICT,"ASSISTANT_CANCELLED","回复已取消或执行已中断，请查看会话历史后重试。");
     }
 
     @ExceptionHandler(Exception.class)

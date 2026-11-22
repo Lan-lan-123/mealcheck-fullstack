@@ -1,9 +1,9 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/authTest.js'
 
 async function openWorkspace(page, role = 'USER') {
   await page.addInitScript(role => {
-    localStorage.setItem('mealcheck_token', 'workspace-test-token')
-    localStorage.setItem('mealcheck_user', JSON.stringify({ username: 'demo', displayName: role === 'ADMIN' ? '平台管理员' : '小林', role }))
+
+    sessionStorage.setItem('mealcheck_fixture_user', JSON.stringify({ username: 'demo', displayName: role === 'ADMIN' ? '平台管理员' : '小林', role }))
   }, role)
   await page.route('**/api/**', route => {
     const path = new URL(route.request().url()).pathname

@@ -1,3 +1,4 @@
+import Button from '../../components/Button'
 import useAgentCoordination, { defaultCoordinationFilters } from '../../hooks/useAgentCoordination'
 import { formatTime, Pagination } from './AdminUi'
 import { formatDuration, coordinationStatusLabel, coordinationStatusClass, coordinationModeLabel, coordinationNodeLabel } from './coordinationLabels'
@@ -20,9 +21,9 @@ export default function AgentCoordinationPanel({ enabled, refreshRevision }) {
               <h2>周报 Agent 协调运行</h2>
               <p>查看每次多 Agent 周报的整体状态、降级情况、修订次数和节点执行时间线。</p>
             </div>
-            <button className="secondary-btn" type="button" onClick={loadCoordinationRuns} disabled={coordinationLoading}>
+            <Button variant="secondary" className="secondary-btn" type="button" onClick={loadCoordinationRuns} disabled={coordinationLoading}>
               {coordinationLoading ? '刷新中...' : '刷新运行记录'}
-            </button>
+            </Button>
           </div>
 
           <form className="filter-grid compact coordination-filter-grid" onSubmit={applyCoordinationFilters}>
@@ -36,12 +37,12 @@ export default function AgentCoordinationPanel({ enabled, refreshRevision }) {
             </select>
             <input type="number" min="1" value={coordinationFiltersDraft.userId} onChange={event => setCoordinationFiltersDraft({ ...coordinationFiltersDraft, userId: event.target.value })} placeholder="用户 ID" />
             <input type="number" min="1" value={coordinationFiltersDraft.jobId} onChange={event => setCoordinationFiltersDraft({ ...coordinationFiltersDraft, jobId: event.target.value })} placeholder="后台任务 ID" />
-            <button className="secondary-btn" type="submit" disabled={coordinationLoading}>筛选</button>
-            <button className="secondary-btn" type="button" onClick={() => {
+            <Button variant="secondary" className="secondary-btn" type="submit" disabled={coordinationLoading}>筛选</Button>
+            <Button variant="secondary" className="secondary-btn" type="button" onClick={() => {
               setCoordinationFiltersDraft(defaultCoordinationFilters)
               setCoordinationFilters(defaultCoordinationFilters)
               setCoordinationPage(0)
-            }}>重置</button>
+            }}>重置</Button>
           </form>
 
           <div className="admin-table-wrap">
@@ -62,7 +63,7 @@ export default function AgentCoordinationPanel({ enabled, refreshRevision }) {
                     <td>{run.revisionCount ?? 0}</td>
                     <td>{formatDuration(run.elapsedMs)}</td>
                     <td>{formatTime(run.startedAt)}</td>
-                    <td><button className="secondary-btn" type="button" onClick={event => openCoordinationRun(run.runId, event.currentTarget)} disabled={coordinationLoading}>查看时间线</button></td>
+                    <td><Button variant="secondary" className="secondary-btn" type="button" onClick={event => openCoordinationRun(run.runId, event.currentTarget)} disabled={coordinationLoading}>查看时间线</Button></td>
                   </tr>
                 )) : <tr><td colSpan="11" className="empty-cell">暂无符合条件的 Agent 协调记录</td></tr>}
               </tbody>

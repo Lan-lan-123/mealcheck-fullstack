@@ -9,6 +9,89 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RemoteCallGuardTest {
+    @Test void reviewDoesNotRetryWithLessThanItsReservedExecutionWindow() {
+        var properties=new AppProperties();properties.getRemoteResilience().setMaxAttempts(2);
+        var calls=new AtomicInteger();var guard=new RemoteCallGuard(properties);
+        try(var context=AiCallContext.open(1L,java.time.Duration.ofSeconds(2))) {
+            assertThatThrownBy(()->guard.execute("diet-assistant-evidence-review",()->{calls.incrementAndGet();throw new IllegalStateException(new java.io.IOException());}))
+                    .isInstanceOf(IllegalStateException.class);
+        }
+        assertThat(calls).hasValue(1);
+    }
+    @Test void localAdmissionDeadlinesDoNotTripProviderCircuit() {
+        var properties=new AppProperties();properties.getRemoteResilience().setFailureThreshold(1);
+        var guard=new RemoteCallGuard(properties);
+        assertThatThrownBy(()->guard.execute("queued",()->{throw new RemoteCallGuard.LocalAdmissionDeadlineException("queue expired");}))
+                .isInstanceOf(RemoteCallGuard.LocalAdmissionDeadlineException.class);
+        assertThat(guard.execute("queued",()->"available")).isEqualTo("available");
+    }
+    @Test void deadlineFailuresTripCircuitAndAreCountedOncePerOperation() {
+        var properties = new AppProperties();
+        properties.getRemoteResilience().setFailureThreshold(2);
+        var guard = new RemoteCallGuard(properties);
+        var calls = new AtomicInteger();
+        for (int index=0; index<2; index++) {
+            assertThatThrownBy(() -> guard.execute("slow", () -> {
+                calls.incrementAndGet();
+                throw new RemoteCallGuard.RemoteCallDeadlineException("AI operation deadline exceeded");
+            })).isInstanceOf(RemoteCallGuard.RemoteCallDeadlineException.class);
+        }
+        assertThatThrownBy(() -> guard.execute("slow", calls::incrementAndGet))
+                .isInstanceOf(RemoteCallGuard.RemoteCallRejectedException.class).hasMessageContaining("circuit");
+        assertThat(calls).hasValue(2);
+    }
+
+    @Test void deadlineExpiryDuringBackoffAlsoTripsCircuit() {
+        var properties = new AppProperties();
+        properties.getRemoteResilience().setFailureThreshold(1);
+        var guard = new RemoteCallGuard(properties);
+        var calls = new AtomicInteger();
+        try (var scope = AiCallContext.open(1L, java.time.Duration.ofSeconds(1))) {
+            assertThatThrownBy(() -> guard.execute("retry-after-timeout", () -> {
+                calls.incrementAndGet();
+                throw new RemoteCallGuard.RetryableRemoteCallException(429, java.time.Duration.ofSeconds(3));
+            })).isInstanceOf(RemoteCallGuard.RemoteCallDeadlineException.class);
+        }
+        assertThatThrownBy(() -> guard.execute("retry-after-timeout", calls::incrementAndGet))
+                .isInstanceOf(RemoteCallGuard.RemoteCallRejectedException.class).hasMessageContaining("circuit");
+        assertThat(calls).hasValue(1);
+    }
+
+    @Test void localRejectionsDoNotTripCircuit() {
+        var properties = new AppProperties();
+        properties.getRemoteResilience().setFailureThreshold(1);
+        var guard = new RemoteCallGuard(properties);
+        assertThatThrownBy(() -> guard.execute("local", () -> {
+            throw new RemoteCallGuard.RemoteCallRejectedException("local admission rejected");
+        })).isInstanceOf(RemoteCallGuard.RemoteCallRejectedException.class);
+        assertThat(guard.execute("local", () -> "ok")).isEqualTo("ok");
+    }
+
+    @Test void inFlightSuccessDoesNotCloseAnotherCallsNewlyOpenedCircuit() throws Exception {
+        var properties = new AppProperties();
+        properties.getRemoteResilience().setFailureThreshold(1);
+        var guard = new RemoteCallGuard(properties);
+        var entered = new java.util.concurrent.CountDownLatch(1);
+        var release = new java.util.concurrent.CountDownLatch(1);
+        var worker = java.util.concurrent.Executors.newSingleThreadExecutor();
+        try {
+            var result = worker.submit(() -> guard.execute("shared", () -> {
+                entered.countDown();
+                try { release.await(3, java.util.concurrent.TimeUnit.SECONDS); }
+                catch (InterruptedException error) { throw new RuntimeException(error); }
+                return "older success";
+            }));
+            assertThat(entered.await(2, java.util.concurrent.TimeUnit.SECONDS)).isTrue();
+            assertThatThrownBy(() -> guard.execute("shared", () -> {
+                throw new RemoteCallGuard.RemoteCallDeadlineException("timed out");
+            })).isInstanceOf(RemoteCallGuard.RemoteCallDeadlineException.class);
+            release.countDown();
+            assertThat(result.get(2, java.util.concurrent.TimeUnit.SECONDS)).isEqualTo("older success");
+            assertThatThrownBy(() -> guard.execute("shared", () -> "must not dispatch"))
+                    .isInstanceOf(RemoteCallGuard.RemoteCallRejectedException.class).hasMessageContaining("circuit");
+        } finally { release.countDown(); worker.shutdownNow(); }
+    }
+
     @Test void expiredOuterOperationCannotDispatchOrRenewItsDeadline() {
         var guard = new RemoteCallGuard(new AppProperties());
         var calls = new AtomicInteger();

@@ -27,9 +27,11 @@ public class AiChatClient {
     @org.springframework.beans.factory.annotation.Value("${mealcheck.ai.input-cost-per-million:0}") private double inputPrice;
     @org.springframework.beans.factory.annotation.Value("${mealcheck.ai.output-cost-per-million:0}") private double outputPrice;
     private final ThreadLocal<Usage> usageForCall=new ThreadLocal<>();
+    private final ThreadLocal<String> modelForCall=new ThreadLocal<>();
     public record Usage(Long inputTokens,Long outputTokens,Double estimatedCost) { }
     public Usage lastUsage() { return usageForCall.get(); }
-    public void clearUsage() { usageForCall.remove(); }
+    public String lastModel() { return modelForCall.get(); }
+    public void clearUsage() { usageForCall.remove(); modelForCall.remove(); }
 
     public AiChatClient(AppProperties properties,
                         ObjectMapper objectMapper,
@@ -44,25 +46,23 @@ public class AiChatClient {
     }
 
     public boolean isConfigured() {
-        return properties.getAi().getApiKey() != null
-                && !properties.getAi().getApiKey().isBlank()
-                && properties.getAi().getBaseUrl() != null
-                && !properties.getAi().getBaseUrl().isBlank()
-                && properties.getAi().getModel() != null
-                && !properties.getAi().getModel().isBlank();
+        return properties.getAi().connection().configured();
     }
 
     public String complete(String operation, List<Map<String, Object>> messages, double temperature) {
-        if (!isConfigured()) {
+        var connection = properties.getAi().connection();
+        if (!connection.configured()) {
             throw new IllegalStateException("AI API Key, Base URL or model is not configured.");
         }
 
         return completeWith(
                 operation,
                 "ai-chat",
-                properties.getAi().getApiKey(),
-                properties.getAi().getBaseUrl(),
-                properties.getAi().getModel(),
+                connection.apiKey(),
+                connection.baseUrl(),
+                "vision-recognition".equals(operation) && properties.getAi().getVisionModel() != null
+                        && !properties.getAi().getVisionModel().isBlank()
+                        ? properties.getAi().getVisionModel().trim() : connection.model(),
                 properties.getAi().getTimeoutSeconds(),
                 messages,
                 temperature
@@ -84,6 +84,7 @@ public class AiChatClient {
 
         long startedAt = System.nanoTime();
         clearUsage();
+        modelForCall.set(model);
         try {
             URI endpoint = AiEndpointResolver.chatCompletions(baseUrl);
             Map<String, Object> body = new LinkedHashMap<>();
@@ -110,13 +111,18 @@ public class AiChatClient {
             var usage=objectMapper.readTree(response.body()).path("usage");
             long input=usage.path("prompt_tokens").asLong(0),output=usage.path("completion_tokens").asLong(0);
             boolean known=usage.has("prompt_tokens") && usage.has("completion_tokens");
-            boolean priced=inputPrice>0 && outputPrice>0 && model.equals(properties.getAi().getModel()) && baseUrl.equals(properties.getAi().getBaseUrl());
+            var pricedConnection=properties.getAi().environmentConnection();
+            boolean priced=inputPrice>0 && outputPrice>0 && model.equals(pricedConnection.model()) && baseUrl.equals(pricedConnection.baseUrl());
             double cost=known && priced ? (input*inputPrice+output*outputPrice)/1_000_000.0 : 0;
             usageForCall.set(new Usage(known?input:null,known?output:null,known && priced?cost:null));
             aiStatusService.recordSuccess(operation, elapsedMs(startedAt));
             observability.recordAiCall(startedAt, operation, "success");
             return content;
-        } catch (AiBudgetService.BudgetExceededException | AiBudgetService.BudgetUnavailableException | RemoteCallGuard.RemoteCallDeadlineException e) {
+        } catch (AiBudgetService.BudgetExceededException | AiBudgetService.BudgetUnavailableException e) {
+            throw e;
+        } catch (RemoteCallGuard.RemoteCallDeadlineException e) {
+            aiStatusService.recordFailure(operation, "AI operation deadline exceeded", elapsedMs(startedAt));
+            observability.recordAiCall(startedAt, operation, "failure");
             throw e;
         } catch (AiClientException e) {
             aiStatusService.recordFailure(operation, e.getMessage(), elapsedMs(startedAt));
@@ -134,10 +140,15 @@ public class AiChatClient {
     }
 
     private String extractMessageContent(String responseBody) throws Exception {
-        JsonNode root = objectMapper.readTree(responseBody);
+        JsonNode root;
+        try { root=objectMapper.readTree(responseBody); }
+        catch(com.fasterxml.jackson.core.JsonProcessingException malformed) {
+            throw new InvalidResponseException("AI 服务返回结果格式无效，请稍后重试。",malformed);
+        }
+        if(root==null || !root.isObject())throw new InvalidResponseException("AI 服务返回结果格式无效，请稍后重试。");
         String content = root.path("choices").path(0).path("message").path("content").asText("");
         if (content.isBlank()) {
-            throw new AiClientException("AI 服务返回结果无效，请稍后重试。");
+            throw new InvalidResponseException("AI 服务返回结果无效，请稍后重试。");
         }
         return content;
     }
@@ -150,5 +161,9 @@ public class AiChatClient {
         public AiClientException(String message, Throwable cause) {
             super(message, cause);
         }
+    }
+    public static class InvalidResponseException extends AiClientException {
+        public InvalidResponseException(String message) { super(message); }
+        public InvalidResponseException(String message,Throwable cause) { super(message,cause); }
     }
 }

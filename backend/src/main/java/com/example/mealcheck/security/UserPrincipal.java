@@ -15,12 +15,16 @@ public class UserPrincipal implements UserDetails {
     private final String password;
     private final String displayName;
     private final String role;
+    private final boolean enabled;
+    private final long tokenVersion;
 
     public UserPrincipal(UserAccount user) {
         this.id = user.getId();
         this.username = user.getUsername();
         this.password = user.getPasswordHash();
         this.displayName = user.getDisplayName();
+        this.enabled = user.isEnabled();
+        this.tokenVersion = user.getTokenVersion();
         this.role = user.getRole() == null || user.getRole().isBlank()
                 ? "USER"
                 : user.getRole();
@@ -28,6 +32,10 @@ public class UserPrincipal implements UserDetails {
 
     public Long getId() {
         return id;
+    }
+
+    public long getTokenVersion() {
+        return tokenVersion;
     }
 
     public String getDisplayName() {
@@ -70,6 +78,6 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return enabled;
     }
 }

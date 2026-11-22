@@ -6,8 +6,64 @@ import java.time.Duration;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.*;
 
 class AssistantTaskManagerTest {
+    @Test void coordinationOutageRejectsWorkAndDoesNotLeaveALocalUserReservation() {
+        var store=mock(AssistantTaskStore.class);
+        var manager=new AssistantTaskManager(1,1,Duration.ofSeconds(5),store,"node",15);
+        var ran=new AtomicBoolean();
+        try {
+            when(store.admit(anyString(),anyLong(),anyString(),anyLong(),anyInt()))
+                    .thenThrow(new org.springframework.dao.DataAccessResourceFailureException("offline"));
+            assertThatThrownBy(()->manager.call(1,d->{ran.set(true);return "bad";})).isInstanceOf(IllegalStateException.class);
+            assertThat(ran).isFalse();assertThat(manager.queuedTasks()).isZero();
+            doAnswer(invocation->new AssistantTaskStore.Lease(invocation.getArgument(0),1,"node","token"))
+                    .when(store).admit(anyString(),anyLong(),anyString(),anyLong(),anyInt());
+            when(store.start(any())).thenReturn(true);
+            assertThat(manager.<String>call(1,d->"recovered")).isEqualTo("recovered");
+        }finally{manager.shutdown();}
+    }
+
+    @Test void failedHeartbeatsDoNotExtendTheLocalExecutionLease() throws Exception {
+        var store=mock(AssistantTaskStore.class);
+        when(store.admit(anyString(),anyLong(),anyString(),anyLong(),anyInt()))
+                .thenAnswer(invocation->new AssistantTaskStore.Lease(invocation.getArgument(0),1,"node","token"));
+        when(store.start(any())).thenReturn(true);
+        when(store.heartbeat(anyString(),anyList(),anyInt()))
+                .thenThrow(new org.springframework.dao.DataAccessResourceFailureException("offline"));
+        var manager=new AssistantTaskManager(1,1,Duration.ofSeconds(15),store,"node",2);
+        var entered=new CountDownLatch(1);var stopped=new CountDownLatch(1);var delivery=new AssistantStreamDelivery(null);
+        try {
+            var task=manager.submit(1,delivery,()->{
+                entered.countDown();try{new CountDownLatch(1).await();}catch(InterruptedException interrupted){Thread.currentThread().interrupt();}
+            },state->{},stopped::countDown);
+            assertThat(entered.await(2,TimeUnit.SECONDS)).isTrue();
+            assertThat(stopped.await(6,TimeUnit.SECONDS)).isTrue();
+            assertThat(task.state()).isEqualTo(AssistantTaskManager.State.INTERRUPTED);
+            assertThat(delivery.failureStatus).isEqualTo("ERROR");
+        }finally{manager.shutdown();}
+    }
+    @Test void synchronousCallsShareAdmissionAndReleaseItBeforeReturningSuccess() throws Exception {
+        var manager=new AssistantTaskManager(1,2,Duration.ofSeconds(5));
+        var callers=Executors.newSingleThreadExecutor();var entered=new CountDownLatch(1);var release=new CountDownLatch(1);
+        try {
+            var first=callers.submit(()->manager.call(1,delivery->{
+                entered.countDown();try{release.await(3,TimeUnit.SECONDS);}catch(InterruptedException interrupted){throw new CancellationException();}
+                return "first";
+            }));
+            assertThat(entered.await(2,TimeUnit.SECONDS)).isTrue();
+            assertThatThrownBy(()->manager.submit(1,new AssistantStreamDelivery(null),()->{},s->{},()->{})).isInstanceOf(ResponseStatusException.class);
+            release.countDown();assertThat(first.get(3,TimeUnit.SECONDS)).isEqualTo("first");
+            assertThat(manager.<String>call(1,delivery->"second")).isEqualTo("second");
+            assertThatThrownBy(()->manager.call(1,delivery->{throw new IllegalArgumentException("bad request");})).isInstanceOf(IllegalArgumentException.class);
+        }finally{release.countDown();manager.shutdown();callers.shutdownNow();}
+    }
+    @Test void closedManagerRejectsAdmission() {
+        var manager=new AssistantTaskManager(1,1,Duration.ofSeconds(5));manager.shutdown();
+        assertThatThrownBy(()->manager.call(1,delivery->"late")).isInstanceOf(ResponseStatusException.class);
+    }
     private Runnable waitFor(CountDownLatch gate, CountDownLatch entered) {
         return () -> { entered.countDown(); try { gate.await(); } catch(InterruptedException cancelled) { Thread.currentThread().interrupt(); } };
     }

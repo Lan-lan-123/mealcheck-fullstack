@@ -12,21 +12,29 @@ public class AiCallConcurrency {
     private final MeterRegistry metrics;
     private final int limit;
     public AiCallConcurrency(AiCallPermitStore store, MeterRegistry metrics,
-            @Value("${mealcheck.ai-budget.max-concurrent-calls:10}") int limit) {
+            @Value("${mealcheck.ai-budget.max-concurrent-calls:42}") int limit) {
         if (limit < 1 || limit > 100) throw new IllegalArgumentException("AI global concurrency must be 1..100");
         this.store=store; this.metrics=metrics; this.limit=limit;
     }
     public UUID acquire(Duration remaining) {
-        long deadline=System.nanoTime()+remaining.toNanos();
+        long started=System.nanoTime();
+        long deadline=started+remaining.toNanos();
         long backoff=50;
+        UUID ticket=null;
+        boolean admitted=false;
         try {
+            AiCallContext.checkExecution();
+            if(remaining.isNegative() || remaining.isZero())
+                throw new RemoteCallGuard.LocalAdmissionDeadlineException("No AI admission time remains");
+            var context=AiCallContext.capture();
+            boolean background=context!=null && context.background();
+            ticket=store.enqueue(background,Math.max(1,remaining.toMillis()));
             while (System.nanoTime()<deadline) {
                 AiCallContext.checkExecution();
                 // Conservative crash lease exceeds the client's remaining deadline. No DB transaction is held while waiting.
-                var context=AiCallContext.capture();
-                var admission=store.tryAcquire(limit, Math.max(1000,(deadline-System.nanoTime())/1_000_000)+30000,
-                        context != null && context.background());
-                if (admission != null && admission.permit()!=null) return admission.permit();
+                var admission=store.tryAcquireQueued(limit, Math.max(1000,(deadline-System.nanoTime())/1_000_000)+30000,
+                        background,ticket);
+                if (admission != null && admission.permit()!=null) { admitted=true;return admission.permit(); }
                 String reason=admission == null ? "concurrency" : admission.reason();
                 metrics.counter("mealcheck.ai.admission.waits","reason",reason).increment();
                 long wait=admission != null && admission.retryMillis()>0 ? Math.min(1000,admission.retryMillis())
@@ -40,10 +48,18 @@ public class AiCallConcurrency {
             Thread.currentThread().interrupt();
             throw new RemoteCallGuard.RemoteCallRejectedException("AI concurrency wait interrupted");
         } catch (org.springframework.dao.DataAccessException unavailable) {
+            AiCallContext.checkExecution();
             throw new AiBudgetService.BudgetUnavailableException();
+        } finally {
+            metrics.timer("mealcheck.ai.admission.duration","outcome",admitted?"accepted":"rejected")
+                    .record(System.nanoTime()-started,java.util.concurrent.TimeUnit.NANOSECONDS);
+            if(ticket!=null)try { store.cancelWaiter(ticket); }
+            catch(org.springframework.dao.DataAccessException unavailable) {
+                metrics.counter("mealcheck.ai.admission.cleanup.deferred").increment();
+            }
         }
         metrics.counter("mealcheck.ai.concurrency.rejected").increment();
-        throw new RemoteCallGuard.RemoteCallDeadlineException("AI concurrency wait exceeded operation deadline");
+        throw new RemoteCallGuard.LocalAdmissionDeadlineException("AI concurrency wait exceeded operation deadline");
     }
     public void release(UUID id) {
         if (id==null) return;

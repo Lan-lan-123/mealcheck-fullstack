@@ -34,6 +34,8 @@ class CapacityScriptTest(unittest.TestCase):
                 except (BrokenPipeError, ConnectionResetError): pass
             def do_POST(self):
                 self.rfile.read(int(self.headers['Content-Length']))
+                if self.headers.get('X-XSRF-TOKEN') != 'contract-csrf':
+                    self.reply(403, {'code': 'CSRF_INVALID'}); return
                 if self.path.startswith('/api/reports/weekly/jobs'):
                     token=self.headers['Authorization']
                     if token not in ('Bearer fake-account-c','Bearer fake-account-d'):
@@ -52,6 +54,12 @@ class CapacityScriptTest(unittest.TestCase):
                 if behavior == 'unknown': self.reply(503, {}); return
                 self.reply(202, {'key': key, 'status': 'PENDING', 'result': None})
             def do_GET(self):
+                if self.path == '/api/auth/csrf':
+                    self.send_response(200)
+                    self.send_header('Set-Cookie', 'mealcheck_csrf=contract-cookie; HttpOnly; Path=/')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({'token':'contract-csrf','headerName':'X-XSRF-TOKEN'}).encode())
+                    return
                 if self.path.startswith('/api/meals?'):
                     self.reply(401 if behavior == 'bad_auth' else 200, {'totalElements': 1000,'content':[{'id':1}]})
                     return

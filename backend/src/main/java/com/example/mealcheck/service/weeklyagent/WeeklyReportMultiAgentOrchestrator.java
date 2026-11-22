@@ -31,6 +31,8 @@ import static org.bsc.langgraph4j.action.AsyncNodeAction.node_async;
 
 @Service
 public class WeeklyReportMultiAgentOrchestrator {
+    @org.springframework.beans.factory.annotation.Autowired(required=false)
+    private com.example.mealcheck.service.DietPreferenceService dietPreferences;
     private static final Logger log = LoggerFactory.getLogger(WeeklyReportMultiAgentOrchestrator.class);
     private static final String PREPARE = "prepare";
     private static final String TREND_AGENT = "trend_agent";
@@ -76,10 +78,17 @@ public class WeeklyReportMultiAgentOrchestrator {
                                          WeeklyReportResponse baseReport,
                                          Long jobId) {
         try (var scope=com.example.mealcheck.service.AiCallContext.open(user.getId(),java.time.Duration.ofSeconds(Math.max(1,properties.getAiBudget().getOperationTimeoutSeconds())))) {
-            return generateWithinDeadline(user,baseReport,jobId);
+            var preferences = dietPreferences == null ? com.example.mealcheck.dto.DietPreferences.defaults() : dietPreferences.get(user.getId());
+            var result = generateWithinDeadline(user,baseReport,jobId,preferences);
+            if (preferences.active()) {
+                result.setReportText(com.example.mealcheck.service.DietPreferenceService.guard(result.getReportText(),preferences));
+                result.setHighlights(result.getHighlights().stream().map(s -> com.example.mealcheck.service.DietPreferenceService.guard(s,preferences)).distinct().toList());
+                result.setNextWeekSuggestions(result.getNextWeekSuggestions().stream().map(s -> com.example.mealcheck.service.DietPreferenceService.guard(s,preferences)).distinct().toList());
+            }
+            return result;
         }
     }
-    private WeeklyReportResponse generateWithinDeadline(UserAccount user,WeeklyReportResponse baseReport,Long jobId) {
+    private WeeklyReportResponse generateWithinDeadline(UserAccount user,WeeklyReportResponse baseReport,Long jobId,com.example.mealcheck.dto.DietPreferences preferences) {
         if (!properties.getWeeklyReport().isMultiAgentEnabled()) {
             baseReport.setGenerationMode("RULE_BASED");
             baseReport.setReviewStatus("DISABLED");
@@ -95,7 +104,7 @@ public class WeeklyReportMultiAgentOrchestrator {
         if (runId != null && !runId.isBlank()) {
             inputs.put(WeeklyReportAgentState.RUN_ID, runId);
         }
-        inputs.put(WeeklyReportAgentState.PROFILE_CONTEXT, profileContext(user));
+        inputs.put(WeeklyReportAgentState.PROFILE_CONTEXT, profileContext(user) + com.example.mealcheck.service.DietPreferenceService.prompt(preferences));
         inputs.put(WeeklyReportAgentState.REVISION_COUNT, 0);
 
         RunnableConfig config = RunnableConfig.builder()
@@ -225,7 +234,7 @@ public class WeeklyReportMultiAgentOrchestrator {
                 state.runId(), REVIEW_AGENT, "AGENT", Math.max(1, state.revisionCount()));
         try {
             WeeklyReportReview review = reviewAgent.review(
-                    state.baseReport(), state.profileContext(), state.trend(), state.draft());
+                    state.baseReport(), state.profileContext(), state.trend(), state.evidence(), state.draft());
             String outcome = review.approved() ? "APPROVED" : "REJECTED";
             coordinationRecorder.completeStep(step, outcome, review.aiGenerated(), !review.aiGenerated());
             return Map.of(

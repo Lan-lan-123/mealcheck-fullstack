@@ -22,6 +22,7 @@ public class ProductionConfigurationValidator {
 
     @PostConstruct
     void validate() {
+        require(properties.getJwt().isCookieSecure(),"Production authentication cookies must require HTTPS");
         String jwtSecret = properties.getJwt().getSecret();
         require(jwtSecret != null
                         && jwtSecret.getBytes(StandardCharsets.UTF_8).length >= 48

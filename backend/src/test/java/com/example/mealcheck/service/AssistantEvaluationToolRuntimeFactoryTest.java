@@ -15,10 +15,33 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
 
 class AssistantEvaluationToolRuntimeFactoryTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Test
+    void ragKnowledgeIsOnlyReturnedByAnExplicitToolCallAndHonorsLimit() throws Exception {
+        var production = mock(AssistantFunctionToolRegistry.class);
+        var context = objectMapper.readTree("""
+                {"ragToolEvaluation":true,"ragKnowledgeFixtures":[
+                  {"id":1,"title":"早餐","content":"受控知识正文"},
+                  {"id":2,"title":"蛋白质","content":"另一条知识"}]}
+                """);
+        var runtime = new AssistantEvaluationToolRuntimeFactory(production, objectMapper).create(context, "不得直接返回的上下文");
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(1);
+        var result = runtime.execute(null, request("search_diet_knowledge", "{\"query\":\"早餐\",\"limit\":1}"), deadline);
+        assertThat(result.status()).isEqualTo("SUCCESS");
+        var content = objectMapper.readTree(result.content());
+        assertThat(content.path("count").asInt()).isEqualTo(1);
+        assertThat(content.path("results").size()).isEqualTo(1);
+        assertThat(result.content()).contains("受控知识正文").doesNotContain("不得直接返回的上下文");
+        assertThatThrownBy(() -> runtime.execute(null,
+                request("search_diet_knowledge", "{\"query\":\"早餐\",\"limit\":1.5}"), deadline))
+                .isInstanceOf(IllegalArgumentException.class);
+        verify(production, never()).execute(any(), any(), org.mockito.ArgumentMatchers.anyLong());
+    }
 
     @Test
     void reusesProductionSpecificationsButExecutesOnlySyntheticData() throws Exception {

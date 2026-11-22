@@ -12,6 +12,17 @@ public class AdminKnowledgeChunkRequest {
     @NotBlank
     private String content;
 
+    @jakarta.validation.constraints.Positive
+    private Long expectedRevision;
+
+    @Size(max = 500)
+    private String reason;
+
+    public Long getExpectedRevision() { return expectedRevision; }
+    public void setExpectedRevision(Long value) { expectedRevision = value; }
+    public String getReason() { return reason; }
+    public void setReason(String value) { reason = value; }
+
     public String getTitle() {
         return title;
     }

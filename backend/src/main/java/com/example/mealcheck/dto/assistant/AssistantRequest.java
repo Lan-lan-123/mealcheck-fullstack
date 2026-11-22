@@ -5,6 +5,10 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
 public class AssistantRequest {
+    @NotNull
+    private AssistantReviewMode reviewMode=AssistantReviewMode.REVIEWED;
+    public AssistantReviewMode getReviewMode() {return reviewMode;}
+    public void setReviewMode(AssistantReviewMode value) {reviewMode=value;}
     @Size(max=4000)
     private String question;
     @Size(max=4000)

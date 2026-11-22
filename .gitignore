@@ -11,11 +11,17 @@ deploy/release-results/
 .env
 .env.production
 .env.operations
+.env.local
+.env.*.local
+/knowledge-mode-live-embedding.json
 tools/.runtime/
 tools/vision-results/
 tools/datasets/synthetic-meals-100/images/
+tools/datasets/vision-boundaries-18-v1/images/
 loadtests/results/
 *.log
+/logs/*
+!/logs/README.md
 .DS_Store
 .idea/
 
