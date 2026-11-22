@@ -118,7 +118,7 @@ test('partial bulk deletion waits for every request, reloads data and retries on
   expect(state.deleted).toEqual([1, 2])
   expect(state.reads).toEqual(before)
   release()
-  await expect(page.getByRole('status')).toContainText('已删除 1 条饮食记录，1 条删除失败。')
+  await expect(page.getByRole('status').filter({ hasText: '已删除 1 条饮食记录，1 条删除失败。' })).toBeVisible()
   await expect(page.getByRole('alert')).toContainText('未删除记录：#1')
   await expect.poll(() => state.reads.meals).toBe(before.meals + 1)
   await expect.poll(() => state.reads.analytics).toBe(before.analytics + 1)
@@ -141,12 +141,12 @@ for (const outcome of ['success', 'failure']) {
     await expect.poll(() => state.reads.meals).toBe(before.meals + 1)
     await expect.poll(() => state.reads.analytics).toBe(before.analytics + 1)
     if (outcome === 'success') {
-      await expect(page.getByRole('status')).toContainText('已删除 2 条饮食记录')
+      await expect(page.getByRole('status').filter({ hasText: '已删除 2 条饮食记录' })).toBeVisible()
       await expect(page.getByText('暂无饮食记录', { exact: true })).toBeVisible()
       await expect(page.getByRole('alert')).toHaveCount(0)
       await expect(page.getByRole('button', { name: '批量删除', exact: true })).toBeDisabled()
     } else {
-      await expect(page.getByRole('status')).toContainText('已删除 0 条饮食记录，2 条删除失败。')
+      await expect(page.getByRole('status').filter({ hasText: '已删除 0 条饮食记录，2 条删除失败。' })).toBeVisible()
       await expect(page.getByRole('alert')).toContainText('#1、#2')
       await expect(page.locator('tbody input[type=checkbox]:checked')).toHaveCount(2)
       await expect(page.getByRole('button', { name: '批量删除 (2)', exact: true })).toBeEnabled()
