@@ -10,8 +10,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,8 +33,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         WeeklyReportRequestService.class})
 @EnableConfigurationProperties(AppProperties.class)
 class ApiSecurityAndMealFlowTest {
-    @MockBean AiSettingsService aiSettings;
-    @MockBean AiChatClient connectionClient;
+    @MockitoBean AiSettingsService aiSettings;
+    @MockitoBean AiChatClient connectionClient;
 
     @Test void onlyAdministratorsCanReadChangeResetOrTestAiConnections() throws Exception {
         for(String path:List.of("/api/admin/ai-settings", "/api/admin/ai-settings/test", "/api/admin/ai-settings/reset")) {
@@ -74,7 +74,7 @@ class ApiSecurityAndMealFlowTest {
                 .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("PRIVATE_PROVIDER_PAYLOAD"))));
         assertThat(AiCallContext.capture()).isNull();
     }
-    @MockBean DietPreferenceService dietPreferences;
+    @MockitoBean DietPreferenceService dietPreferences;
 
     @Test void dietSettingsUseOnlyAuthenticatedIdentityAndValidatePayloads() throws Exception {
         when(dietPreferences.get(10L)).thenReturn(DietPreferences.defaults());
@@ -94,33 +94,33 @@ class ApiSecurityAndMealFlowTest {
     @Autowired MockMvc http;
     @Autowired JwtService jwt;
     @Autowired AppProperties properties;
-    @MockBean BehaviorTrackingService tracking;
-    @MockBean UserMealQueryService mealQueries;
-    @MockBean UserAccountRepository users;
-    @MockBean MealRecordRepository meals;
-    @MockBean WeeklyReportJobRepository jobs;
-    @MockBean WeeklyReportSnapshotRepository snapshots;
-    @MockBean TokenBlacklistService blacklist;
-    @MockBean VisionFoodRecognitionService vision;
-    @MockBean KnowledgeIndexService knowledge;
-    @MockBean AdviceGenerationService advice;
-    @MockBean ImageStorageService images;
-    @MockBean NonFoodUploadGuardService uploadGuard;
-    @MockBean UserGoalService goals;
-    @MockBean MealRecordPersistenceService persistence;
-    @MockBean MealAnalysisRequestService analysisRequests;
-    @MockBean MealAnalysisRequestStore requestStore;
-    @MockBean WeeklyReportService reports;
-    @MockBean RateLimitService limits;
-    @MockBean AiBudgetService budgets;
-    @MockBean AssistantMemoryStore memoryStore;
-    @MockBean AssistantMemoryMaintenanceService memoryMaintenance;
-    @MockBean AdminService admin;
-    @MockBean AdminAuditService audit;
-    @MockBean AssistantBenchmarkService benchmark;
-    @MockBean AssistantBenchmarkHistoryService history;
-    @MockBean AssistantEvaluationReviewService reviews;
-    @MockBean AssistantEvaluationCandidateService candidates;
+    @MockitoBean BehaviorTrackingService tracking;
+    @MockitoBean UserMealQueryService mealQueries;
+    @MockitoBean UserAccountRepository users;
+    @MockitoBean MealRecordRepository meals;
+    @MockitoBean WeeklyReportJobRepository jobs;
+    @MockitoBean WeeklyReportSnapshotRepository snapshots;
+    @MockitoBean TokenBlacklistService blacklist;
+    @MockitoBean VisionFoodRecognitionService vision;
+    @MockitoBean KnowledgeIndexService knowledge;
+    @MockitoBean AdviceGenerationService advice;
+    @MockitoBean ImageStorageService images;
+    @MockitoBean NonFoodUploadGuardService uploadGuard;
+    @MockitoBean UserGoalService goals;
+    @MockitoBean MealRecordPersistenceService persistence;
+    @MockitoBean MealAnalysisRequestService analysisRequests;
+    @MockitoBean MealAnalysisRequestStore requestStore;
+    @MockitoBean WeeklyReportService reports;
+    @MockitoBean RateLimitService limits;
+    @MockitoBean AiBudgetService budgets;
+    @MockitoBean AssistantMemoryStore memoryStore;
+    @MockitoBean AssistantMemoryMaintenanceService memoryMaintenance;
+    @MockitoBean AdminService admin;
+    @MockitoBean AdminAuditService audit;
+    @MockitoBean AssistantBenchmarkService benchmark;
+    @MockitoBean AssistantBenchmarkHistoryService history;
+    @MockitoBean AssistantEvaluationReviewService reviews;
+    @MockitoBean AssistantEvaluationCandidateService candidates;
     UserAccount user;
     String token;
 

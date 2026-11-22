@@ -4,7 +4,7 @@ package com.example.mealcheck.controller;
 @org.springframework.boot.test.context.TestConfiguration
 public class CsrfTestRequests {
     @org.springframework.context.annotation.Bean
-    org.springframework.boot.test.autoconfigure.web.servlet.MockMvcBuilderCustomizer validCsrfRequests() {
+    org.springframework.boot.webmvc.test.autoconfigure.MockMvcBuilderCustomizer validCsrfRequests() {
         return builder->builder.defaultRequest(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/")
                 .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()));
     }

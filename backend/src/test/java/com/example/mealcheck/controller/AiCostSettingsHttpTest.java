@@ -10,8 +10,8 @@ import java.util.*;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.ArgumentMatchers.*;
@@ -25,9 +25,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AiCostSettingsHttpTest {
     @Autowired MockMvc http;
     @Autowired JwtService jwt;
-    @MockBean AiCostSettingsService settings;
-    @MockBean UserAccountRepository users;
-    @MockBean TokenBlacklistService blacklist;
+    @MockitoBean AiCostSettingsService settings;
+    @MockitoBean UserAccountRepository users;
+    @MockitoBean TokenBlacklistService blacklist;
     String token,adminToken;
     @BeforeEach void setup() {
         token=token(10L,"cost-user","USER");adminToken=token(20L,"cost-admin","ADMIN");

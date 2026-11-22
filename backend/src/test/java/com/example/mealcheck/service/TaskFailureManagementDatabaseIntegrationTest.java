@@ -7,9 +7,9 @@ import com.example.mealcheck.repository.*;
 import com.example.mealcheck.security.UserPrincipal;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.*;
@@ -46,9 +46,9 @@ class TaskFailureManagementDatabaseIntegrationTest {
     @Autowired UserAccountRepository users;
     @Autowired AdminAuditLogRepository audits;
     @Autowired JdbcTemplate jdbc;
-    @MockBean UserGoalService goals;
-    @MockBean RateLimitService limits;
-    @MockBean MealRecordPersistenceService persistence;
+    @MockitoBean UserGoalService goals;
+    @MockitoBean RateLimitService limits;
+    @MockitoBean MealRecordPersistenceService persistence;
     UserPrincipal user,admin;
     final String key="failure-management-key-0001";
     @BeforeEach void setup() {

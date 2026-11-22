@@ -3,6 +3,7 @@ package com.example.mealcheck.controller;
 import com.example.mealcheck.service.MealNutritionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import static org.mockito.Mockito.*;
@@ -14,6 +15,7 @@ class MealNutritionControllerTest {
     private MockMvc http;
     @BeforeEach void setup() {
         http = MockMvcBuilders.standaloneSetup(new MealNutritionController(service))
+                .setMessageConverters(new MappingJackson2HttpMessageConverter())
                 .setCustomArgumentResolvers(new org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver())
                 .setControllerAdvice(new GlobalExceptionHandler()).build();
     }

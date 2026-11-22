@@ -6,9 +6,9 @@ import com.example.mealcheck.service.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.*;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -39,12 +39,12 @@ class KnowledgeIndexingControllerTest {
         }
     }
     @Autowired MockMvc http;
-    @MockBean KnowledgeEmbeddingService embeddings;
-    @MockBean KnowledgeRebuildStore store;
-    @MockBean VectorCompressionService compression;
-    @MockBean KnowledgeJobLifecycleService lifecycle;
-    @MockBean KnowledgeIndexService index;
-    @MockBean KnowledgeRebuildPreviewService previews;
+    @MockitoBean KnowledgeEmbeddingService embeddings;
+    @MockitoBean KnowledgeRebuildStore store;
+    @MockitoBean VectorCompressionService compression;
+    @MockitoBean KnowledgeJobLifecycleService lifecycle;
+    @MockitoBean KnowledgeIndexService index;
+    @MockitoBean KnowledgeRebuildPreviewService previews;
 
     @Test @WithMockUser(roles="USER") void ordinaryUserCannotPreview() throws Exception {
         http.perform(post("/api/admin/knowledge/indexing/preview").contentType("application/json").content("{\"mode\":\"LOCAL\"}"))

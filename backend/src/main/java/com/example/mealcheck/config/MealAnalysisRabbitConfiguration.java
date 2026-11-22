@@ -5,12 +5,12 @@ import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFacto
 import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
 import org.springframework.amqp.rabbit.retry.RejectAndDontRequeueRecoverer;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
-import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
+import org.springframework.boot.amqp.autoconfigure.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import java.time.Duration;
 
 @Configuration
 @ConditionalOnProperty(name = "mealcheck.analysis.dispatch", havingValue = "rabbitmq", matchIfMissing = true)
@@ -45,9 +45,9 @@ public class MealAnalysisRabbitConfiguration {
         // Terminal model/validation failures must reach the DLQ immediately, not be retried
         // into a no-op ACK after their database state has already changed to FAILED.
         factory.setAdviceChain(RetryInterceptorBuilder.stateless()
-                .retryPolicy(new SimpleRetryPolicy(3,
-                        java.util.Map.of(AmqpRejectAndDontRequeueException.class, false), true, true))
-                .backOffOptions(1000, 2, 5000)
+                .configureRetryPolicy(policy -> policy.maxRetries(2)
+                        .delay(Duration.ofSeconds(1)).multiplier(2).maxDelay(Duration.ofSeconds(5))
+                        .excludes(AmqpRejectAndDontRequeueException.class))
                 .recoverer(new RejectAndDontRequeueRecoverer()).build());
         return factory;
     }
@@ -60,7 +60,7 @@ public class MealAnalysisRabbitConfiguration {
         factory.setAcknowledgeMode(AcknowledgeMode.AUTO);
         factory.setPrefetchCount(1);
         factory.setDefaultRequeueRejected(true);
-        factory.setAdviceChain(RetryInterceptorBuilder.stateless().maxAttempts(3)
+        factory.setAdviceChain(RetryInterceptorBuilder.stateless().maxRetries(2)
                 .backOffOptions(1000,2,5000).recoverer((message,cause) -> {
                     throw new org.springframework.amqp.ImmediateRequeueAmqpException("Dead-letter archive unavailable");
                 }).build());

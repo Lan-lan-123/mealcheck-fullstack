@@ -11,11 +11,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -142,8 +142,8 @@ class WeeklyReportDatabaseIntegrationTest {
         assertThat(deferred.getNextRetryAt()).isAfter(AppTime.now().plusMinutes(59));
         assertThat(workerJobs.markFailed(job.getId(),3,job.getExecutionToken(),new IllegalStateException("late"))).isFalse();
     }
-    @MockBean RateLimitService limits;
-    @SpyBean UserDietProfileService profiles;
+    @MockitoBean RateLimitService limits;
+    @MockitoSpyBean UserDietProfileService profiles;
     @TempDir Path uploadDir;
     UserAccount user;
 

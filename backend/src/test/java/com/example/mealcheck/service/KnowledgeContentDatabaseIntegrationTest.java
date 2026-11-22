@@ -4,9 +4,9 @@ import com.example.mealcheck.config.AppProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.*;
@@ -39,10 +39,10 @@ class KnowledgeContentDatabaseIntegrationTest {
     @Autowired KnowledgeRebuildStore builds;
     @Autowired KnowledgeSourceSyncStore source;
     @Autowired AppProperties properties;
-    @MockBean PgVectorKnowledgeService vectors;
-    @MockBean KnowledgeEmbeddingService embeddings;
-    @MockBean KnowledgeIndexService index;
-    @MockBean KnowledgeEmbeddingProfileStore profiles;
+    @MockitoBean PgVectorKnowledgeService vectors;
+    @MockitoBean KnowledgeEmbeddingService embeddings;
+    @MockitoBean KnowledgeIndexService index;
+    @MockitoBean KnowledgeEmbeddingProfileStore profiles;
     long id;
     final String signature="hash-v1:2:halfvec-v1";
     @BeforeEach void setup() {

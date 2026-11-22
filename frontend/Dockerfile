@@ -2,7 +2,7 @@ FROM node:22-alpine AS build
 WORKDIR /workspace
 
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --no-audit
 
 COPY . .
 ARG VITE_BUSINESS_ZONE=Asia/Shanghai

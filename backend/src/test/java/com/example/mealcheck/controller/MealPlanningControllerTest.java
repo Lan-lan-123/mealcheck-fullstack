@@ -9,9 +9,9 @@ import com.example.mealcheck.util.AppTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.*;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -33,8 +33,8 @@ class MealPlanningControllerTest {
         }
     }
     @Autowired MockMvc http;
-    @MockBean TodayMealService today;
-    @MockBean NextMealService next;
+    @MockitoBean TodayMealService today;
+    @MockitoBean NextMealService next;
     UserPrincipal principal() { var account=new UserAccount(); account.setId(9L); account.setUsername("owner"); return new UserPrincipal(account); }
     @Test void anonymousRequestsAreRejected() throws Exception {
         http.perform(get("/api/meals/today")).andExpect(status().is4xxClientError());

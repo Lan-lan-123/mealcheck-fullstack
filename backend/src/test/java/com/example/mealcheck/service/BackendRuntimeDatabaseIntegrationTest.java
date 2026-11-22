@@ -3,7 +3,7 @@ package com.example.mealcheck.service;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -32,7 +32,7 @@ class BackendRuntimeDatabaseIntegrationTest {
         registry.add("spring.datasource.username", POSTGRES::getUsername);
         registry.add("spring.datasource.password", POSTGRES::getPassword);
     }
-    @MockBean BackgroundTaskDispatcher background;
+    @MockitoBean BackgroundTaskDispatcher background;
     @Autowired ApplicationContext context;
     @Autowired AiBudgetService budgets;
     @Autowired ImageStorageService storage;

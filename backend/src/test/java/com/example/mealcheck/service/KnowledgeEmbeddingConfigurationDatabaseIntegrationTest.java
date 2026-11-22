@@ -7,10 +7,10 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -52,10 +52,10 @@ class KnowledgeEmbeddingConfigurationDatabaseIntegrationTest {
     @Autowired AppProperties properties;
     @Autowired JdbcTemplate jdbc;
     @Autowired ObjectMapper mapper;
-    @MockBean KnowledgeIndexService index;
-    @MockBean AiHttpTransport transport;
-    @MockBean ApplicationObservability observability;
-    @MockBean AdminAuditService audit;
+    @MockitoBean KnowledgeIndexService index;
+    @MockitoBean AiHttpTransport transport;
+    @MockitoBean ApplicationObservability observability;
+    @MockitoBean AdminAuditService audit;
     final UserPrincipal admin=mock(UserPrincipal.class);
 
     @BeforeEach @SuppressWarnings("unchecked") void setup() throws Exception {

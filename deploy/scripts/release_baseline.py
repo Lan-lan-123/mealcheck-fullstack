@@ -319,7 +319,7 @@ def main():
             verification.run(name, [mvn, '-o', '-q', '-Dtest=WeeklyReportCoordinationMetricsTest',
                                    f'-DargLine=-Duser.timezone={zone}', 'test'], verification.source / 'backend')
         frontend = verification.source / 'frontend'
-        verification.run('frontend-install', [npm, 'ci'], frontend)
+        verification.run('frontend-install', [npm, 'ci', '--no-audit'], frontend)
         verification.run('frontend-typecheck', [npm, 'run', 'typecheck'], frontend)
         verification.run('frontend-tests', [npm, 'test'], frontend)
         verification.run('frontend-build', [npm, 'run', 'build'], frontend)

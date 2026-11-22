@@ -37,7 +37,7 @@ public class WeeklyReportCoordinationQueryService {
                                                        Long jobId) {
         int safePage = Math.max(0, page);
         int safeSize = Math.max(1, Math.min(100, size));
-        Specification<WeeklyReportCoordinationRun> specification = Specification.where(null);
+        Specification<WeeklyReportCoordinationRun> specification = Specification.unrestricted();
         if (status != null && !status.isBlank() && !"ALL".equalsIgnoreCase(status)) {
             String normalizedStatus = status.trim().toUpperCase(Locale.ROOT);
             specification = specification.and((root, query, criteria) ->

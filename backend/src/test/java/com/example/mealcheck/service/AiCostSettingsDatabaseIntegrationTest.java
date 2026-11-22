@@ -12,9 +12,9 @@ import java.util.concurrent.*;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.*;
@@ -42,7 +42,7 @@ class AiCostSettingsDatabaseIntegrationTest {
     @Autowired AppProperties properties;
     @Autowired JdbcTemplate jdbc;
     @Autowired UserAccountRepository users;
-    @MockBean AdminAuditService audit;
+    @MockitoBean AdminAuditService audit;
     UserAccount user,other;
     final LocalDate day=LocalDate.of(2026,10,25);
     static BigDecimal amount(String value) { return new BigDecimal(value); }

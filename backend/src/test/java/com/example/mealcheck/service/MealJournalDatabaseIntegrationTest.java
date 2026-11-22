@@ -11,8 +11,8 @@ import com.example.mealcheck.util.AppTime;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.*;
 import org.springframework.test.web.servlet.MockMvc;
@@ -39,11 +39,11 @@ class MealJournalDatabaseIntegrationTest {
     @DynamicPropertySource static void database(DynamicPropertyRegistry r) {
         r.add("spring.datasource.url",POSTGRES::getJdbcUrl);r.add("spring.datasource.username",POSTGRES::getUsername);r.add("spring.datasource.password",POSTGRES::getPassword);
     }
-    @MockBean BackgroundTaskDispatcher background;
-    @MockBean RateLimitService limits;
-    @MockBean RedisCacheService redis;
-    @MockBean AiChatClient ai;
-    @MockBean TokenBlacklistService blacklist;
+    @MockitoBean BackgroundTaskDispatcher background;
+    @MockitoBean RateLimitService limits;
+    @MockitoBean RedisCacheService redis;
+    @MockitoBean AiChatClient ai;
+    @MockitoBean TokenBlacklistService blacklist;
     @Autowired UserAccountRepository users;
     @Autowired MealRecordRepository meals;
     @Autowired MealJournalService journal;
@@ -58,7 +58,7 @@ class MealJournalDatabaseIntegrationTest {
     @Autowired WeeklyReportSnapshotRepository snapshots;
     @Autowired WeeklyReportHistoryService reportHistory;
     @Autowired com.fasterxml.jackson.databind.ObjectMapper mapper;
-    @org.springframework.boot.test.mock.mockito.SpyBean TrackingQueryRepository trackingQueries;
+    @org.springframework.test.context.bean.override.mockito.MockitoSpyBean TrackingQueryRepository trackingQueries;
     UserPrincipal alice,bob; LocalDate today;
     @BeforeEach void setup() {
         jdbc.execute("TRUNCATE users CASCADE");

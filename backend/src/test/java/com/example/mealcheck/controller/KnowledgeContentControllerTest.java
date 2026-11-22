@@ -3,8 +3,8 @@ import com.example.mealcheck.security.JwtAuthenticationFilter;
 import com.example.mealcheck.service.KnowledgeContentService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.*;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(KnowledgeIndexingControllerTest.TestSecurity.class)
 class KnowledgeContentControllerTest {
     @Autowired MockMvc http;
-    @MockBean KnowledgeContentService service;
+    @MockitoBean KnowledgeContentService service;
     @Test @WithMockUser(roles="USER") void ordinaryUserCannotReadOrRestoreHistory() throws Exception {
         http.perform(get("/api/admin/knowledge/content-history")).andExpect(status().isForbidden());
         http.perform(get("/api/admin/knowledge/content-history/1")).andExpect(status().isForbidden());

@@ -15,11 +15,11 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.amqp.autoconfigure.RabbitAutoConfiguration;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockMultipartFile;
@@ -86,13 +86,13 @@ class MealAnalysisRabbitDatabaseIntegrationTest {
     @Autowired AmqpAdmin admin;
     @Autowired RabbitListenerEndpointRegistry listeners;
     @Autowired PlatformTransactionManager transactionManager;
-    @MockBean RateLimitService limits;
-    @MockBean UserGoalService goals;
-    @MockBean NonFoodUploadGuardService guard;
-    @MockBean KnowledgeIndexService knowledge;
-    @MockBean VisionFoodRecognitionService vision;
-    @MockBean AiChatClient ai;
-    @MockBean BackgroundTaskDispatcher background;
+    @MockitoBean RateLimitService limits;
+    @MockitoBean UserGoalService goals;
+    @MockitoBean NonFoodUploadGuardService guard;
+    @MockitoBean KnowledgeIndexService knowledge;
+    @MockitoBean VisionFoodRecognitionService vision;
+    @MockitoBean AiChatClient ai;
+    @MockitoBean BackgroundTaskDispatcher background;
     @TempDir Path uploadDir;
     UserPrincipal principal;
     MockMultipartFile image;
@@ -121,6 +121,12 @@ class MealAnalysisRabbitDatabaseIntegrationTest {
     }
     @AfterEach void stop() { listeners.stop(); }
 
+    private void startListeners() {
+        var containers = listeners.getListenerContainers();
+        assertThat(containers).isNotEmpty();
+        containers.forEach(MessageListenerContainer::start);
+    }
+
     @Test void twoConsumersExecuteConcurrentlyAndDuplicateDeliveryPublishesOnlyOneMeal() throws Exception {
         var entered = new CountDownLatch(2);
         var release = new CountDownLatch(1);
@@ -135,14 +141,14 @@ class MealAnalysisRabbitDatabaseIntegrationTest {
         requests.enqueue(principal, KEY + "-2", image, "current");
         publisher.publish();
         rabbit.convertAndSend(EXCHANGE, ROUTING_KEY, id.toString());
-        listeners.start();
+        startListeners();
         try {
             assertThat(entered.await(10, TimeUnit.SECONDS)).isTrue();
             assertThat(jdbc.queryForObject("SELECT count(*) FROM meal_analysis_requests WHERE status='PROCESSING'", Long.class)).isEqualTo(2);
         } finally { release.countDown(); }
         await().atMost(Duration.ofSeconds(15)).untilAsserted(() -> assertThat(meals.count()).isEqualTo(2));
         await().atMost(Duration.ofSeconds(5)).untilAsserted(() -> assertThat(outboxCount()).isZero());
-        listeners.stop(); listeners.start();
+        listeners.stop(); startListeners();
         rabbit.convertAndSend(EXCHANGE, ROUTING_KEY, id.toString());
         await().atMost(Duration.ofSeconds(5)).untilAsserted(() ->
                 assertThat(admin.getQueueProperties(QUEUE).get("QUEUE_MESSAGE_COUNT")).isEqualTo(0));
@@ -169,7 +175,7 @@ class MealAnalysisRabbitDatabaseIntegrationTest {
         assertThat(outbox.claim()).isNull();
         // Explicit recovery after restoring the DB to an empty broker replays unfinished work.
         jdbc.update("UPDATE meal_analysis_outbox SET published_at=NULL");
-        publisher.publish(); listeners.start();
+        publisher.publish(); startListeners();
         awaitSuccess();
         verify(vision, times(1)).recognize(any(ValidatedImage.class));
     }
@@ -181,7 +187,7 @@ class MealAnalysisRabbitDatabaseIntegrationTest {
         assertThat(store.takeMessage(eventId())).isNull();
         var oldPrepared = analysis.prepareValidated(old.user(), store.loadImage(old), old.goal());
         jdbc.update("UPDATE meal_analysis_requests SET lease_until=CURRENT_TIMESTAMP-INTERVAL '1 minute'");
-        publisher.publish(); listeners.start(); awaitSuccess();
+        publisher.publish(); startListeners(); awaitSuccess();
         assertThatThrownBy(() -> store.loadImage(old)).isInstanceOf(MealAnalysisRequestStore.WorkNoLongerOwnedException.class);
         store.complete(old.user(), old.key(), old.token(), oldPrepared);
         assertThat(meals.count()).isEqualTo(1);
@@ -192,7 +198,7 @@ class MealAnalysisRabbitDatabaseIntegrationTest {
         when(vision.recognize(any(ValidatedImage.class))).thenThrow(new IllegalStateException("model unavailable"));
         requests.enqueue(principal, KEY, image, "current");
         UUID old = eventId();
-        publisher.publish(); listeners.start();
+        publisher.publish(); startListeners();
         await().atMost(Duration.ofSeconds(15)).untilAsserted(() -> assertThat(requests.status(principal, KEY).status()).isEqualTo("FAILED"));
         var dead = rabbit.receive(DEAD_QUEUE, 10000);
         assertThat(dead).isNotNull();
@@ -205,7 +211,7 @@ class MealAnalysisRabbitDatabaseIntegrationTest {
         requests.enqueue(principal, KEY, image, "current");
         assertThat(eventId()).isNotEqualTo(old);
         assertThat(store.takeMessage(old)).isNull();
-        publisher.publish(); listeners.start(); awaitSuccess();
+        publisher.publish(); startListeners(); awaitSuccess();
         assertThat(meals.count()).isEqualTo(1);
         verify(vision, times(2)).recognize(any(ValidatedImage.class));
     }
@@ -328,7 +334,7 @@ class MealAnalysisRabbitDatabaseIntegrationTest {
         for (int i=0;i<10;i++) publisher.publish();
         assertThat(admin.getQueueProperties(QUEUE).get("QUEUE_MESSAGE_COUNT")).isEqualTo(200);
         due(); publisher.publish(); // Confirmed backlog must not be republished.
-        listeners.start();
+        startListeners();
         await().atMost(Duration.ofSeconds(120)).untilAsserted(() -> assertThat(meals.count()).isEqualTo(200));
         await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
             assertThat(outboxCount()).isZero();
