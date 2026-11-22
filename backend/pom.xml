@@ -21,7 +21,8 @@
         <jjwt.version>0.12.6</jjwt.version>
         <langchain4j.version>1.13.1</langchain4j.version>
         <langgraph4j.version>1.8.24</langgraph4j.version>
-        <mcp-java-sdk.version>1.0.0</mcp-java-sdk.version>
+        <mcp-java-sdk.version>1.0.1</mcp-java-sdk.version>
+        <opentelemetry.version>1.67.0</opentelemetry.version>
         <twelvemonkeys.version>3.13.1</twelvemonkeys.version>
         <testcontainers.version>1.21.4</testcontainers.version>
         <mealcheck.testReportsDirectory>${project.build.directory}/surefire-reports</mealcheck.testReportsDirectory>

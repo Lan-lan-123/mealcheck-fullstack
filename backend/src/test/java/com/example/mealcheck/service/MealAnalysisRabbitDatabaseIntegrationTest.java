@@ -151,7 +151,7 @@ class MealAnalysisRabbitDatabaseIntegrationTest {
         listeners.stop(); startListeners();
         rabbit.convertAndSend(EXCHANGE, ROUTING_KEY, id.toString());
         await().atMost(Duration.ofSeconds(5)).untilAsserted(() ->
-                assertThat(admin.getQueueProperties(QUEUE).get("QUEUE_MESSAGE_COUNT")).isEqualTo(0));
+                assertThat(admin.getQueueInfo(QUEUE).getMessageCount()).isZero());
         verify(vision, times(2)).recognize(any(ValidatedImage.class));
         verify(limits, times(2)).consumeMealAnalysis(anyString());
     }
@@ -332,13 +332,13 @@ class MealAnalysisRabbitDatabaseIntegrationTest {
         assertThat(requests.status(principal,KEY).message()).contains("自动恢复");
         assertThatThrownBy(() -> store.loadImage(abandoned)).isInstanceOf(MealAnalysisRequestStore.WorkNoLongerOwnedException.class);
         for (int i=0;i<10;i++) publisher.publish();
-        assertThat(admin.getQueueProperties(QUEUE).get("QUEUE_MESSAGE_COUNT")).isEqualTo(200);
+        assertThat(admin.getQueueInfo(QUEUE).getMessageCount()).isEqualTo(200);
         due(); publisher.publish(); // Confirmed backlog must not be republished.
         startListeners();
         await().atMost(Duration.ofSeconds(120)).untilAsserted(() -> assertThat(meals.count()).isEqualTo(200));
         await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
             assertThat(outboxCount()).isZero();
-            assertThat(admin.getQueueProperties(QUEUE).get("QUEUE_MESSAGE_COUNT")).isEqualTo(0);
+            assertThat(admin.getQueueInfo(QUEUE).getMessageCount()).isZero();
         });
         assertThat(jdbc.queryForObject("SELECT count(*) FROM meal_analysis_requests WHERE status='SUCCEEDED' AND input_image IS NULL",Long.class)).isEqualTo(200);
         assertThat(jdbc.queryForObject("SELECT count(DISTINCT record_id) FROM meal_analysis_requests",Long.class)).isEqualTo(200);
