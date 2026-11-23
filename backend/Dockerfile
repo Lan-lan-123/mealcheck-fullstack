@@ -14,7 +14,7 @@ RUN --mount=type=cache,target=/root/.m2 \
 FROM eclipse-temurin:17-jre-alpine-3.24@sha256:2b4113ae80e31f103b284dd3bc3e008add670cf8555417b5b289fa1128f2f0a3
 WORKDIR /app
 
-RUN addgroup -S -g 999 mealcheck \
+RUN addgroup -S -g 10001 mealcheck \
     && adduser -S -D -H -u 999 -G mealcheck -h /app -s /sbin/nologin mealcheck \
     && mkdir -p /app/uploads /app/upload-temp \
     && chown -R mealcheck:mealcheck /app
