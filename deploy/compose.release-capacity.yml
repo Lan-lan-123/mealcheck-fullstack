@@ -1,7 +1,10 @@
 # Overlay for the existing isolated capacity-acceptance project only.
 services:
+  postgres:
+    image: ${MEALCHECK_RELEASE_POSTGRES_IMAGE:?Set candidate PostgreSQL image}
   backend:
     image: ${MEALCHECK_RELEASE_BACKEND_IMAGE:?Set candidate backend image}
+    user: mealcheck
     volumes: !reset []
     entrypoint: [java, -Xms128m, -Xmx512m, -jar, /app/app.jar]
     command: !reset []

@@ -209,7 +209,8 @@ class Verification:
 
     def containers(self, args):
         short = self.commit[:12]
-        for role in ('backend', 'frontend'):
+        build_contexts = {'backend': 'backend', 'frontend': 'frontend', 'postgres': 'deploy/postgres'}
+        for role, context in build_contexts.items():
             tag = f'mealcheck-baseline-{role}:{short}'
             # Never overwrite a previously built candidate tag.
             exists = subprocess.run(['docker', 'image', 'inspect', tag], stdout=subprocess.DEVNULL,
@@ -218,7 +219,7 @@ class Verification:
                 raise RuntimeError(f'Candidate tag already exists; retain it and use a fresh candidate: {tag}')
             self.run(f'build-{role}', ['docker', 'build', '--label', f'org.opencontainers.image.revision={self.commit}',
                                       '--label', f'org.opencontainers.image.version={args.version}',
-                                      '-t', tag, str(self.source / role)])
+                                      '-t', tag, str(self.source / context)])
             info = json.loads(subprocess.check_output(['docker', 'image', 'inspect', tag], text=True))[0]
             self.manifest['images'][role] = dict(tag=tag, imageId=info['Id'], repoDigests=info.get('RepoDigests', []),
                                                 revision=info['Config']['Labels']['org.opencontainers.image.revision'])
@@ -235,6 +236,7 @@ class Verification:
         try:
             self.run('capacity-start', capacity + ['up', '--no-build', '-d', '--wait', '--wait-timeout', '150'])
             self.verify_running_image(capacity, 'backend')
+            self.verify_running_image(capacity, 'postgres')
             self.run('capacity-faults', [sys.executable, 'loadtests/capacity_acceptance.py', '--output',
                                        str(self.output / 'capacity'), '--fault-checks'])
         finally:
@@ -250,6 +252,7 @@ class Verification:
             self.record_dependency_images(smoke)
             self.verify_running_image(smoke, 'backend')
             self.verify_running_image(smoke, 'frontend')
+            self.verify_running_image(smoke, 'postgres')
             self.run('http-smoke', [sys.executable, 'deploy/scripts/smoke.py', '--base-url', 'http://127.0.0.1:18080'])
             self.run('stack-backup', [sys.executable, 'deploy/scripts/recovery.py', 'backup', '--project', smoke_project,
                                      '--env-file', 'deploy/smoke.env', '--compose', 'docker-compose.prod.yml',
@@ -264,7 +267,8 @@ class Verification:
             self.run('production-service-logs', smoke + ['logs', '--no-color', '--tail', '200'], required=False)
             self.run('production-cleanup', smoke + ['down', '--volumes'])
         self.run('full-schema-restore', [sys.executable, 'deploy/scripts/recovery.py', 'self-test', '--migrations',
-                                        'backend/src/main/resources/db/migration', '--output', str(self.output / 'full-schema')])
+                                        'backend/src/main/resources/db/migration', '--output', str(self.output / 'full-schema'),
+                                        '--image', self.manifest['images']['postgres']['imageId']])
         self.run('alert-rules', ['docker', 'run', '--rm', '--entrypoint', 'promtool', '-v',
                                 f'{self.source / "deploy/monitoring"}:/rules:ro', 'prom/prometheus:v3.5.0',
                                 'check', 'rules', '/rules/mealcheck-alerts.yml'])

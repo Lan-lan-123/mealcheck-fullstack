@@ -1,8 +1,11 @@
 import { test, expect } from './fixtures/authTest.js'
-import { readFile } from 'node:fs/promises'
 
 // Browser tests use a deterministic API contract. Real persistence, authorization,
 // concurrency and migrations are covered separately by the backend tests.
+const previewImage = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAABAAAAAMCAIAAADkharWAAAAGklEQVR4nGOMa4pmIAUwkaSaYVQDcWA4aAAA7wsBU2gnm8cAAAAASUVORK5CYII=',
+  'base64'
+)
 const foods = [{ name: '米饭', category: 'staple', confidence: .9 }]
 const result = { recordId: 1, revision: 0, recognition: { foods }, evaluation: { score: 21, summary: '餐食结构有待补充', riskTags: ['蔬菜不足'] }, advice: '增加蔬菜和蛋白质' }
 const report = { periodStart: '2025-01-01', periodEnd: '2025-01-07', days: 7, totalMeals: 1, averageScore: 21,
@@ -19,7 +22,7 @@ async function fixture(page, options = {}) {
     if (path === '/api/auth/captcha') return send({ captchaId: 'test', question: '1 + 2 = ?' })
     if (path === '/api/auth/login') return send({ token: 'fixture-token', username: 'alice', role: 'USER', displayName: '测试用户' })
     if (path === '/api/auth/logout') return send(null)
-    if (path === '/api/meals/1/image') return route.fulfill({ contentType: 'image/png', body: await readFile(new URL('../../tools/datasets/synthetic-meals-100/images/synth-005.png', import.meta.url)) })
+    if (path === '/api/meals/1/image') return route.fulfill({ contentType: 'image/png', body: previewImage })
     if (path === '/api/meals/analysis-requests') {
       posts++; key = request.headers()['idempotency-key']; expect(key).toMatch(/^[\w-]{16,80}$/)
       if (options.lostResponse) return send({ message: '响应传输失败' }, 502)

@@ -49,7 +49,7 @@ services:
       - data
 
   postgres:
-    image: pgvector/pgvector:pg16
+    image: ${MEALCHECK_POSTGRES_IMAGE:-pgvector/pgvector:pg16}
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-mealcheck}
