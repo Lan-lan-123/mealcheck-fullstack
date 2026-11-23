@@ -1,8 +1,10 @@
+import Button from './Button'
 import { useEffect, useId, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 
 // Native modal dialogs keep background controls inert and handle keyboard focus.
+/** @param {{title: string; onClose: () => void; children: import('react').ReactNode; returnFocus?: HTMLElement | null}} props */
 export default function DetailDrawer({ title, onClose, children, returnFocus }) {
   const dialog = useRef(null)
   const titleId = useId()
@@ -31,7 +33,7 @@ export default function DetailDrawer({ title, onClose, children, returnFocus }) 
     <dialog ref={dialog} className="detail-drawer workspace" aria-labelledby={titleId}
       onCancel={event => { event.preventDefault(); onClose() }}
       onClick={event => { if (event.target === dialog.current && event.clientX < dialog.current.getBoundingClientRect().left) onClose() }}>
-      <header className="detail-drawer-head"><h2 id={titleId}>{title}</h2><button autoFocus className="icon-button" type="button" onClick={onClose} aria-label="关闭详情"><X size={20} /></button></header>
+      <header className="detail-drawer-head"><h2 id={titleId}>{title}</h2><Button variant="plain" autoFocus className="icon-button" type="button" onClick={onClose} aria-label="关闭详情"><X size={20} /></Button></header>
       <div className="detail-drawer-body" tabIndex={0} role="region" aria-label={`${title}内容`}>{children}</div>
     </dialog>, document.body
   )

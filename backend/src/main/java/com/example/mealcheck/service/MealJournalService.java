@@ -46,19 +46,21 @@ public class MealJournalService {
         var user=lock(principal);
         var time=validateTime(request.occurredAt());
         var recognized=new RecognitionResult();
-        recognized.setFoods(request.foods().stream().map(f -> new FoodItem(f.name().trim(),f.category(),1.0,"用户手动记录")).toList());
+        recognized.setFoods(request.foods().stream().map(f -> f.toFoodItem("用户手动记录")).toList());
         recognized.setFoods(scoring.acceptedFoods(recognized));
         if(recognized.getFoods().isEmpty()) throw new IllegalArgumentException("请至少填写一项有效食物。");
         var goal=goals.effectiveGoal(user,request.goal());
         var evaluation=scoring.evaluate(recognized,goal);
         var record=new MealRecord(); record.setUser(user); record.setGoal(goal); record.setOccurredAt(time);
         record.setMealType(request.mealType()); record.setRecordSource("MANUAL"); record.setTimeConfirmed(true); record.setNote(request.note());
-        record.setScore(evaluation.getScore()); record.setSummary(evaluation.getSummary());
+        record.setScore(evaluation.getScore());
+        record.setScoreBreakdownJson(Jsons.toJson(mapper, evaluation.getScoreBreakdown())); record.setSummary(evaluation.getSummary());
         record.setDetectedFoodsJson(Jsons.toJson(mapper,recognized.getFoods()));
         record.setOriginalFoodsJson(record.getDetectedFoodsJson()); record.setScoringVersion(MealScoringService.VERSION);
         record.setCategoryCountsJson(Jsons.toJson(mapper,evaluation.getCategoryCounts()));
         record.setRiskTagsJson(Jsons.toJson(mapper,evaluation.getRiskTags()));
-        record.setAdvice(advice.correctedAdvice(recognized,evaluation,goal));
+        record.setAdvice(advice.correctedAdvice(recognized,evaluation,goal,user.getId()));
+        record.setAdviceStatus("USER_CORRECTION");record.setAdviceFailureCode(null);
         meals.saveAndFlush(record); clearSkip(record); profiles.applyMeal(user,record); invalidation.mealDates(user.getId(),AppTime.businessDate(record.getOccurredAt()));
         return analysis.toResponse(record);
     }

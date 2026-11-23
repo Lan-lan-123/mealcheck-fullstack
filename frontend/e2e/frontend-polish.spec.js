@@ -1,11 +1,11 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/authTest.js'
 
 async function fixture(page, role = 'USER', path = '/user/records', evaluationStatus = 'RUNNING') {
   const requests = [], errors = []
   page.on('pageerror', error => errors.push(error.message))
   await page.addInitScript(role => {
-    localStorage.setItem('mealcheck_token', 'polish-test')
-    localStorage.setItem('mealcheck_user', JSON.stringify({ username: 'tester', displayName: '测试账户', role }))
+
+    sessionStorage.setItem('mealcheck_fixture_user', JSON.stringify({ username: 'tester', displayName: '测试账户', role }))
   }, role)
   const benchmark = { runId: 'evaluation-1', status: evaluationStatus, mode: 'QUICK', caseCount: 10, completedCount: 2, cases: [] }
   const run = { runId: 'coordination-1', status: 'RUNNING', userId: 1, jobId: 2, elapsedMs: 1500, stepCount: 1 }
@@ -18,7 +18,8 @@ async function fixture(page, role = 'USER', path = '/user/records', evaluationSt
     const path = url.pathname
     if (request.method() === 'DELETE') return send(null)
     if (path === '/api/profile/goals/current') return send({ goalType: 'balanced', note: '已保存目标', endDate: '' })
-    if (path === '/api/meals') return send({ content: [meal], page: 0, totalElements: 1, totalPages: 1 })
+    if (path === '/api/meals/1' && request.method() === 'GET') return send(meal)
+    if (['/api/meals', '/api/meals/summaries'].includes(path)) return send({ content: [meal], page: 0, totalElements: 1, totalPages: 1 })
     if (path === '/api/meals/trends') return send({ total: 3, days: 30, averageScore: 30, dailyAverageScores: [{ label: '2026-09-29', value: 0 }, { label: '2026-09-30', value: null }, { label: '2026-10-01', value: 90 }], foodCounts: [{ label: '零样本', value: 0 }, { label: '少量', value: 1 }, { label: '最多', value: 100 }] })
     if (path === '/api/admin/users') return send({ content: [{ id: 2, username: 'test-user', role: 'USER' }], page: 0, totalElements: 1, totalPages: 1 })
     if (path === '/api/admin/dashboard') return send({ overview: {} })
@@ -41,6 +42,7 @@ async function fixture(page, role = 'USER', path = '/user/records', evaluationSt
 
 test('direct user URLs, reload and history preserve the page and unsaved goals', async ({ page }) => {
   const state = await fixture(page, 'USER', '/user/goals')
+  await expect(page.getByRole('textbox', { name: '目标说明', exact: true })).toHaveValue('已保存目标')
   await page.getByRole('textbox', { name: '目标说明', exact: true }).fill('未保存的目标草稿')
   await page.getByRole('button', { name: '饮食记录', exact: true }).click()
   await expect(page).toHaveURL(/\/user\/records$/)
@@ -87,7 +89,7 @@ test('mobile filters collapse, expose date labels and keep drafts when folded', 
   await page.getByLabel('结束日期').fill('2026-10-01')
   await page.getByLabel('最低评分').fill('80')
   await page.getByRole('button', { name: '筛选', exact: true }).click()
-  await expect.poll(() => state.requests.filter(item => item.path === '/api/meals').at(-1).query.from).toBe('2026-09-01')
+  await expect.poll(() => state.requests.filter(item => ['/api/meals', '/api/meals/summaries'].includes(item.path)).at(-1).query.from).toBe('2026-09-01')
   await filters.locator('summary').click()
   await expect(page.getByLabel('开始日期')).not.toBeVisible()
   await filters.locator('summary').click()

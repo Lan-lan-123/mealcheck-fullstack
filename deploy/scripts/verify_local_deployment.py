@@ -4,6 +4,11 @@ No model calls or existing user-data mutations. Credentials stay in memory.
 The optional PostgreSQL fixture is created only for the newly registered account
 and removed through account deletion. This is an engineering smoke test.
 """
+
+import sys as _auth_sys
+from pathlib import Path as _AuthPath
+_auth_sys.path.insert(0, str(_AuthPath(__file__).resolve().parents[2] / 'tools'))
+import cookie_http as _auth_http
 import argparse
 import base64
 from datetime import datetime, timezone, timedelta
@@ -13,7 +18,8 @@ from pathlib import Path
 import re
 import secrets
 from urllib.error import HTTPError
-from urllib.request import Request, urlopen
+from urllib.request import Request
+urlopen = _auth_http.urlopen
 import recovery
 
 

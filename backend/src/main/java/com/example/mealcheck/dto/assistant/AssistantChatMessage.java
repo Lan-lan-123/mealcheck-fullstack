@@ -1,6 +1,34 @@
 package com.example.mealcheck.dto.assistant;
 
 public class AssistantChatMessage {
+    @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
+    private String reviewStatus="UNKNOWN";
+    public String getReviewStatus() {return reviewStatus;}
+    @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
+    private String answerStatus="COMPLETE";
+    @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
+    private java.util.List<String> answerReasonCodes=java.util.List.of();
+    @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
+    private String failureCode;
+    @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
+    private Integer upstreamStatus;
+    public String getAnswerStatus() {return answerStatus;}
+    public java.util.List<String> getAnswerReasonCodes() {return answerReasonCodes;}
+    public String getFailureCode() {return failureCode;}
+    public Integer getUpstreamStatus() {return upstreamStatus;}
+    public void setOutcome(AssistantResponse response) {
+        answerStatus=response.getAnswerStatus();answerReasonCodes=response.getAnswerReasonCodes();
+        failureCode=response.getFailureCode();upstreamStatus=response.getUpstreamStatus();
+        reviewStatus=response.getReviewStatus();
+    }
+    @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
+    private java.util.List<AssistantReference> references = java.util.List.of();
+    public java.util.List<AssistantReference> getReferences() { return references; }
+    public void setReferences(java.util.List<AssistantReference> value) { references = value == null ? java.util.List.of() : java.util.List.copyOf(value); }
+    @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
+    private java.util.List<AssistantToolCall> toolCalls = java.util.List.of();
+    public java.util.List<AssistantToolCall> getToolCalls() { return toolCalls; }
+    public void setToolCalls(java.util.List<AssistantToolCall> value) { toolCalls = value == null ? java.util.List.of() : java.util.List.copyOf(value); }
     private Long messageId;
     private String requestId;
     private String deliveryStatus="COMPLETE";

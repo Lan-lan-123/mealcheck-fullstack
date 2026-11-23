@@ -100,10 +100,12 @@ export default function useAssistantEvaluation(enabled, refreshRevision) {
     const modeCopy = {
       QUICK: '快速测试包含 10 条代表性用例',
       STANDARD: '标准测试包含 50 条核心用例',
-      FULL: '完整测试包含 200 条分层用例，耗时和模型费用较高'
+      FULL: '完整测试包含 200 条分层用例，耗时和模型费用较高',
+      RAG_TOOLS: 'RAG 工具评测包含同一套 200 道题，使用受控知识样本检查工具选择、参数和执行状态，不评回答质量',
+      RAG_CHAIN: 'RAG 链路评测包含 200 道题，将在实际工具调用时执行向量检索、重排和过滤，并分别检查工具规则与检索结果；不评分最终回答质量'
     }
     const confirmed = await confirm(
-      `${modeCopy[mode] || '本次测试'}，将运行生产 Function Calling 链路并调用裁判模型；模型请求数会随工具轮数增加。确认开始吗？`, { title: '启动助手评测', confirmText: '开始评测' })
+      `${modeCopy[mode] || '本次测试'}，将运行生产 Function Calling 链路${['RAG_TOOLS', 'RAG_CHAIN'].includes(mode) ? '，不调用独立裁判评分' : '并调用裁判模型'}；会产生模型调用费用${mode === 'RAG_CHAIN' ? '，语义检索和重排也可能产生费用' : ''}，请求数会随工具轮数增加。确认开始吗？`, { title: '启动助手评测', confirmText: '开始评测' })
     if (!confirmed) return
     const selected = ++selection.current
     setAssistantBenchmarkLoading(true)

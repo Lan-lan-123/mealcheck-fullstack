@@ -1,3 +1,4 @@
+import Button from '../../components/Button'
 import FilterDisclosure from '../../components/FilterDisclosure'
 import { formatTime, MetricSmall, Chart, FoodTags, Pagination } from './AdminUi'
 
@@ -9,7 +10,7 @@ export default function MealManagementPanel({ applyMealFilters, defaultMealFilte
               <h2>全站饮食记录</h2>
               <p>按用户、日期和评分筛选记录，并查看整体可视化分析。</p>
             </div>
-            <button className={showMealManager ? 'primary-btn' : 'secondary-btn'} type="button" onClick={() => setShowMealManager(value => !value)}>{showMealManager ? '收起管理' : '管理全体饮食记录'}</button>
+            <Button variant="plain" className={showMealManager ? 'primary-btn' : 'secondary-btn'} type="button" onClick={() => setShowMealManager(value => !value)}>{showMealManager ? '收起管理' : '管理全体饮食记录'}</Button>
           </div>
 
           {showMealManager && (
@@ -20,12 +21,12 @@ export default function MealManagementPanel({ applyMealFilters, defaultMealFilte
                 <label className="form-field">结束日期<input type="date" min={mealFiltersDraft.from || undefined} value={mealFiltersDraft.to} onChange={e => setMealFiltersDraft({ ...mealFiltersDraft, to: e.target.value })} /></label>
                 <label className="form-field">最低评分<input type="number" min="0" max="100" value={mealFiltersDraft.minScore} onChange={e => setMealFiltersDraft({ ...mealFiltersDraft, minScore: e.target.value })} placeholder="最低评分" /></label>
                 <label className="form-field">最高评分<input type="number" min="0" max="100" value={mealFiltersDraft.maxScore} onChange={e => setMealFiltersDraft({ ...mealFiltersDraft, maxScore: e.target.value })} placeholder="最高评分" /></label>
-                <button className="secondary-btn" type="submit">筛选</button>
-                <button className="secondary-btn" type="button" onClick={() => { setMealFiltersDraft(defaultMealFilters); setMealFilters(defaultMealFilters); setMealPage(0) }}>重置</button>
+                <Button variant="secondary" className="secondary-btn" type="submit">筛选</Button>
+                <Button variant="secondary" className="secondary-btn" type="button" onClick={() => { setMealFiltersDraft(defaultMealFilters); setMealFilters(defaultMealFilters); setMealPage(0) }}>重置</Button>
               </form></FilterDisclosure>
               <div className="meal-manager-actions">
-                <button className="secondary-btn" type="button" onClick={toggleAllMealSelection}>{selectedMealIds.length === meals.length && meals.length > 0 ? '取消全选' : '全选本页'}</button>
-                <button className="table-danger-btn" type="button" onClick={handleDeleteSelectedMeals} disabled={!selectedMealIds.length || loading}>批量删除{selectedMealIds.length ? ` (${selectedMealIds.length})` : ''}</button>
+                <Button variant="secondary" className="secondary-btn" type="button" onClick={toggleAllMealSelection} disabled={loading}>{selectedMealIds.length === meals.length && meals.length > 0 ? '取消全选' : '全选本页'}</Button>
+                <Button variant="danger" className="table-danger-btn" type="button" onClick={handleDeleteSelectedMeals} disabled={!selectedMealIds.length || loading}>批量删除{selectedMealIds.length ? ` (${selectedMealIds.length})` : ''}</Button>
               </div>
             </div>
           )}
@@ -48,14 +49,14 @@ export default function MealManagementPanel({ applyMealFilters, defaultMealFilte
               <tbody>
                 {meals.length ? meals.map(meal => (
                   <tr key={meal.id}>
-                    {showMealManager && <td><input type="checkbox" checked={selectedMealIds.includes(meal.id)} onChange={() => toggleMealSelection(meal.id)} /></td>}
+                    {showMealManager && <td><input type="checkbox" checked={selectedMealIds.includes(meal.id)} disabled={loading} onChange={() => toggleMealSelection(meal.id)} /></td>}
                     <td>{meal.id}</td>
                     <td>{meal.username || '未知用户'}</td>
                     <td><strong>{meal.score ?? '暂无'}</strong></td>
                     <td><FoodTags names={meal.foodNames} /></td>
                     <td className="summary-cell">{meal.summary || '暂无'}</td>
                     <td>{formatTime(meal.createdAt)}</td>
-                    {showMealManager && <td><button className="table-danger-btn" type="button" onClick={() => handleDeleteMeal(meal)} disabled={deletingMealId === meal.id || loading}>{deletingMealId === meal.id ? '删除中...' : '删除'}</button></td>}
+                    {showMealManager && <td><Button variant="danger" className="table-danger-btn" type="button" onClick={() => handleDeleteMeal(meal)} disabled={deletingMealId === meal.id || loading}>{deletingMealId === meal.id ? '删除中...' : '删除'}</Button></td>}
                   </tr>
                 )) : <tr><td colSpan={showMealManager ? 8 : 6} className="empty-cell">暂无饮食记录</td></tr>}
               </tbody>

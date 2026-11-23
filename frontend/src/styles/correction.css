@@ -1,4 +1,11 @@
 .correction-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(100px, 180px) auto; gap: 10px; margin: 12px 0; }
+.food-attributes-editor { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 12px; }
+.food-attributes-editor label { display: grid; gap: 4px; min-width: 130px; }
+.correction-review { grid-column: 1 / -1; padding: 10px; border-radius: 8px; background: #fff8e9; color: #674b1d; overflow-wrap: anywhere; }
+.correction-review p { margin: 0 0 8px; font-size: 13px; }
+.correction-review label { display: flex; align-items: center; gap: 8px; }
+.correction-review input[type="checkbox"] { width: auto; flex: none; }
+.correction-photo img { display: block; width: 100%; max-height: 240px; object-fit: contain; border-radius: 8px; }
 @media (max-width: 600px) { .correction-row { grid-template-columns: minmax(0, 1fr); } }
 
 .evaluation-actions { display:flex; flex-wrap:wrap; gap:10px; margin:12px 0; }
@@ -9,3 +16,10 @@
 .dataset-fingerprint { overflow-wrap:anywhere; font-size:12px; }
 .evaluation-review { display:grid; gap:14px; margin-top:20px; }
 @media(max-width:600px) { .evaluation-actions { flex-direction:column; } .evaluation-actions button { min-height:44px; } }
+.quick-food-review { grid-column: 1 / -1; width: 100%; min-width: 0; margin: 8px 0; padding: 12px; border: 1px solid var(--border, #d5dfda); border-radius: 10px; }
+.quick-review-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.score-details { margin: 14px 0; }
+.score-details summary { cursor: pointer; }
+.score-details li { margin: 8px 0; }
+.score-details small { display: block; color: var(--muted, #52635c); overflow-wrap: anywhere; }
+.diet-preferences { margin-block: 20px; }

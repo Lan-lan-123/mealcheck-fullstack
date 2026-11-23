@@ -1,4 +1,9 @@
 """Demonstrate the real MealCheck MCP endpoint without calling an AI model."""
+
+import sys as _auth_sys
+from pathlib import Path as _AuthPath
+_auth_sys.path.insert(0, str(_AuthPath(__file__).resolve().parents[2] / 'tools'))
+import cookie_http as _auth_http
 import argparse
 import json
 import os
@@ -20,7 +25,7 @@ def rest(base, path, method="GET", body=None, token=None, expected=200):
         data=json.dumps(body).encode("utf-8") if body is not None else None,
     )
     try:
-        with urllib.request.urlopen(request, timeout=20) as response:
+        with _auth_http.urlopen(request, timeout=20) as response:
             status, raw = response.status, response.read()
     except urllib.error.HTTPError as error:
         status, raw = error.code, error.read()
@@ -61,7 +66,7 @@ class McpClient:
             self.url, method="POST", headers=self.headers(),
             data=json.dumps(message).encode("utf-8"),
         )
-        with urllib.request.urlopen(request, timeout=20) as response:
+        with _auth_http.urlopen(request, timeout=20) as response:
             self.session = response.headers.get("Mcp-Session-Id") or self.session
             if notification or response.status == 202:
                 reply = None
@@ -109,7 +114,7 @@ class McpClient:
         if not self.session:
             return
         request = urllib.request.Request(self.url, method="DELETE", headers=self.headers())
-        with urllib.request.urlopen(request, timeout=10):
+        with _auth_http.urlopen(request, timeout=10):
             pass
 
 

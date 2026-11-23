@@ -4,6 +4,11 @@ Only the account registered by this invocation is promoted and removed. Existing
 accounts, meals and knowledge content are not edited. Search hit statistics may
 increase. External embedding and reranker keys must be empty for this smoke test.
 """
+
+import sys as _auth_sys
+from pathlib import Path as _AuthPath
+_auth_sys.path.insert(0, str(_AuthPath(__file__).resolve().parents[2] / 'tools'))
+import cookie_http as _auth_http
 import argparse
 from datetime import datetime, timezone
 import json
@@ -12,7 +17,8 @@ import re
 import secrets
 from urllib.error import HTTPError
 from urllib.parse import urlencode
-from urllib.request import Request, urlopen
+from urllib.request import Request
+urlopen = _auth_http.urlopen
 
 import recovery
 
@@ -89,8 +95,8 @@ def verify(args):
                 len({chunk['title'] for chunk in all_chunks}) == args.expected_count
                 and len({chunk['contentHash'] for chunk in all_chunks}) == args.expected_count)
         check('source version is current',
-                all(chunk['sourceVersion'] == 'v3-curated-100' for chunk in all_chunks))
-        for topic in ['乳糖不耐受的替代选择', '低预算食堂选餐', '剩饭剩菜的及时冷藏', '营养标签的计量单位']:
+                all(chunk['sourceVersion'] == 'v5-curated-200' for chunk in all_chunks))
+        for topic in ['全素食与维生素B12来源', '千焦千卡与能量单位', '食品召回的产品与批次核对', '保温桶与长时间携餐']:
             status, result = http('GET', '/api/knowledge/search?' + urlencode({'q': topic, 'limit': 5}))
             check('new topic is retrievable: ' + topic,
                     status == 200 and any(topic in hit['title'] for hit in result['results'][:3]))
@@ -127,6 +133,6 @@ if __name__ == '__main__':
     parser.add_argument('--base-url', default='http://127.0.0.1:5173')
     parser.add_argument('--postgres', default='mealcheck-postgres')
     parser.add_argument('--backend', default='mealcheck-backend')
-    parser.add_argument('--expected-count', type=int, default=100)
+    parser.add_argument('--expected-count', type=int, default=200)
     parser.add_argument('--output', type=Path, required=True)
     verify(parser.parse_args())

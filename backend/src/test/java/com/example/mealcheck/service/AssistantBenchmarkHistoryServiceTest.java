@@ -23,6 +23,22 @@ import static org.mockito.Mockito.when;
 
 class AssistantBenchmarkHistoryServiceTest {
 
+    @Test void chainComparisonDetectsRankingChangesEvenWhenBothCasesPass() throws Exception {
+        var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        var service = spy(new AssistantBenchmarkHistoryService(mock(AssistantEvaluationRunRepository.class), mapper));
+        var base = (com.fasterxml.jackson.databind.node.ObjectNode) mapper.valueToTree(comparisonResponse("base", true, 1.0, "fingerprint"));
+        var candidate = (com.fasterxml.jackson.databind.node.ObjectNode) mapper.valueToTree(comparisonResponse("candidate", true, 1.0, "fingerprint"));
+        base.put("mode", "RAG_CHAIN"); candidate.put("mode", "RAG_CHAIN");
+        var evidence = mapper.readTree("{\"retrievalStatus\":\"PASSED\",\"retrievalPassed\":true,\"firstRelevantRank\":1}");
+        ((com.fasterxml.jackson.databind.node.ObjectNode) base.path("cases").get(0)).set("ragChain", evidence.deepCopy());
+        ((com.fasterxml.jackson.databind.node.ObjectNode) evidence).put("firstRelevantRank", 2);
+        ((com.fasterxml.jackson.databind.node.ObjectNode) candidate.path("cases").get(0)).set("ragChain", evidence);
+        doReturn(mapper.treeToValue(base, AssistantBenchmarkResponse.class)).when(service).detail("base");
+        doReturn(mapper.treeToValue(candidate, AssistantBenchmarkResponse.class)).when(service).detail("candidate");
+        assertThat(service.compare("base", "candidate").caseChanges()).singleElement()
+                .satisfies(change -> assertThat(change.changeType()).isEqualTo("CHANGED"));
+    }
+
     @Test
     void persistsAndLoadsFullResultDetail() {
         AssistantEvaluationRunRepository repository = mock(AssistantEvaluationRunRepository.class);

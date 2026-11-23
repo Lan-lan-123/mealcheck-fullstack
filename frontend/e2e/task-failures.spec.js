@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/authTest.js'
 
 const failure = { id: 1, taskType: 'MEAL_ANALYSIS', userId: 9, taskKey: 'meal-request-001', eventId: 'old-event',
   phase: 'ANALYZE', errorCode: 'REMOTE_TIMEOUT', errorSummary: '远程调用超时', status: 'OPEN', attempts: 1,
@@ -7,8 +7,8 @@ const failure = { id: 1, taskType: 'MEAL_ANALYSIS', userId: 9, taskKey: 'meal-re
 const detail = item => ({ failure: item, history: [item], operations: [] })
 async function setup(page, handler) {
   await page.addInitScript(() => {
-    localStorage.setItem('mealcheck_token', 'test-admin-token')
-    localStorage.setItem('mealcheck_user', JSON.stringify({ username: 'admin', role: 'ADMIN' }))
+
+    sessionStorage.setItem('mealcheck_fixture_user', JSON.stringify({ username: 'admin', role: 'ADMIN' }))
   })
   await page.route('**/api/**', async route => {
     const url = new URL(route.request().url())

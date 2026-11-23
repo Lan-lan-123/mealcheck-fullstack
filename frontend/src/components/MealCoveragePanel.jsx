@@ -1,3 +1,4 @@
+import Button from './Button'
 import { useEffect, useState } from 'react'
 import { declareSkippedMeal, mealCoverage } from '../api/client'
 import { businessToday, mealTypes } from '../utils/time'
@@ -18,7 +19,7 @@ export default function MealCoveragePanel({ revision, onChanged }) {
   }
   return <section className="card"><h2>餐次记录状态</h2><label className="form-field">查看日期<input type="date" min="2000-01-01" max={businessToday()} required value={day} onChange={e => { if (e.target.value) setDay(e.target.value) }} /></label>
     {error && <p className="error" role="alert">{error}</p>}
-    <div className="meal-slots">{Object.entries(summary?.daily?.[0]?.slots || {}).map(([type, state]) => <div key={type}><strong>{mealTypes[type]}</strong><span>{state === 'RECORDED' ? '已有记录' : state === 'SKIPPED' ? '明确未吃' : '未记录，情况未知'}</span>{state !== 'RECORDED' && <button type="button" disabled={busy} onClick={() => toggle(type, state)}>{state === 'SKIPPED' ? '撤销未吃标记' : '确认这餐未吃'}</button>}</div>)}</div>
+    <div className="meal-slots">{Object.entries(summary?.daily?.[0]?.slots || {}).map(([type, state]) => <div key={type}><strong>{mealTypes[type]}</strong><span>{state === 'RECORDED' ? '已有记录' : state === 'SKIPPED' ? '明确未吃' : '未记录，情况未知'}</span>{state !== 'RECORDED' && <Button variant="secondary" className="secondary-btn" type="button" disabled={busy} onClick={() => toggle(type, state)}>{state === 'SKIPPED' ? '撤销未吃标记' : '确认这餐未吃'}</Button>}</div>)}</div>
     <TrackingSummary summary={summary} />
   </section>
 }

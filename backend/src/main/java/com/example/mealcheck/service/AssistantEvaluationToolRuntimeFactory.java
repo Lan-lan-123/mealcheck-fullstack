@@ -22,11 +22,24 @@ public class AssistantEvaluationToolRuntimeFactory {
 
     private final AssistantFunctionToolRegistry productionRegistry;
     private final ObjectMapper objectMapper;
+    private final KnowledgeIndexService knowledgeIndex;
 
     public AssistantEvaluationToolRuntimeFactory(AssistantFunctionToolRegistry productionRegistry,
                                                  ObjectMapper objectMapper) {
+        this(productionRegistry, objectMapper, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public AssistantEvaluationToolRuntimeFactory(AssistantFunctionToolRegistry productionRegistry,
+                                                 ObjectMapper objectMapper, KnowledgeIndexService knowledgeIndex) {
         this.productionRegistry = productionRegistry;
         this.objectMapper = objectMapper;
+        this.knowledgeIndex = knowledgeIndex;
+    }
+
+    RagChainToolRuntime createRagChain() {
+        if (knowledgeIndex == null) throw new IllegalStateException("RAG chain retrieval is not configured");
+        return new RagChainToolRuntime(productionRegistry, knowledgeIndex, objectMapper);
     }
 
     public AssistantFunctionToolRuntime create(JsonNode context, String knowledgeContext) {
@@ -83,14 +96,33 @@ public class AssistantEvaluationToolRuntimeFactory {
             if ("DIET_KNOWLEDGE_UNAVAILABLE".equals(toolState())) {
                 return unavailable("diet knowledge is unavailable");
             }
-            return jsonResult(Map.of(
+            if(context.path("ragToolEvaluation").asBoolean()) {
+                int count = limit == null || limit.isNull() ? 3 : limit.intValue();
+                if ((limit != null && !limit.isNull() && !limit.isIntegralNumber()) || count < 1 || count > 5
+                        || query.asText().length() > 500) {
+                    throw new IllegalArgumentException("Invalid knowledge query or limit");
+                }
+                JsonNode fixtures=context.path("ragKnowledgeFixtures");
+                var results = objectMapper.createArrayNode();
+                if (fixtures.isArray()) for (var fixture : fixtures) {
+                    if (results.size() >= count) break;
+                    results.add(fixture);
+                }
+                var refs=new java.util.ArrayList<com.example.mealcheck.dto.KnowledgeSnippet>();
+                for(var fixture:results)refs.add(new com.example.mealcheck.dto.KnowledgeSnippet(fixture.path("id").asLong(),
+                        fixture.path("title").asText(),fixture.path("content").asText(),1.0));
+                return new ToolResult(jsonResult(Map.of("count",results.size(),"results",results)).content(),refs);
+            }
+            ToolResult result=jsonResult(Map.of(
                     "count", knowledge.isBlank() ? 0 : 1,
                     "results", knowledge.isBlank()
                             ? List.of()
                             : List.of(Map.of(
-                            "title", "Evaluation dietary knowledge",
+                            "id", 10001L,"title", "Evaluation dietary knowledge",
                             "content", knowledge))
             ));
+            return new ToolResult(result.content(),knowledge.isBlank()?List.of():List.of(
+                    new com.example.mealcheck.dto.KnowledgeSnippet(10001L,"Evaluation dietary knowledge",knowledge,1.0)));
         }
 
         private ToolResult recentMeals(JsonNode arguments) {

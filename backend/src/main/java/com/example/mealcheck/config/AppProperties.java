@@ -56,6 +56,25 @@ public class AppProperties {
     public AiBudget getAiBudget() { return aiBudget; }
     public void setAiBudget(AiBudget aiBudget) { this.aiBudget = aiBudget; }
 
+    private java.util.List<AiModelLimit> aiModelLimits = new java.util.ArrayList<>();
+    public java.util.List<AiModelLimit> getAiModelLimits() { return aiModelLimits; }
+    public void setAiModelLimits(java.util.List<AiModelLimit> value) { aiModelLimits=value; }
+    public static class AiModelLimit {
+        private String host="",model="";
+        private int concurrency=10,rpm=40;
+        private long tpm=0;
+        public String getHost() { return host; }
+        public void setHost(String value) { host=value; }
+        public String getModel() { return model; }
+        public void setModel(String value) { model=value; }
+        public int getConcurrency() { return concurrency; }
+        public void setConcurrency(int value) { concurrency=value; }
+        public int getRpm() { return rpm; }
+        public void setRpm(int value) { rpm=value; }
+        public long getTpm() { return tpm; }
+        public void setTpm(long value) { tpm=value; }
+    }
+
     public static class AiBudget {
         private boolean enabled = true;
         private int dailyCalls = 100;
@@ -66,6 +85,9 @@ public class AppProperties {
         private String zone = "Asia/Shanghai";
         private int operationTimeoutSeconds = 120;
         private int maxOutputTokens = 2048;
+        private int minimumHttpExecutionMillis = 1000;
+        public int getMinimumHttpExecutionMillis() { return minimumHttpExecutionMillis; }
+        public void setMinimumHttpExecutionMillis(int value) { minimumHttpExecutionMillis=value; }
         public boolean isEnabled() { return enabled; }
         public void setEnabled(boolean value) { enabled=value; }
         public int getDailyCalls() { return dailyCalls; }
@@ -89,6 +111,12 @@ public class AppProperties {
     public static class Jwt {
         private String secret;
         private long expirationMinutes = 10080;
+        private String generation = "cookie-v1";
+        private boolean cookieSecure;
+        public String getGeneration() { return generation; }
+        public void setGeneration(String value) { generation=value; }
+        public boolean isCookieSecure() { return cookieSecure; }
+        public void setCookieSecure(boolean value) { cookieSecure=value; }
         public String getSecret() { return secret; }
         public void setSecret(String secret) { this.secret = secret; }
         public long getExpirationMinutes() { return expirationMinutes; }
@@ -102,21 +130,54 @@ public class AppProperties {
     }
 
     public static class Ai {
+        /** Published atomically after a persisted administrator change. */
+        private volatile Connection connectionOverride;
+        public record Connection(String apiKey, String baseUrl, String model) {
+            public boolean configured() {
+                return apiKey != null && !apiKey.isBlank() && baseUrl != null && !baseUrl.isBlank()
+                        && model != null && !model.isBlank();
+            }
+            @Override public String toString() { return "AI connection [credentials redacted]"; }
+        }
+        public Connection connection() {
+            Connection selected = connectionOverride;
+            return selected == null ? environmentConnection() : selected;
+        }
+        public Connection environmentConnection() { return new Connection(apiKey, baseUrl, model); }
+        public void overrideConnection(Connection selected) { connectionOverride = selected; }
         private String apiKey = "";
         private String baseUrl;
         private String model;
+        private String visionModel = "";
+        public String getVisionModel() { return visionModel; }
+        public void setVisionModel(String visionModel) { this.visionModel = visionModel; }
         private int timeoutSeconds = 60;
+        private String visionThinkingMode = "off";
+        private String adviceThinkingMode = "off";
+        private String assistantThinkingMode = "off";
+        private String weeklyThinkingMode = "off";
+        private int thinkingBudgetTokens = 512;
+        public String getVisionThinkingMode() { return visionThinkingMode; }
+        public void setVisionThinkingMode(String value) { visionThinkingMode = value; }
+        public String getAdviceThinkingMode() { return adviceThinkingMode; }
+        public void setAdviceThinkingMode(String value) { adviceThinkingMode = value; }
+        public String getAssistantThinkingMode() { return assistantThinkingMode; }
+        public void setAssistantThinkingMode(String value) { assistantThinkingMode = value; }
+        public String getWeeklyThinkingMode() { return weeklyThinkingMode; }
+        public void setWeeklyThinkingMode(String value) { weeklyThinkingMode = value; }
+        public int getThinkingBudgetTokens() { return thinkingBudgetTokens; }
+        public void setThinkingBudgetTokens(int value) { thinkingBudgetTokens = value; }
         private java.math.BigDecimal inputCostPerMillion = java.math.BigDecimal.ZERO;
         private java.math.BigDecimal outputCostPerMillion = java.math.BigDecimal.ZERO;
         public java.math.BigDecimal getInputCostPerMillion() { return inputCostPerMillion; }
         public void setInputCostPerMillion(java.math.BigDecimal value) { inputCostPerMillion=value; }
         public java.math.BigDecimal getOutputCostPerMillion() { return outputCostPerMillion; }
         public void setOutputCostPerMillion(java.math.BigDecimal value) { outputCostPerMillion=value; }
-        public String getApiKey() { return apiKey; }
+        public String getApiKey() { return connection().apiKey(); }
         public void setApiKey(String apiKey) { this.apiKey = apiKey; }
-        public String getBaseUrl() { return baseUrl; }
+        public String getBaseUrl() { return connection().baseUrl(); }
         public void setBaseUrl(String baseUrl) { this.baseUrl = baseUrl; }
-        public String getModel() { return model; }
+        public String getModel() { return connection().model(); }
         public void setModel(String model) { this.model = model; }
         public int getTimeoutSeconds() { return timeoutSeconds; }
         public void setTimeoutSeconds(int timeoutSeconds) { this.timeoutSeconds = timeoutSeconds; }
@@ -128,6 +189,7 @@ public class AppProperties {
         private String embeddingApiKey = "";
         private String embeddingBaseUrl = "";
         private String embeddingModel = "";
+        private boolean embeddingSendDimensions = true;
         private int embeddingTimeoutSeconds = 30;
         private double vectorWeight = 0.65;
         private double keywordWeight = 0.25;
@@ -150,7 +212,7 @@ public class AppProperties {
         private int chunkMaxTokens = 500;
         private int chunkOverlapTokens = 50;
         private String splitterStrategy = "recursive-markdown";
-        private String sourceVersion = "v3-curated-100";
+        private String sourceVersion = "v8-longform-200-boundary-v2";
         private String vectorStorage = "halfvec";
         private double benchmarkRegressionTolerance = 0.02;
         public boolean isAutoIndex() { return autoIndex; }
@@ -163,6 +225,8 @@ public class AppProperties {
         public void setEmbeddingBaseUrl(String embeddingBaseUrl) { this.embeddingBaseUrl = embeddingBaseUrl; }
         public String getEmbeddingModel() { return embeddingModel; }
         public void setEmbeddingModel(String embeddingModel) { this.embeddingModel = embeddingModel; }
+        public boolean isEmbeddingSendDimensions() { return embeddingSendDimensions; }
+        public void setEmbeddingSendDimensions(boolean value) { this.embeddingSendDimensions = value; }
         public int getEmbeddingTimeoutSeconds() { return embeddingTimeoutSeconds; }
         public void setEmbeddingTimeoutSeconds(int embeddingTimeoutSeconds) { this.embeddingTimeoutSeconds = embeddingTimeoutSeconds; }
         public double getVectorWeight() { return vectorWeight; }
@@ -234,8 +298,8 @@ public class AppProperties {
         private int maxConcurrentDecodes = 2;
         public int getMaxConcurrentDecodes() { return maxConcurrentDecodes; }
         public void setMaxConcurrentDecodes(int value) { maxConcurrentDecodes = value; }
-        private int maxPendingDecodes = 20;
-        private long decodeWaitMillis = 8000;
+        private int maxPendingDecodes = 62;
+        private long decodeWaitMillis = 15000;
         private long temporaryMaxBytes = 1024L * 1024 * 1024;
         public int getMaxPendingDecodes() { return maxPendingDecodes; }
         public void setMaxPendingDecodes(int value) { maxPendingDecodes = value; }
@@ -325,7 +389,7 @@ public class AppProperties {
         private boolean enabled = true;
         private String endpoint = "/mcp";
         private String serverName = "mealcheck-mcp-server";
-        private String serverVersion = "1.0.0";
+        private String serverVersion = "2.0.0";
 
         public boolean isEnabled() { return enabled; }
         public void setEnabled(boolean enabled) { this.enabled = enabled; }
@@ -341,7 +405,8 @@ public class AppProperties {
         private boolean enabled = false;
         private int maxToolRounds = 3;
         private int maxToolCalls = 6;
-        private int totalTimeoutSeconds = 30;
+        private int totalTimeoutSeconds = 90;
+        private int reviewReserveSeconds = 30;
 
         public boolean isEnabled() { return enabled; }
         public void setEnabled(boolean enabled) { this.enabled = enabled; }
@@ -351,6 +416,8 @@ public class AppProperties {
         public void setMaxToolCalls(int maxToolCalls) { this.maxToolCalls = maxToolCalls; }
         public int getTotalTimeoutSeconds() { return totalTimeoutSeconds; }
         public void setTotalTimeoutSeconds(int totalTimeoutSeconds) { this.totalTimeoutSeconds = totalTimeoutSeconds; }
+        public int getReviewReserveSeconds() { return reviewReserveSeconds; }
+        public void setReviewReserveSeconds(int reviewReserveSeconds) { this.reviewReserveSeconds = reviewReserveSeconds; }
     }
 
     public static class AssistantMemory {
@@ -384,8 +451,8 @@ public class AppProperties {
         private int ragQueueCapacity = 8;
         private int backgroundPoolSize = 2;
         private int backgroundQueueCapacity = 16;
-        private int timeoutMillis = 2500;
-        private int totalTimeoutMillis = 3000;
+        private int timeoutMillis = 15000;
+        private int totalTimeoutMillis = 20000;
 
         public int getHttpPoolSize() { return httpPoolSize; }
         public void setHttpPoolSize(int httpPoolSize) { this.httpPoolSize = httpPoolSize; }
@@ -429,7 +496,7 @@ public class AppProperties {
         private int batchSize = 100;
         private int executorCorePoolSize = 2;
         private int executorMaxPoolSize = 4;
-        private int executorQueueCapacity = 20;
+        private int executorQueueCapacity = 0;
         private int agentExecutorCorePoolSize = 2;
         private int agentExecutorMaxPoolSize = 4;
         private int agentExecutorQueueCapacity = 20;
@@ -482,7 +549,7 @@ public class AppProperties {
         private int initialBackoffMillis = 200;
         private int failureThreshold = 5;
         private int openDurationSeconds = 30;
-        private int maxConcurrentCalls = 8;
+        private int maxConcurrentCalls = 42;
 
         public int getMaxAttempts() { return maxAttempts; }
         public void setMaxAttempts(int maxAttempts) { this.maxAttempts = maxAttempts; }

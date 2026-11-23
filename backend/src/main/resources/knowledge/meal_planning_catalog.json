@@ -1,0 +1,505 @@
+{
+  "version": "meal-planning-v1",
+  "costBasis": "内置搭配库的每人每餐规划估计（人民币），按各单品参考区间相加；不是门店报价，不含配送费、包装费和优惠，实际费用需自行确认。",
+  "timeBasis": "食堂与外卖按选餐约 5 分钟估计，不含排队和配送；自制按最慢单品准备时间加 5 分钟装配估计，需具备相应食材和厨具。",
+  "foods": [
+    {
+      "id": "rice",
+      "name": "米饭",
+      "group": "staple",
+      "tags": [
+        "大米",
+        "米"
+      ],
+      "animal": "NONE",
+      "homeMinutes": 25,
+      "costs": {
+        "HOME": [
+          1,
+          2
+        ],
+        "CANTEEN": [
+          2,
+          3
+        ],
+        "TAKEOUT": [
+          2,
+          4
+        ]
+      },
+      "mealTypes": [
+        "LUNCH",
+        "DINNER"
+      ]
+    },
+    {
+      "id": "bread",
+      "name": "全麦面包",
+      "group": "staple",
+      "tags": [
+        "小麦",
+        "面粉",
+        "麸质"
+      ],
+      "animal": "NONE",
+      "homeMinutes": 1,
+      "costs": {
+        "HOME": [
+          2,
+          4
+        ],
+        "CANTEEN": [
+          2,
+          4
+        ],
+        "TAKEOUT": [
+          3,
+          5
+        ]
+      },
+      "mealTypes": [
+        "BREAKFAST"
+      ]
+    },
+    {
+      "id": "oats",
+      "name": "原味即食燕麦",
+      "group": "staple",
+      "tags": [
+        "燕麦"
+      ],
+      "animal": "NONE",
+      "homeMinutes": 5,
+      "costs": {
+        "HOME": [
+          1,
+          3
+        ],
+        "CANTEEN": [
+          2,
+          4
+        ],
+        "TAKEOUT": [
+          3,
+          6
+        ]
+      },
+      "mealTypes": [
+        "BREAKFAST"
+      ]
+    },
+    {
+      "id": "potato",
+      "name": "蒸红薯",
+      "group": "staple",
+      "tags": [
+        "红薯",
+        "薯类"
+      ],
+      "animal": "NONE",
+      "homeMinutes": 25,
+      "costs": {
+        "HOME": [
+          2,
+          4
+        ],
+        "CANTEEN": [
+          3,
+          5
+        ],
+        "TAKEOUT": [
+          4,
+          7
+        ]
+      },
+      "mealTypes": [
+        "BREAKFAST",
+        "LUNCH",
+        "DINNER"
+      ]
+    },
+    {
+      "id": "corn",
+      "name": "蒸玉米",
+      "group": "staple",
+      "tags": [
+        "玉米"
+      ],
+      "animal": "NONE",
+      "homeMinutes": 20,
+      "costs": {
+        "HOME": [
+          2,
+          4
+        ],
+        "CANTEEN": [
+          3,
+          5
+        ],
+        "TAKEOUT": [
+          4,
+          6
+        ]
+      },
+      "mealTypes": [
+        "BREAKFAST",
+        "LUNCH",
+        "DINNER"
+      ]
+    },
+    {
+      "id": "tofu",
+      "name": "清蒸豆腐",
+      "group": "protein",
+      "tags": [
+        "黄豆",
+        "大豆",
+        "豆制品",
+        "豆腐",
+        "soy"
+      ],
+      "animal": "NONE",
+      "homeMinutes": 10,
+      "costs": {
+        "HOME": [
+          2,
+          4
+        ],
+        "CANTEEN": [
+          4,
+          6
+        ],
+        "TAKEOUT": [
+          6,
+          9
+        ]
+      },
+      "mealTypes": [
+        "LUNCH",
+        "DINNER"
+      ]
+    },
+    {
+      "id": "chickpeas",
+      "name": "即食鹰嘴豆",
+      "group": "protein",
+      "tags": [
+        "豆类",
+        "鹰嘴豆"
+      ],
+      "animal": "NONE",
+      "homeMinutes": 1,
+      "costs": {
+        "HOME": [
+          3,
+          6
+        ],
+        "TAKEOUT": [
+          6,
+          10
+        ]
+      },
+      "mealTypes": [
+        "LUNCH",
+        "DINNER"
+      ]
+    },
+    {
+      "id": "soymilk",
+      "name": "无糖豆浆",
+      "group": "protein",
+      "tags": [
+        "黄豆",
+        "大豆",
+        "豆制品",
+        "豆浆",
+        "soy"
+      ],
+      "animal": "NONE",
+      "homeMinutes": 1,
+      "costs": {
+        "HOME": [
+          2,
+          4
+        ],
+        "CANTEEN": [
+          2,
+          4
+        ],
+        "TAKEOUT": [
+          3,
+          6
+        ]
+      },
+      "mealTypes": [
+        "BREAKFAST"
+      ]
+    },
+    {
+      "id": "egg",
+      "name": "水煮鸡蛋",
+      "group": "protein",
+      "tags": [
+        "蛋类",
+        "鸡蛋",
+        "egg"
+      ],
+      "animal": "EGG",
+      "homeMinutes": 10,
+      "costs": {
+        "HOME": [
+          1,
+          2
+        ],
+        "CANTEEN": [
+          2,
+          3
+        ],
+        "TAKEOUT": [
+          2,
+          4
+        ]
+      },
+      "mealTypes": [
+        "BREAKFAST",
+        "LUNCH",
+        "DINNER"
+      ]
+    },
+    {
+      "id": "chicken",
+      "name": "清蒸鸡肉",
+      "group": "protein",
+      "tags": [
+        "禽肉",
+        "肉类",
+        "鸡肉",
+        "chicken"
+      ],
+      "animal": "MEAT",
+      "homeMinutes": 20,
+      "costs": {
+        "HOME": [
+          5,
+          8
+        ],
+        "CANTEEN": [
+          6,
+          10
+        ],
+        "TAKEOUT": [
+          8,
+          14
+        ]
+      },
+      "mealTypes": [
+        "LUNCH",
+        "DINNER"
+      ]
+    },
+    {
+      "id": "fish",
+      "name": "清蒸鱼",
+      "group": "protein",
+      "tags": [
+        "鱼类",
+        "海鲜",
+        "肉类",
+        "fish"
+      ],
+      "animal": "MEAT",
+      "homeMinutes": 20,
+      "costs": {
+        "HOME": [
+          6,
+          10
+        ],
+        "CANTEEN": [
+          8,
+          12
+        ],
+        "TAKEOUT": [
+          10,
+          18
+        ]
+      },
+      "mealTypes": [
+        "LUNCH",
+        "DINNER"
+      ]
+    },
+    {
+      "id": "cucumber",
+      "name": "原味黄瓜",
+      "group": "vegetable",
+      "tags": [
+        "黄瓜"
+      ],
+      "animal": "NONE",
+      "homeMinutes": 3,
+      "costs": {
+        "HOME": [
+          1,
+          3
+        ],
+        "CANTEEN": [
+          3,
+          5
+        ],
+        "TAKEOUT": [
+          4,
+          7
+        ]
+      },
+      "mealTypes": [
+        "BREAKFAST",
+        "LUNCH",
+        "DINNER"
+      ]
+    },
+    {
+      "id": "tomato",
+      "name": "原味番茄",
+      "group": "vegetable",
+      "tags": [
+        "番茄",
+        "西红柿"
+      ],
+      "animal": "NONE",
+      "homeMinutes": 3,
+      "costs": {
+        "HOME": [
+          1,
+          3
+        ],
+        "CANTEEN": [
+          3,
+          5
+        ],
+        "TAKEOUT": [
+          4,
+          7
+        ]
+      },
+      "mealTypes": [
+        "BREAKFAST",
+        "LUNCH",
+        "DINNER"
+      ]
+    },
+    {
+      "id": "broccoli",
+      "name": "清蒸西兰花",
+      "group": "vegetable",
+      "tags": [
+        "西兰花",
+        "十字花科"
+      ],
+      "animal": "NONE",
+      "homeMinutes": 10,
+      "costs": {
+        "HOME": [
+          2,
+          4
+        ],
+        "CANTEEN": [
+          3,
+          5
+        ],
+        "TAKEOUT": [
+          5,
+          8
+        ]
+      },
+      "mealTypes": [
+        "BREAKFAST",
+        "LUNCH",
+        "DINNER"
+      ]
+    },
+    {
+      "id": "greens",
+      "name": "清炒青菜",
+      "group": "vegetable",
+      "tags": [
+        "青菜",
+        "绿叶菜"
+      ],
+      "animal": "NONE",
+      "homeMinutes": 10,
+      "costs": {
+        "HOME": [
+          1,
+          3
+        ],
+        "CANTEEN": [
+          3,
+          5
+        ],
+        "TAKEOUT": [
+          4,
+          7
+        ]
+      },
+      "mealTypes": [
+        "BREAKFAST",
+        "LUNCH",
+        "DINNER"
+      ]
+    },
+    {
+      "id": "apple",
+      "name": "苹果",
+      "group": "fruit",
+      "tags": [
+        "苹果"
+      ],
+      "animal": "NONE",
+      "homeMinutes": 2,
+      "costs": {
+        "HOME": [
+          2,
+          4
+        ],
+        "CANTEEN": [
+          2,
+          4
+        ],
+        "TAKEOUT": [
+          3,
+          6
+        ]
+      },
+      "mealTypes": [
+        "BREAKFAST"
+      ]
+    },
+    {
+      "id": "banana",
+      "name": "香蕉",
+      "group": "fruit",
+      "tags": [
+        "香蕉"
+      ],
+      "animal": "NONE",
+      "homeMinutes": 1,
+      "costs": {
+        "HOME": [
+          1,
+          3
+        ],
+        "CANTEEN": [
+          2,
+          3
+        ],
+        "TAKEOUT": [
+          2,
+          5
+        ]
+      },
+      "mealTypes": [
+        "BREAKFAST"
+      ]
+    }
+  ]
+}

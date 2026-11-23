@@ -63,13 +63,15 @@ class AssistantFunctionCallingServiceTest {
         UserAccount user = user("demo");
 
         AssistantFunctionCallingService.FunctionCallingResult result = service.ask(
-                user, "system", List.of(new AssistantChatMessage("assistant", "上一轮")), "问题");
+                user, "system", List.of(new AssistantChatMessage("assistant", "上一轮")), "我最近吃的饭怎么样？");
 
         assertThat(result.answer()).contains("答案");
-        assertThat(result.calledTools()).containsExactly("search_diet_knowledge");
+        assertThat(result.calledTools()).containsExactly("get_my_recent_meals","search_diet_knowledge");
         assertThat(result.references()).containsExactly(snippet);
         assertThat(result.toolRounds()).isEqualTo(1);
-        assertThat(result.toolTrace()).singleElement().satisfies(trace -> {
+        assertThat(result.toolTrace()).hasSize(2);
+        assertThat(result.toolTrace().get(0).origin()).isEqualTo("ORCHESTRATOR");
+        assertThat(result.toolTrace().get(1)).satisfies(trace -> {
             assertThat(trace.name()).isEqualTo("search_diet_knowledge");
             assertThat(trace.status()).isEqualTo("SUCCESS");
             assertThat(trace.round()).isEqualTo(1);
@@ -105,7 +107,7 @@ class AssistantFunctionCallingServiceTest {
         AssistantFunctionCallingService service = new AssistantFunctionCallingService(
                 properties, registry, modelFactory, httpExecutor);
 
-        assertThatThrownBy(() -> service.ask(user("demo"), "system", List.of(), "问题"))
+        assertThatThrownBy(() -> service.ask(user("demo"), "system", List.of(), "查看我的目标"))
                 .isInstanceOfSatisfying(
                         AssistantFunctionCallingService.FunctionCallingExecutionException.class,
                         exception -> {

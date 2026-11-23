@@ -49,12 +49,14 @@ public class AssistantMemoryStore {
     public long request(String signature,int dimension,String storage) {
         validate(dimension,storage);
         jdbc.execute("SELECT pg_advisory_xact_lock(7302022)");
+        jdbc.update("UPDATE assistant_memory_rebuild_jobs SET status='FAILED',last_error='CONFIG_CHANGED',execution_token=NULL,lease_until=NULL,updated_at=CURRENT_TIMESTAMP "
+                + "WHERE signature<>? AND status IN ('PENDING','RUNNING','RETRY')",signature);
         var active=jdbc.queryForList("SELECT id,signature FROM assistant_memory_rebuild_jobs WHERE status IN ('PENDING','RUNNING','RETRY')");
         if (!active.isEmpty()) {
             if (!signature.equals(active.get(0).get("signature"))) throw new ResponseStatusException(HttpStatus.CONFLICT,"另一个记忆向量版本正在重建");
             return ((Number)active.get(0).get("id")).longValue();
         }
-        var failed=jdbc.queryForList("SELECT id FROM assistant_memory_rebuild_jobs WHERE signature=? AND status='FAILED' ORDER BY id DESC LIMIT 1",signature);
+        var failed=jdbc.queryForList("SELECT id FROM assistant_memory_rebuild_jobs WHERE signature=? AND status='FAILED' AND last_error IS DISTINCT FROM 'CONFIG_CHANGED' ORDER BY id DESC LIMIT 1",signature);
         if (!failed.isEmpty()) return ((Number)failed.get(0).get("id")).longValue();
         long id=jdbc.queryForObject("INSERT INTO assistant_memory_rebuild_jobs(signature,dimension,storage) VALUES (?,?,?) RETURNING id",Long.class,signature,dimension,storage);
         jdbc.update("""
@@ -105,6 +107,8 @@ public class AssistantMemoryStore {
         validate(work.dimension(),work.storage());
         if (!owns(work)) return false;
         jdbc.execute("SET LOCAL lock_timeout='2s'");
+        String activeKnowledge=jdbc.queryForObject("SELECT signature FROM knowledge_embedding_settings WHERE id=1 FOR SHARE",String.class);
+        if (activeKnowledge!=null && !work.signature().equals(activeKnowledge)) return false;
         jdbc.queryForObject("SELECT id FROM assistant_memory_version WHERE id=1 FOR UPDATE",Integer.class);
         jdbc.execute("LOCK TABLE assistant_memory_facts IN SHARE ROW EXCLUSIVE MODE");
         if (!pending(work,1).isEmpty()) return false;

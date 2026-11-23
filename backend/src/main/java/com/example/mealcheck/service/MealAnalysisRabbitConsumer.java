@@ -30,7 +30,7 @@ public class MealAnalysisRabbitConsumer {
     }
 
     @RabbitListener(queues = MealAnalysisRabbitConfiguration.QUEUE, containerFactory = "mealAnalysisListenerFactory",
-            concurrency = "${mealcheck.analysis.concurrency:8}")
+            concurrency = "${mealcheck.analysis.concurrency:40}")
     public void consume(Message message) {
         UUID eventId;
         try {
@@ -52,10 +52,12 @@ public class MealAnalysisRabbitConsumer {
         String outcome = "failure";
         String phase = "ANALYZE";
         try (var deadline = analysis.analysisDeadline(work.user()); var lease = leases.track(work)) {
-            var prepared = analysis.prepareValidated(work.user(), work.imageReference()==null?work.image():store.loadImage(work), work.goal());
+            var prepared = analysis.prepareValidated(work.user(), store.loadImage(work), work.goal());
             phase = "SAVE";
             var result = store.complete(work.user(), work.key(), work.token(), prepared);
             outcome = "SUCCEEDED".equals(result.status()) ? "success" : "fenced";
+        } catch (MealAnalysisRequestStore.WorkNoLongerOwnedException obsolete) {
+            outcome = "fenced";
         } catch (RuntimeException error) {
             store.fail(work.user().getId(), work.key(), work.token(), phase, error);
             // Model calls already have bounded retry; do not automatically rebill terminal failures.

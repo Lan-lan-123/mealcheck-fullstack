@@ -17,6 +17,17 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
+EVIDENCE_DIRECTORY = Path('logs/deploy/release-baseline')
+
+
+def candidate_versions(source):
+    namespace = {'m': 'http://maven.apache.org/POM/4.0.0'}
+    pom = ET.parse(source / 'backend/pom.xml').getroot()
+    package = json.loads((source / 'frontend/package.json').read_text(encoding='utf-8'))
+    lock = json.loads((source / 'frontend/package-lock.json').read_text(encoding='utf-8'))
+    return {'backend': pom.findtext('m:version', namespaces=namespace),
+            'frontend': package['version'], 'lockfile': lock['version'],
+            'lockfileRoot': lock['packages']['']['version']}
 
 
 def now():
@@ -50,27 +61,65 @@ def test_summary(directory):
     return totals
 
 
+def require_database_tests(source):
+    """A successful Maven exit alone is insufficient when Docker tests were skipped."""
+    reports = list((source / 'backend/target').glob('*-reports/TEST-*DatabaseIntegrationTest.xml'))
+    executed = 0
+    for path in reports:
+        suite = ET.parse(path).getroot()
+        if int(suite.get('failures', 0)) or int(suite.get('errors', 0)):
+            raise RuntimeError('Database integration reports contain failures or errors')
+        executed += int(suite.get('tests', 0)) - int(suite.get('skipped', 0))
+    if not executed:
+        raise RuntimeError('No database integration tests executed; skipped Docker tests are not release acceptance')
+    return {'databaseIntegrationReportCount': len(reports), 'executedDatabaseTests': executed}
+
+
+def verify_clusters(verification):
+    jar = verification.source / 'backend/target/mealcheck-backend.jar'
+    identity = sha256(jar)
+    for kind in ('assistant', 'knowledge'):
+        verification.run(f'{kind}-cluster', [sys.executable, f'deploy/scripts/verify_{kind}_cluster.py',
+                         '--jar', str(jar), '--output', str(verification.output / f'{kind}-cluster')])
+        result = json.loads((verification.output / f'{kind}-cluster/verification.json').read_text(encoding='utf-8'))
+        if result.get('status') != 'PASSED' or result.get('jarSha256') != identity or sha256(jar) != identity:
+            raise RuntimeError(f'{kind} cluster did not verify the fixed candidate JAR')
+    verification.manifest['verifiedBackendJarSha256'] = identity
+    verification.save()
+
+
 class Verification:
     def __init__(self, args):
-        if git('status', '--porcelain', '--untracked-files=no'):
-            raise RuntimeError('Commit tracked changes before exporting a candidate')
+        if git('status', '--porcelain', '--untracked-files=all'):
+            raise RuntimeError('Review and commit tracked changes and required untracked files before exporting a candidate')
+        versions = candidate_versions(ROOT)
+        if any(version != args.version for version in versions.values()):
+            raise RuntimeError(f'Candidate version must match backend, frontend and lockfile: {versions}')
         self.commit = git('rev-parse', 'HEAD')
-        self.output = ROOT / 'deploy/release-results' / (
+        self.output = ROOT / EVIDENCE_DIRECTORY / (
             args.output_name or datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ') + '-' + self.commit[:12])
         self.output = self.output.resolve()
-        if not self.output.is_relative_to((ROOT / 'deploy/release-results').resolve()):
-            raise RuntimeError('Evidence must stay inside deploy/release-results')
+        if not self.output.is_relative_to((ROOT / EVIDENCE_DIRECTORY).resolve()):
+            raise RuntimeError('Evidence must stay inside logs/deploy/release-baseline')
         self.output.mkdir(parents=True, exist_ok=False)
         self.source = self.output / 'source'
         self.env = os.environ.copy()
         # Playwright must launch the archived source, never reuse another dev server.
         self.env['CI'] = 'true'
+        crash = self.output / 'crash'
+        crash.mkdir()
+        self.env['JAVA_TOOL_OPTIONS'] = (self.env.get('JAVA_TOOL_OPTIONS', '')
+            + f' "-XX:ErrorFile={crash.as_posix()}/hs_err_pid%p.log"').strip()
         # Scratch fixtures have explicit public test configuration. Do not inherit real keys.
-        for key in ('MEALCHECK_AI_API_KEY', 'MEALCHECK_ASSISTANT_API_KEY',
-                    'MEALCHECK_KNOWLEDGE_EMBEDDING_API_KEY', 'MEALCHECK_KNOWLEDGE_RERANK_API_KEY'):
+        for key in set(self.env) | {'MEALCHECK_AI_API_KEY', 'MEALCHECK_ASSISTANT_API_KEY',
+                                   'MEALCHECK_ASSISTANT_EVALUATION_JUDGE_API_KEY',
+                                   'MEALCHECK_KNOWLEDGE_EMBEDDING_API_KEY', 'MEALCHECK_KNOWLEDGE_RERANK_API_KEY'}:
+            if not (key.startswith('MEALCHECK_') and key.endswith('_API_KEY')):
+                continue
             self.env[key] = ''
         self.manifest = dict(formatVersion=1, scope='local-engineering-release-candidate',
-                             version=args.version, gitCommit=self.commit, gitTree=git('rev-parse', 'HEAD^{tree}'),
+                             version=args.version, componentVersions=versions,
+                             gitCommit=self.commit, gitTree=git('rev-parse', 'HEAD^{tree}'),
                              startedAtUtc=now(), status='RUNNING', checks=[], images={},
                              limitations=['Real model quality, provider quotas and actual billing are not verified.',
                                           'A full one-hour all-feature load test is not part of this baseline.',
@@ -160,7 +209,8 @@ class Verification:
 
     def containers(self, args):
         short = self.commit[:12]
-        for role in ('backend', 'frontend'):
+        build_contexts = {'backend': 'backend', 'frontend': 'frontend', 'postgres': 'deploy/postgres'}
+        for role, context in build_contexts.items():
             tag = f'mealcheck-baseline-{role}:{short}'
             # Never overwrite a previously built candidate tag.
             exists = subprocess.run(['docker', 'image', 'inspect', tag], stdout=subprocess.DEVNULL,
@@ -169,7 +219,7 @@ class Verification:
                 raise RuntimeError(f'Candidate tag already exists; retain it and use a fresh candidate: {tag}')
             self.run(f'build-{role}', ['docker', 'build', '--label', f'org.opencontainers.image.revision={self.commit}',
                                       '--label', f'org.opencontainers.image.version={args.version}',
-                                      '-t', tag, str(self.source / role)])
+                                      '-t', tag, str(self.source / context)])
             info = json.loads(subprocess.check_output(['docker', 'image', 'inspect', tag], text=True))[0]
             self.manifest['images'][role] = dict(tag=tag, imageId=info['Id'], repoDigests=info.get('RepoDigests', []),
                                                 revision=info['Config']['Labels']['org.opencontainers.image.revision'])
@@ -186,6 +236,7 @@ class Verification:
         try:
             self.run('capacity-start', capacity + ['up', '--no-build', '-d', '--wait', '--wait-timeout', '150'])
             self.verify_running_image(capacity, 'backend')
+            self.verify_running_image(capacity, 'postgres')
             self.run('capacity-faults', [sys.executable, 'loadtests/capacity_acceptance.py', '--output',
                                        str(self.output / 'capacity'), '--fault-checks'])
         finally:
@@ -201,6 +252,7 @@ class Verification:
             self.record_dependency_images(smoke)
             self.verify_running_image(smoke, 'backend')
             self.verify_running_image(smoke, 'frontend')
+            self.verify_running_image(smoke, 'postgres')
             self.run('http-smoke', [sys.executable, 'deploy/scripts/smoke.py', '--base-url', 'http://127.0.0.1:18080'])
             self.run('stack-backup', [sys.executable, 'deploy/scripts/recovery.py', 'backup', '--project', smoke_project,
                                      '--env-file', 'deploy/smoke.env', '--compose', 'docker-compose.prod.yml',
@@ -215,7 +267,8 @@ class Verification:
             self.run('production-service-logs', smoke + ['logs', '--no-color', '--tail', '200'], required=False)
             self.run('production-cleanup', smoke + ['down', '--volumes'])
         self.run('full-schema-restore', [sys.executable, 'deploy/scripts/recovery.py', 'self-test', '--migrations',
-                                        'backend/src/main/resources/db/migration', '--output', str(self.output / 'full-schema')])
+                                        'backend/src/main/resources/db/migration', '--output', str(self.output / 'full-schema'),
+                                        '--image', self.manifest['images']['postgres']['imageId']])
         self.run('alert-rules', ['docker', 'run', '--rm', '--entrypoint', 'promtool', '-v',
                                 f'{self.source / "deploy/monitoring"}:/rules:ro', 'prom/prometheus:v3.5.0',
                                 'check', 'rules', '/rules/mealcheck-alerts.yml'])
@@ -235,6 +288,10 @@ class Verification:
             p = self.output / relative
             if p.exists():
                 self.manifest['evidenceHashes'][relative] = sha256(p)
+        for kind in ('assistant', 'knowledge'):
+            for p in (self.output / f'{kind}-cluster').glob('*'):
+                if p.is_file() and (p.name in ('verification.json', 'progress.json') or p.suffix == '.log'):
+                    self.manifest['evidenceHashes'][p.relative_to(self.output).as_posix()] = sha256(p)
         self.save()
         (self.output / 'manifest.json.sha256').write_text(sha256(self.output / 'manifest.json') + '  manifest.json\n', encoding='ascii')
         print(f'MANIFEST {self.output / "manifest.json"}', flush=True)
@@ -254,12 +311,20 @@ def main():
             verification.run('backend-verify', [mvn, '--batch-mode', '--no-transfer-progress', 'verify', '-Pintegration'], verification.source / 'backend')
         finally:
             verification.collect_backend_reports('backend-verify')
+        verification.manifest['databaseIntegrationExecution'] = require_database_tests(verification.source)
+        verification.save()
+        fixtures = verification.source / 'logs/deploy/evaluation-fixtures'
+        verification.run('prepare-evaluation-fixtures', [sys.executable, 'tools/evaluation/prepare_ci_fixtures.py',
+                                                       '--output', str(fixtures)])
+        verification.env['MEALCHECK_TEST_CHUNK_MANIFEST'] = str(fixtures / 'chunks.json')
+        verification.env['MEALCHECK_TEST_SCREENING_PACKET'] = str(fixtures / 'screening-packet')
         for zone in ('UTC', 'Asia/Shanghai'):
             name = 'timezone-' + zone.replace('/', '-')
             verification.run(name, [mvn, '-o', '-q', '-Dtest=WeeklyReportCoordinationMetricsTest',
                                    f'-DargLine=-Duser.timezone={zone}', 'test'], verification.source / 'backend')
         frontend = verification.source / 'frontend'
-        verification.run('frontend-install', [npm, 'ci'], frontend)
+        verification.run('frontend-install', [npm, 'ci', '--no-audit'], frontend)
+        verification.run('frontend-typecheck', [npm, 'run', 'typecheck'], frontend)
         verification.run('frontend-tests', [npm, 'test'], frontend)
         verification.run('frontend-build', [npm, 'run', 'build'], frontend)
         if args.install_browser:
@@ -268,10 +333,16 @@ def main():
         shutil.copytree(frontend / 'playwright-report', verification.output / 'reports/browser')
         verification.env['MEALCHECK_RUN_RECOVERY_DB_TESTS'] = '1'
         for name, directory, pattern in [('operations-contracts', 'tools', 'test_operations.py'),
+                                          ('lifecycle-contracts', 'tools', 'test_lifecycle_backup.py'),
+                                          ('assistant-cluster-contracts', 'tools', 'test_assistant_cluster.py'),
                                           ('capacity-contracts', 'loadtests', 'test_capacity_acceptance.py'),
                                           ('recovery-contracts', 'tools', 'test_recovery*.py'),
-                                          ('model-stub-contracts', 'loadtests', 'test_model_stub.py')]:
+                                          ('model-stub-contracts', 'loadtests', 'test_model_stub.py'),
+                                          ('release-contracts', 'tools', 'test_release_baseline.py'),
+                                          ('saved-answer-score-contracts', 'tools', 'test_score_saved_assistant_answers.py')]:
             verification.run(name, [sys.executable, '-m', 'unittest', 'discover', '-s', directory, '-p', pattern, '-v'])
+        verification.run('evaluation-contracts', [sys.executable, 'tools/evaluation/run_offline_unit_tests.py'])
+        verify_clusters(verification)
         nginx = shutil.which('nginx')
         if nginx:
             verification.run('trusted-proxy', [sys.executable, 'tools/test_proxy_headers.py', '--nginx', nginx])

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/authTest.js'
 
 async function fixture(page, { conflict = false, foods = [{ name: '示例食物', category: 'other' }] } = {}) {
   let record = { id: 1, revision: 0, foods, score: 80,
@@ -8,8 +8,8 @@ async function fixture(page, { conflict = false, foods = [{ name: '示例食物'
     version, enabled, status, totals: null, estimatedFoods: 0,
     items: record.foods.map((food, foodIndex) => ({ ...food, foodIndex, grams: null, per100g: null, source: null })) })
   await page.addInitScript(() => {
-    localStorage.setItem('mealcheck_token', 'fixture-token')
-    localStorage.setItem('mealcheck_user', JSON.stringify({ username: 'alice', role: 'USER', displayName: '测试用户' }))
+
+    sessionStorage.setItem('mealcheck_fixture_user', JSON.stringify({ username: 'alice', role: 'USER', displayName: '测试用户' }))
   })
   await page.route('**/api/**', async route => {
     const request = route.request(), path = new URL(request.url()).pathname
@@ -27,7 +27,7 @@ async function fixture(page, { conflict = false, foods = [{ name: '示例食物'
       else {
         const items = payload.items.map(item => ({ ...record.foods[item.foodIndex], ...item }))
         const known = items.every(item => item.grams !== null && Object.values(item.per100g).every(value => value !== null))
-        snapshot = { ...empty(true, payload.expectedVersion + 1, known ? 'ESTIMATED' : 'INCOMPLETE'), items,
+        snapshot = { ...empty(true, payload.expectedVersion + 1, known ? 'ESTIMATED' : 'INCOMPLETE'), items, estimatedFoods: known ? items.length : 0,
           totals: known ? { energyKcal: 300, proteinGrams: 15, fatGrams: 7.5, carbohydrateGrams: 30 } : null }
       }
       return send(snapshot)
@@ -36,7 +36,8 @@ async function fixture(page, { conflict = false, foods = [{ name: '示例食物'
       record = { ...record, foods: request.postDataJSON().foods, revision: record.revision + 1 }
       return send({ recordId: 1, revision: record.revision, recognition: { foods: record.foods }, evaluation: { score: 80 }, advice: '结构建议' })
     }
-    if (path === '/api/meals') return send({ content: [record], totalElements: 1, totalPages: 1, page: 0 })
+    if (path === '/api/meals/1' && request.method() === 'GET') return send(record)
+    if (['/api/meals', '/api/meals/summaries'].includes(path)) return send({ content: [record], totalElements: 1, totalPages: 1, page: 0 })
     if (path === '/api/profile/goals/current') return send({ goalType: 'balanced' })
     if (path === '/api/assistant/conversations') return send([])
     if (path === '/api/assistant/proactive') return send({ items: [] })

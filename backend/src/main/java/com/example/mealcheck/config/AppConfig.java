@@ -47,7 +47,7 @@ public class AppConfig {
                 "weekly-report",
                 coreSize,
                 Math.max(coreSize, weekly.getExecutorMaxPoolSize()),
-                Math.max(1, weekly.getExecutorQueueCapacity()),
+                Math.max(0, weekly.getExecutorQueueCapacity()),
                 "weekly-report-",
                 registry
         );

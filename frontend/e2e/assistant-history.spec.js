@@ -1,9 +1,9 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/authTest.js'
 
 async function setup(page, olderHandler) {
   await page.addInitScript(() => {
-    localStorage.setItem('mealcheck_token', 'history-test-token')
-    localStorage.setItem('mealcheck_user', JSON.stringify({ username: 'demo', role: 'USER' }))
+
+    sessionStorage.setItem('mealcheck_fixture_user', JSON.stringify({ username: 'demo', role: 'USER' }))
   })
   await page.route('**/api/**', async route => {
     const url = new URL(route.request().url())

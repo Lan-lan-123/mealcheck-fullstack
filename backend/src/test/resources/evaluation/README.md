@@ -46,3 +46,51 @@
 当前已经记录模型名称、裁判模型、数据集版本与内容指纹。后续仍应接入应用 Git commit、Prompt 版本、知识库版本、是否启用 rerank、Token 与费用信息。发布时比较新旧版本的总通过率、各类别通过率、安全失败数、平均耗时和单次成功回答成本。
 
 这套数据用于回归门禁，不代表完整的医学或营养安全认证。后续应把真实用户差评经过脱敏和人工整理后补充为新的评测用例。
+
+## 建议风险核对专项回归（50 条）
+
+同目录 `advice_unknown_review_regression.json` 的版本为
+`advice-unknown-review-v2-50`，包含 2 条原有供应商回答和 48 条显式编写的合成规则样本。
+原有 `synth-044`、`synth-074` 的识别输入、原始回答和旧展示回答保留不变。
+顶层 `source` / `sourceSha256` 仅说明这两条历史记录的来源；各题的 `provenance`
+区分历史回答与新增合成样本，整套数据保持 `independentlyAnnotated=false`。
+
+这套评测固定识别结果与模型原始建议，测试本地风险核对资格、建议过滤、一致性检查和最终展示回退。
+它不调用供应商、不读取 `.env`，不测量新生成建议的模型质量或图片识别准确率。
+
+| 分组 | 样本数 | 检查内容 |
+| --- | ---: | --- |
+| 历史问题回归 | 2 | 合理未知表述保留、香蕉无依据核对过滤 |
+| 未知、否定与未来建议 | 8 | 未知与否定措辞不误拦，下一餐建议不当作本餐事实 |
+| 确认风险与冲突断言 | 8 | true/false/null 与确定性断言、组合风险的对应关系 |
+| 有依据的风险核对 | 8 | 烹饪线索、本地属性冲突和英文线索支持的核对 |
+| 不必要的风险核对 | 8 | 水果、饮品、已确认属性与错误属性核对的过滤 |
+| 食物、属性与整餐隔离 | 8 | 不跨食物转移风险，不用高油替代油炸或掩盖其他错误 |
+| 过滤与回退边界 | 8 | 空回答、过滤后为空、残留事实错误和有效建议保留 |
+
+每题包含 `scenario` 和明确的 `expected`，不按样本 ID 特判：
+
+- `rawConsistent`：原始回答是否通过本地一致性检查。
+- `filteredAdvice`：过滤后的完整预期文本；预期值显式保存在样本中，不从被测实现生成。
+- `filteredConsistent`：过滤后的回答是否仍存在冲突或为空。
+- `outcome`：`KEEP` 原样保留、`FILTER` 过滤后保留、`FALLBACK` 回退到明确标注的本地规则建议。
+- `reviewEligibility`：每个食物分别是否允许核对 `fried`、`highOil`。
+
+当前预期分布为 KEEP 24 条、FILTER 11 条、FALLBACK 15 条。
+输入覆盖 fried/highOil 全部 9 种三态组合。
+`AdviceUnknownReviewRegressionTest` 为每题分别执行内容处理、核对资格和服务展示三组参数化测试，
+并验证只调用一次模型替身、过滤重复执行稳定、样本唯一性、分组、来源和字段完整性。
+合计 150 个逐样本测试和 1 个数据完整性测试；原有两个按 ID 分支的回归循环已由此替代。
+
+从项目根目录运行（报告和终端日志集中保存在 `logs/backend/`）：
+
+```powershell
+$reportDir = Join-Path (Get-Location).Path ('logs/backend/advice-review50-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff'))
+New-Item -ItemType Directory -Path $reportDir | Out-Null
+python tools/run_logged.py --group backend --name advice-review50 --cwd backend -- mvn test `
+  '-Dtest=AdviceUnknownReviewRegressionTest,MealAdviceConsistencyTest,MealAdviceRiskPolicyTest,AdviceGenerationServiceTest' `
+  "-Dmealcheck.testReportsDirectory=$reportDir"
+```
+
+新增样本时须同步维护版本、数量与分布断言，先明确预期行为，再运行测试。
+不得仅为使失败样本通过而用当前实现的输出重写期望值。

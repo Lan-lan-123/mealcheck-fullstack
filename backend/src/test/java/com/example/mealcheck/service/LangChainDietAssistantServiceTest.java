@@ -20,6 +20,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
@@ -44,6 +46,7 @@ class LangChainDietAssistantServiceTest {
         AssistantSkillRegistry skillRegistry = mock(AssistantSkillRegistry.class);
         AssistantMemoryService memoryService = mock(AssistantMemoryService.class);
         AssistantFunctionCallingService functionCallingService = mock(AssistantFunctionCallingService.class);
+        AssistantChatModelFactory modelFactory = mock(AssistantChatModelFactory.class);
         LangChainDietAssistantService service = new LangChainDietAssistantService(
                 properties,
                 userRepository,
@@ -58,7 +61,7 @@ class LangChainDietAssistantServiceTest {
                 mock(ApplicationObservability.class),
                 skillRegistry,
                 memoryService,
-                mock(AssistantChatModelFactory.class),
+                modelFactory,
                 functionCallingService,
                 new AssistantFunctionPromptFactory()
         );
@@ -104,7 +107,7 @@ class LangChainDietAssistantServiceTest {
                 new AssistantProactiveAdviceResponse(List.of())
         ));
 
-        AssistantResponse response = service.ask(new UserPrincipal(user), "今天怎么吃更适合减脂？", null, List.of());
+        AssistantResponse response = service.ask(new UserPrincipal(user), "我最近的饮食记录怎么调整更适合减脂？", null, List.of());
 
         assertThat(response.getSuggestions()).anyMatch(text -> text.contains("米饭"));
         assertThat(response.getSuggestions()).anyMatch(text -> text.contains("高油"));
@@ -112,5 +115,31 @@ class LangChainDietAssistantServiceTest {
         verify(redisCacheService).getJson(eq("assistant:history:demo:99"), any());
         verify(redisCacheService).setJson(eq("assistant:history:demo:99"), any(), any());
         verifyNoInteractions(functionCallingService);
+        var preferences = mock(DietPreferenceService.class);
+        org.springframework.test.util.ReflectionTestUtils.setField(service,"dietPreferences",preferences);
+        when(preferences.get(7L)).thenReturn(new com.example.mealcheck.dto.DietPreferences(
+                com.example.mealcheck.dto.DietPreferences.Style.OMNIVORE,List.of("米饭"),List.of(),1));
+        var constrained = service.ask(new UserPrincipal(user), "我最近的饮食记录怎么调整更适合减脂？", null, List.of());
+        assertThat(constrained.getSuggestions()).noneMatch(text -> text.contains("米饭"));
+        assertThat(constrained.getAnswer()).doesNotContain("米饭");
+        verify(preferences).get(7L);
+        // With saved restrictions, provider output is checked before any visible delta.
+        properties.getAi().setApiKey("test-key-not-a-provider-key");
+        properties.getAi().setBaseUrl("http://unused.invalid");
+        properties.getAi().setModel("stub");
+        when(preferences.get(7L)).thenReturn(new com.example.mealcheck.dto.DietPreferences(
+                com.example.mealcheck.dto.DietPreferences.Style.VEGAN,List.of(),List.of(),2));
+        var model = mock(dev.langchain4j.model.chat.ChatModel.class);
+        when(modelFactory.create(any(java.time.Duration.class),eq(.45),eq("diet-assistant"))).thenReturn(model);
+        when(model.chat(anyString())).thenReturn("{\"summary\":\"下一餐可选鸡蛋\",\"suggestions\":[\"鸡蛋补充蛋白\",\"搭配青菜\"],\"riskLevel\":\"LOW\",\"weeklyTrend\":\"记录不足\"}");
+        var visible = new java.util.ArrayList<String>();
+        var delivery = new AssistantStreamDelivery((kind,data) -> {
+            if ("delta".equals(kind)) visible.add(((java.util.Map<?,?>)data).get("text").toString());
+        });
+        var streamed = service.deliver(new UserPrincipal(user),"根据我的记录给我下一餐建议",null,List.of(),delivery);
+        assertThat(streamed.getAnswer()).isEqualTo(DietPreferenceService.SAFE_SUGGESTION);
+        assertThat(String.join("",visible)).isEqualTo(streamed.getAnswer()).doesNotContain("鸡蛋");
+        verify(modelFactory,never()).stream(anyString(),any());
+        verify(model).chat(org.mockito.ArgumentMatchers.argThat((String text) -> text.contains("纯素") && text.contains("优先于历史推测")));
     }
 }

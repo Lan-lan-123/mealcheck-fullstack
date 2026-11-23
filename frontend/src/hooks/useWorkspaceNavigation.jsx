@@ -20,6 +20,7 @@ export function WorkspaceNavigationProvider({ children }) {
 
 export function useWorkspaceNavigation() { return useContext(NavigationContext) }
 
+/** @param {'user' | 'admin'} mode @returns {[string, (key: string) => void]} */
 export function useWorkspaceSection(mode) {
   const { pathname, navigate } = useWorkspaceNavigation()
   const section = pathname.startsWith(`/${mode}/`) ? pathname.split('/')[2] : 'overview'

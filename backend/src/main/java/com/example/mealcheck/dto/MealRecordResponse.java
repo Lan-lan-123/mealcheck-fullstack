@@ -5,14 +5,26 @@ import java.util.List;
 import java.util.Map;
 
 public class MealRecordResponse {
+    private ScoreBreakdown scoreBreakdown;
+    public ScoreBreakdown getScoreBreakdown() { return scoreBreakdown; }
+    public void setScoreBreakdown(ScoreBreakdown value) { scoreBreakdown = value; }
     private Long id;
     private LocalDateTime createdAt;
     private String goal;
     private int score;
     private String summary;
     private List<FoodItem> foods;
+    private List<FoodItem> uncertainFoods = List.of();
+    public List<FoodItem> getUncertainFoods() { return uncertainFoods; }
+    public void setUncertainFoods(List<FoodItem> value) { uncertainFoods = value; }
     private Map<String, Integer> categoryCounts;
     private List<String> riskTags;
+    private String adviceStatus="LEGACY";
+    private String adviceFailureCode;
+    public String getAdviceStatus() { return adviceStatus; }
+    public void setAdviceStatus(String value) { adviceStatus=value; }
+    public String getAdviceFailureCode() { return adviceFailureCode; }
+    public void setAdviceFailureCode(String value) { adviceFailureCode=value; }
     private String advice;
     private String imageUrl;
     private long revision;

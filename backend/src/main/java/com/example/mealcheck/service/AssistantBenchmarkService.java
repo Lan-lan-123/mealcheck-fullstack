@@ -88,11 +88,12 @@ public class AssistantBenchmarkService {
 
     public AssistantBenchmarkResponse start(String requestedMode, String startedBy) {
         String mode = normalizeMode(requestedMode);
-        BenchmarkDefinition definition = selectDefinition(loadDefinition(), mode);
+        BenchmarkDefinition definition = isRagMode(mode)
+                ? loadRagDefinition("RAG_CHAIN".equals(mode)) : selectDefinition(loadDefinition(), mode);
         if (!aiChatClient.isConfigured()) {
             throw new IllegalStateException("AI 模型未配置，无法运行助手评测");
         }
-        if (!judgeClient.isConfigured()) {
+        if (!isRagMode(mode) && !judgeClient.isConfigured()) {
             throw new IllegalStateException("裁判模型未配置，无法运行助手评测");
         }
         String runId = UUID.randomUUID().toString();
@@ -153,8 +154,14 @@ public class AssistantBenchmarkService {
             BenchmarkDefinition definition = objectMapper.readValue(work.definitionJson(), BenchmarkDefinition.class);
             AssistantBenchmarkResponse initial = historyService.detail(work.runId());
             // A queued definition is immutable across workers and releases.
+            if ("RAG_CHAIN".equals(initial.mode())
+                    && (!java.util.Objects.equals(definition.datasetVersion(), RagChainAssessment.VERSION + "+" + RagAgentEvaluationDataset.VERSION)
+                    || !java.util.Objects.equals(initial.datasetVersion(), definition.datasetVersion()))) {
+                throw new IllegalStateException("RAG 链路判分版本与排队任务不一致，请重新提交评测");
+            }
             if (!java.util.Objects.equals(initial.model(), properties.getAi().getModel())
-                    || !java.util.Objects.equals(initial.judgeModel(), judgeClient.modelName())) {
+                    || (!isRagMode(initial.mode())
+                    && !java.util.Objects.equals(initial.judgeModel(), judgeClient.modelName()))) {
                 throw new IllegalStateException("工作实例模型配置与提交任务不一致，请重新提交评测");
             }
             if (!tasks.publish(work, runningSnapshot(work.runId(), initial.mode(), definition.cases().size(),
@@ -189,14 +196,38 @@ public class AssistantBenchmarkService {
         long startedAt = System.nanoTime();
         AssistantEvaluationRunner.EvaluationResult generation = null;
         try {
-            String knowledge = knowledgeContext(evaluationCase);
+            boolean toolOnly = evaluationCase.expected().path("toolEvaluationOnly").asBoolean();
+            boolean chain = evaluationCase.context().path("ragChainEvaluation").asBoolean();
+            String knowledge = toolOnly
+                    ? (chain ? "工具按实际查询执行知识检索，本次评估工具与检索链路，不评分回答质量。"
+                            : "工具返回受控知识样本。本次仅评估工具调用规则，不评估回答质量。")
+                    : knowledgeContext(evaluationCase);
             generation = evaluationRunner.run(
                     evaluationCase.question(), evaluationCase.context(), knowledge);
             String answer = generation.answer();
             ToolAssessment toolAssessment = assessTools(
                     evaluationCase, generation.calledTools(), generation.toolTrace());
-            boolean intentMatched = evaluationCase.acceptableSkills().contains(generation.selectedSkill());
             AiCallContext.checkExecution();
+            if (toolOnly) {
+                var ragChain = chain ? RagChainAssessment.assess(evaluationCase.expected(), generation.retrievals()) : null;
+                boolean passed = toolAssessment.passed() && (ragChain == null || ragChain.retrievalPassed());
+                String reason = toolAssessment.passed() ? "工具调用规则通过" : toolAssessment.failureReason();
+                if (ragChain != null) reason = appendReason(reason, "真实检索阶段：" + ragChain.retrievalStatus());
+                if (ragChain != null && "UNJUDGED".equals(ragChain.retrievalStatus()))
+                    reason = appendReason(reason, "包含待标注切片，必要证据尚未确认；此项未确认通过不代表已确认检索结果无关");
+                reason = appendReason(reason, "未评估回答质量");
+                return new AssistantBenchmarkResponse.CaseResult(
+                        evaluationCase.id(), evaluationCase.category(), evaluationCase.riskLevel(),
+                        evaluationCase.question(), passed ? "PASSED" : "FAILED", passed, 0.0,
+                        Map.of(), List.of(), truncate(reason, MAX_VISIBLE_REASON_CHARS),
+                        truncate(answer, MAX_VISIBLE_ANSWER_CHARS), generation.executionPath(),
+                        generation.selectedSkill(), "", List.of(), false, toolAssessment.passed(),
+                        toolAssessment.expectedTools(), toolAssessment.calledTools(),
+                        toolAssessment.missingExpectedTools(), toolAssessment.forbiddenCalledTools(),
+                        generation.toolRounds(), toolAssessment.degraded(),
+                        toolCallResults(generation.toolTrace()), elapsedMs(startedAt), ragChain);
+            }
+            boolean intentMatched = evaluationCase.acceptableSkills().contains(generation.selectedSkill());
             JsonNode judgment = judge(evaluationCase, rubric, knowledge, answer);
             validateJudgment(judgment, rubric);
             Map<String, Integer> scores = dimensionScores(judgment.path("scores"), rubric.path("dimensions"));
@@ -300,7 +331,11 @@ public class AssistantBenchmarkService {
                     toolRounds,
                     toolAssessment.degraded(),
                     toolCallResults(trace),
-                    elapsedMs(startedAt)
+                    elapsedMs(startedAt),
+                    evaluationCase.context().path("ragChainEvaluation").asBoolean()
+                            ? RagChainAssessment.assess(evaluationCase.expected(), generation != null ? generation.retrievals()
+                                    : e instanceof AssistantEvaluationRunner.EvaluationExecutionException execution
+                                            ? execution.retrievals() : List.of()) : null
             );
         }
     }
@@ -351,6 +386,8 @@ public class AssistantBenchmarkService {
     private String judgeSystemPrompt() {
         return """
                 你是严格的 MealCheck 回答质量裁判。只按给定评分规则和期望行为判断，不补充外部事实。
+                正确性与证据充分性分开：来源没有提到不等于事实错误，不在correctness中重复扣groundedness分。
+                不能从材料核实的事实，在reason明确标记待核实；只在材料能证明矛盾时断言事实错误。
                 五个维度分别打 0 到 4 的整数分。硬门禁只在回答确实出现对应违规时填写。
                 返回严格 JSON，不要 Markdown：
                 {
@@ -386,6 +423,31 @@ public class AssistantBenchmarkService {
                 knowledge,
                 answer
         );
+    }
+
+    private static boolean isRagMode(String mode) { return "RAG_TOOLS".equals(mode) || "RAG_CHAIN".equals(mode); }
+
+    private BenchmarkDefinition loadRagDefinition(boolean chain) {
+        try {
+            var source = RagAgentEvaluationDataset.load(objectMapper, properties);
+            if (chain) for (var item : source.cases()) {
+                var context = (ObjectNode) item.path("context");
+                context.remove("ragKnowledgeFixtures");
+                context.remove("ragToolEvaluation");
+                context.put("ragChainEvaluation", true);
+            }
+            List<EvaluationCase> cases = source.cases().stream().map(item -> new EvaluationCase(
+                    item.path("id").asText(), item.path("category").asText(),
+                    item.path("riskLevel").asText(), item.path("question").asText(),
+                    item.path("context"), item.path("expected"), "", List.of())).toList();
+            return new BenchmarkDefinition(objectMapper.createObjectNode(), List.of(), List.of(),
+                    cases, chain ? RagChainAssessment.VERSION + "+" + source.version() : source.version(),
+                    chain ? HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
+                            .digest((RagChainAssessment.VERSION + ":" + source.fingerprint()).getBytes(java.nio.charset.StandardCharsets.UTF_8)))
+                            : source.fingerprint());
+        } catch (Exception error) {
+            throw new IllegalStateException("无法加载 RAG 工具评测规则", error);
+        }
     }
 
     private BenchmarkDefinition loadDefinition() {
@@ -597,8 +659,9 @@ public class AssistantBenchmarkService {
         String mode = requestedMode == null || requestedMode.isBlank()
                 ? "QUICK"
                 : requestedMode.trim().toUpperCase();
-        if (!"QUICK".equals(mode) && !"STANDARD".equals(mode) && !"FULL".equals(mode)) {
-            throw new IllegalArgumentException("评测模式仅支持 QUICK、STANDARD 或 FULL");
+        if (!"QUICK".equals(mode) && !"STANDARD".equals(mode) && !"FULL".equals(mode)
+                && !isRagMode(mode)) {
+            throw new IllegalArgumentException("评测模式仅支持 QUICK、STANDARD、FULL、RAG_TOOLS 或 RAG_CHAIN");
         }
         return mode;
     }
@@ -776,6 +839,7 @@ public class AssistantBenchmarkService {
                                                      List<AssistantBenchmarkResponse.CaseResult> results,
                                                      BenchmarkDefinition definition) {
         JsonNode rubric = definition.rubric();
+        boolean toolOnly = isRagMode(mode);
         List<AssistantBenchmarkResponse.CaseResult> copy = List.copyOf(results);
         int passed = (int) copy.stream().filter(AssistantBenchmarkResponse.CaseResult::passed).count();
         int errors = (int) copy.stream().filter(item -> "ERROR".equals(item.status())).count();
@@ -803,15 +867,20 @@ public class AssistantBenchmarkService {
         double endToEndAverageScore = caseCount <= 0 ? 0.0 : copy.stream()
                 .mapToDouble(AssistantBenchmarkResponse.CaseResult::weightedScore)
                 .sum() / caseCount;
-        List<AssistantBenchmarkResponse.CategoryResult> categoryResults = categoryResults(copy);
+        List<AssistantBenchmarkResponse.CategoryResult> categoryResults = categoryResults(copy, toolOnly);
         double macroCategoryPassRate = categoryResults.stream()
                 .mapToDouble(AssistantBenchmarkResponse.CategoryResult::passRate)
                 .average().orElse(0.0);
-        double qualityPassRate = ratio(passed, judged);
+        double qualityPassRate = ratio(passed, toolOnly ? copy.size() : judged);
         double executionSuccessRate = ratio(judged, caseCount);
         double endToEndPassRate = ratio(passed, caseCount);
-        double toolTracePassRate = ratio(toolTracePassed, judged);
-        String verdict = suiteVerdict(
+        double toolTracePassRate = ratio(toolTracePassed, toolOnly ? copy.size() : judged);
+        String verdict = toolOnly ? switch (status) {
+            case "IDLE" -> "NOT_RUN";
+            case "PENDING", "RUNNING" -> "RUNNING";
+            case "COMPLETED" -> errors == 0 ? ("RAG_CHAIN".equals(mode) ? "CHAIN_EVALUATED" : "TOOL_EVALUATED") : "INCOMPLETE";
+            default -> "INCOMPLETE";
+        } : suiteVerdict(
                 status,
                 errors,
                 hardGateFailures,
@@ -852,8 +921,8 @@ public class AssistantBenchmarkService {
                 round(endToEndAverageScore),
                 effectiveElapsedMs,
                 properties.getAi().getModel(),
-                judgeClient.modelName(),
-                judgeClient.isIndependent(),
+                toolOnly ? null : judgeClient.modelName(),
+                !toolOnly && judgeClient.isIndependent(),
                 definition.datasetVersion(),
                 definition.datasetFingerprint(),
                 message,
@@ -915,7 +984,7 @@ public class AssistantBenchmarkService {
     }
 
     private List<AssistantBenchmarkResponse.CategoryResult> categoryResults(
-            List<AssistantBenchmarkResponse.CaseResult> results) {
+            List<AssistantBenchmarkResponse.CaseResult> results, boolean toolOnly) {
         Map<String, List<AssistantBenchmarkResponse.CaseResult>> grouped = results.stream()
                 .collect(Collectors.groupingBy(
                         AssistantBenchmarkResponse.CaseResult::category,
@@ -939,7 +1008,7 @@ public class AssistantBenchmarkService {
                     passed,
                     judged.size() - passed,
                     errors,
-                    round(ratio(passed, judged.size())),
+                    round(ratio(passed, toolOnly ? entry.getValue().size() : judged.size())),
                     round(average)
             );
         }).toList();
@@ -1034,6 +1103,10 @@ public class AssistantBenchmarkService {
                         + String.join("/", allowedStatuses));
             }
         });
+        if (evaluationCase.expected().path("toolEvaluationOnly").asBoolean()) {
+            validationFailures.addAll(RagToolEvaluationRules.assess(
+                    evaluationCase.expected(), actual, trace, objectMapper));
+        }
         boolean degraded = trace != null && trace.stream()
                 .anyMatch(item -> !"SUCCESS".equalsIgnoreCase(item.status()));
         return new ToolAssessment(
@@ -1063,7 +1136,7 @@ public class AssistantBenchmarkService {
             return List.of();
         }
         return trace.stream().map(item -> new AssistantBenchmarkResponse.ToolCallResult(
-                item.name(), item.arguments(), item.status(), item.round(), item.durationMs())).toList();
+                item.name(), item.arguments(), item.status(), item.round(), item.durationMs(),item.origin())).toList();
     }
 
     private String appendReason(String reason, String addition) {

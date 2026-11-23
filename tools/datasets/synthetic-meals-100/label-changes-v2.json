@@ -1,0 +1,2405 @@
+{
+  "version": "synthetic-meals-100-v2-assistant-audit",
+  "baseVersion": "synthetic-meals-100-v1",
+  "baseDatasetSha256": "532e7bc6cba4577b5d4968bcd64761f2145f9d5cc06373c0853f331864228d83",
+  "reviewedCases": 100,
+  "changedCases": 50,
+  "independentlyAnnotated": false,
+  "changes": [
+    {
+      "id": "synth-001",
+      "before": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "aliases": [
+            "西红柿炒鸡蛋",
+            "番茄炒鸡蛋"
+          ]
+        },
+        {
+          "name": "清炒小白菜",
+          "category": "vegetable",
+          "aliases": [
+            "小白菜",
+            "炒小白菜",
+            "青菜"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "aliases": [
+            "西红柿炒鸡蛋",
+            "番茄炒鸡蛋"
+          ]
+        },
+        {
+          "name": "清炒小白菜",
+          "category": "vegetable",
+          "aliases": [
+            "小白菜",
+            "炒小白菜",
+            "青菜",
+            "清炒青菜"
+          ]
+        }
+      ],
+      "reason": "米饭、番茄炒蛋和小白菜类青菜均可见。清炒青菜是原有青菜别名的同义表达。"
+    },
+    {
+      "id": "synth-002",
+      "before": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "aliases": [
+            "西红柿炒鸡蛋",
+            "番茄炒鸡蛋"
+          ]
+        },
+        {
+          "name": "清炒小白菜",
+          "category": "vegetable",
+          "aliases": [
+            "小白菜",
+            "炒小白菜",
+            "青菜"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "aliases": [
+            "西红柿炒鸡蛋",
+            "番茄炒鸡蛋"
+          ]
+        },
+        {
+          "name": "清炒小白菜",
+          "category": "vegetable",
+          "aliases": [
+            "小白菜",
+            "炒小白菜",
+            "青菜",
+            "清炒青菜"
+          ]
+        }
+      ],
+      "reason": "米饭、番茄炒蛋和小白菜类青菜均可见。清炒青菜是原有青菜别名的同义表达。"
+    },
+    {
+      "id": "synth-003",
+      "before": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "aliases": [
+            "西红柿炒鸡蛋",
+            "番茄炒鸡蛋"
+          ]
+        },
+        {
+          "name": "清炒小白菜",
+          "category": "vegetable",
+          "aliases": [
+            "小白菜",
+            "炒小白菜",
+            "青菜"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "aliases": [
+            "西红柿炒鸡蛋",
+            "番茄炒鸡蛋"
+          ]
+        },
+        {
+          "name": "清炒小白菜",
+          "category": "vegetable",
+          "aliases": [
+            "小白菜",
+            "炒小白菜",
+            "青菜",
+            "清炒青菜"
+          ]
+        }
+      ],
+      "reason": "米饭、番茄炒蛋和小白菜类青菜均可见。清炒青菜是原有青菜别名的同义表达。"
+    },
+    {
+      "id": "synth-004",
+      "before": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "aliases": [
+            "西红柿炒鸡蛋",
+            "番茄炒鸡蛋"
+          ]
+        },
+        {
+          "name": "清炒小白菜",
+          "category": "vegetable",
+          "aliases": [
+            "小白菜",
+            "炒小白菜",
+            "青菜"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "aliases": [
+            "西红柿炒鸡蛋",
+            "番茄炒鸡蛋"
+          ]
+        },
+        {
+          "name": "清炒小白菜",
+          "category": "vegetable",
+          "aliases": [
+            "小白菜",
+            "炒小白菜",
+            "青菜",
+            "清炒青菜"
+          ]
+        }
+      ],
+      "reason": "米饭、番茄炒蛋和小白菜类青菜均可见。清炒青菜是原有青菜别名的同义表达。"
+    },
+    {
+      "id": "synth-005",
+      "before": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "aliases": [
+            "西红柿炒鸡蛋",
+            "番茄炒鸡蛋"
+          ]
+        },
+        {
+          "name": "清炒小白菜",
+          "category": "vegetable",
+          "aliases": [
+            "小白菜",
+            "炒小白菜",
+            "青菜"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "番茄炒蛋",
+          "category": "protein",
+          "aliases": [
+            "西红柿炒鸡蛋",
+            "番茄炒鸡蛋"
+          ]
+        },
+        {
+          "name": "清炒小白菜",
+          "category": "vegetable",
+          "aliases": [
+            "小白菜",
+            "炒小白菜",
+            "青菜",
+            "清炒青菜"
+          ]
+        }
+      ],
+      "reason": "米饭、番茄炒蛋和小白菜类青菜均可见。清炒青菜是原有青菜别名的同义表达。"
+    },
+    {
+      "id": "synth-006",
+      "before": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "清蒸鱼",
+          "category": "protein",
+          "aliases": [
+            "蒸鱼",
+            "鱼肉"
+          ]
+        },
+        {
+          "name": "西兰花",
+          "category": "vegetable",
+          "aliases": [
+            "清蒸西兰花",
+            "蒸西兰花"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "鱼肉",
+          "category": "protein",
+          "aliases": [
+            "鱼排"
+          ]
+        },
+        {
+          "name": "西兰花",
+          "category": "vegetable",
+          "aliases": [
+            "清蒸西兰花",
+            "蒸西兰花"
+          ]
+        }
+      ],
+      "reason": "可见鱼肉、米饭和西兰花；鱼肉表面纹理和褐色痕迹不足以确认清蒸或煎制。"
+    },
+    {
+      "id": "synth-007",
+      "before": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "清蒸鱼",
+          "category": "protein",
+          "aliases": [
+            "蒸鱼",
+            "鱼肉"
+          ]
+        },
+        {
+          "name": "西兰花",
+          "category": "vegetable",
+          "aliases": [
+            "清蒸西兰花",
+            "蒸西兰花"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "鱼肉",
+          "category": "protein",
+          "aliases": [
+            "鱼排"
+          ]
+        },
+        {
+          "name": "西兰花",
+          "category": "vegetable",
+          "aliases": [
+            "清蒸西兰花",
+            "蒸西兰花"
+          ]
+        }
+      ],
+      "reason": "可见鱼肉、米饭和西兰花；鱼肉表面纹理和褐色痕迹不足以确认清蒸或煎制。"
+    },
+    {
+      "id": "synth-008",
+      "before": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "清蒸鱼",
+          "category": "protein",
+          "aliases": [
+            "蒸鱼",
+            "鱼肉"
+          ]
+        },
+        {
+          "name": "西兰花",
+          "category": "vegetable",
+          "aliases": [
+            "清蒸西兰花",
+            "蒸西兰花"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "鱼肉",
+          "category": "protein",
+          "aliases": [
+            "鱼排"
+          ]
+        },
+        {
+          "name": "西兰花",
+          "category": "vegetable",
+          "aliases": [
+            "清蒸西兰花",
+            "蒸西兰花"
+          ]
+        }
+      ],
+      "reason": "可见鱼肉、米饭和西兰花；鱼肉表面纹理和褐色痕迹不足以确认清蒸或煎制。"
+    },
+    {
+      "id": "synth-009",
+      "before": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "清蒸鱼",
+          "category": "protein",
+          "aliases": [
+            "蒸鱼",
+            "鱼肉"
+          ]
+        },
+        {
+          "name": "西兰花",
+          "category": "vegetable",
+          "aliases": [
+            "清蒸西兰花",
+            "蒸西兰花"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "鱼肉",
+          "category": "protein",
+          "aliases": [
+            "鱼排"
+          ]
+        },
+        {
+          "name": "西兰花",
+          "category": "vegetable",
+          "aliases": [
+            "清蒸西兰花",
+            "蒸西兰花"
+          ]
+        }
+      ],
+      "reason": "可见鱼肉、米饭和西兰花；鱼肉表面纹理和褐色痕迹不足以确认清蒸或煎制。"
+    },
+    {
+      "id": "synth-010",
+      "before": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "清蒸鱼",
+          "category": "protein",
+          "aliases": [
+            "蒸鱼",
+            "鱼肉"
+          ]
+        },
+        {
+          "name": "西兰花",
+          "category": "vegetable",
+          "aliases": [
+            "清蒸西兰花",
+            "蒸西兰花"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "鱼肉",
+          "category": "protein",
+          "aliases": [
+            "鱼排"
+          ]
+        },
+        {
+          "name": "西兰花",
+          "category": "vegetable",
+          "aliases": [
+            "清蒸西兰花",
+            "蒸西兰花"
+          ]
+        }
+      ],
+      "reason": "可见鱼肉、米饭和西兰花；鱼肉表面纹理和褐色痕迹不足以确认清蒸或煎制。"
+    },
+    {
+      "id": "synth-011",
+      "before": [
+        {
+          "name": "糙米饭",
+          "category": "staple",
+          "aliases": [
+            "糙米"
+          ]
+        },
+        {
+          "name": "鸡胸肉",
+          "category": "protein",
+          "aliases": [
+            "鸡肉"
+          ]
+        },
+        {
+          "name": "胡萝卜",
+          "category": "vegetable"
+        }
+      ],
+      "after": [
+        {
+          "name": "糙米饭",
+          "category": "staple",
+          "aliases": [
+            "糙米"
+          ]
+        },
+        {
+          "name": "鸡胸肉",
+          "category": "protein",
+          "aliases": [
+            "鸡肉"
+          ]
+        },
+        {
+          "name": "胡萝卜",
+          "category": "vegetable",
+          "aliases": [
+            "胡萝卜片"
+          ]
+        }
+      ],
+      "reason": "可见鸡肉片、米饭与胡萝卜切片；补充切片形态别名。"
+    },
+    {
+      "id": "synth-012",
+      "before": [
+        {
+          "name": "糙米饭",
+          "category": "staple",
+          "aliases": [
+            "糙米"
+          ]
+        },
+        {
+          "name": "鸡胸肉",
+          "category": "protein",
+          "aliases": [
+            "鸡肉"
+          ]
+        },
+        {
+          "name": "胡萝卜",
+          "category": "vegetable"
+        }
+      ],
+      "after": [
+        {
+          "name": "糙米饭",
+          "category": "staple",
+          "aliases": [
+            "糙米"
+          ]
+        },
+        {
+          "name": "鸡胸肉",
+          "category": "protein",
+          "aliases": [
+            "鸡肉"
+          ]
+        },
+        {
+          "name": "胡萝卜",
+          "category": "vegetable",
+          "aliases": [
+            "胡萝卜片"
+          ]
+        }
+      ],
+      "reason": "可见鸡肉片、米饭与胡萝卜切片；补充切片形态别名。"
+    },
+    {
+      "id": "synth-013",
+      "before": [
+        {
+          "name": "糙米饭",
+          "category": "staple",
+          "aliases": [
+            "糙米"
+          ]
+        },
+        {
+          "name": "鸡胸肉",
+          "category": "protein",
+          "aliases": [
+            "鸡肉"
+          ]
+        },
+        {
+          "name": "胡萝卜",
+          "category": "vegetable"
+        }
+      ],
+      "after": [
+        {
+          "name": "糙米饭",
+          "category": "staple",
+          "aliases": [
+            "糙米"
+          ]
+        },
+        {
+          "name": "鸡胸肉",
+          "category": "protein",
+          "aliases": [
+            "鸡肉"
+          ]
+        },
+        {
+          "name": "胡萝卜",
+          "category": "vegetable",
+          "aliases": [
+            "胡萝卜片"
+          ]
+        }
+      ],
+      "reason": "可见鸡肉片、米饭与胡萝卜切片；补充切片形态别名。"
+    },
+    {
+      "id": "synth-014",
+      "before": [
+        {
+          "name": "糙米饭",
+          "category": "staple",
+          "aliases": [
+            "糙米"
+          ]
+        },
+        {
+          "name": "鸡胸肉",
+          "category": "protein",
+          "aliases": [
+            "鸡肉"
+          ]
+        },
+        {
+          "name": "胡萝卜",
+          "category": "vegetable"
+        }
+      ],
+      "after": [
+        {
+          "name": "糙米饭",
+          "category": "staple",
+          "aliases": [
+            "糙米"
+          ]
+        },
+        {
+          "name": "鸡胸肉",
+          "category": "protein",
+          "aliases": [
+            "鸡肉"
+          ]
+        },
+        {
+          "name": "胡萝卜",
+          "category": "vegetable",
+          "aliases": [
+            "胡萝卜片"
+          ]
+        }
+      ],
+      "reason": "可见鸡肉片、米饭与胡萝卜切片；补充切片形态别名。"
+    },
+    {
+      "id": "synth-015",
+      "before": [
+        {
+          "name": "糙米饭",
+          "category": "staple",
+          "aliases": [
+            "糙米"
+          ]
+        },
+        {
+          "name": "鸡胸肉",
+          "category": "protein",
+          "aliases": [
+            "鸡肉"
+          ]
+        },
+        {
+          "name": "胡萝卜",
+          "category": "vegetable"
+        }
+      ],
+      "after": [
+        {
+          "name": "糙米饭",
+          "category": "staple",
+          "aliases": [
+            "糙米"
+          ]
+        },
+        {
+          "name": "鸡胸肉",
+          "category": "protein",
+          "aliases": [
+            "鸡肉"
+          ]
+        },
+        {
+          "name": "胡萝卜",
+          "category": "vegetable",
+          "aliases": [
+            "胡萝卜片"
+          ]
+        }
+      ],
+      "reason": "可见鸡肉片、米饭与胡萝卜切片；补充切片形态别名。"
+    },
+    {
+      "id": "synth-016",
+      "before": [
+        {
+          "name": "面条",
+          "category": "staple",
+          "aliases": [
+            "面"
+          ]
+        },
+        {
+          "name": "牛肉",
+          "category": "protein"
+        },
+        {
+          "name": "菠菜",
+          "category": "vegetable"
+        }
+      ],
+      "after": [
+        {
+          "name": "面条",
+          "category": "staple",
+          "aliases": [
+            "面"
+          ]
+        },
+        {
+          "name": "牛肉",
+          "category": "protein",
+          "aliases": [
+            "牛肉块"
+          ]
+        },
+        {
+          "name": "菠菜",
+          "category": "vegetable"
+        }
+      ],
+      "reason": "可见面条、肉块和绿叶菜；不把菜的近似外观当作物种确认。"
+    },
+    {
+      "id": "synth-017",
+      "before": [
+        {
+          "name": "面条",
+          "category": "staple",
+          "aliases": [
+            "面"
+          ]
+        },
+        {
+          "name": "牛肉",
+          "category": "protein"
+        },
+        {
+          "name": "菠菜",
+          "category": "vegetable"
+        }
+      ],
+      "after": [
+        {
+          "name": "面条",
+          "category": "staple",
+          "aliases": [
+            "面"
+          ]
+        },
+        {
+          "name": "牛肉",
+          "category": "protein",
+          "aliases": [
+            "牛肉块"
+          ]
+        },
+        {
+          "name": "菠菜",
+          "category": "vegetable"
+        }
+      ],
+      "reason": "可见面条、肉块和绿叶菜；不把菜的近似外观当作物种确认。"
+    },
+    {
+      "id": "synth-018",
+      "before": [
+        {
+          "name": "面条",
+          "category": "staple",
+          "aliases": [
+            "面"
+          ]
+        },
+        {
+          "name": "牛肉",
+          "category": "protein"
+        },
+        {
+          "name": "菠菜",
+          "category": "vegetable"
+        }
+      ],
+      "after": [
+        {
+          "name": "面条",
+          "category": "staple",
+          "aliases": [
+            "面"
+          ]
+        },
+        {
+          "name": "牛肉",
+          "category": "protein",
+          "aliases": [
+            "牛肉块"
+          ]
+        },
+        {
+          "name": "菠菜",
+          "category": "vegetable"
+        }
+      ],
+      "reason": "可见面条、肉块和绿叶菜；不把菜的近似外观当作物种确认。"
+    },
+    {
+      "id": "synth-019",
+      "before": [
+        {
+          "name": "面条",
+          "category": "staple",
+          "aliases": [
+            "面"
+          ]
+        },
+        {
+          "name": "牛肉",
+          "category": "protein"
+        },
+        {
+          "name": "菠菜",
+          "category": "vegetable"
+        }
+      ],
+      "after": [
+        {
+          "name": "面条",
+          "category": "staple",
+          "aliases": [
+            "面"
+          ]
+        },
+        {
+          "name": "牛肉",
+          "category": "protein",
+          "aliases": [
+            "牛肉块"
+          ]
+        },
+        {
+          "name": "菠菜",
+          "category": "vegetable"
+        }
+      ],
+      "reason": "可见面条、肉块和绿叶菜；不把菜的近似外观当作物种确认。"
+    },
+    {
+      "id": "synth-020",
+      "before": [
+        {
+          "name": "面条",
+          "category": "staple",
+          "aliases": [
+            "面"
+          ]
+        },
+        {
+          "name": "牛肉",
+          "category": "protein"
+        },
+        {
+          "name": "菠菜",
+          "category": "vegetable"
+        }
+      ],
+      "after": [
+        {
+          "name": "面条",
+          "category": "staple",
+          "aliases": [
+            "面"
+          ]
+        },
+        {
+          "name": "牛肉",
+          "category": "protein",
+          "aliases": [
+            "牛肉块"
+          ]
+        },
+        {
+          "name": "菠菜",
+          "category": "vegetable"
+        }
+      ],
+      "reason": "可见面条、肉块和绿叶菜；不把菜的近似外观当作物种确认。"
+    },
+    {
+      "id": "synth-021",
+      "before": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "豆腐",
+          "category": "protein"
+        },
+        {
+          "name": "四季豆",
+          "category": "vegetable"
+        }
+      ],
+      "after": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "豆腐",
+          "category": "protein",
+          "aliases": [
+            "豆腐块"
+          ]
+        },
+        {
+          "name": "四季豆",
+          "category": "vegetable",
+          "aliases": [
+            "豆角"
+          ]
+        }
+      ],
+      "reason": "可见豆腐块、绿色豆角类蔬菜和米饭。"
+    },
+    {
+      "id": "synth-022",
+      "before": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "豆腐",
+          "category": "protein"
+        },
+        {
+          "name": "四季豆",
+          "category": "vegetable"
+        }
+      ],
+      "after": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "豆腐",
+          "category": "protein",
+          "aliases": [
+            "豆腐块"
+          ]
+        },
+        {
+          "name": "四季豆",
+          "category": "vegetable",
+          "aliases": [
+            "豆角"
+          ]
+        }
+      ],
+      "reason": "可见豆腐块、绿色豆角类蔬菜和米饭。"
+    },
+    {
+      "id": "synth-023",
+      "before": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "豆腐",
+          "category": "protein"
+        },
+        {
+          "name": "四季豆",
+          "category": "vegetable"
+        }
+      ],
+      "after": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "豆腐",
+          "category": "protein",
+          "aliases": [
+            "豆腐块"
+          ]
+        },
+        {
+          "name": "四季豆",
+          "category": "vegetable",
+          "aliases": [
+            "豆角"
+          ]
+        }
+      ],
+      "reason": "可见豆腐块、绿色豆角类蔬菜和米饭。"
+    },
+    {
+      "id": "synth-024",
+      "before": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "豆腐",
+          "category": "protein"
+        },
+        {
+          "name": "四季豆",
+          "category": "vegetable"
+        }
+      ],
+      "after": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "豆腐",
+          "category": "protein",
+          "aliases": [
+            "豆腐块"
+          ]
+        },
+        {
+          "name": "四季豆",
+          "category": "vegetable",
+          "aliases": [
+            "豆角"
+          ]
+        }
+      ],
+      "reason": "可见豆腐块、绿色豆角类蔬菜和米饭。"
+    },
+    {
+      "id": "synth-025",
+      "before": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "豆腐",
+          "category": "protein"
+        },
+        {
+          "name": "四季豆",
+          "category": "vegetable"
+        }
+      ],
+      "after": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "豆腐",
+          "category": "protein",
+          "aliases": [
+            "豆腐块"
+          ]
+        },
+        {
+          "name": "四季豆",
+          "category": "vegetable",
+          "aliases": [
+            "豆角"
+          ]
+        }
+      ],
+      "reason": "可见豆腐块、绿色豆角类蔬菜和米饭。"
+    },
+    {
+      "id": "synth-026",
+      "before": [
+        {
+          "name": "馒头",
+          "category": "staple"
+        },
+        {
+          "name": "水煮蛋",
+          "category": "protein",
+          "aliases": [
+            "煮鸡蛋",
+            "水煮鸡蛋",
+            "鸡蛋"
+          ]
+        },
+        {
+          "name": "牛奶",
+          "category": "dairy"
+        }
+      ],
+      "after": [
+        {
+          "name": "包子",
+          "category": "staple"
+        },
+        {
+          "name": "水煮蛋",
+          "category": "protein",
+          "aliases": [
+            "煮鸡蛋",
+            "水煮鸡蛋",
+            "鸡蛋"
+          ]
+        },
+        {
+          "name": "牛奶",
+          "category": "dairy"
+        }
+      ],
+      "reason": "五张图片均有包子褶口；原始馒头标签与画面不符。"
+    },
+    {
+      "id": "synth-027",
+      "before": [
+        {
+          "name": "馒头",
+          "category": "staple"
+        },
+        {
+          "name": "水煮蛋",
+          "category": "protein",
+          "aliases": [
+            "煮鸡蛋",
+            "水煮鸡蛋",
+            "鸡蛋"
+          ]
+        },
+        {
+          "name": "牛奶",
+          "category": "dairy"
+        }
+      ],
+      "after": [
+        {
+          "name": "包子",
+          "category": "staple"
+        },
+        {
+          "name": "水煮蛋",
+          "category": "protein",
+          "aliases": [
+            "煮鸡蛋",
+            "水煮鸡蛋",
+            "鸡蛋"
+          ]
+        },
+        {
+          "name": "牛奶",
+          "category": "dairy"
+        }
+      ],
+      "reason": "五张图片均有包子褶口；原始馒头标签与画面不符。"
+    },
+    {
+      "id": "synth-028",
+      "before": [
+        {
+          "name": "馒头",
+          "category": "staple"
+        },
+        {
+          "name": "水煮蛋",
+          "category": "protein",
+          "aliases": [
+            "煮鸡蛋",
+            "水煮鸡蛋",
+            "鸡蛋"
+          ]
+        },
+        {
+          "name": "牛奶",
+          "category": "dairy"
+        }
+      ],
+      "after": [
+        {
+          "name": "包子",
+          "category": "staple"
+        },
+        {
+          "name": "水煮蛋",
+          "category": "protein",
+          "aliases": [
+            "煮鸡蛋",
+            "水煮鸡蛋",
+            "鸡蛋"
+          ]
+        },
+        {
+          "name": "牛奶",
+          "category": "dairy"
+        }
+      ],
+      "reason": "五张图片均有包子褶口；原始馒头标签与画面不符。"
+    },
+    {
+      "id": "synth-029",
+      "before": [
+        {
+          "name": "馒头",
+          "category": "staple"
+        },
+        {
+          "name": "水煮蛋",
+          "category": "protein",
+          "aliases": [
+            "煮鸡蛋",
+            "水煮鸡蛋",
+            "鸡蛋"
+          ]
+        },
+        {
+          "name": "牛奶",
+          "category": "dairy"
+        }
+      ],
+      "after": [
+        {
+          "name": "包子",
+          "category": "staple"
+        },
+        {
+          "name": "水煮蛋",
+          "category": "protein",
+          "aliases": [
+            "煮鸡蛋",
+            "水煮鸡蛋",
+            "鸡蛋"
+          ]
+        },
+        {
+          "name": "牛奶",
+          "category": "dairy"
+        }
+      ],
+      "reason": "五张图片均有包子褶口；原始馒头标签与画面不符。"
+    },
+    {
+      "id": "synth-030",
+      "before": [
+        {
+          "name": "馒头",
+          "category": "staple"
+        },
+        {
+          "name": "水煮蛋",
+          "category": "protein",
+          "aliases": [
+            "煮鸡蛋",
+            "水煮鸡蛋",
+            "鸡蛋"
+          ]
+        },
+        {
+          "name": "牛奶",
+          "category": "dairy"
+        }
+      ],
+      "after": [
+        {
+          "name": "包子",
+          "category": "staple"
+        },
+        {
+          "name": "水煮蛋",
+          "category": "protein",
+          "aliases": [
+            "煮鸡蛋",
+            "水煮鸡蛋",
+            "鸡蛋"
+          ]
+        },
+        {
+          "name": "牛奶",
+          "category": "dairy"
+        }
+      ],
+      "reason": "五张图片均有包子褶口；原始馒头标签与画面不符。"
+    },
+    {
+      "id": "synth-041",
+      "before": [
+        {
+          "name": "玉米",
+          "category": "staple",
+          "aliases": [
+            "玉米棒",
+            "水煮玉米"
+          ]
+        },
+        {
+          "name": "炒鸡蛋",
+          "category": "protein",
+          "aliases": [
+            "炒蛋"
+          ]
+        },
+        {
+          "name": "蘑菇",
+          "category": "vegetable"
+        }
+      ],
+      "after": [
+        {
+          "name": "玉米",
+          "category": "staple",
+          "aliases": [
+            "玉米棒",
+            "水煮玉米",
+            "煮玉米"
+          ]
+        },
+        {
+          "name": "炒鸡蛋",
+          "category": "protein",
+          "aliases": [
+            "炒蛋"
+          ]
+        },
+        {
+          "name": "蘑菇",
+          "category": "vegetable",
+          "aliases": [
+            "蘑菇片"
+          ]
+        }
+      ],
+      "reason": "可见玉米、炒蛋状食物及蘑菇；煮玉米与原别名水煮玉米同义。"
+    },
+    {
+      "id": "synth-042",
+      "before": [
+        {
+          "name": "玉米",
+          "category": "staple",
+          "aliases": [
+            "玉米棒",
+            "水煮玉米"
+          ]
+        },
+        {
+          "name": "炒鸡蛋",
+          "category": "protein",
+          "aliases": [
+            "炒蛋"
+          ]
+        },
+        {
+          "name": "蘑菇",
+          "category": "vegetable"
+        }
+      ],
+      "after": [
+        {
+          "name": "玉米",
+          "category": "staple",
+          "aliases": [
+            "玉米棒",
+            "水煮玉米",
+            "煮玉米"
+          ]
+        },
+        {
+          "name": "炒鸡蛋",
+          "category": "protein",
+          "aliases": [
+            "炒蛋"
+          ]
+        },
+        {
+          "name": "蘑菇",
+          "category": "vegetable",
+          "aliases": [
+            "蘑菇片"
+          ]
+        }
+      ],
+      "reason": "可见玉米、炒蛋状食物及蘑菇；煮玉米与原别名水煮玉米同义。"
+    },
+    {
+      "id": "synth-043",
+      "before": [
+        {
+          "name": "玉米",
+          "category": "staple",
+          "aliases": [
+            "玉米棒",
+            "水煮玉米"
+          ]
+        },
+        {
+          "name": "炒鸡蛋",
+          "category": "protein",
+          "aliases": [
+            "炒蛋"
+          ]
+        },
+        {
+          "name": "蘑菇",
+          "category": "vegetable"
+        }
+      ],
+      "after": [
+        {
+          "name": "玉米",
+          "category": "staple",
+          "aliases": [
+            "玉米棒",
+            "水煮玉米",
+            "煮玉米"
+          ]
+        },
+        {
+          "name": "炒鸡蛋",
+          "category": "protein",
+          "aliases": [
+            "炒蛋"
+          ]
+        },
+        {
+          "name": "蘑菇",
+          "category": "vegetable",
+          "aliases": [
+            "蘑菇片"
+          ]
+        }
+      ],
+      "reason": "可见玉米、炒蛋状食物及蘑菇；煮玉米与原别名水煮玉米同义。"
+    },
+    {
+      "id": "synth-044",
+      "before": [
+        {
+          "name": "玉米",
+          "category": "staple",
+          "aliases": [
+            "玉米棒",
+            "水煮玉米"
+          ]
+        },
+        {
+          "name": "炒鸡蛋",
+          "category": "protein",
+          "aliases": [
+            "炒蛋"
+          ]
+        },
+        {
+          "name": "蘑菇",
+          "category": "vegetable"
+        }
+      ],
+      "after": [
+        {
+          "name": "玉米",
+          "category": "staple",
+          "aliases": [
+            "玉米棒",
+            "水煮玉米",
+            "煮玉米"
+          ]
+        },
+        {
+          "name": "炒鸡蛋",
+          "category": "protein",
+          "aliases": [
+            "炒蛋"
+          ]
+        },
+        {
+          "name": "蘑菇",
+          "category": "vegetable",
+          "aliases": [
+            "蘑菇片"
+          ]
+        }
+      ],
+      "reason": "可见玉米、炒蛋状食物及蘑菇；煮玉米与原别名水煮玉米同义。"
+    },
+    {
+      "id": "synth-045",
+      "before": [
+        {
+          "name": "玉米",
+          "category": "staple",
+          "aliases": [
+            "玉米棒",
+            "水煮玉米"
+          ]
+        },
+        {
+          "name": "炒鸡蛋",
+          "category": "protein",
+          "aliases": [
+            "炒蛋"
+          ]
+        },
+        {
+          "name": "蘑菇",
+          "category": "vegetable"
+        }
+      ],
+      "after": [
+        {
+          "name": "玉米",
+          "category": "staple",
+          "aliases": [
+            "玉米棒",
+            "水煮玉米",
+            "煮玉米"
+          ]
+        },
+        {
+          "name": "炒鸡蛋",
+          "category": "protein",
+          "aliases": [
+            "炒蛋"
+          ]
+        },
+        {
+          "name": "蘑菇",
+          "category": "vegetable",
+          "aliases": [
+            "蘑菇片"
+          ]
+        }
+      ],
+      "reason": "可见玉米、炒蛋状食物及蘑菇；煮玉米与原别名水煮玉米同义。"
+    },
+    {
+      "id": "synth-046",
+      "before": [
+        {
+          "name": "全麦面包",
+          "category": "staple"
+        },
+        {
+          "name": "原味酸奶",
+          "category": "dairy",
+          "aliases": [
+            "酸奶"
+          ]
+        },
+        {
+          "name": "苹果",
+          "category": "fruit",
+          "aliases": [
+            "苹果片"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "全麦面包",
+          "category": "staple"
+        },
+        {
+          "name": "酸奶",
+          "category": "dairy"
+        },
+        {
+          "name": "苹果",
+          "category": "fruit",
+          "aliases": [
+            "苹果片",
+            "苹果切片"
+          ]
+        }
+      ],
+      "reason": "可见面包、酸奶状食物和苹果切片；画面不能证明酸奶原味或无糖。"
+    },
+    {
+      "id": "synth-047",
+      "before": [
+        {
+          "name": "全麦面包",
+          "category": "staple"
+        },
+        {
+          "name": "原味酸奶",
+          "category": "dairy",
+          "aliases": [
+            "酸奶"
+          ]
+        },
+        {
+          "name": "苹果",
+          "category": "fruit",
+          "aliases": [
+            "苹果片"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "全麦面包",
+          "category": "staple"
+        },
+        {
+          "name": "酸奶",
+          "category": "dairy"
+        },
+        {
+          "name": "苹果",
+          "category": "fruit",
+          "aliases": [
+            "苹果片",
+            "苹果切片"
+          ]
+        }
+      ],
+      "reason": "可见面包、酸奶状食物和苹果切片；画面不能证明酸奶原味或无糖。"
+    },
+    {
+      "id": "synth-048",
+      "before": [
+        {
+          "name": "全麦面包",
+          "category": "staple"
+        },
+        {
+          "name": "原味酸奶",
+          "category": "dairy",
+          "aliases": [
+            "酸奶"
+          ]
+        },
+        {
+          "name": "苹果",
+          "category": "fruit",
+          "aliases": [
+            "苹果片"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "全麦面包",
+          "category": "staple"
+        },
+        {
+          "name": "酸奶",
+          "category": "dairy"
+        },
+        {
+          "name": "苹果",
+          "category": "fruit",
+          "aliases": [
+            "苹果片",
+            "苹果切片"
+          ]
+        }
+      ],
+      "reason": "可见面包、酸奶状食物和苹果切片；画面不能证明酸奶原味或无糖。"
+    },
+    {
+      "id": "synth-049",
+      "before": [
+        {
+          "name": "全麦面包",
+          "category": "staple"
+        },
+        {
+          "name": "原味酸奶",
+          "category": "dairy",
+          "aliases": [
+            "酸奶"
+          ]
+        },
+        {
+          "name": "苹果",
+          "category": "fruit",
+          "aliases": [
+            "苹果片"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "全麦面包",
+          "category": "staple"
+        },
+        {
+          "name": "酸奶",
+          "category": "dairy"
+        },
+        {
+          "name": "苹果",
+          "category": "fruit",
+          "aliases": [
+            "苹果片",
+            "苹果切片"
+          ]
+        }
+      ],
+      "reason": "可见面包、酸奶状食物和苹果切片；画面不能证明酸奶原味或无糖。"
+    },
+    {
+      "id": "synth-050",
+      "before": [
+        {
+          "name": "全麦面包",
+          "category": "staple"
+        },
+        {
+          "name": "原味酸奶",
+          "category": "dairy",
+          "aliases": [
+            "酸奶"
+          ]
+        },
+        {
+          "name": "苹果",
+          "category": "fruit",
+          "aliases": [
+            "苹果片"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "全麦面包",
+          "category": "staple"
+        },
+        {
+          "name": "酸奶",
+          "category": "dairy"
+        },
+        {
+          "name": "苹果",
+          "category": "fruit",
+          "aliases": [
+            "苹果片",
+            "苹果切片"
+          ]
+        }
+      ],
+      "reason": "可见面包、酸奶状食物和苹果切片；画面不能证明酸奶原味或无糖。"
+    },
+    {
+      "id": "synth-051",
+      "before": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "红烧肉",
+          "category": "oily"
+        },
+        {
+          "name": "菜花",
+          "category": "vegetable",
+          "aliases": [
+            "花菜",
+            "炒花菜"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "红烧肉",
+          "category": "oily"
+        },
+        {
+          "name": "菜花",
+          "category": "vegetable",
+          "aliases": [
+            "花菜",
+            "炒花菜",
+            "花椰菜",
+            "炒花椰菜"
+          ]
+        }
+      ],
+      "reason": "可见带明显肥瘦层次的肉块、米饭和花椰菜；菜花与花椰菜同义。"
+    },
+    {
+      "id": "synth-052",
+      "before": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "红烧肉",
+          "category": "oily"
+        },
+        {
+          "name": "菜花",
+          "category": "vegetable",
+          "aliases": [
+            "花菜",
+            "炒花菜"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "红烧肉",
+          "category": "oily"
+        },
+        {
+          "name": "菜花",
+          "category": "vegetable",
+          "aliases": [
+            "花菜",
+            "炒花菜",
+            "花椰菜",
+            "炒花椰菜"
+          ]
+        }
+      ],
+      "reason": "可见带明显肥瘦层次的肉块、米饭和花椰菜；菜花与花椰菜同义。"
+    },
+    {
+      "id": "synth-053",
+      "before": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "红烧肉",
+          "category": "oily"
+        },
+        {
+          "name": "菜花",
+          "category": "vegetable",
+          "aliases": [
+            "花菜",
+            "炒花菜"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "红烧肉",
+          "category": "oily"
+        },
+        {
+          "name": "菜花",
+          "category": "vegetable",
+          "aliases": [
+            "花菜",
+            "炒花菜",
+            "花椰菜",
+            "炒花椰菜"
+          ]
+        }
+      ],
+      "reason": "可见带明显肥瘦层次的肉块、米饭和花椰菜；菜花与花椰菜同义。"
+    },
+    {
+      "id": "synth-054",
+      "before": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "红烧肉",
+          "category": "oily"
+        },
+        {
+          "name": "菜花",
+          "category": "vegetable",
+          "aliases": [
+            "花菜",
+            "炒花菜"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "红烧肉",
+          "category": "oily"
+        },
+        {
+          "name": "菜花",
+          "category": "vegetable",
+          "aliases": [
+            "花菜",
+            "炒花菜",
+            "花椰菜",
+            "炒花椰菜"
+          ]
+        }
+      ],
+      "reason": "可见带明显肥瘦层次的肉块、米饭和花椰菜；菜花与花椰菜同义。"
+    },
+    {
+      "id": "synth-055",
+      "before": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "红烧肉",
+          "category": "oily"
+        },
+        {
+          "name": "菜花",
+          "category": "vegetable",
+          "aliases": [
+            "花菜",
+            "炒花菜"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "米饭",
+          "category": "staple",
+          "aliases": [
+            "白米饭",
+            "白饭",
+            "蒸米饭"
+          ]
+        },
+        {
+          "name": "红烧肉",
+          "category": "oily"
+        },
+        {
+          "name": "菜花",
+          "category": "vegetable",
+          "aliases": [
+            "花菜",
+            "炒花菜",
+            "花椰菜",
+            "炒花椰菜"
+          ]
+        }
+      ],
+      "reason": "可见带明显肥瘦层次的肉块、米饭和花椰菜；菜花与花椰菜同义。"
+    },
+    {
+      "id": "synth-056",
+      "before": [
+        {
+          "name": "炸鸡",
+          "category": "fried"
+        },
+        {
+          "name": "薯条",
+          "category": "fried"
+        },
+        {
+          "name": "可乐",
+          "category": "drink",
+          "aliases": [
+            "碳酸饮料"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "炸鸡",
+          "category": "fried"
+        },
+        {
+          "name": "薯条",
+          "category": "fried"
+        },
+        {
+          "name": "可乐",
+          "category": "drink",
+          "aliases": [
+            "碳酸饮料",
+            "冰可乐"
+          ]
+        }
+      ],
+      "reason": "可见裹粉炸物、薯条及带冰块的深色饮品。"
+    },
+    {
+      "id": "synth-057",
+      "before": [
+        {
+          "name": "炸鸡",
+          "category": "fried"
+        },
+        {
+          "name": "薯条",
+          "category": "fried"
+        },
+        {
+          "name": "可乐",
+          "category": "drink",
+          "aliases": [
+            "碳酸饮料"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "炸鸡",
+          "category": "fried"
+        },
+        {
+          "name": "薯条",
+          "category": "fried"
+        },
+        {
+          "name": "可乐",
+          "category": "drink",
+          "aliases": [
+            "碳酸饮料",
+            "冰可乐"
+          ]
+        }
+      ],
+      "reason": "可见裹粉炸物、薯条及带冰块的深色饮品。"
+    },
+    {
+      "id": "synth-058",
+      "before": [
+        {
+          "name": "炸鸡",
+          "category": "fried"
+        },
+        {
+          "name": "薯条",
+          "category": "fried"
+        },
+        {
+          "name": "可乐",
+          "category": "drink",
+          "aliases": [
+            "碳酸饮料"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "炸鸡",
+          "category": "fried"
+        },
+        {
+          "name": "薯条",
+          "category": "fried"
+        },
+        {
+          "name": "可乐",
+          "category": "drink",
+          "aliases": [
+            "碳酸饮料",
+            "冰可乐"
+          ]
+        }
+      ],
+      "reason": "可见裹粉炸物、薯条及带冰块的深色饮品。"
+    },
+    {
+      "id": "synth-059",
+      "before": [
+        {
+          "name": "炸鸡",
+          "category": "fried"
+        },
+        {
+          "name": "薯条",
+          "category": "fried"
+        },
+        {
+          "name": "可乐",
+          "category": "drink",
+          "aliases": [
+            "碳酸饮料"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "炸鸡",
+          "category": "fried"
+        },
+        {
+          "name": "薯条",
+          "category": "fried"
+        },
+        {
+          "name": "可乐",
+          "category": "drink",
+          "aliases": [
+            "碳酸饮料",
+            "冰可乐"
+          ]
+        }
+      ],
+      "reason": "可见裹粉炸物、薯条及带冰块的深色饮品。"
+    },
+    {
+      "id": "synth-060",
+      "before": [
+        {
+          "name": "炸鸡",
+          "category": "fried"
+        },
+        {
+          "name": "薯条",
+          "category": "fried"
+        },
+        {
+          "name": "可乐",
+          "category": "drink",
+          "aliases": [
+            "碳酸饮料"
+          ]
+        }
+      ],
+      "after": [
+        {
+          "name": "炸鸡",
+          "category": "fried"
+        },
+        {
+          "name": "薯条",
+          "category": "fried"
+        },
+        {
+          "name": "可乐",
+          "category": "drink",
+          "aliases": [
+            "碳酸饮料",
+            "冰可乐"
+          ]
+        }
+      ],
+      "reason": "可见裹粉炸物、薯条及带冰块的深色饮品。"
+    }
+  ]
+}

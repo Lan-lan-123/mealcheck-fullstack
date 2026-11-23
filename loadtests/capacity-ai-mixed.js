@@ -1,4 +1,5 @@
 import http from 'k6/http';
+import { authHeaders } from './auth-headers.js';
 import { sleep, check } from 'k6';
 import exec from 'k6/execution';
 import { SharedArray } from 'k6/data';
@@ -34,7 +35,7 @@ export const options = {
 };
 export function setup() { return mixedSetup(); }
 export { analyze, read, handleSummary };
-function params(account) { return { headers: { Authorization: `Bearer ${account.token}`, 'Content-Type': 'application/json' }, timeout: '65s' }; }
+function params(account) { return { headers: { ...authHeaders(base, account.token), 'Content-Type': 'application/json' }, timeout: '65s' }; }
 export function ask() {
   const account = accounts[exec.scenario.iterationInTest % accounts.length];
   const started = Date.now();

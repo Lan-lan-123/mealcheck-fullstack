@@ -1,0 +1,3691 @@
+{
+  "version": "v8-longform-200",
+  "corpusSha256": "09f60831a24bce93982862e885fa97dcacc82675f05b1c2436e45834496a39b7",
+  "topicCount": 200,
+  "chunkCount": 1351,
+  "splitter": {
+    "strategy": "recursive-markdown",
+    "minTokens": 300,
+    "maxTokens": 500,
+    "overlapTokens": 50,
+    "revision": "sentence-heading-boundaries-v2",
+    "overlapPolicy": "SENTENCE_ALIGNED_BEST_EFFORT_CONFIGURED_BUDGET"
+  },
+  "independentlyReviewed": false,
+  "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+  "newProviderCalls": 0,
+  "contentStatus": "PENDING_INDEPENDENT_CONTENT_AND_RELEVANCE_REVIEW",
+  "lengthPolicy": "CONTENT_QUALITY_AND_ORIGINAL_LENGTH_BOTH_REQUIRED",
+  "lengthGoalDeviationCount": 0,
+  "lengthPlanStatus": "SATISFIED",
+  "topics": [
+    {
+      "topicId": "knowledge-001",
+      "title": "主食结构建议",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 16,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "9f50d2f18d1ef080d37771ffee38bda7975c3f6fccdc8225bd96b16d8fb50322",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 15
+    },
+    {
+      "topicId": "knowledge-002",
+      "title": "蛋白质结构建议",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 17,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/protein-foods"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "fc3a7d0a73c93ab80b1175691f5a45732cebc66e891776cd3dc820a73632c3b8",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 15
+    },
+    {
+      "topicId": "knowledge-003",
+      "title": "蔬菜结构建议",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 17,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "cc8a50df279e159892f1ce1d15a5d0a35576fef483a88e858455600d38f71ed8",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 14
+    },
+    {
+      "topicId": "knowledge-004",
+      "title": "高油烹饪风险",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 17,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "3b5b2ab40710a82cf6219fceef914bd756186e285acac1a941f70c9c36bd5ef0",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 14
+    },
+    {
+      "topicId": "knowledge-005",
+      "title": "含糖饮料与甜品风险",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 13,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/added-sugars-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "a2ffb87fb15663c8e4f140a742db45260340c9c099e0158aa2ba5442d7819d7e",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 13
+    },
+    {
+      "topicId": "knowledge-006",
+      "title": "饮食多样性建议",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 14,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml",
+        "https://www.who.int/news-room/fact-sheets/detail/healthy-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "74ad8b374591033127806310ddd9547f2dcb6a6e8b1344e9c34f7885085df2a7",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 13
+    },
+    {
+      "topicId": "knowledge-007",
+      "title": "减脂目标建议",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 13,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "63d4c08d0466c6991e41ffe879fde464a3bb421d7b86160bba51f72a96f67367",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 13
+    },
+    {
+      "topicId": "knowledge-008",
+      "title": "增肌目标建议",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 13,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/protein-foods",
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "ba57c90720b0ef8c56802764ee4d4f0bfc7703b481e4fc8c93e127615e1ed766",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 13
+    },
+    {
+      "topicId": "knowledge-009",
+      "title": "清淡饮食建议",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 8,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "5b150eab991cef0b95659f768fbf5a5c1909af31c925218692bc3814215cde8a",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-010",
+      "title": "早餐饮品建议",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 3,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "338a430788db224aabe848bb3de398133b3a3c00763ee5034212de21869e39f8",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 3
+    },
+    {
+      "topicId": "knowledge-011",
+      "title": "烤肉选择建议",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 3,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "114c113571bf80b7cf89b2b9f4bc18c926c2fe6d967ca036955cee6835ae4005",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 3
+    },
+    {
+      "topicId": "knowledge-012",
+      "title": "炸鸡和油炸食品风险",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 3,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "6052db2f4e50101d1333727082d281faa96506d63a5b0edc5492a093796fe975",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 3
+    },
+    {
+      "topicId": "knowledge-013",
+      "title": "蔬菜餐搭配建议",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 3,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "6b8bc182a47d3a14dc23d9807c98a37f8f8e4d3f7b6280da8152609f0028694f",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-014",
+      "title": "奶茶甜饮控制建议",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 3,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/added-sugars-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "c87b9552eb7314e1b85d4e99d7f4cf6d13d51eaa0b3f42f32f69664c7602c85a",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-015",
+      "title": "食堂选餐三步法",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 14,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "18ce9b9a77e779ac56d289c0ebe0ccf33731680e71fcb35e8bc2c2bb7094df8f",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 13
+    },
+    {
+      "topicId": "knowledge-016",
+      "title": "夜宵选择建议",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 3,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "af6c001b59282562bcf518a01b61a1b248413bee892923167afab3fef3613831",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-017",
+      "title": "高分餐盘结构",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 8,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "75c907f41d6eba0164978fb05fc114aa840fc09f62ed8a244a0c7d3f75db77c8",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-018",
+      "title": "低分餐常见原因",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "63ee0803318bb175de390a08f6d4026368d9d1166c193a9074599f923196d59d",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-019",
+      "title": "减脂期外食建议",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 13,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "ec953140a498057d62d7c452eada0ffb98ae78628348b21d2511edeec77bb0b1",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-020",
+      "title": "增肌期食堂搭配",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 13,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/protein-foods"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "56c272f13252f0d3afadd532c232ce2cb2903fddae60e21a44b8687cfe144d27",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-021",
+      "title": "一日餐次与节奏管理",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 13,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "f593f6062cbe27f147ba066809f999e5b143de8f07f952fd946449f99f90173c",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-022",
+      "title": "食堂菜品识别与替换",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "fb65e4be3f0594d34aaa049b0d2f548b5c799cf80a101cc0fcd40756cfbef2a3",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-023",
+      "title": "份量与餐盘估算",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 15,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "fe87cf4c7fc5c698771fc446cfce9b0ed8242e284f8718e1308b25860bf2149c",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-024",
+      "title": "运动学习与恢复饮食",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 16,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/protein-foods"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "7cd4a67cdc944992e5a6908b34a0b1dcb05389e8e6a0f368b09a147227754e70",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 13
+    },
+    {
+      "topicId": "knowledge-025",
+      "title": "外卖聚餐与特殊场景",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 16,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "bd84e87805458865d833c77b462611e36bb4bcbd8fb4b47cca596d75c6816a1f",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 13
+    },
+    {
+      "topicId": "knowledge-026",
+      "title": "饮食记录与持续改进",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 16,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "a195a7583821c8d79062d85260f632e63aae5702861f49f8fe0417e782d204fd",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 13
+    },
+    {
+      "topicId": "knowledge-027",
+      "title": "杂粮饭与白米饭搭配",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 3,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "3a193c00d4ba4feaf28654a9e58f273ec5e80ed84d119440ad0926596874c6a6",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-028",
+      "title": "面食餐的配菜选择",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "5095fe69597d9af2a4c08c839bb42d4db88326892872fb0edcd659ddd1915c6c",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-029",
+      "title": "粥餐的补充组合",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "ae01ace537915e8f16b312e7517efe44a4e136eba3239f4134969bc254eb25a1",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-030",
+      "title": "包子饺子的结构补充",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "c0b0f142525e06a4563152c30932be4777f2fc9d228e07a55210bdf947a48d9b",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-031",
+      "title": "土豆玉米的食物角色",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "8fb1086d66fbb4f93de7305dd7353b68dbe318426f495b85c4a6a0232ffa0934",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-032",
+      "title": "全麦面包的标签判断",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 8,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "5c5049434f5ec1164b8fdc41e1be53578245e4055409a99f3be2c32bb69378f0",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-033",
+      "title": "主食叠加的识别",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 8,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "d6c29359171a9ee08b5f28a2e54965a3fe1c628c06eec6167cee7f688524cd11",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-034",
+      "title": "食堂鸡蛋的便捷组合",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/protein-foods"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "ff2618dab0c53bfb2b4c9fd16fb7292c06cdcdfc644b8911bf033f65ba7e37ca",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-035",
+      "title": "豆腐豆制品的选餐方式",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 8,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/protein-foods"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "41766ab95e5192f4fd7f29811656701c9df1000d1edf9f7ea688b777ef20747e",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-036",
+      "title": "鱼虾餐的搭配与安全",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 8,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/protein-foods",
+        "https://www.cdc.gov/food-safety/prevention/index.html",
+        "https://www.fda.gov/food/buy-store-serve-safe-food/food-allergies-what-you-need-know"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "b01487d15867a965aacd2c41b665b0e4ba04290b8401099003888c2cb1c38b09",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-037",
+      "title": "加工肉的替换场景",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 3,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "a9cd837364b10e90dfff90d4207d47fa7c815d479527d84ede2610eeb0bba275",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-038",
+      "title": "素食正餐的基础组合",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/protein-foods"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "c3a25668fb321c09df05d0002ff4dfe1e3bdaba5155c84ba1aef6b1215f82352",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-039",
+      "title": "绿叶菜轮换的做法",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 3,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "1eab5a9a57943a121f92919296637520c8884c8236dfdc3e95ea909d62e78c5e",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-040",
+      "title": "沙拉酱单独决定",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "b86e5e29708d4c60a4a29c377862bd856de6f806eaa61dc454d84becdea67386",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-041",
+      "title": "完整水果与果汁区分",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 3,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "e1bb4f5df4c5a9ff4300dbba4d1e65ecb85209368a4d0a9363bd28a4aaff34a5",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-042",
+      "title": "水果加餐的安排",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "88f7f8a904f38707942fff7f3e7b9cc0af0589fea373eef9751d740b85fbfae2",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-043",
+      "title": "膳食纤维来源轮换",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "c72b61325eda6edae49ebe3753b99da42c03c196bebc4e684c55fec7dfd38484",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-044",
+      "title": "白水作为默认饮品",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "fa95a0685bf1d4a7e39682db469e6eee8a13268be234efe81c297c04d3f132a5",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-045",
+      "title": "奶类和乳饮料区分",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "01fbf131f0a65d6177fd75a154f5c1c74cd34890b851966fa9ad5bb8e305ea01",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-046",
+      "title": "酸奶的标签比较",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "fc08102425ed53f4a054a8cfac6a7d2708726c6b46a122d509c601f944900b7f",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-047",
+      "title": "乳糖不耐受的替代选择",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.niddk.nih.gov/health-information/digestive-diseases/lactose-intolerance/eating-diet-nutrition"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "5d086dd00680239210e7ee1edce918bcab61d74f5e9e524f516adc3fe7f6a575",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-048",
+      "title": "无糖饮料的理解",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/added-sugars-nutrition-facts-label",
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "9d6408acb1858f4184e397463318e6c80cc70d738594801336de0a54c288b464",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-049",
+      "title": "外卖便当的组合",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 3,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "c5607dd22607d6674bd7c9e6a5080cb4017b52e306f660aca0cdb5a2851ca439",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-050",
+      "title": "盖饭的酱汁与配菜",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 3,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "d50ce94da212c500efc6260c13cea64d8ed4c1f750402abd853d4674c07fbf03",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-051",
+      "title": "麻辣烫自选食材",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml",
+        "https://www.cdc.gov/food-safety/prevention/index.html",
+        "https://www.fda.gov/food/buy-store-serve-safe-food/food-allergies-what-you-need-know"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "5111e4478b0f900c72bdfb0f8e6215c473881b7d6b85a2d2b101eb0fa5b1f577",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-052",
+      "title": "火锅聚餐的点单",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.cdc.gov/food-safety/prevention/index.html"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "a79c406e74e9d6539ee1ab5d7eda840319934083c419fa5ec78ed5ba56d0e908",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-053",
+      "title": "烧烤聚餐的替换",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.cdc.gov/food-safety/prevention/index.html"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "6de30445fb0a165317d871b77702589c8443a4e913a8c8776657f0aa58d4c572",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-054",
+      "title": "自助餐的取餐顺序",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/eat-healthy/healthy-eating-budget",
+        "https://www.cdc.gov/food-safety/prevention/index.html"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "5b5a55a4399167187f6181917f83ddde72c5ad8eba83af57a7cb407c213089b1",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-055",
+      "title": "便利店简餐的组合",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/eat-healthy/healthy-eating-budget",
+        "https://www.cdc.gov/food-safety/prevention/index.html"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "75afaa74657a91d5067b51940372cf6698c260bfad9691ced72d0342445601eb",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-056",
+      "title": "轻食餐的完整性",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml",
+        "https://www.cdc.gov/food-safety/prevention/index.html"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "694a6e301620b76f5b98ab7cca7bd67456bb86a3f083cb66a919e814bddb56c5",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-057",
+      "title": "低预算食堂选餐",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 15,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/eat-healthy/healthy-eating-budget"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "db57bf997aa79cdc5c46bc7bc8237922cbfff05d9700ca38b9272a6fbc124dbe",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-058",
+      "title": "赶课时的备选早餐",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/eat-healthy/healthy-eating-budget"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "f4314260b83f07124cfa1b74055b5a8e2b9dd5c7c72c04753d4d827c0c36035d",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-059",
+      "title": "考试周的就餐准备",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 14,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/eat-healthy/healthy-eating-budget"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "37e1d00b3d4f5f6dabc25455783b285ce3a26a60059be6f00d2b0c3ca7cf4d1b",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-060",
+      "title": "训练前的就餐安排",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/protein-foods"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "9fcb7d4032166eb48dee8b71775226fb68e1568af240177c11182a5e29868e9d",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-061",
+      "title": "训练后的正常餐",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 8,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/protein-foods"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "fb19dd688c03520be74b0bf516e4e4331d8b9b5e41286f89d8ef8337e9a49fa9",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-062",
+      "title": "出行途中选餐",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.cdc.gov/food-safety/prevention/index.html",
+        "https://www.cdc.gov/yellow-book/hcp/preparing-international-travelers/food-and-water-precautions-for-travelers.html"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "40602d5020027418b1c8f9bcaa8325430137e6489f042cd0e50360f8ba6900e5",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-063",
+      "title": "宿舍简餐的安全组合",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 12,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.cdc.gov/food-safety/prevention/index.html",
+        "https://www.fda.gov/food/buy-store-serve-safe-food/safe-food-handling"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "d35e1474bd28b496bfd4e6e9c239a7e3cac464d528290e9300936b89f415eef1",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-064",
+      "title": "营养标签的计量单位",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 13,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "9ed114d567f5b87fd6c7820c8022eda31e14c5e1f9cd097b5bdbceae184b76f7",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-065",
+      "title": "整包与每份的换算",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 12,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "7e70b012d5b7e099eec663def59b06e76bbcc97f3581742d15e035b5d4b77606",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-066",
+      "title": "脂肪标签的完整阅读",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 9,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "6ef0e9e2b577d2249b48e349ad0612c1b15481cc25a1a93b4c1c52bb54937ec9",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-067",
+      "title": "糖标签与实际摄入",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 9,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/added-sugars-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "7a4d17d4c796827c48da82774440aeef92a559631bd67fafc910927793237dcc",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 8
+    },
+    {
+      "topicId": "knowledge-068",
+      "title": "钠标签与口感区分",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 9,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label",
+        "https://www.fda.gov/food/nutrition-education-resources-materials/sodium-your-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "4fdb3c20dcbaec1d5b60728fd49339299d3d7eef6b7c9e8d38a1dc8771acba3c",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 8
+    },
+    {
+      "topicId": "knowledge-069",
+      "title": "配料表与宣传名称",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 12,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label",
+        "https://www.fda.gov/food/food-additives-and-gras-ingredients-information-consumers/types-food-ingredients"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "059f7a5d35b19963db0f8b1bd3be665958af9367319c00a11d2338c7184d1c31",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-070",
+      "title": "份量未知时保留未知",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 12,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "3da139059e86d6c6b970740b78f56e7070ffcfb3e156885a69d05736a7ee9e0f",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-071",
+      "title": "食品过敏的选餐边界",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 13,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/buy-store-serve-safe-food/food-allergies-what-you-need-know"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "817d023ad0d93526100a12bda4ba4d3ab0cd7f65353003ac21dfd9e7c3b5b923",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-072",
+      "title": "就餐前手部清洁",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 8,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.cdc.gov/food-safety/prevention/index.html",
+        "https://www.cdc.gov/clean-hands/about/index.html",
+        "https://www.cdc.gov/clean-hands/about/hand-sanitizer.html"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "3d8151cee20e430f366358b433f0210636aea952a647d4daaf36d3c5e9a07d9d",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-073",
+      "title": "生熟食品与公筷",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 9,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.cdc.gov/food-safety/prevention/index.html",
+        "https://www.fda.gov/food/buy-store-serve-safe-food/safe-food-handling"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "67b351c5bb0e42adfc051bde1aefb36f80a016daeccd22b81b3a2d143388faff",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-074",
+      "title": "剩饭剩菜的及时冷藏",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 14,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.cdc.gov/food-safety/prevention/index.html",
+        "https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/leftovers-and-food-safety",
+        "https://www.fda.gov/consumers/consumer-updates/are-you-storing-food-safely",
+        "https://www.foodsafety.gov/food-safety-charts/cold-food-storage-charts"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "00037ab0b750d0c9ca6e18c1bc656e58b028c3921944f8f57e552f284e1da3b0",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 13
+    },
+    {
+      "topicId": "knowledge-075",
+      "title": "剩菜复热的注意",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 14,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.cdc.gov/food-safety/prevention/index.html",
+        "https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/leftovers-and-food-safety",
+        "https://www.fda.gov/radiation-emitting-products/resources-you-radiation-emitting-products/microwave-ovens",
+        "https://www.fda.gov/food/buy-store-serve-safe-food/safe-food-handling"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "e3ef1cac7d7f5a7778d74bc267144316e5919bf53dfbadbd3e23945d6865ec3e",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 13
+    },
+    {
+      "topicId": "knowledge-076",
+      "title": "冷藏食品与配送保存",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 14,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.cdc.gov/food-safety/prevention/index.html",
+        "https://www.fda.gov/consumers/consumer-updates/are-you-storing-food-safely",
+        "https://www.foodsafety.gov/blog/tips-meal-kit-and-food-delivery-safety"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "f011e89958a779eb4daa66cf51c79fe39db57c4dec2478d511a6c2ae6d7d7fdb",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 13
+    },
+    {
+      "topicId": "knowledge-077",
+      "title": "便当携带的储存条件",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 13,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.cdc.gov/food-safety/prevention/index.html",
+        "https://www.fda.gov/food/buy-store-serve-safe-food/safe-food-handling"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "2dd60a165d93dbebb7b9dcf516588460ab7484d5787a1c7017f5dbd472571e65",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-078",
+      "title": "饮食目标一次调整一项",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 8,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "78aa15f53f2c4fccaa04963104c0e61c46145b1ffed9b6abf38b7762462e92f0",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 8
+    },
+    {
+      "topicId": "knowledge-079",
+      "title": "记录完整性与覆盖率",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 13,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "9c7976af0ff05eee92fed6c5df6cb12311fec696a4c5ebb1c6e2455cd825c494",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-080",
+      "title": "饥饿饱腹感的补充记录",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 8,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "bd17717c01e44f5d08ac2a703cf0055d8e987168ebd446ba792c508e54050681",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-081",
+      "title": "聚餐后恢复正常节奏",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 8,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml",
+        "https://www.cdc.gov/food-safety/prevention/index.html"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "25388464d3da41a9f808b8b1e39b7e8a1a5993933ac8b287ff67b2b506b0bb88",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-082",
+      "title": "周报样本不足的理解",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 15,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "89050bccbd415e38295a7b8a0d763a85ce02961bc6243c316f1987b2f1bfd72f",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-083",
+      "title": "行动计划的执行复盘",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 14,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "37bfcbb313d52bf9bfd7fd77390176accebb9180c881c38db43d90565416dde7",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-084",
+      "title": "知识建议与个体需求的边界",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 13,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "024a665042d0df3deb14ccfbe9a1b4c1b5e117b1bf76a0af3d7aab8322d56b71",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-085",
+      "title": "零食与正餐的区分",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 3,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "14646b09283ae7ca4cec4b67d8d9bb3d28fee52cb0919f986664bdc3519ebf2f",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-086",
+      "title": "共享餐与个人份量",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "8a79bb40d1c6dfe79e775cf6607b80245f5eae523eb94c6a9c1469396576aa35",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-087",
+      "title": "食材缺货时的替代清单",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/eat-healthy/healthy-eating-budget"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "3e0a7713870d62c0bc5e4149e9bc9e7cc83a42175a9ac9f8bc9559c943d8f9dc",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-088",
+      "title": "减少浪费与合理点单",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 5,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/eat-healthy/healthy-eating-budget"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "1bc8f350047acc1725f4957a6df7703712b964ced58a9dd4d3427238bf0ac112",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-089",
+      "title": "同类餐的比较方式",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 5,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "743ef359bbded7522d8132c78d6731cc69ea2c9700d9ebe9e078095a4a73915d",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-090",
+      "title": "有条件称重时的记录",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 12,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "fea90fb00e4fe627548ba94a3c89a7b97bb98833ca30866d33ccc810f7f14a00",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-091",
+      "title": "食物识别错误的纠正",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 5,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "3b85ac10b5566b21be8cd50d3d6275d34f96144002bbc3a8c98b1238ca92f77d",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-092",
+      "title": "可执行的一周选餐计划",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 12,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/eat-healthy/healthy-eating-budget"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "126678dd6b8bc3ac274a204add3d4d391f0b0aeef250918024e99d174651e049",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-093",
+      "title": "食品保质与开封记录",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 8,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.cdc.gov/food-safety/prevention/index.html"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "6a146f0c195ad272e6003541e0b57fcc3715b0067636b66f61e129893f0804c2",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-094",
+      "title": "外食配料不明时的询问",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 9,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/buy-store-serve-safe-food/food-allergies-what-you-need-know"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "89fb3149241152ef833b0ad6a4d97b9ef22aedb046cfbd6fa9ca8905aeaf980f",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-095",
+      "title": "长期记录的温和使用",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 8,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "6fab666ffe9c957ca3fe058bfffa7c5861de3a718cae740a5f395b683911df9f",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-096",
+      "title": "购买前的食物清单",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/eat-healthy/healthy-eating-budget"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "074a5399302e4977af24dfb6c7d8a7a00383b915ba1d79878dd8fd3fbfa12656",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-097",
+      "title": "不同日期餐食的补记",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "647406199574280ae3f6b6c36e4a993e771eece357a0ac7fcee002ce61ac7f4e",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-098",
+      "title": "饮食建议来源的核对",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 12,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "1773c6911b7a6d516f1e798972a424cfc8a1ae542560e0ad9c12f42163d449df",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-099",
+      "title": "多目标之间的实际取舍",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/eat-healthy/healthy-eating-budget"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "47c79e426786b4bc922e0c96a44fa0e238aa009a70bce7fb5a8d6c7f4443f64f",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-100",
+      "title": "稳定习惯与弹性安排",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 9,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "c4eb97f00f159f8127427182c4a0a00a60ac40bbb6263e5d3e74845c52760a1d",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-101",
+      "title": "原味燕麦与调味麦片的选择",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/sites/default/files/2024-06/TipSheet-4-Make-Half-Your-Grains.pdf"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "ca3402cc1b850caf626fa00d695304235291304289a8dbbfb07bdb5289989c72",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-102",
+      "title": "红豆绿豆与甜豆沙的区别",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/protein-foods",
+        "https://www.fda.gov/food/nutrition-facts-label/added-sugars-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "633f41871c62efad3c3d9d35acdffa22705045ab186363e184f6504009cfe572",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-103",
+      "title": "坚果小包装与调味选择",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/protein-foods"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "5a2d0356b4f18e4c2ec1613e5c195875e3dc35e5e869cb1d8af12c064e3f99c6",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-104",
+      "title": "芝麻酱花生酱的配料与用量",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/protein-foods"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "260e405952a38f78ab38142e63946109e556ef6b37f5564c811e7288a5295414",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-105",
+      "title": "咸菜腌菜作为配菜的安排",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-education-resources-materials/sodium-your-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "e50e17a48d18f7591ed198d84e12e93baf1a618e316f67d6e1f54b38ccc0cdbf",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-106",
+      "title": "汤面汤汁与额外调味",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-education-resources-materials/sodium-your-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "a09da7b1a17bd0ef2f15e1a6709bd287f6a9268804e3457ddd34a202af17805b",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-107",
+      "title": "咸蛋卤蛋与普通鸡蛋的轮换",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-education-resources-materials/sodium-your-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "22b31b49f9fd33a6307f9c8f1c4d390b53bb472bd41dd99e6e0fca465bd57dab",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-108",
+      "title": "起酥面包与夹心面包的比较",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "bd41f4c884a09e06a3615b32b8b7ad2e7c127f238e7c3abdebf4c20f7cf5db5b",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-109",
+      "title": "蒸饺煎饺的做法与搭配",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "43810b41d2ea3a0fd9fce687a5b48c9db20fca942f4d3f5313a6e4aca9b76a1e",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-110",
+      "title": "寿司饭团的馅料与餐食结构",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 3,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/protein-foods",
+        "https://www.fda.gov/food/buy-store-serve-safe-food/safe-food-handling"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "600fa7749bee93c8b656067be60f0ab4041d6b96ae4e7e2744957d0684654127",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-111",
+      "title": "三明治夹层的实际判断",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "f33a06c9a0079731e695729397d746b189b3e6ec81e979b8df12650eca342964",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-112",
+      "title": "披萨分片与共享点单",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "b20ab72122618e4e25e4ac13c5499a5623015a337d0be3fa9c095cbe0bd43c63",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-113",
+      "title": "汉堡套餐的单品取舍",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "aee206884828a25bb6343e97a16a73fd5d923368ed8009addcafd7a6f8f830eb",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-114",
+      "title": "螺蛳粉酸辣粉的料包安排",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 9,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-education-resources-materials/sodium-your-diet",
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "31b5eb85098a5882029d6e5a8af46ce2e8105a6fc96cea0b1cb2820dc0161de6",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-115",
+      "title": "咖喱饭的酱汁与食材确认",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/vegetables"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "8dfb95666b1854e8cf9472a0f2393acd32a2d8bebb83bd3927145960d801e902",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-116",
+      "title": "砂锅米线的配菜补充",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/protein-foods"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "eda9aa805b3ce1ca95cb731bd7058c173d9d0473e4855f403e63cdfa55c72fac",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-117",
+      "title": "肠粉卷饼的主食与馅料",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/sites/default/files/2024-06/TipSheet-4-Make-Half-Your-Grains.pdf"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "4177d41e45651beb04a619c60d27c4e77f439168031c61957087056666a3f9df",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-118",
+      "title": "自选称重菜的价格与搭配",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/eat-healthy/healthy-eating-budget"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "5d868068482eb333b6dd55f0c992bb950e440890c93ea231339c2be030ebee2c",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-119",
+      "title": "团体盒饭的有限选择",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/eat-healthy/healthy-eating-budget"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "e046332b1b4c5b3db6f0d8406cdb345f219ca8ba3e6fb1fba094c42ee872265d",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-120",
+      "title": "连堂课期间的就餐备选",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/eat-healthy/healthy-eating-budget",
+        "https://www.fda.gov/food/buy-store-serve-safe-food/safe-food-handling"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "621dcce1265344d255c0d49cffd05d35942568528493a618b41d3faec0405758",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-121",
+      "title": "咖啡奶茶与茶的咖啡因叠加",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/consumers/consumer-updates/spilling-beans-how-much-caffeine-too-much"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "95a7b57a46eaa150435a25359bef43ef6efbefb73dd8a3d6d1b16df6edd2bbb2",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-122",
+      "title": "低因咖啡与无咖啡因的区别",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/consumers/consumer-updates/spilling-beans-how-much-caffeine-too-much"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "f86ec6a9d3316204e97376ce92abf0692f9fce7a8081505a537ee433206522d3",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-123",
+      "title": "能量饮料与日常提神",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/consumers/consumer-updates/spilling-beans-how-much-caffeine-too-much"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "3cacde2805fcbe2fb634fbb8b905b0c4d1831f8f47d0def7fa65f8aa694cc01a",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-124",
+      "title": "蜂蜜红糖与甜味来源",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/added-sugars-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "6d10692ee2d7e7003de46f9fe04dc33cb7b72deae91eb363e319afa2f042f5d9",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-125",
+      "title": "果干蜜饯与新鲜水果",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/added-sugars-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "ef2ee8588992f257329d6e87feb8ee00bd55ef68daf323d50ea98fc06a37bbf5",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-126",
+      "title": "水果罐头的糖水与果肉",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet",
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "8d8e71cdbcc6de4ceb4613c072e5bce59128eab7b1020370b858b0666f0d7e76",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-127",
+      "title": "冷冻蔬菜的备用用途",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/vegetables",
+        "https://www.fda.gov/food/nutrition-education-resources-materials/sodium-your-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "66c84130b3b4d0b9c140afa20dd2979376cfff0fa97674aea4445b78e2f4bf03",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-128",
+      "title": "植物饮品的蛋白质与钙标签",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 8,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/eat-healthy/dairy",
+        "https://www.fda.gov/consumers/consumer-updates/milk-and-plant-based-milk-alternatives-know-nutrient-difference"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "40b85306dca1b17ae58b5f34fcf34d7ee19220add955c12f1a7b032d83ede93d",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-129",
+      "title": "奶酪零食与奶类选择",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 5,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/eat-healthy/dairy",
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "952df6421953e6eebda4cc4e515f988b0868829dd1ab0bc4e43ee70c27805e4b",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 5
+    },
+    {
+      "topicId": "knowledge-130",
+      "title": "运动饮料作为日常饮品的判断",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "a93b7adf62ee65933badd48bdc6f46279b6f6451e2a52b4eaa445976ab004369",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-131",
+      "title": "蛋白棒的营养与用途",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "0ca500a13b5ed1d276769ab4d413480e2f71edc16e3074fe324fd45e2e203fae",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-132",
+      "title": "饼干作为应急食物的局限",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "81bf2870122e7982999e723eb10298782b28f6cad63deb096f61f8863744f6fd",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-133",
+      "title": "海苔零食与普通蔬菜的区别",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "2f585abe85347de85a80cb28f12a64d102692567b3d6c26b17c3637dd9f14182",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-134",
+      "title": "酸梅汤与果味饮料的辨别",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/added-sugars-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "a2aa9495d3626fff01bb30ab0a533b2e5d29ef643d7b4ecab49c69a1e0f3f306",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-135",
+      "title": "代餐粉与长期餐食安排",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 8,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "c5656556c2304d84aed11fc7e75379a7dab394c0d3c8fb307afb8c6d2d3ae18c",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-136",
+      "title": "含铁食物与维生素C搭配",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 8,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://ods.od.nih.gov/factsheets/Iron%20-Consumer/",
+        "https://ods.od.nih.gov/factsheets/Iron-Consumer/"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "ecc13df107687a50ea9ae92202fec9545f3175e307f1fcbc364c4acb6f738c64",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-137",
+      "title": "不喝奶时的钙来源核对",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://ods.od.nih.gov/factsheets/Calcium-Consumer/",
+        "https://www.fda.gov/consumers/consumer-updates/milk-and-plant-based-milk-alternatives-know-nutrient-difference"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "0ec2a1770d070b5d0f5999a8a652d6acfd52c565f10d7fbf616314ec0024241f",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-138",
+      "title": "维生素补充剂与正常吃饭",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 8,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://ods.od.nih.gov/HealthInformation/ODS_Frequently_Asked_Questions.aspx",
+        "https://ods.od.nih.gov/factsheets/WYNTK-Consumer/"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "735f5c9f49e5c94dbdbbaaa0ba2668f6f7e6fded9d2850ae86085ff2c8633299",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-139",
+      "title": "红肉鱼禽与豆类的轮换",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/protein-foods"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "e053fce354e63f9fab0c71f8a66888af404060f1fe8f58695ffdd6da12221156",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-140",
+      "title": "增加豆类时的耐受观察",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.niddk.nih.gov/health-information/digestive-diseases/gas-digestive-tract/treatment"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "3b380672ea3b29b43168a76ec613a5ebb9ea2d0b8f857d707ef40a2805855630",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-141",
+      "title": "共享冰箱的生熟分放",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 12,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/buy-store-serve-safe-food/safe-food-handling"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "f261a6b80234500496d178c3bbd2915ac08ce430bdbb9e56da15acb2cd3517e0",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-142",
+      "title": "冷冻食物的安全解冻",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 12,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/buy-store-serve-safe-food/safe-food-handling"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "0620793ca793f5c0996a007f8c1d2a1063e9363c436c4358e99ce49130307dce",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-143",
+      "title": "微波加热的容器选择",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 5,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/radiation-emitting-products/resources-you-radiation-emitting-products/microwave-ovens",
+        "https://www.cdc.gov/food-safety/prevention/index.html"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "900a8f524cadb2e5a887be30b0802e311f723e70677a03d531a2245b8cf8b9df",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-144",
+      "title": "微波复热的中心温度",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 12,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/cooking-microwave-ovens"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "c05f48f62662940e3cbaad6299b1614998070d5ebf50c9d95df32ea88328c36a",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-145",
+      "title": "饭团三明治的随身保存",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 8,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/buy-store-serve-safe-food/safe-food-handling",
+        "https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/keeping-bag-lunches-safe"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "59a866e7868faf1a095877acc73a4bc942714a997ad94e6759a8b3dbd27b6652",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-146",
+      "title": "溏心蛋与生蛋的安全边界",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/buy-store-serve-safe-food/what-you-need-know-about-egg-safety"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "e9314de872a092ad5e4b73cdc09fe2a989546d1acb4e81ad80996f14bcc428eb",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-147",
+      "title": "外卖漏液破包的处理",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/buy-store-serve-safe-food/safe-food-handling"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "9dc75001e3fe75030a001bed7244ad15aeea17b0a7c94437d6afbe5dc54b86fa",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-148",
+      "title": "水果蔬菜的流动水清洗",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/consumers/consumer-updates/7-tips-cleaning-fruits-vegetables"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "d291ad9c2f9584900f6e6f5101f6732c11b2a07e6865a1d94d0c5c2a5ed5ccc2",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-149",
+      "title": "预切水果的冷藏与购买",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/consumers/consumer-updates/7-tips-cleaning-fruits-vegetables"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "d0db7acc408be078e1241e6fce12ae008f65bd89a43db1eaa403559165cc5796",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-150",
+      "title": "食物过敏与共用器具接触",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 13,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/buy-store-serve-safe-food/food-allergies-what-you-need-know",
+        "https://www.fda.gov/food/nutrition-food-labeling-and-critical-foods/food-allergies",
+        "https://www.fda.gov/food/retail-food-protection/allergen-removal-and-transfer-using-wiping-and-cleaning-methods-retail-food-establishments"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "6116cb9d0957811a1a3159788dbb7d2652a7899c9182ab72ecc69db0266ff957",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-151",
+      "title": "荞麦面与混合谷物面的原料判断",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/sites/default/files/2024-06/TipSheet-4-Make-Half-Your-Grains.pdf",
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "f3365ccb0212143f8c4b8b616cc45a6ccc9378f03def13969e206705b43454c2",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-152",
+      "title": "烤红薯与糖衣薯类的区分",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "b5b408a38419e3920e40e87ddd4e02de76e4caeb11ae70f18d7eb3f4e6f75836",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-153",
+      "title": "馒头花卷与甜馒头的选择",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/sites/default/files/2024-06/TipSheet-4-Make-Half-Your-Grains.pdf"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "39aca691350f9b5dec9c2031c80cba6ba56bd3cceaa56ba718685cfeaf1bfb28",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-154",
+      "title": "油条油饼早餐的组合调整",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 9,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "a6f4949f7a7d4ba804bd1edf2c5d8281e3ee69254b960907c584f05f78680665",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-155",
+      "title": "炒饭炒面的混合食材记录",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 8,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/protein-foods"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "a245c7d07e36291b99c80849ae14aaf50e7c90c5ef5ce82096939b61a2161831",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-156",
+      "title": "凉皮凉面的蛋白质配菜",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/protein-foods"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "451b8bdafeb48649f4b44946af3a48a1c8d939819f52bf7eb29e902850739577",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-157",
+      "title": "石锅拌饭的锅巴与拌酱",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "dc5d94ced508d51db578d9181d33e36ecaf50fa597e50cc8c16dfaaed3932157",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-158",
+      "title": "煲仔饭的配肉与额外酱油",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-education-resources-materials/sodium-your-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "93b1808d223a2542c50bc258d0bd5d99466ec91955355b03192a58b57a2eda07",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-159",
+      "title": "汤泡饭的食物与汤汁记录",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "3e54988d4c7ab97b356aed1698b75252169e0d12814ec1823d76bffb21b8c7f9",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-160",
+      "title": "茶叶蛋与鸡蛋干的产品差异",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "49547e236fbc34e67437782385faba230cd8664410cf8568166a865358256943",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-161",
+      "title": "鱼豆腐蟹棒的配料核对",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label",
+        "https://www.fda.gov/food/buy-store-serve-safe-food/food-allergies-what-you-need-know"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "2c6b1039c8c5194715b99889f4e54299a5ce78b0640d1c0be27bf19209ce287c",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-162",
+      "title": "鸡蛋实际食用部分的记录",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/protein-foods"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "4d4f89331f306ad1ed275d010839deebe9c6173590ecad175ce924fa8ca4cfaf",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-163",
+      "title": "鸡皮肥肉与可见脂肪的取舍",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "b0c8dbccb4fd887c7b7a8a6f65b06caf390eadf391e788dbad83bf8d4ffd51d3",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-164",
+      "title": "带骨鱼肉的份量与去骨记录",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/buy-store-serve-safe-food/selecting-and-serving-fresh-and-frozen-seafood-safely"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "87027dbb8c8e918f63d34a3e6b4e85d115decf2f1e248d45d3241abecd5760c4",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-165",
+      "title": "带壳虾蟹的重量理解",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/buy-store-serve-safe-food/selecting-and-serving-fresh-and-frozen-seafood-safely"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "e2ecbebc3f5d10f8f42998bf6b3b33931cf9b5e2418f492733230f8b0e3c59bd",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-166",
+      "title": "炒青菜与盘底油汁的区分",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "a4d64eb1d7174e49cb658a78b3f6a9d26fc762b548e15dae4feb632d4701718a",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-167",
+      "title": "菌菇菜与蛋白质食物的搭配",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/vegetables",
+        "https://www.myplate.gov/web/web/eat-healthy/protein-foods"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "8ea3c15326e02403b9d9e4cb86016c3eb2a84b4c3b0ac3ec7f6202439f8c83df",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-168",
+      "title": "莲藕山药芋头菜肴的搭配",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/vegetables"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "66b780921843e6adfa7941b5df8a8ac9b2899e6af943fe0ad9abc8fb648d24b7",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-169",
+      "title": "海带紫菜菜肴与调味观察",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-education-resources-materials/sodium-your-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "37aacfeae99fde3cb99e4432affa89b18dc81d542f19560e710e04f113480d1d",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-170",
+      "title": "绿豆芽黄豆芽与整粒豆类",
+      "lengthBucket": "SHORT",
+      "minChunks": 2,
+      "maxChunks": 3,
+      "actualChunks": 2,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/web/eat-healthy/vegetables",
+        "https://www.myplate.gov/web/web/eat-healthy/protein-foods",
+        "https://www.fda.gov/food/buy-store-serve-safe-food/selecting-and-serving-produce-safely"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "a4ac3dedaf3532de8b0c2ec5b984f995c8efcf05482d7db10f92f0d5b7a3a901",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 2
+    },
+    {
+      "topicId": "knowledge-171",
+      "title": "奶昔冰沙的水果与配料",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet",
+        "https://www.fda.gov/food/nutrition-facts-label/added-sugars-nutrition-facts-label",
+        "https://www.fda.gov/food/buy-store-serve-safe-food/food-allergies-what-you-need-know"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "7a80553125ad6acec281b268901c64799e6c8e5a844dcb33e84e5c51fb9466bb",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-172",
+      "title": "椰子水椰奶与椰子饮料",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label",
+        "https://www.fda.gov/consumers/consumer-updates/milk-and-plant-based-milk-alternatives-know-nutrient-difference"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "ebc4bc344e2c3ba9d5e9d810891fe13f5672472eb7a07106fb656305f331fcbb",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-173",
+      "title": "益生菌饮料与酸奶的用途",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 5,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nccih.nih.gov/health/probiotics-usefulness-and-safety",
+        "https://www.fda.gov/food/nutrition-facts-label/added-sugars-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "c883808091335382cd69d00312bd00846a156cf098738ffddc55e438043fab17",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 5
+    },
+    {
+      "topicId": "knowledge-174",
+      "title": "酸奶碗的蜂蜜麦片与配料",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 8,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/added-sugars-nutrition-facts-label",
+        "https://www.fda.gov/food/buy-store-serve-safe-food/food-allergies-what-you-need-know"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "1d0c525698b707f4e1ceaac71a6c0bfe234f18c115f1491d9a809d3421fca603",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-175",
+      "title": "现磨豆浆的加糖与原料确认",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/eat-healthy/dairy",
+        "https://www.fda.gov/consumers/consumer-updates/milk-and-plant-based-milk-alternatives-know-nutrient-difference"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "dc8b9599fc401eb6479e4aba29ca7b56b346743b03dfea9396aa3cdd468a0e77",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-176",
+      "title": "零蔗糖宣传与糖的项目区分",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/added-sugars-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "9b870828a8522a1f4155551198a6178ac7d87a258fc3c7798d48669c83814b51",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-177",
+      "title": "千焦千卡与能量单位",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 5,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/sps/c100087/202509/470fa4ff5de14dd38619223cce9da4e7.shtml",
+        "https://www.nist.gov/glossary-term/26261"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "4029705c1fb473983376ce2b1e7920ae1bf58022dc7dc61bd8011e6cd2f7984a",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-178",
+      "title": "营养标签百分比与个人目标",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/whats-nutrition-facts-label",
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "627374f481da59c2245d480d62f6abd685922d2b3bc5be8db4e7bbb2f6f02a24",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-179",
+      "title": "生重熟重与吸水失水",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 5,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nhc.gov.cn/sps/c100087/202509/470fa4ff5de14dd38619223cce9da4e7.shtml"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "c1dc9c15b83914bf604a5ca60027740e031d53316196719f5264641c48e5a337",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-180",
+      "title": "可食部分与容器皮核重量",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "39ff1dd774970d01afed80c7b08995f75fcb9d29c1b0080f60a8c82435d5028e",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-181",
+      "title": "单价与实际每份花费",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/sites/default/files/2024-06/TipSheet-23-Eat-Healthy-On-A-Budget.pdf"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "0b7294ad87e2588677f2795534d7c04fed03f1adee623a64aeaf9b3b5e027794",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-182",
+      "title": "低脂食品的糖与整体组成",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "1aee1d6287b6bdde0ccf69779cb52918e63f5c2b30cc121afaaca126601ef0d1",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-183",
+      "title": "同品牌不同口味的标签核对",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label",
+        "https://www.fda.gov/food/buy-store-serve-safe-food/food-allergies-what-you-need-know"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "a53a9b9d09e940a695cbedd717d145bce0546ae15e2ca9b13603802e45b5c124",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-184",
+      "title": "网红食谱与标准化配方的区别",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "b1d8cb1c2ecbea56697912574d08e5db312fb9b1a802812a152cd8d64d181279",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-185",
+      "title": "果蔬粉与正常果蔬安排",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 8,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://ods.od.nih.gov/HealthInformation/ODS_Frequently_Asked_Questions.aspx",
+        "https://ods.od.nih.gov/factsheets/WYNTK-Consumer/"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "569c8246725cdee938479829ee8e958d6f9c775763db75297a7403a64426e2bb",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-186",
+      "title": "全素食与维生素B12来源",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://ods.od.nih.gov/factsheets/VitaminB12-Consumer/",
+        "https://ods.od.nih.gov/factsheets/VitaminB12-HealthProfessional/",
+        "https://ods.od.nih.gov/HealthInformation/ODS_Frequently_Asked_Questions.aspx?ct=39988"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "ef42b2f64a2d5f08940f837cb766a082a688bee3588fd4b78dc646348e115a80",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-187",
+      "title": "健康食品价格与日常可获得性",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.myplate.gov/web/eat-healthy/healthy-eating-budget"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "222219ae054d79407d76de2791afd7ce519e4ef17a99400aaa8b98b01e775350",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-188",
+      "title": "餐厅营养信息与实际定制",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 9,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/files/food/published/Menu-Labeling-Supplemental-Guidance-for-Industry-PDF.pdf"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "123505660005922dd91835c404da60896a7b64ef04561b313a5c011945869bb2",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-189",
+      "title": "排毒果汁与正常餐食",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.nccih.nih.gov/health/detoxes-cleanses",
+        "https://www.nccih.nih.gov/health/detoxes-and-cleanses-what-you-need-to-know"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "baacb238e6c0b1d8979f46da21d8a9139dad7754bec32ce8995f4faebdb94c5e",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-190",
+      "title": "运动记录与餐食记录的分开观察",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 9,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "98a5c9b2bfd80c8d641ac4a1ad33d0b4519e34262b2088bf3aace567873d822b",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-191",
+      "title": "鼓包漏液罐头与包装异常",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/shelf-stable-food"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "e2d5bf877fe4d1d920989c938864e30fae99df4d037b27e2f038c7ab9909c70d",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-192",
+      "title": "停电后冷藏冷冻食品的判断",
+      "lengthBucket": "EXTENDED",
+      "minChunks": 12,
+      "maxChunks": 20,
+      "actualChunks": 13,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/buy-store-serve-safe-food/food-and-water-safety-during-power-outages-and-floods"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "82d5de060774df6d3bf9447456fe4c1ea00b7c553b9612cbe2cf35188553f27b",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 12
+    },
+    {
+      "topicId": "knowledge-193",
+      "title": "保温桶与长时间携餐",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/keeping-bag-lunches-safe"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "fcead5749c8ef1cb6a2eb93af340117d0e70c358b1ff5e09fbe75d889df3284f",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-194",
+      "title": "冰箱温度与存放位置",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/buy-store-serve-safe-food/refrigerator-thermometers-cold-facts-about-food-safety"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "070354a4229ce6bd4131d6b0f02a00881176d43b3898c7b9128be509f9f62938",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-195",
+      "title": "剩菜分装与反复取食",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/leftovers-and-food-safety",
+        "https://www.fda.gov/food/buy-store-serve-safe-food/safe-food-handling"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "72ca266eca71a2ef988b824e3e0c1b4e747a98a5bc34aa0a036e748c6b22e045",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-196",
+      "title": "生食芽菜的食品安全",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 8,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/media/77178/download",
+        "https://www.fda.gov/food/buy-store-serve-safe-food/selecting-and-serving-produce-safely"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "8d6c938902e57e152003cc5b96d9a50eceb2110b84dacab672322e7f51b09b72",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-197",
+      "title": "生腌醉虾与海鲜熟制",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/buy-store-serve-safe-food/selecting-and-serving-fresh-and-frozen-seafood-safely",
+        "https://www.fda.gov/food/buy-store-serve-safe-food/food-allergies-what-you-need-know"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "11f10fb74114ae08b63f218c4edb27318a22f8556471a22a2a314493dc2787b3",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-198",
+      "title": "牛奶开封后的分装与保存",
+      "lengthBucket": "LONG",
+      "minChunks": 7,
+      "maxChunks": 10,
+      "actualChunks": 7,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/buy-store-serve-safe-food/safe-food-handling",
+        "https://www.fda.gov/food/buy-store-serve-safe-food/refrigerator-thermometers-cold-facts-about-food-safety"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "cf3b2d42cb9bd4aa5e83448a26a9ff5e3d67205aea2b1c5c557cd8e4409fa70c",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 7
+    },
+    {
+      "topicId": "knowledge-199",
+      "title": "试吃餐具与共用汤勺",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/buy-store-serve-safe-food/safe-food-handling",
+        "https://www.fda.gov/food/buy-store-serve-safe-food/food-allergies-what-you-need-know"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "ece9fed2dd95cba1bfdfe762bfc5a09bd767668dae60b7a031ca391f6c715e8e",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    },
+    {
+      "topicId": "knowledge-200",
+      "title": "食品召回的产品与批次核对",
+      "lengthBucket": "MEDIUM",
+      "minChunks": 4,
+      "maxChunks": 6,
+      "actualChunks": 4,
+      "lengthPlanSatisfied": true,
+      "sourceUrls": [
+        "https://www.fda.gov/food/buy-store-serve-safe-food/food-recalls-what-you-need-know"
+      ],
+      "authorship": "CODEX_TOPIC_SPECIFIC_LITERAL_PROSE",
+      "authorReview": "COMPLETED",
+      "manuscriptSha256": "3480d42d444321b51e117df5374e94e379d02190445342b1a51702fa32f062f2",
+      "independentlyReviewed": false,
+      "originalBodyPreserved": true,
+      "previousActualChunks": 4
+    }
+  ],
+  "previousChunkCount": 1249,
+  "splitterRevision": "sentence-heading-boundaries-v2",
+  "indexSourceVersion": "v8-longform-200-boundary-v2"
+}

@@ -9,8 +9,8 @@ import com.example.mealcheck.service.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest({MealAnalysisRequestController.class,MealCorrectionController.class,MealCorrectionEvaluationController.class,VisionEvaluationController.class,TaskFailureAdminController.class})
-@Import({SecurityConfig.class,JwtService.class,JwtAuthenticationFilter.class,CustomUserDetailsService.class})
+@Import({CsrfTestRequests.class,SecurityConfig.class,JwtService.class,JwtAuthenticationFilter.class,CustomUserDetailsService.class})
 @EnableConfigurationProperties(AppProperties.class)
 class MealReliabilityHttpTest {
     @Test void failureTimeFiltersConvertBusinessTimeAndRejectMalformedInput() throws Exception {
@@ -34,15 +34,15 @@ class MealReliabilityHttpTest {
                 .andExpect(status().isBadRequest());
     }
     @Autowired MockMvc http;
-    @MockBean MealAnalysisRequestService requests;
-    @MockBean MealCorrectionService corrections;
-    @MockBean MealCorrectionEvaluationService evaluation;
-    @MockBean ImageUploadValidationService validation;
-    @MockBean VisionFoodRecognitionService vision;
-    @MockBean AiChatClient ai;
-    @MockBean TaskFailureManagementService failures;
-    @MockBean UserAccountRepository users;
-    @MockBean TokenBlacklistService blacklist;
+    @MockitoBean MealAnalysisRequestService requests;
+    @MockitoBean MealCorrectionService corrections;
+    @MockitoBean MealCorrectionEvaluationService evaluation;
+    @MockitoBean ImageUploadValidationService validation;
+    @MockitoBean VisionFoodRecognitionService vision;
+    @MockitoBean AiChatClient ai;
+    @MockitoBean TaskFailureManagementService failures;
+    @MockitoBean UserAccountRepository users;
+    @MockitoBean TokenBlacklistService blacklist;
     private UserPrincipal principal(String role) {
         var account=new UserAccount(); account.setId(1L); account.setUsername("alice"); account.setPasswordHash("hash"); account.setRole(role);
         return new UserPrincipal(account);

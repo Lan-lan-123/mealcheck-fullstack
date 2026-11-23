@@ -8,6 +8,7 @@ public class AdminUserResponse {
     private String username;
     private String displayName;
     private String role;
+    private boolean enabled = true;
     private LocalDateTime createdAt;
     private LocalDateTime lastUploadAt;
 
@@ -42,6 +43,14 @@ public class AdminUserResponse {
 
     public String getRole() {
         return role;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public LocalDateTime getCreatedAt() {

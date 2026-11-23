@@ -33,10 +33,12 @@ def remote_root():
     return remote
 
 
-def metrics(mode, passed, duration):
+def metrics(mode, passed, duration, artifact_bytes=None):
     prefix = "mealcheck_" + mode
     lines = [f"{prefix}_success {int(passed)}", f"{prefix}_duration_seconds {duration:.3f}"]
     if passed: lines.append(f"{prefix}_last_success_timestamp_seconds {time.time():.0f}")
+    if passed and artifact_bytes is not None:
+        lines.append(f"{prefix}_artifact_bytes {artifact_bytes}")
     gateway = os.environ.get("MEALCHECK_BACKUP_PUSHGATEWAY", "http://127.0.0.1:19091").rstrip("/")
     # POST merges metrics so failed runs preserve the last successful timestamp.
     with urlopen(Request(gateway + "/metrics/job/mealcheck_" + mode, data=("\n".join(lines) + "\n").encode(), method="POST"), timeout=10): pass
@@ -55,6 +57,7 @@ def execute(args):
         # Read/decrypt remote contents and verify against the local source.
         command(["rclone", "check", "--download", str(directory), remote + "/" + name])
         (directory / "offsite-verified.json").write_text(json.dumps({"verified": True, "name": name}), encoding="utf-8")
+        return sum(file.stat().st_size for file in directory.rglob('*') if file.is_file() and not file.is_symlink())
     else:
         names = command(["rclone", "lsf", "--dirs-only", remote]).decode().splitlines()
         names = sorted(entry.rstrip("/") for entry in names if NAME.fullmatch(entry.rstrip("/")))
@@ -73,11 +76,11 @@ def main():
     parser.add_argument("--project")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    started, passed = time.monotonic(), False
+    started, passed, artifact_bytes = time.monotonic(), False, None
     try:
-        execute(args); passed = True
+        artifact_bytes = execute(args); passed = True
     finally:
-        metrics(args.mode, passed, time.monotonic() - started)
+        metrics(args.mode, passed, time.monotonic() - started, artifact_bytes)
 
 
 if __name__ == "__main__": main()

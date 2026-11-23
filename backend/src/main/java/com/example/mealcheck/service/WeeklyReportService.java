@@ -24,6 +24,8 @@ import java.util.Map;
 
 @Service
 public class WeeklyReportService {
+    @org.springframework.beans.factory.annotation.Autowired(required=false)
+    private DietPreferenceService dietPreferences;
     private final BehaviorTrackingService tracking;
     private final UserAccountRepository userRepository;
     private final MealAnalysisService mealAnalysisService;
@@ -51,7 +53,7 @@ public class WeeklyReportService {
         int safeDays = Math.max(1, Math.min(days, 30));
         UserAccount user = userRepository.findById(principal.getId()).orElseThrow();
         return snapshotRepository.findFirstByUserAndDaysOrderByGeneratedAtDesc(user, safeDays)
-                .filter(snapshot -> AppTime.today().equals(snapshot.getPeriodEnd()))
+                .filter(snapshot -> !snapshot.isStale() && AppTime.today().equals(snapshot.getPeriodEnd()))
                 .map(snapshot -> withTracking(user,Jsons.fromJson(objectMapper, snapshot.getReportJson(), WeeklyReportResponse.class)))
                 .orElseGet(() -> generateForUser(user, safeDays));
     }
@@ -65,7 +67,7 @@ public class WeeklyReportService {
     @Transactional(readOnly = true)
     public WeeklyReportResponse latest(UserAccount user) {
         return snapshotRepository.findFirstByUserAndDaysOrderByGeneratedAtDesc(user, 7)
-                .filter(snapshot -> AppTime.today().equals(snapshot.getPeriodEnd()))
+                .filter(snapshot -> !snapshot.isStale() && AppTime.today().equals(snapshot.getPeriodEnd()))
                 .map(snapshot -> withTracking(user,Jsons.fromJson(objectMapper, snapshot.getReportJson(), WeeklyReportResponse.class)))
                 .orElseGet(() -> generateForUser(user, 7));
     }
@@ -118,6 +120,11 @@ public class WeeklyReportService {
         response.setGoalType(userGoalService.effectiveGoal(user, "current"));
         response.setGeneratedAt(AppTime.now());
         response.setReportText(makeReportText(response));
+        if (dietPreferences != null) {
+            var preferences = dietPreferences.get(user.getId());
+            response.setReportText(DietPreferenceService.guard(response.getReportText(),preferences));
+            response.setNextWeekSuggestions(response.getNextWeekSuggestions().stream().map(s -> DietPreferenceService.guard(s,preferences)).distinct().toList());
+        }
         withTracking(user,response);
         return response;
     }

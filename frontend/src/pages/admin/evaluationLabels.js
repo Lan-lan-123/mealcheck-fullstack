@@ -26,7 +26,9 @@ export function benchmarkModeLabel(mode) {
   const labels = {
     QUICK: '快速测试 10 题',
     STANDARD: '标准测试 50 题',
-    FULL: '完整测试 200 题'
+    FULL: '完整测试 200 题',
+    RAG_TOOLS: 'RAG 工具评测（历史模式）',
+    RAG_CHAIN: 'RAG 链路评测 200 题'
   }
   return labels[mode] || mode || '未知模式'
 }
@@ -38,7 +40,9 @@ export function benchmarkVerdictLabel(verdict) {
     PASSED: '通过',
     NEEDS_REVIEW: '需要复核',
     BLOCKED: '阻断发布',
-    INCOMPLETE: '结果不完整'
+    INCOMPLETE: '结果不完整',
+    TOOL_EVALUATED: '工具规则已评测',
+    CHAIN_EVALUATED: '工具与检索链路已评测'
   }
   return labels[verdict] || verdict || '未知'
 }

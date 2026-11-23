@@ -126,6 +126,36 @@ groups:
 
   - name: mealcheck-analysis-and-backups
     rules:
+      - alert: MealCheckAssistantCoordinationUnhealthy
+        expr: mealcheck_assistant_coordination_healthy == 0 or time() - mealcheck_assistant_coordination_last_success_timestamp_seconds > 45
+        for: 30s
+        labels: {severity: warning, service: mealcheck}
+        annotations: {summary: "助手共享任务协调失败或心跳维护过期", description: "检查数据库连接与锁等待。租约失效会阻止旧执行提交，任务不会自动重新调用模型。"}
+      - alert: MealCheckImagePayloadBudgetHigh
+        expr: mealcheck_lifecycle_payload_bytes / clamp_min(mealcheck_lifecycle_payload_budget_bytes, 1) > 0.8 and on(instance) mealcheck_lifecycle_monitor_healthy == 1
+        for: 5m
+        labels: {severity: warning, service: mealcheck}
+        annotations: {summary: "暂存图片已超过逻辑预算的 80%", description: "检查失败图片占用、清理策略与消费恢复；逻辑预算不包含 WAL、表膨胀及备份。"}
+      - alert: MealCheckLifecycleMonitorStale
+        expr: mealcheck_lifecycle_monitor_healthy == 0 or time() - mealcheck_lifecycle_monitor_last_success_timestamp_seconds > 120
+        for: 2m
+        labels: {severity: warning, service: mealcheck}
+        annotations: {summary: "任务生命周期指标采样失败或过期"}
+      - alert: MealCheckRetentionUnhealthy
+        expr: mealcheck_retention_enabled == 1 and (mealcheck_retention_healthy == 0 or (mealcheck_retention_last_success_timestamp_seconds > 0 and time() - mealcheck_retention_last_success_timestamp_seconds > 93600) or (mealcheck_retention_last_success_timestamp_seconds == 0 and time() - mealcheck_retention_monitor_started_timestamp_seconds > 93600))
+        for: 30m
+        labels: {severity: warning, service: mealcheck}
+        annotations: {summary: "生命周期清理失败或超过 26 小时未成功"}
+      - alert: MealCheckOutboxUnpublishedStuck
+        expr: mealcheck_lifecycle_outbox_oldest_unpublished_seconds > 300 and on(instance) mealcheck_lifecycle_monitor_healthy == 1
+        for: 5m
+        labels: {severity: warning, service: mealcheck}
+        annotations: {summary: "存在超过五分钟未确认发布的有效任务"}
+      - alert: MealCheckDatabaseLifecycleMonitorStale
+        expr: mealcheck_lifecycle_database_monitor_healthy == 0 or time() - mealcheck_lifecycle_database_last_success_timestamp_seconds > 900
+        for: 10m
+        labels: {severity: warning, service: mealcheck}
+        annotations: {summary: "数据库增长指标不可用", description: "检查 pg_stat_wal 等统计视图权限；指标是低频快照，不执行 VACUUM 或精确膨胀扫描。"}
       - alert: MealCheckUnavailable
         expr: up{job="mealcheck"} == 0
         for: 2m

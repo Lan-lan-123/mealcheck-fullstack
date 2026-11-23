@@ -45,6 +45,7 @@ public class AssistantFunctionToolRegistry implements AssistantFunctionToolRunti
     private final MealAnalysisService mealAnalysisService;
     private final WeeklyReportService weeklyReportService;
     private final UserGoalService userGoalService;
+    private final NextMealService nextMealService;
     private final ObjectMapper objectMapper;
     private final ExecutorService dbExecutor;
     private final ExecutorService ragExecutor;
@@ -56,6 +57,7 @@ public class AssistantFunctionToolRegistry implements AssistantFunctionToolRunti
                                          MealAnalysisService mealAnalysisService,
                                          WeeklyReportService weeklyReportService,
                                          UserGoalService userGoalService,
+                                         NextMealService nextMealService,
                                          ObjectMapper objectMapper,
                                          @Qualifier("assistantDbExecutor") ExecutorService dbExecutor,
                                          @Qualifier("assistantRagExecutor") ExecutorService ragExecutor,
@@ -65,6 +67,7 @@ public class AssistantFunctionToolRegistry implements AssistantFunctionToolRunti
         this.mealAnalysisService = mealAnalysisService;
         this.weeklyReportService = weeklyReportService;
         this.userGoalService = userGoalService;
+        this.nextMealService = nextMealService;
         this.objectMapper = objectMapper;
         this.dbExecutor = dbExecutor;
         this.ragExecutor = ragExecutor;
@@ -99,8 +102,25 @@ public class AssistantFunctionToolRegistry implements AssistantFunctionToolRunti
 
         long startedAt = observability.start();
         Future<AssistantFunctionToolRuntime.ToolResult> task;
+        var parentContext = AiCallContext.capture();
+        long toolDeadline = Math.min(deadlineNanos, System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeoutMillis));
+        var cancelled = new java.util.concurrent.atomic.AtomicBoolean();
+        Runnable executionGuard = () -> {
+            if (cancelled.get()) throw new java.util.concurrent.CancellationException("Assistant tool cancelled");
+            if (parentContext != null && parentContext.dispatchGuard() != null) parentContext.dispatchGuard().run();
+        };
+        var toolContext = new AiCallContext.Context(user == null ? null : user.getId(),
+                parentContext == null ? toolDeadline : Math.min(toolDeadline, parentContext.deadlineNanos()),
+                executionGuard, parentContext != null && parentContext.background());
         try {
-            task = definition.executor().submit(() -> definition.handler().execute(user, arguments));
+            task = definition.executor().submit(() -> {
+                try (var scope = AiCallContext.restore(toolContext)) {
+                    AiCallContext.checkExecution();
+                    var result = definition.handler().execute(user, arguments);
+                    AiCallContext.checkExecution();
+                    return result;
+                }
+            });
         } catch (RejectedExecutionException e) {
             observability.recordAssistantTool(startedAt, request.name(), "rejected");
             throw new IllegalStateException("Assistant tool executor is saturated: " + request.name(), e);
@@ -111,11 +131,13 @@ public class AssistantFunctionToolRegistry implements AssistantFunctionToolRunti
             observability.recordAssistantTool(startedAt, request.name(), "success");
             return result;
         } catch (TimeoutException e) {
+            cancelled.set(true);
             task.cancel(true);
             purge(definition.executor());
             observability.recordAssistantTool(startedAt, request.name(), "timeout");
             throw new IllegalStateException("Assistant tool timed out: " + request.name(), e);
         } catch (InterruptedException e) {
+            cancelled.set(true);
             task.cancel(true);
             purge(definition.executor());
             Thread.currentThread().interrupt();
@@ -166,7 +188,37 @@ public class AssistantFunctionToolRegistry implements AssistantFunctionToolRunti
                         .build(),
                 dbExecutor,
                 this::currentGoal);
+        register(tools, ToolSpecification.builder()
+                        .name("recommend_next_meal")
+                        .description("Find real next-meal combinations from MealCheck's catalog, applying the authenticated user's preferences, goal and recent meals. Costs are reference ranges, not live quotes. Time excludes delivery and queues. Ask for missing constraints before calling; never relax constraints without user consent.")
+                        .parameters(JsonObjectSchema.builder()
+                                .addStringProperty("mealType", "BREAKFAST, LUNCH or DINNER")
+                                .addStringProperty("scene", "HOME (cook at home), CANTEEN or TAKEOUT")
+                                .addIntegerProperty("budget", "Budget in CNY, integer 1 to 500")
+                                .addIntegerProperty("availableMinutes", "Preparation/selection minutes, integer 5 to 120; excludes delivery and queues")
+                                .required("mealType", "scene", "budget", "availableMinutes")
+                                .additionalProperties(false).build())
+                        .build(), dbExecutor, this::recommendNextMeal);
         return Collections.unmodifiableMap(new LinkedHashMap<>(tools));
+    }
+
+    private AssistantFunctionToolRuntime.ToolResult recommendNextMeal(UserAccount user, JsonNode arguments) {
+        rejectUnknownArguments(arguments, List.of("mealType", "scene", "budget", "availableMinutes"));
+        String meal = requiredText(arguments, "mealType", 20);
+        String scene = requiredText(arguments, "scene", 20);
+        if (!List.of("BREAKFAST", "LUNCH", "DINNER").contains(meal)) throw new IllegalArgumentException("mealType must be BREAKFAST, LUNCH or DINNER");
+        if (!List.of("HOME", "CANTEEN", "TAKEOUT").contains(scene)) throw new IllegalArgumentException("scene must be HOME, CANTEEN or TAKEOUT");
+        var request = new com.example.mealcheck.dto.MealPlanningDtos.NextMealRequest(meal, scene,
+                requiredInteger(arguments, "budget", 1, 500), requiredInteger(arguments, "availableMinutes", 5, 120));
+        var result = nextMealService.recommend(new com.example.mealcheck.security.UserPrincipal(user), request);
+        return new AssistantFunctionToolRuntime.ToolResult(toJson(result), List.of());
+    }
+
+    private int requiredInteger(JsonNode arguments, String name, int min, int max) {
+        JsonNode value = arguments.get(name);
+        if (value == null || !value.isIntegralNumber() || !value.canConvertToInt() || value.intValue() < min || value.intValue() > max)
+            throw new IllegalArgumentException(name + " must be an integer from " + min + " to " + max);
+        return value.intValue();
     }
 
     private void register(Map<String, ToolDefinition> tools,

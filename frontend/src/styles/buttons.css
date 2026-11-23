@@ -1,0 +1,17 @@
+/* Shared action buttons also apply to dialogs rendered outside the workspace. */
+.mc-button:not(.mc-button--plain) { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+:is(.primary, .primary-btn, .secondary-btn, .ghost) { border-radius: 9px; font-size: 13px; font-weight: 600; padding: 10px 14px; min-height: 40px; transition: background-color .15s, border-color .15s; }
+:is(.primary, .primary-btn) { background: var(--accent); color: #fff; }
+:is(.primary, .primary-btn):hover:not(:disabled) { background: #1c634c; transform: none; }
+.workspace :is(.secondary-btn, .ghost), .secondary-btn, .ghost { background: #edf5ef; color: #46765a; border: 1px solid #dce6df; }
+.workspace :is(.secondary-btn, .ghost):hover:not(:disabled), :is(.secondary-btn, .ghost):hover:not(:disabled) { background: #e1eee5; border-color: #aac5b4; }
+.modal-backdrop { z-index: 1400; }
+.modal-backdrop .weekly-modal { max-width: 760px; border-color: var(--line); border-radius: 14px; background: var(--surface); color: var(--ink); }
+.modal-head { align-items: center; gap: 12px; }
+.modal-head h2 { min-width: 0; font-size: 20px; line-height: 1.4; margin: 0; }
+.modal-head > button { flex: 0 0 auto; width: auto; white-space: nowrap; }
+@media (max-width: 760px) {
+  :is(.primary, .primary-btn, .secondary-btn, .ghost) { min-height: 44px; }
+  .modal-backdrop { padding: 16px; }
+  .modal-backdrop .weekly-modal { padding: 20px; }
+}

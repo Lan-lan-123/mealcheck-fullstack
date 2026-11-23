@@ -1,11 +1,13 @@
+import Button from './Button'
 import { formatTime } from '../utils/time'
 import { useEffect, useRef, useState } from 'react'
 import { adminMealCorrections, adminReviewMealCorrection, adminMealCorrectionEvaluation, adminRunMealEvaluation,
   adminMealEvaluationHistory, adminMealEvaluationDetail, adminCompareMealEvaluations } from '../api/client'
 import { categoryName } from '../utils/mealLabels'
+import FoodAttributesEditor from './FoodAttributesEditor'
+import { foodCategories as categories, foodForEditing, unknownFoodAttributes } from '../utils/foodClassification'
 import SectionSwitcher from './SectionSwitcher'
 
-const categories = ['staple', 'protein', 'vegetable', 'fruit', 'dairy', 'soup', 'drink', 'dessert', 'fried', 'oily', 'other']
 export default function MealCorrectionEvaluationPanel() {
   const [section, setSection] = useState('results')
   const [page, setPage] = useState(0), [historyPage, setHistoryPage] = useState(0)
@@ -31,9 +33,16 @@ export default function MealCorrectionEvaluationPanel() {
   useEffect(() => { load(); return () => current.current?.abort() }, [page, historyPage])
   function select(item) {
     setSelected(item); setExpectedScore(item.expectedScore ?? ''); setConfirmed(false)
-    setFoods(JSON.parse(item.afterFoods).map(({ name, category }) => ({ name, category })))
+    setFoods(JSON.parse(item.afterFoods).map(food => {
+      const editable = foodForEditing(food)
+      return { name: editable.name, category: editable.category, attributes: editable.attributes }
+    }))
   }
-  function change(index, field, value) { setFoods(rows => rows.map((food, i) => i === index ? { ...food, [field]: value } : food)) }
+  function change(index, field, value) {
+    setConfirmed(false)
+    setFoods(rows => rows.map((food, i) => i === index ? { ...food, [field]: value,
+      ...(field === 'name' ? { attributes: unknownFoodAttributes() } : {}) } : food))
+  }
   async function action(work) {
     if (busy) return
     setBusy(true); setError('')
@@ -68,9 +77,9 @@ export default function MealCorrectionEvaluationPanel() {
         {evaluation.caseCount ? (evaluation.passed ? '回归通过' : '回归失败') : '尚无审核样本'}</p>
       <p className="dataset-fingerprint">数据集指纹：{evaluation.datasetFingerprint}</p>
       <div className="evaluation-actions">
-        <button type="button" disabled={!evaluation.caseCount || disabled} onClick={download}>导出脱敏回归集</button>
-        <button type="button" disabled={disabled} onClick={() => action(async () => { await adminRunMealEvaluation(); await load() })}>运行并保存评测</button>
-        <button type="button" disabled={disabled} onClick={load}>查看当前审核集</button>
+        <Button variant="secondary" className="secondary-btn" type="button" disabled={!evaluation.caseCount || disabled} onClick={download}>导出脱敏回归集</Button>
+        <Button variant="secondary" className="secondary-btn" type="button" disabled={disabled} onClick={() => action(async () => { await adminRunMealEvaluation(); await load() })}>运行并保存评测</Button>
+        <Button variant="secondary" className="secondary-btn" type="button" disabled={disabled} onClick={load}>查看当前审核集</Button>
       </div>
       <div className="evaluation-table" tabIndex={0} aria-label="逐题评分结果"><table>
         <thead><tr><th>案例</th><th>目标</th><th>期望</th><th>实际</th><th>结果</th></tr></thead>
@@ -80,14 +89,14 @@ export default function MealCorrectionEvaluationPanel() {
     </div>
     <div className="section-panel" hidden={section !== 'history'}>
     <h3>评测历史</h3>
-    <div className="evaluation-actions">{history.map(run => <button type="button" key={run.id} disabled={disabled}
-      onClick={() => action(() => view(run.id))}>#{run.id} · {formatTime(run.createdAt)} · 失败 {run.failedCount}/{run.caseCount}</button>)}</div>
-    <button type="button" disabled={disabled || historyPage === 0} onClick={() => setHistoryPage(value => value - 1)}>历史上一页</button>
-    <button type="button" disabled={disabled || history.length < 20} onClick={() => setHistoryPage(value => value + 1)}>历史下一页</button>
+    <div className="evaluation-actions">{history.map(run => <Button variant="secondary" className="secondary-btn" type="button" key={run.id} disabled={disabled}
+      onClick={() => action(() => view(run.id))}>#{run.id} · {formatTime(run.createdAt)} · 失败 {run.failedCount}/{run.caseCount}</Button>)}</div>
+    <Button variant="secondary" className="secondary-btn" type="button" disabled={disabled || historyPage === 0} onClick={() => setHistoryPage(value => value - 1)}>历史上一页</Button>
+    <Button variant="secondary" className="secondary-btn" type="button" disabled={disabled || history.length < 20} onClick={() => setHistoryPage(value => value + 1)}>历史下一页</Button>
     <div className="evaluation-actions">
       <label>基线评测<select value={base} onChange={event => { setBase(event.target.value); setComparison(null) }}><option value="">请选择</option>{history.map(run => <option key={run.id} value={run.id}>#{run.id}</option>)}</select></label>
       <label>候选评测<select value={candidate} onChange={event => { setCandidate(event.target.value); setComparison(null) }}><option value="">请选择</option>{history.map(run => <option key={run.id} value={run.id}>#{run.id}</option>)}</select></label>
-      <button type="button" disabled={!base || !candidate || disabled} onClick={() => action(async () => setComparison(await adminCompareMealEvaluations(base, candidate)))}>比较评测</button>
+      <Button variant="secondary" className="secondary-btn" type="button" disabled={!base || !candidate || disabled} onClick={() => action(async () => setComparison(await adminCompareMealEvaluations(base, candidate)))}>比较评测</Button>
     </div>
     {comparison && <div><p>{comparison.comparable ? '同一数据集，可比较评分变化。' : '数据集输入或标签不同，请勿直接比较通过率。'}</p>
       <ul>{comparison.differences.map(row => <li key={row.id}>{row.id}：{row.before ?? '未包含'} → {row.after ?? '未包含'} · {row.beforePassed ? '通过' : '失败或未包含'} → {row.afterPassed ? '通过' : '失败或未包含'}</li>)}</ul></div>}
@@ -98,23 +107,24 @@ export default function MealCorrectionEvaluationPanel() {
       <strong>纠错 #{item.id} · 第 {item.revision} 次修改 · {item.status}</strong>
       <p>原识别：{JSON.parse(item.beforeFoods).map(food => food.name).join('、')}</p>
       <p>纠正后：{JSON.parse(item.afterFoods).map(food => food.name).join('、')}</p>
-      <p>修改原因：{item.reason}</p><button type="button" disabled={disabled} onClick={() => select(item)}>审核样本</button>
+      <p>修改原因：{item.reason}</p><Button variant="secondary" className="secondary-btn" type="button" disabled={disabled} onClick={() => select(item)}>审核样本</Button>
     </article>)}</div>
-    <button type="button" disabled={page === 0 || disabled} onClick={() => setPage(value => value - 1)}>上一页</button>
-    <span>第 {page + 1} 页</span><button type="button" disabled={items.length < 50 || disabled} onClick={() => setPage(value => value + 1)}>下一页</button>
+    <Button variant="secondary" className="secondary-btn" type="button" disabled={page === 0 || disabled} onClick={() => setPage(value => value - 1)}>上一页</Button>
+    <span>第 {page + 1} 页</span><Button variant="secondary" className="secondary-btn" type="button" disabled={items.length < 50 || disabled} onClick={() => setPage(value => value + 1)}>下一页</Button>
     {selected && <form className="evaluation-review" onSubmit={event => { event.preventDefault(); action(() => review('APPROVED')) }}>
       <h3>审核 #{selected.id}</h3>
       {foods.map((food, index) => <div className="correction-row" key={index}>
         <input aria-label={`脱敏食物名称 ${index + 1}`} required maxLength={100} disabled={busy} value={food.name} onChange={event => change(index, 'name', event.target.value)} />
         <select aria-label={`脱敏食物分类 ${index + 1}`} disabled={busy} value={food.category} onChange={event => change(index, 'category', event.target.value)}>{categories.map(category => <option key={category} value={category}>{categoryName(category)}</option>)}</select>
-        <button type="button" disabled={busy} onClick={() => setFoods(rows => rows.filter((_, i) => i !== index))}>移除</button>
+        <Button variant="secondary" className="secondary-btn" type="button" disabled={busy} onClick={() => { setConfirmed(false); setFoods(rows => rows.filter((_, i) => i !== index)) }}>移除</Button>
+        <FoodAttributesEditor attributes={food.attributes} labelPrefix={`脱敏食物 ${index + 1}`} disabled={busy} onChange={value => change(index, 'attributes', value)} />
       </div>)}
-      <button type="button" disabled={busy || foods.length >= 30} onClick={() => setFoods(rows => [...rows, { name: '', category: 'other' }])}>添加脱敏食物</button>
+      <Button variant="secondary" className="secondary-btn" type="button" disabled={busy || foods.length >= 30} onClick={() => { setConfirmed(false); setFoods(rows => [...rows, { name: '', category: 'other', attributes: unknownFoodAttributes() }]) }}>添加脱敏食物</Button>
       <label>人工期望评分<input type="number" min="0" max="100" required disabled={busy} value={expectedScore} onChange={event => setExpectedScore(event.target.value)} /></label>
       <label><input type="checkbox" required disabled={busy} checked={confirmed} onChange={event => setConfirmed(event.target.checked)} />已核对评分，并移除姓名、联系方式等个人信息</label>
-      <button disabled={busy || !confirmed || expectedScore === '' || !foods.length}>审核通过并加入回归集</button>
-      <button type="button" disabled={busy || !confirmed || expectedScore === '' || !foods.length} onClick={() => action(() => review('REJECTED'))}>拒绝</button>
-      <button type="button" disabled={busy} onClick={() => setSelected(null)}>取消</button>
+      <Button variant="secondary" type="submit" className="secondary-btn" disabled={busy || !confirmed || expectedScore === '' || !foods.length}>审核通过并加入回归集</Button>
+      <Button variant="secondary" className="secondary-btn" type="button" disabled={busy || !confirmed || expectedScore === '' || !foods.length} onClick={() => action(() => review('REJECTED'))}>拒绝</Button>
+      <Button variant="secondary" className="secondary-btn" type="button" disabled={busy} onClick={() => setSelected(null)}>取消</Button>
     </form>}
     </div>
   </section>

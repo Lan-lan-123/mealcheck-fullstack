@@ -74,7 +74,9 @@ public class AssistantToolOrchestrator {
     public AssistantToolContext gather(UserAccount user,
                                        AssistantConversation conversation,
                                        String ragQuery) {
-        long deadlineNanos = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(totalTimeoutMillis());
+        var parent=AiCallContext.capture();
+        long localDeadline=System.nanoTime()+TimeUnit.MILLISECONDS.toNanos(totalTimeoutMillis());
+        long deadlineNanos=parent==null?localDeadline:Math.min(localDeadline,parent.deadlineNanos());
         CompletableFuture<List<MealRecord>> recentRecords = async(
                 "recent-meals", () -> mealAnalysisService.listSince(user, 30), List::of,
                 dbExecutor, deadlineNanos);
@@ -132,10 +134,22 @@ public class AssistantToolOrchestrator {
         CompletableFuture<T> result = new CompletableFuture<>();
         AtomicBoolean terminal = new AtomicBoolean();
         AtomicReference<Future<?>> submittedTask = new AtomicReference<>();
+        var parentContext=AiCallContext.capture();
+        long localDeadline=System.nanoTime()+TimeUnit.MILLISECONDS.toNanos(timeoutMillis);
+        var toolContext=new AiCallContext.Context(parentContext==null?null:parentContext.userId(),
+                parentContext==null?localDeadline:Math.min(localDeadline,parentContext.deadlineNanos()),()-> {
+                    if(terminal.get())throw new java.util.concurrent.CancellationException("Assistant tool ended");
+                    if(parentContext!=null && parentContext.dispatchGuard()!=null)parentContext.dispatchGuard().run();
+                },parentContext!=null && parentContext.background());
         try {
             Future<?> task = executor.submit(() -> {
                 try {
-                    T value = action.get();
+                    T value;
+                    try (var scope=AiCallContext.restore(toolContext)) {
+                        AiCallContext.checkExecution();
+                        value = action.get();
+                        AiCallContext.checkExecution();
+                    }
                     if (terminal.compareAndSet(false, true)) {
                         result.complete(value);
                         observability.recordAssistantTool(startedAt, tool, "success");

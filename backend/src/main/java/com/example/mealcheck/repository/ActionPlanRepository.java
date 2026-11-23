@@ -16,6 +16,11 @@ public class ActionPlanRepository {
         rs.getDate("planned_date").toLocalDate(), rs.getString("status"), rs.getString("note"), rs.getLong("version"),
         rs.getString("completed_at"), rs.getObject("source_period_start", LocalDate.class), rs.getObject("source_period_end", LocalDate.class));
     public ActionPlanRepository(JdbcTemplate jdbc) { this.jdbc = jdbc; }
+    public Page<PlanView> pendingToday(long userId, LocalDate day) {
+        long total = jdbc.queryForObject("SELECT count(*) FROM action_plans WHERE user_id=? AND planned_date=? AND status='OPEN'", Long.class, userId, day);
+        var content = jdbc.query("SELECT * FROM action_plans WHERE user_id=? AND planned_date=? AND status='OPEN' ORDER BY id LIMIT 5", mapper, userId, day);
+        return Page.of(content, total, 0, 5);
+    }
     public Optional<PlanView> owned(long userId, long id) {
         return jdbc.query("SELECT * FROM action_plans WHERE user_id=? AND id=?", mapper, userId, id).stream().findFirst();
     }

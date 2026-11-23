@@ -1,0 +1,385 @@
+{
+  "version": "vision-boundaries-18-v1",
+  "datasetKind": "synthetic-generated",
+  "independentHumanLabels": false,
+  "annotationMethod": "Assistant visual inspection before provider evaluation; no independent human gold labels.",
+  "status": "READY_FOR_PROVIDER_EVALUATION",
+  "frozen": true,
+  "cases": [
+    {
+      "id": "leftover-01",
+      "group": "leftovers",
+      "outcomes": [
+        "FOOD"
+      ],
+      "names": [
+        "米饭",
+        "白饭",
+        "剩饭"
+      ],
+      "category": "staple",
+      "note": "大部分为空的盘中仍有一小团清晰米饭。",
+      "subject": "A nearly empty plate with a spoonful of clearly identifiable cooked white rice.",
+      "image": "images/leftover-01.png",
+      "reviewStatus": "assistant-visual-inspected",
+      "repeat": 1,
+      "sha256": "a3aa60b02c9d4b77b5d6e5dddb3391c52406627fd598a29f2fac2069663acf72",
+      "reviewDate": "2026-10-24",
+      "forbidMeasuredIntake": true,
+      "requireUnknownIdentity": false
+    },
+    {
+      "id": "leftover-02",
+      "group": "leftovers",
+      "subject": "A large nearly empty white plate on a pale dining table, containing only TWO small unmistakable cooked broccoli florets near one rim. More than 90 percent of plate surface is empty. The green florets are real clearly identifiable edible leftovers, not stains. No other food.",
+      "outcomes": [
+        "FOOD"
+      ],
+      "names": [
+        "西兰花",
+        "花椰菜"
+      ],
+      "category": "vegetable",
+      "note": "仅两小块可辨认西兰花，仍为食物。",
+      "image": "images/leftover-02.png",
+      "reviewStatus": "assistant-visual-inspected",
+      "repeat": 1,
+      "sha256": "9f6107a3281fb86ba1e4b64a9a24b472751779832122aa082768c60401438b61",
+      "reviewDate": "2026-10-24",
+      "forbidMeasuredIntake": true,
+      "requireUnknownIdentity": false
+    },
+    {
+      "id": "leftover-03",
+      "group": "leftovers",
+      "subject": "A nearly empty gray ceramic plate on a wooden table, with one small bite-sized chunk of bread crust and its pale soft interior clearly visible. Very little edible food remains but the bread texture must be unmistakable. No butter, spread or other food.",
+      "outcomes": [
+        "FOOD"
+      ],
+      "names": [
+        "面包",
+        "吐司"
+      ],
+      "category": "staple",
+      "note": "仅一小块面包，有可辨认可食内容。",
+      "image": "images/leftover-03.png",
+      "reviewStatus": "assistant-visual-inspected",
+      "repeat": 1,
+      "sha256": "8d94e99ee3ccb1b96d156fd64621ea38ac0c70c42a87626460e1c7dbca1cdcfc",
+      "reviewDate": "2026-10-24",
+      "forbidMeasuredIntake": true,
+      "requireUnknownIdentity": false
+    },
+    {
+      "id": "leftover-04",
+      "group": "leftovers",
+      "subject": "An otherwise empty white ceramic noodle bowl on a simple dining table, containing only three or four long strands of cooked plain wheat noodles at the bottom. The noodle strands are distinct and clearly visible, not sauce streaks. No toppings, broth or other food.",
+      "outcomes": [
+        "FOOD"
+      ],
+      "names": [
+        "面",
+        "粉"
+      ],
+      "category": "staple",
+      "note": "碗底少量明确面条，不能因少而判空。",
+      "image": "images/leftover-04.png",
+      "reviewStatus": "assistant-visual-inspected",
+      "repeat": 1,
+      "sha256": "4d47393b1c99af914f2bacdf9cbec44d3368b7fb260fee6a9c2656dc31cb4687",
+      "reviewDate": "2026-10-24",
+      "forbidMeasuredIntake": true,
+      "requireUnknownIdentity": false
+    },
+    {
+      "id": "leftover-05",
+      "group": "leftovers",
+      "subject": "A completely eaten white dinner plate on a wooden table. Only very thin flat dry reddish sauce streaks and smears adhere to the plate surface; no chunks, no rice, no vegetables, no crumbs and no pooled sauce. Every visible mark is a flat stain, nothing that forms an edible portion. Clearly empty used tableware.",
+      "outcomes": [
+        "NON_FOOD"
+      ],
+      "names": [],
+      "note": "空盘只有薄酱汁痕迹，没有可食块状内容。",
+      "image": "images/leftover-05.png",
+      "reviewStatus": "assistant-visual-inspected",
+      "repeat": 1,
+      "sha256": "13ec3a4fb9418142a6336d9470b99eda35f320a475b7285a139d0b239cc0500e",
+      "reviewDate": "2026-10-24",
+      "forbidMeasuredIntake": true,
+      "requireUnknownIdentity": false
+    },
+    {
+      "id": "leftover-06",
+      "group": "leftovers",
+      "subject": "An empty brushed stainless steel cafeteria tray, with only faint greasy brown translucent wipe marks and dry circular sauce residue in its empty compartments. No solid food, no crumbs, no pieces, no liquid pooling. Clearly used empty tableware, not a meal. Natural side daylight.",
+      "outcomes": [
+        "NON_FOOD"
+      ],
+      "names": [],
+      "note": "餐盘仅油渍和干燥残痕，无食物份量。",
+      "image": "images/leftover-06.png",
+      "reviewStatus": "assistant-visual-inspected",
+      "repeat": 1,
+      "sha256": "895b60a11e7f7a56c22b7f24171b7e07ca2d04fb0025a2f9c61f30a896e468e6",
+      "reviewDate": "2026-10-24",
+      "forbidMeasuredIntake": true,
+      "requireUnknownIdentity": false
+    },
+    {
+      "id": "occlusion-01",
+      "group": "occlusion",
+      "subject": "A white rice bowl on a dining table. A large folded opaque plain napkin lies diagonally over about TWO THIRDS of the bowl opening. In the remaining third, cooked white rice grains are clearly visible and identifiable. Do not show or imply any other food. The image is sharp, only part of the contents is visible.",
+      "outcomes": [
+        "FOOD"
+      ],
+      "names": [
+        "米饭",
+        "白饭"
+      ],
+      "category": "staple",
+      "note": "实际画面约半碗被布遮住，露出米饭足以辨认；不计为无法辨认的严重遮挡。",
+      "image": "images/occlusion-01.png",
+      "reviewStatus": "assistant-visual-inspected",
+      "repeat": 1,
+      "sha256": "c50ad13ea1f4d05f68c322b324e2c7d4db6d5431ab824238b91f0b0945f9dc3a",
+      "reviewDate": "2026-10-24",
+      "forbidMeasuredIntake": true,
+      "requireUnknownIdentity": false
+    },
+    {
+      "id": "occlusion-02",
+      "group": "occlusion",
+      "subject": "A white shallow plate of leafy cooked bok choy on a dining table. A large opaque metal lid and a broad serving spoon obscure about THREE QUARTERS of the plate. At the unobstructed edge a few green bok choy leaves and their white stems remain clearly identifiable. No other food is visible. Sharp realistic photo.",
+      "outcomes": [
+        "FOOD"
+      ],
+      "names": [
+        "青菜",
+        "白菜",
+        "油菜",
+        "小白菜"
+      ],
+      "category": "vegetable",
+      "note": "盖子遮住大部分盘面，露出青菜清楚可辨。",
+      "image": "images/occlusion-02.png",
+      "reviewStatus": "assistant-visual-inspected",
+      "repeat": 1,
+      "sha256": "595b0b97401166e72a18a4433f37ecb54b349ed585516269d919e76c88705e7e",
+      "reviewDate": "2026-10-24",
+      "forbidMeasuredIntake": true,
+      "requireUnknownIdentity": false
+    },
+    {
+      "id": "occlusion-03",
+      "group": "occlusion",
+      "subject": "A deep bowl on a table viewed from a low oblique angle. A large plain opaque folded napkin conceals almost the entire opening and about 95 percent of the contents. Only a tiny out-of-focus beige patch is visible through a narrow gap; no grain structure, ingredients, shape or food identity can be determined from that patch. Keep the bowl, table and napkin in focus so the limitation is specifically obstruction, not general darkness. No identifiable food elsewhere.",
+      "outcomes": [
+        "IMAGE_UNCLEAR",
+        "UNCERTAIN_ONLY"
+      ],
+      "names": [],
+      "note": "碗口几乎全被餐巾遮挡，缝隙仅模糊浅色块，无法确认食物种类。",
+      "image": "images/occlusion-03.png",
+      "reviewStatus": "assistant-visual-inspected",
+      "repeat": 3,
+      "sha256": "f51b6db707ba7a48314ab70cc001c131b524691b27094a10f3f43933885352e2",
+      "reviewDate": "2026-10-24",
+      "forbidMeasuredIntake": true,
+      "requireUnknownIdentity": true
+    },
+    {
+      "id": "occlusion-04",
+      "group": "occlusion",
+      "subject": "An ordinary dinner plate almost completely concealed under a large opaque stainless steel serving lid. A folded cloth further covers its only narrow edge gap. Through that tiny gap one sees a shapeless unidentifiable tan-orange sliver, with no distinguishing ingredient detail. At least 95 percent of the contents is hidden. Bright enough to assess the obstruction, no recognizable edible items elsewhere, no person.",
+      "outcomes": [
+        "IMAGE_UNCLEAR"
+      ],
+      "names": [],
+      "note": "实际画面盖子完全遮住餐盘内容，没有原提示词所设想的小缝隙；按实际图标为无法确认内容。",
+      "image": "images/occlusion-04.png",
+      "reviewStatus": "assistant-visual-inspected",
+      "repeat": 3,
+      "sha256": "98e7c6366ca46bb82dd0b1ec353161535bd41532fe17ce7a57ec357668012754",
+      "reviewDate": "2026-10-24",
+      "forbidMeasuredIntake": true,
+      "requireUnknownIdentity": false
+    },
+    {
+      "id": "occlusion-05",
+      "group": "occlusion",
+      "subject": "A plain white ceramic food bowl on a wooden dining table with a perfectly fitted fully opaque metal lid, completely closed. Absolutely none of the contents can be seen. Sharp daylight photo of bowl and lid. No labels, no other food or objects. This must not be an open or transparently covered bowl. Contents and whether food is present are visually unknowable.",
+      "outcomes": [
+        "IMAGE_UNCLEAR"
+      ],
+      "names": [],
+      "note": "完全不透明封盖，无法判断内有无食物；不能直接判空。",
+      "image": "images/occlusion-05.png",
+      "reviewStatus": "assistant-visual-inspected",
+      "repeat": 1,
+      "sha256": "85f45c59397bd4a1515cd70bab99ba1d887b08bcd4aaf2a785bb9375c07e50a4",
+      "reviewDate": "2026-10-24",
+      "forbidMeasuredIntake": true,
+      "requireUnknownIdentity": false
+    },
+    {
+      "id": "occlusion-06",
+      "group": "occlusion",
+      "subject": "A shallow ceramic dish on a light dining table viewed obliquely. The ENTIRE dish opening and contents are hidden underneath a thick opaque folded kitchen cloth, tucked all around the rim. Only part of the ceramic rim and dish side are visible. No food or ingredients can be seen anywhere. Good light and sharp focus show the occluding cloth clearly. No text.",
+      "outcomes": [
+        "IMAGE_UNCLEAR"
+      ],
+      "names": [],
+      "note": "餐盘开口完全被厚布遮住，无法确认食品或空盘。",
+      "image": "images/occlusion-06.png",
+      "reviewStatus": "assistant-visual-inspected",
+      "repeat": 1,
+      "sha256": "78741c3a702d9967858279cc2bbf2c1f07224383bb370b6ac31f964f127605a1",
+      "reviewDate": "2026-10-24",
+      "forbidMeasuredIntake": true,
+      "requireUnknownIdentity": false
+    },
+    {
+      "id": "package-01",
+      "group": "packaging",
+      "subject": "A sealed transparent plastic food bag containing two clearly visible slices of whole wheat bread. A small plain white label on the bag reads exactly 全麦面包 in large legible black Chinese characters. No brand and no nutrition numbers. The bread is visibly inside the sealed bag, with an ordinary table backdrop. Keep package text limited to the specified food name.",
+      "outcomes": [
+        "FOOD"
+      ],
+      "names": [
+        "面包",
+        "吐司"
+      ],
+      "category": "staple",
+      "note": "透明袋内面包可见且标签清楚，识别面包，不虚构营养。",
+      "image": "images/package-01.png",
+      "reviewStatus": "assistant-visual-inspected",
+      "repeat": 1,
+      "sha256": "7ba75362dfcf1bb97031906c3cbdc510943bfb09b04bae5babe6f1d12396f790",
+      "reviewDate": "2026-10-24",
+      "forbidMeasuredIntake": true,
+      "requireUnknownIdentity": false
+    },
+    {
+      "id": "package-02",
+      "group": "packaging",
+      "subject": "A single unopened generic milk carton on a kitchen table, no other food. The carton has simple neutral white and blue packaging, a sealed cap, and a prominent clear black Chinese label reading exactly 纯牛奶. No brand, no nutrition table, no volume or other numerical text. Realistic commercial carton material. The label must be readable, not mirrored.",
+      "outcomes": [
+        "FOOD"
+      ],
+      "names": [
+        "牛奶"
+      ],
+      "category": "dairy",
+      "note": "未开封且纯牛奶标签明确，不猜份量营养数值。",
+      "image": "images/package-02.png",
+      "reviewStatus": "assistant-visual-inspected",
+      "repeat": 1,
+      "sha256": "080f02cc5d779b7ebdfaf60bba3119f0fca8c76b48d6885b05de535247ddad0b",
+      "reviewDate": "2026-10-24",
+      "forbidMeasuredIntake": true,
+      "requireUnknownIdentity": false
+    },
+    {
+      "id": "package-03",
+      "group": "packaging",
+      "subject": "A single fully opaque unbranded sealed matte gray food pouch standing on a dining table. No transparent window and absolutely no writing, picture, branding, readable label or nutrition text. The sealed pouch shape is generic and does not reveal the contents. Nothing edible is visible. Do not add food illustrations, cookies, bread, snacks or loose food around it.",
+      "outcomes": [
+        "IMAGE_UNCLEAR",
+        "UNCERTAIN_ONLY"
+      ],
+      "names": [],
+      "note": "不透明无标签密封袋，未知内容不得确定命名或计分。",
+      "image": "images/package-03.png",
+      "reviewStatus": "assistant-visual-inspected",
+      "repeat": 3,
+      "sha256": "8b39b3ef9088c7c19920cc0a4b3e871b6c41d6ed85665e05cb7e08ee3ae871c5",
+      "reviewDate": "2026-10-24",
+      "forbidMeasuredIntake": true,
+      "requireUnknownIdentity": true
+    },
+    {
+      "id": "package-04",
+      "group": "packaging",
+      "subject": "A generic opaque white paper takeaway cup on a table with a fully closed opaque lid, no straw hole revealing contents. Any small label is completely covered by blank masking tape so there are no readable words or logos. No liquid or contents can be seen. The drink identity, whether it has milk or sugar, and amount are unknowable from the image. No other food or drink.",
+      "outcomes": [
+        "IMAGE_UNCLEAR",
+        "UNCERTAIN_ONLY"
+      ],
+      "names": [],
+      "note": "不透明杯且标签不可读，不能猜牛奶豆浆含糖量；未确认候选不计分。",
+      "image": "images/package-04.png",
+      "reviewStatus": "assistant-visual-inspected",
+      "repeat": 3,
+      "sha256": "1faac90ac2ed28e2ba4c7f3cf77c3ed2e7dd6e3169edf0375786b34054039abd",
+      "reviewDate": "2026-10-24",
+      "forbidMeasuredIntake": true,
+      "requireUnknownIdentity": true,
+      "forbidIngredients": true
+    },
+    {
+      "id": "package-05",
+      "group": "packaging",
+      "subject": "A fully OPEN empty clear plastic bread bag on a wooden table. The bag is pulled wide open and laid flat so the interior is plainly visible and demonstrably EMPTY. No bread, no crumbs, no food and no label. Realistic transparent crinkled plastic. The image must clearly show there is nothing inside, rather than a closed opaque bag.",
+      "outcomes": [
+        "NON_FOOD"
+      ],
+      "names": [],
+      "note": "打开的透明空包装，内部清晰无食品。",
+      "image": "images/package-05.png",
+      "reviewStatus": "assistant-visual-inspected",
+      "repeat": 1,
+      "sha256": "21ab532c640983b1d533f04ef5b1d3ea320c5b8a3acf568a2b0819caf10dbec8",
+      "reviewDate": "2026-10-24",
+      "forbidMeasuredIntake": true,
+      "requireUnknownIdentity": false
+    },
+    {
+      "id": "package-06",
+      "group": "packaging",
+      "subject": "An empty rectangular transparent plastic takeaway food box with its clear lid fully open beside it, on a dining table. Every part of the empty inside and corners is plainly visible. No food, no residues, no crumbs, no labels. Bright natural light shows the transparent material and bare table behind it. It must clearly be an empty container.",
+      "outcomes": [
+        "NON_FOOD"
+      ],
+      "names": [],
+      "note": "透明餐盒完全打开，内部空且可确认。",
+      "image": "images/package-06.png",
+      "reviewStatus": "assistant-visual-inspected",
+      "repeat": 1,
+      "sha256": "41993b808fb2d1a2f4240a673c85eed3cfd43d8caa49b35761691822650dae4f",
+      "reviewDate": "2026-10-24",
+      "forbidMeasuredIntake": true,
+      "requireUnknownIdentity": false
+    }
+  ],
+  "generator": {
+    "mode": "built-in image_gen",
+    "commonPrompt": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. ",
+    "prompts": {
+      "leftover-01": "Use case: photorealistic-natural. Asset type: independent synthetic MealCheck vision evaluation photograph, case leftover-01. Create exactly ONE realistic ordinary smartphone photo, square frame, no montage or panels. Subject: a large plain white dinner plate on a wooden dining table, almost empty, with a tiny but clearly identifiable loose cluster of about a spoonful of cooked white rice left near the edge. Most of the plate is bare. The rice grains must be unambiguously visible and edible; this is small leftover food, not a stain. Natural daylight, realistic slight imperfections, neutral overhead view, no artistic styling. No other food, no people, no text, no branding, no watermark. Do not print the case identifier or any answer label in the image.",
+      "leftover-02": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A large nearly empty white plate on a pale dining table, containing only TWO small unmistakable cooked broccoli florets near one rim. More than 90 percent of plate surface is empty. The green florets are real clearly identifiable edible leftovers, not stains. No other food.",
+      "leftover-03": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A nearly empty gray ceramic plate on a wooden table, with one small bite-sized chunk of bread crust and its pale soft interior clearly visible. Very little edible food remains but the bread texture must be unmistakable. No butter, spread or other food.",
+      "leftover-04": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. An otherwise empty white ceramic noodle bowl on a simple dining table, containing only three or four long strands of cooked plain wheat noodles at the bottom. The noodle strands are distinct and clearly visible, not sauce streaks. No toppings, broth or other food.",
+      "leftover-05": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A completely eaten white dinner plate on a wooden table. Only very thin flat dry reddish sauce streaks and smears adhere to the plate surface; no chunks, no rice, no vegetables, no crumbs and no pooled sauce. Every visible mark is a flat stain, nothing that forms an edible portion. Clearly empty used tableware.",
+      "leftover-06": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. An empty brushed stainless steel cafeteria tray, with only faint greasy brown translucent wipe marks and dry circular sauce residue in its empty compartments. No solid food, no crumbs, no pieces, no liquid pooling. Clearly used empty tableware, not a meal. Natural side daylight.",
+      "occlusion-01": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A white rice bowl on a dining table. A large folded opaque plain napkin lies diagonally over about TWO THIRDS of the bowl opening. In the remaining third, cooked white rice grains are clearly visible and identifiable. Do not show or imply any other food. The image is sharp, only part of the contents is visible.",
+      "occlusion-02": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A white shallow plate of leafy cooked bok choy on a dining table. A large opaque metal lid and a broad serving spoon obscure about THREE QUARTERS of the plate. At the unobstructed edge a few green bok choy leaves and their white stems remain clearly identifiable. No other food is visible. Sharp realistic photo.",
+      "occlusion-03": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A deep bowl on a table viewed from a low oblique angle. A large plain opaque folded napkin conceals almost the entire opening and about 95 percent of the contents. Only a tiny out-of-focus beige patch is visible through a narrow gap; no grain structure, ingredients, shape or food identity can be determined from that patch. Keep the bowl, table and napkin in focus so the limitation is specifically obstruction, not general darkness. No identifiable food elsewhere.",
+      "occlusion-04": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. An ordinary dinner plate almost completely concealed under a large opaque stainless steel serving lid. A folded cloth further covers its only narrow edge gap. Through that tiny gap one sees a shapeless unidentifiable tan-orange sliver, with no distinguishing ingredient detail. At least 95 percent of the contents is hidden. Bright enough to assess the obstruction, no recognizable edible items elsewhere, no person.",
+      "occlusion-05": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A plain white ceramic food bowl on a wooden dining table with a perfectly fitted fully opaque metal lid, completely closed. Absolutely none of the contents can be seen. Sharp daylight photo of bowl and lid. No labels, no other food or objects. This must not be an open or transparently covered bowl. Contents and whether food is present are visually unknowable.",
+      "occlusion-06": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A shallow ceramic dish on a light dining table viewed obliquely. The ENTIRE dish opening and contents are hidden underneath a thick opaque folded kitchen cloth, tucked all around the rim. Only part of the ceramic rim and dish side are visible. No food or ingredients can be seen anywhere. Good light and sharp focus show the occluding cloth clearly. No text.",
+      "package-01": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A sealed transparent plastic food bag containing two clearly visible slices of whole wheat bread. A small plain white label on the bag reads exactly 全麦面包 in large legible black Chinese characters. No brand and no nutrition numbers. The bread is visibly inside the sealed bag, with an ordinary table backdrop. Keep package text limited to the specified food name.",
+      "package-02": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A single unopened generic milk carton on a kitchen table, no other food. The carton has simple neutral white and blue packaging, a sealed cap, and a prominent clear black Chinese label reading exactly 纯牛奶. No brand, no nutrition table, no volume or other numerical text. Realistic commercial carton material. The label must be readable, not mirrored.",
+      "package-03": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A single fully opaque unbranded sealed matte gray food pouch standing on a dining table. No transparent window and absolutely no writing, picture, branding, readable label or nutrition text. The sealed pouch shape is generic and does not reveal the contents. Nothing edible is visible. Do not add food illustrations, cookies, bread, snacks or loose food around it.",
+      "package-04": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A generic opaque white paper takeaway cup on a table with a fully closed opaque lid, no straw hole revealing contents. Any small label is completely covered by blank masking tape so there are no readable words or logos. No liquid or contents can be seen. The drink identity, whether it has milk or sugar, and amount are unknowable from the image. No other food or drink.",
+      "package-05": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A fully OPEN empty clear plastic bread bag on a wooden table. The bag is pulled wide open and laid flat so the interior is plainly visible and demonstrably EMPTY. No bread, no crumbs, no food and no label. Realistic transparent crinkled plastic. The image must clearly show there is nothing inside, rather than a closed opaque bag.",
+      "package-06": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. An empty rectangular transparent plastic takeaway food box with its clear lid fully open beside it, on a dining table. Every part of the empty inside and corners is plainly visible. No food, no residues, no crumbs, no labels. Bright natural light shows the transparent material and bare table behind it. It must clearly be an empty container."
+    }
+  },
+  "providerEvaluation": {
+    "model": "qwen3.8-flash",
+    "embeddingCallsAllowed": 0,
+    "maxProviderRequests": 26,
+    "automaticRetries": 0
+  },
+  "reviewLimitations": "Assistant-authored labels after visual inspection, not independent human gold labels. Synthetic data only; no hidden contents are asserted by these labels."
+}

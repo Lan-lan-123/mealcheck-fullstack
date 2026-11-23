@@ -37,19 +37,22 @@ public class PgVectorKnowledgeService {
     private final KnowledgeVectorPersistenceService vectorPersistenceService;
     private final MarkdownKnowledgeChunker chunker;
     private final VectorCompressionService compressionService;
+    private final KnowledgeSourceSyncStore sourceSync;
 
     public PgVectorKnowledgeService(JdbcTemplate jdbcTemplate,
                                     KnowledgeEmbeddingService embeddingService,
                                     AppProperties properties,
                                     KnowledgeVectorPersistenceService vectorPersistenceService,
                                     MarkdownKnowledgeChunker chunker,
-                                    VectorCompressionService compressionService) {
+                                    VectorCompressionService compressionService,
+                                    KnowledgeSourceSyncStore sourceSync) {
         this.jdbcTemplate = jdbcTemplate;
         this.embeddingService = embeddingService;
         this.properties = properties;
         this.vectorPersistenceService = vectorPersistenceService;
         this.chunker = chunker;
         this.compressionService = compressionService;
+        this.sourceSync = sourceSync;
     }
 
     public long count() {
@@ -57,19 +60,56 @@ public class PgVectorKnowledgeService {
         return count == null ? 0 : count;
     }
 
+    public long searchRevision() {
+        return jdbcTemplate.queryForObject("SELECT revision FROM knowledge_cache_state WHERE id=1", Long.class);
+    }
+
     public SyncResult syncSource(String source,
                                  String sourceVersion,
                                  LocalDateTime sourceUpdatedAt,
                                  List<KnowledgeChunk> chunks) {
+        return syncSource(source,sourceVersion,sourceUpdatedAt,chunks,true);
+    }
+
+    public SyncResult syncSource(String source,String sourceVersion,LocalDateTime sourceUpdatedAt,
+                                 List<KnowledgeChunk> chunks,boolean explicit) {
+        return syncSource(source, sourceVersion, sourceUpdatedAt, chunks, explicit, null);
+    }
+
+    public String splitterStrategy(String source) { return sourceSync.splitterStrategy(source); }
+
+    public SyncResult syncSource(String source,String sourceVersion,LocalDateTime sourceUpdatedAt,
+                                 List<KnowledgeChunk> chunks,boolean explicit,String splitterStrategy) {
+        return syncSource(source,sourceVersion,sourceUpdatedAt,chunks,explicit,splitterStrategy,null,null);
+    }
+    public SyncResult syncSource(String source,String sourceVersion,LocalDateTime sourceUpdatedAt,
+                                 List<KnowledgeChunk> chunks,boolean explicit,String splitterStrategy,Long expectedRevision,KnowledgeRebuildStore.Work work) {
         requireCompatibleStorage();
+        String signature=activeSignature();
+        var admission=expectedRevision==null&&work==null
+                ?sourceSync.claim(source,sourceFingerprint(safeVersion(sourceVersion),signature,chunks),signature,explicit)
+                :sourceSync.claim(source,sourceFingerprint(safeVersion(sourceVersion),signature,chunks),signature,explicit,expectedRevision,work);
+        if(admission.current())return new SyncResult(admission.currentCount(),0,0,admission.currentCount(),0);
+        var lease=admission.lease();
+        try {
+            return prepareAndPublishSource(source,sourceVersion,sourceUpdatedAt,chunks,lease,explicit,splitterStrategy);
+        } catch(RuntimeException failure) {
+            try {sourceSync.release(lease,failure instanceof KnowledgeSourceSyncStore.Conflict conflict ? conflict.reason().name() : "SYNC_FAILED");}
+            catch(RuntimeException releaseFailure) {log.warn("Knowledge source lease cleanup deferred source={}",source);}
+            throw failure;
+        }
+    }
+
+    private SyncResult prepareAndPublishSource(String source,String sourceVersion,LocalDateTime sourceUpdatedAt,
+                                               List<KnowledgeChunk> chunks,KnowledgeSourceSyncStore.Lease lease,boolean explicit,String splitterStrategy) {
         List<ExistingChunk> stored = jdbcTemplate.query("""
-                SELECT id, chunk_key, content_hash, embedding_signature
+                SELECT id, chunk_key, content_hash, embedding_signature,title,content
                 FROM knowledge_chunks
                 WHERE source = ?
                 ORDER BY id
                 """, (rs, rowNum) -> new ExistingChunk(
                 rs.getLong("id"), rs.getString("chunk_key"), rs.getString("content_hash"),
-                rs.getString("embedding_signature")), source);
+                rs.getString("embedding_signature"),rs.getString("title"),rs.getString("content")), source);
         Map<String, ExistingChunk> byKey = new HashMap<>();
         Set<Long> staleIds = new HashSet<>();
         for (ExistingChunk existing : stored) {
@@ -78,13 +118,20 @@ public class PgVectorKnowledgeService {
                 byKey.put(existing.chunkKey(), existing);
             }
         }
+        // Adopt an existing matching index on upgrade, but require an explicit
+        // administrator action before replacing edits or a different source bundle.
+        if(!explicit && !stored.isEmpty() && (stored.size()!=chunks.size() || chunks.stream().anyMatch(chunk->{
+            var existing=byKey.get(chunk.chunkKey());
+            return existing==null || !Objects.equals(existing.title(),chunk.title()) || !Objects.equals(existing.content(),chunk.content());
+        })))throw new KnowledgeSourceSyncStore.Conflict(KnowledgeSourceSyncStore.Reason.REVIEW_REQUIRED);
 
-        String signature = activeSignature();
+        String signature = lease.signature();
         List<KnowledgeVectorPersistenceService.KnowledgeSyncRow> prepared = new ArrayList<>();
         int inserted = 0;
         int updated = 0;
         int unchanged = 0;
         for (KnowledgeChunk chunk : chunks) {
+            sourceSync.renew(lease);
             ExistingChunk existing = byKey.get(chunk.chunkKey());
             if (existing != null) {
                 staleIds.remove(existing.id());
@@ -92,13 +139,14 @@ public class PgVectorKnowledgeService {
             boolean needsVector = existing == null
                     || !Objects.equals(existing.contentHash(), chunk.contentHash())
                     || !Objects.equals(existing.embeddingSignature(), signature);
-            String vector = needsVector
-                    ? embeddingService.toPgVector(embeddingService.embed(embeddingText(chunk.title(), chunk.content())))
-                    : null;
+            var embedding = needsVector
+                    ? embeddingService.embedForSignatureWithUsage(embeddingText(chunk.title(), chunk.content()), signature) : null;
+            String vector = embedding == null ? null : embeddingService.toPgVector(embedding.vector());
             prepared.add(new KnowledgeVectorPersistenceService.KnowledgeSyncRow(
                     existing == null ? null : existing.id(), chunk.chunkKey(), chunk.chunkIndex(), chunk.title(),
                     chunk.content(), inferCategory(chunk.title(), chunk.content()), vector, signature,
-                    chunk.contentHash(), chunk.tokenCount(), safeVersion(sourceVersion), sourceUpdatedAt));
+                    chunk.contentHash(), chunk.tokenCount(), safeVersion(sourceVersion), sourceUpdatedAt,
+                    embedding == null ? null : embedding.inputTokens(), embedding == null ? null : embedding.totalTokens()));
             if (existing == null) {
                 inserted++;
             } else if (needsVector) {
@@ -108,13 +156,39 @@ public class PgVectorKnowledgeService {
             }
         }
 
-        vectorPersistenceService.syncSource(source, prepared, new ArrayList<>(staleIds));
+        if (splitterStrategy == null) sourceSync.publish(lease, prepared, new ArrayList<>(staleIds));
+        else sourceSync.publish(lease, prepared, new ArrayList<>(staleIds), splitterStrategy);
         return new SyncResult(chunks.size(), inserted, updated, unchanged, staleIds.size());
     }
+
+    static String sourceFingerprint(String version,String signature,List<KnowledgeChunk> chunks) {
+        try {
+            var hash=java.security.MessageDigest.getInstance("SHA-256");
+            fingerprintField(hash,"source-sync-v1");fingerprintField(hash,version);fingerprintField(hash,signature);
+            for(var chunk:chunks) {
+                fingerprintField(hash,chunk.chunkKey());fingerprintField(hash,chunk.title());fingerprintField(hash,chunk.content());
+                fingerprintField(hash,Integer.toString(chunk.chunkIndex()));fingerprintField(hash,Integer.toString(chunk.tokenCount()));
+                fingerprintField(hash,chunk.contentHash());
+            }
+            return java.util.HexFormat.of().formatHex(hash.digest());
+        } catch(java.security.NoSuchAlgorithmException impossible) {throw new IllegalStateException(impossible);}
+    }
+    private static void fingerprintField(java.security.MessageDigest hash,String value) {
+        if(value==null){hash.update(java.nio.ByteBuffer.allocate(4).putInt(-1).array());return;}
+        byte[] bytes=value.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        hash.update(java.nio.ByteBuffer.allocate(4).putInt(bytes.length).array());hash.update(bytes);
+    }
+
+    public List<Map<String,Object>> sourceSyncStatus() {return sourceSync.status();}
 
     public void add(String source, String title, String content) {
         requireCompatibleStorage();
         vectorPersistenceService.add(source, vectorRow(title, content));
+    }
+
+    public void add(String source,String title,String content,String actor) {
+        requireCompatibleStorage();
+        vectorPersistenceService.add(source,vectorRow(title,content),actor);
     }
 
     public boolean update(Long id, String title, String content) {
@@ -122,17 +196,51 @@ public class PgVectorKnowledgeService {
         return vectorPersistenceService.update(id, vectorRow(title, content));
     }
 
+    public boolean update(Long id, String title, String content, long expectedRevision, String actor, String reason) {
+        requireCompatibleStorage();
+        vectorPersistenceService.assertRevision(id, expectedRevision);
+        return vectorPersistenceService.update(id, vectorRow(title, content), expectedRevision, actor, reason);
+    }
+
+    public KnowledgeVectorPersistenceService.KnowledgeVectorRow prepareContent(String title, String content) {
+        requireCompatibleStorage();
+        return vectorRow(title, content);
+    }
+
     @Transactional
     public boolean delete(Long id) {
         return jdbcTemplate.update("DELETE FROM knowledge_chunks WHERE id = ?", id) > 0;
     }
 
+    public void delete(Long id, long expectedRevision, String actor) {
+        vectorPersistenceService.delete(id,expectedRevision,actor);
+    }
+
     public List<KnowledgeSnippet> search(String query, int limit) {
-        boolean vectorReady = storageMatchesConfiguration() && !hasStaleEmbeddings();
-        String vector = vectorReady ? embeddingService.toPgVector(embeddingService.embed(query)) : null;
+        if (query == null || query.isBlank()) return List.of();
+        // Model calls stay outside DB locks. If publication races with a query,
+        // discard the old-space result (or dimension error) and retry once.
+        for (int attempt = 0; attempt < 2; attempt++) {
+            String signature = activeSignature();
+            try {
+                var result = searchWithSignature(query, limit, signature);
+                if (signature.equals(activeSignature())) return result;
+            } catch (RuntimeException failure) {
+                if (signature.equals(activeSignature())) throw failure;
+            }
+        }
+        throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,
+                "向量模型正在切换，请稍后重试检索。");
+    }
+
+    private List<KnowledgeSnippet> searchWithSignature(String query, int limit, String signature) {
+        boolean vectorReady = storageMatchesConfiguration() && !hasStaleEmbeddings(signature);
+        String vector = vectorReady ? embeddingService.toPgVector(embeddingService.embedForSignature(query, signature)) : null;
         String category = inferCategory(query, query);
         int safeLimit = Math.max(1, Math.min(limit, 20));
         int candidateLimit = Math.max(safeLimit, safeLimit * Math.max(2, properties.getKnowledge().getRerankCandidateMultiplier()));
+        candidateLimit = Math.min(100, candidateLimit);
+        List<String> focusTerms = KnowledgeQueryFocus.terms(query);
         double vectorWeight = vectorReady ? normalizedWeight(properties.getKnowledge().getVectorWeight()) : 0.0;
         double keywordWeight = normalizedWeight(properties.getKnowledge().getKeywordWeight());
         double categoryWeight = normalizedWeight(properties.getKnowledge().getCategoryWeight());
@@ -146,8 +254,9 @@ public class PgVectorKnowledgeService {
         vectorWeight /= totalWeight;
         keywordWeight /= totalWeight;
         categoryWeight /= totalWeight;
-        double titleWeight = keywordWeight / 2.0;
-        double contentWeight = keywordWeight / 2.0;
+        double focusWeight = focusTerms.isEmpty() ? 0.0 : keywordWeight * 0.5;
+        double titleWeight = (keywordWeight-focusWeight) / 2.0;
+        double contentWeight = (keywordWeight-focusWeight) / 2.0;
         int rrfK = Math.max(1, Math.min(1000, properties.getKnowledge().getRrfK()));
         double normalizationFactor = rrfK + 1.0;
         String vectorCandidates = vectorReady ? """
@@ -159,11 +268,32 @@ public class PgVectorKnowledgeService {
                 """.formatted(compressionService.castParameter())
                 : "SELECT NULL::bigint AS id, NULL::bigint AS vector_rank WHERE false";
         List<Object> args = new ArrayList<>();
-        if (vectorReady) { args.add(vector); args.add(activeSignature()); args.add(candidateLimit); }
+        args.add(candidateLimit);
+        args.add(focusTerms.toArray(String[]::new));
+        if (vectorReady) { args.add(vector); args.add(signature); args.add(candidateLimit); }
         args.addAll(List.of(query, candidateLimit, query, candidateLimit, normalizationFactor,
-                vectorWeight, rrfK, titleWeight, rrfK, contentWeight, rrfK, category, categoryWeight, rrfK, safeLimit));
+                vectorWeight, rrfK, titleWeight, rrfK, contentWeight, rrfK, focusWeight, rrfK, category, categoryWeight, rrfK, safeLimit));
+        // The focus route is independent of ANN/full-question trigram candidates. It can recover a
+        // rare action term whose document otherwise never enters the final reranking pool.
         List<KnowledgeSnippet> snippets = jdbcTemplate.query("""
-                WITH vector_candidates AS (
+                WITH focus_limit AS (SELECT ?::int AS n), query_terms AS (
+                    SELECT DISTINCT unnest(?::text[]) AS term
+                ), focus_matches AS (
+                    SELECT k.id, t.term,
+                           CASE WHEN POSITION(t.term IN lower(COALESCE(k.title,'')))>0 THEN 3.0 ELSE 1.0 END AS strength
+                    FROM knowledge_chunks k JOIN query_terms t
+                      ON POSITION(t.term IN lower(COALESCE(k.title,'')))>0
+                      OR POSITION(t.term IN lower(split_part(k.content,'参考：',1)))>0
+                ), term_weights AS (
+                    SELECT term, ln(1.0 + ((SELECT COUNT(*) FROM knowledge_chunks)+1.0)/(COUNT(*)+1.0)) AS idf
+                    FROM focus_matches GROUP BY term
+                ), focus_scores AS (
+                    SELECT m.id,SUM(m.strength*w.idf) AS score
+                    FROM focus_matches m JOIN term_weights w ON m.term=w.term GROUP BY m.id
+                ), focus_candidates AS (
+                    SELECT id,ROW_NUMBER() OVER (ORDER BY score DESC,id) AS focus_rank
+                    FROM (SELECT id,score FROM focus_scores ORDER BY score DESC,id LIMIT (SELECT n FROM focus_limit)) f
+                ), vector_candidates AS (
                     %s
                 ), keyword_title_candidates AS (
                     SELECT id, ROW_NUMBER() OVER (ORDER BY distance, id) AS title_rank
@@ -188,18 +318,22 @@ public class PgVectorKnowledgeService {
                     SELECT id FROM keyword_title_candidates
                     UNION
                     SELECT id FROM keyword_content_candidates
+                    UNION
+                    SELECT id FROM focus_candidates
                 ), candidate_ranks AS (
-                    SELECT ids.id, vector.vector_rank, title.title_rank, content.content_rank
+                    SELECT ids.id, vector.vector_rank, title.title_rank, content.content_rank, focus.focus_rank
                     FROM candidate_ids ids
                     LEFT JOIN vector_candidates vector ON vector.id = ids.id
                     LEFT JOIN keyword_title_candidates title ON title.id = ids.id
                     LEFT JOIN keyword_content_candidates content ON content.id = ids.id
+                    LEFT JOIN focus_candidates focus ON focus.id = ids.id
                 )
                 SELECT k.id, k.title, k.content, COALESCE(k.category, 'general') AS category,
                        (? * (
                            CASE WHEN ranks.vector_rank IS NULL THEN 0 ELSE ? / (? + ranks.vector_rank) END
                          + CASE WHEN ranks.title_rank IS NULL THEN 0 ELSE ? / (? + ranks.title_rank) END
                          + CASE WHEN ranks.content_rank IS NULL THEN 0 ELSE ? / (? + ranks.content_rank) END
+                         + CASE WHEN ranks.focus_rank IS NULL THEN 0 ELSE ? / (? + ranks.focus_rank) END
                          + CASE WHEN COALESCE(k.category, 'general') = ? THEN ? / (? + 1.0) ELSE 0 END
                        )) AS score
                 FROM knowledge_chunks k
@@ -229,6 +363,13 @@ public class PgVectorKnowledgeService {
         return safeEmbeddingDimension();
     }
 
+    public String retrievalSignature() {
+        var knowledge=properties.getKnowledge();
+        return String.format(Locale.ROOT,"%s:%s:%.6f:%.6f:%.6f:%d:%d",KnowledgeQueryFocus.VERSION,activeSignature(),
+                knowledge.getVectorWeight(),knowledge.getKeywordWeight(),knowledge.getCategoryWeight(),
+                knowledge.getRrfK(),knowledge.getRerankCandidateMultiplier());
+    }
+
     private double normalizedWeight(double weight) {
         return Math.max(0.0, weight);
     }
@@ -236,18 +377,19 @@ public class PgVectorKnowledgeService {
     private KnowledgeVectorPersistenceService.KnowledgeVectorRow vectorRow(String title, String content) {
         String safeTitle = title == null ? "" : title.trim();
         String safeContent = content == null ? "" : content.trim();
-        float[] embedding = embeddingService.embed(embeddingText(safeTitle, safeContent));
+        String signature = activeSignature();
+        var embedding = embeddingService.embedForSignatureWithUsage(embeddingText(safeTitle, safeContent), signature);
         return new KnowledgeVectorPersistenceService.KnowledgeVectorRow(
                 "manual-" + UUID.randomUUID(),
                 safeTitle,
                 safeContent,
                 inferCategory(safeTitle, safeContent),
-                embeddingService.toPgVector(embedding),
-                activeSignature(),
+                embeddingService.toPgVector(embedding.vector()),
+                signature,
                 chunker.contentHash(safeTitle, safeContent),
                 chunker.estimateTokens(safeContent),
                 "manual",
-                AppTime.now()
+                AppTime.now(), embedding.inputTokens(), embedding.totalTokens()
         );
     }
 
@@ -260,8 +402,12 @@ public class PgVectorKnowledgeService {
     public String configuredSignature() { return activeSignature(); }
 
     public boolean hasStaleEmbeddings() {
+        return hasStaleEmbeddings(activeSignature());
+    }
+
+    private boolean hasStaleEmbeddings(String signature) {
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject("SELECT EXISTS(SELECT 1 FROM knowledge_chunks WHERE embedding_signature IS DISTINCT FROM ?)",
-                Boolean.class, activeSignature()));
+                Boolean.class, signature));
     }
 
     private void requireCompatibleStorage() {
@@ -290,10 +436,11 @@ public class PgVectorKnowledgeService {
     }
 
     private int safeEmbeddingDimension() {
-        return Math.max(1, Math.min(properties.getKnowledge().getEmbeddingDim(), 2000));
+        int configured=embeddingService.activeDimension();
+        return Math.max(1, Math.min(configured>0?configured:properties.getKnowledge().getEmbeddingDim(), 2000));
     }
 
-    private record ExistingChunk(Long id, String chunkKey, String contentHash, String embeddingSignature) {}
+    private record ExistingChunk(Long id, String chunkKey, String contentHash, String embeddingSignature,String title,String content) {}
     private record EmbeddingColumn(String storageType, int dimension) {}
 
     @Transactional
@@ -334,7 +481,8 @@ public class PgVectorKnowledgeService {
         StringBuilder sql = new StringBuilder("""
             SELECT id, source, title, content, COALESCE(category, 'general') AS category,
                    COALESCE(token_count, 0) AS token_count, COALESCE(chunk_index, 0) AS chunk_index,
-                   content_hash, COALESCE(source_version, 'v1') AS source_version,
+                   embedding_input_tokens, embedding_total_tokens,
+                   content_hash, content_revision, COALESCE(source_version, 'v1') AS source_version,
                    source_updated_at, updated_at, COALESCE(hit_count, 0) AS hit_count, last_hit_at
             FROM knowledge_chunks
             """);
@@ -374,7 +522,7 @@ public class PgVectorKnowledgeService {
                 preview = preview.substring(0, 120) + "...";
             }
 
-            return new AdminKnowledgeChunkResponse(
+            var response = new AdminKnowledgeChunkResponse(
                     id,
                     chunkSource,
                     title,
@@ -392,6 +540,10 @@ public class PgVectorKnowledgeService {
                     rs.getLong("hit_count"),
                     lastHitAt == null ? null : lastHitAt.toLocalDateTime()
             );
+            response.setEmbeddingInputTokens(rs.getObject("embedding_input_tokens", Long.class));
+            response.setContentRevision(rs.getLong("content_revision"));
+            response.setEmbeddingTotalTokens(rs.getObject("embedding_total_tokens", Long.class));
+            return response;
         }, pageArgs.toArray());
 
         long safeTotal = total == null ? 0 : total;
@@ -438,23 +590,7 @@ public class PgVectorKnowledgeService {
     private record FilterSql(String whereClause, java.util.List<Object> args) {}
 
     private String inferCategory(String title, String content) {
-        String text = ((title == null ? "" : title) + " " + (content == null ? "" : content)).toLowerCase(Locale.ROOT);
-        if (containsAny(text, "减脂", "减肥", "控卡", "热量", "fat")) return "fat_loss";
-        if (containsAny(text, "增肌", "蛋白", "肌肉", "训练", "muscle")) return "muscle_gain";
-        if (containsAny(text, "油炸", "高油", "炸鸡", "烧烤", "烤肉", "红烧")) return "high_oil";
-        if (containsAny(text, "甜", "含糖", "奶茶", "饮料", "糖")) return "sugar";
-        if (containsAny(text, "蔬菜", "纤维", "绿叶菜", "维生素")) return "vegetable";
-        if (containsAny(text, "主食", "米饭", "面", "碳水", "红薯")) return "staple";
-        return "general";
-    }
-
-    private boolean containsAny(String text, String... keywords) {
-        for (String keyword : keywords) {
-            if (text.contains(keyword)) {
-                return true;
-            }
-        }
-        return false;
+        return KnowledgeCategoryClassifier.infer(title, content);
     }
 
     private String embeddingText(String title, String content) {

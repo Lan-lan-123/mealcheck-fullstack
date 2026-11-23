@@ -18,9 +18,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 @Service
 public class AssistantConversationService {
+    private final com.fasterxml.jackson.databind.ObjectMapper toolCallMapper = new com.fasterxml.jackson.databind.ObjectMapper();
     private final com.example.mealcheck.repository.UserAccountRepository users;
     private final AssistantConversationRepository conversationRepository;
     private final AssistantConversationMessageRepository messageRepository;
@@ -35,7 +37,7 @@ public class AssistantConversationService {
     @Transactional
     public AssistantConversation resolve(UserAccount user, Long conversationId, String firstQuestion) {
         if (conversationId != null) {
-            return conversationRepository.findByIdAndUser(conversationId, user).orElseThrow();
+            return owned(user, conversationId);
         }
         AssistantConversation conversation = new AssistantConversation();
         conversation.setUser(user);
@@ -63,7 +65,7 @@ public class AssistantConversationService {
     @Transactional(readOnly = true)
     public AssistantConversationDetailResponse detail(UserAccount user, Long conversationId, int limit, String before) {
         if (limit < 1 || limit > 100) throw new IllegalArgumentException("每页消息数量必须为 1 到 100");
-        AssistantConversation conversation = conversationRepository.findByIdAndUser(conversationId, user).orElseThrow();
+        AssistantConversation conversation = owned(user, conversationId);
         var pageable = PageRequest.of(0, limit + 1);
         List<AssistantConversationMessage> rows;
         if (before == null || before.isBlank()) rows = messageRepository.latestPage(conversation, pageable);
@@ -135,11 +137,43 @@ public class AssistantConversationService {
 
     @Transactional
     public Long append(AssistantConversation conversation,String role,String text,String requestId,String status) {
+        return appendWithTools(conversation, role, text, requestId, status, List.of());
+    }
+
+    private Long appendWithTools(AssistantConversation conversation, String role, String text, String requestId, String status,
+                                  List<com.example.mealcheck.dto.assistant.AssistantToolCall> toolCalls) {
+        return appendWithEvidence(conversation,role,text,requestId,status,toolCalls,List.of());
+    }
+    private Long appendWithEvidence(AssistantConversation conversation,String role,String text,String requestId,String status,
+                                  List<com.example.mealcheck.dto.assistant.AssistantToolCall> toolCalls,
+                                  List<com.example.mealcheck.dto.assistant.AssistantReference> references) {
+        return appendWithEvidence(conversation,role,text,requestId,status,toolCalls,references,null);
+    }
+    private Long appendWithEvidence(AssistantConversation conversation,String role,String text,String requestId,String status,
+                                  List<com.example.mealcheck.dto.assistant.AssistantToolCall> toolCalls,
+                                  List<com.example.mealcheck.dto.assistant.AssistantReference> references,
+                                  com.example.mealcheck.dto.assistant.AssistantResponse outcome) {
         AssistantConversationMessage message = new AssistantConversationMessage();
         message.setConversation(conversation);
         message.setRole(role);
         message.setText(text);
         message.setRequestId(requestId); message.setDeliveryStatus(status);
+        if(outcome!=null) {
+            var saved=toolCallMapper.createObjectNode().put("answerStatus",outcome.getAnswerStatus());
+            saved.put("reviewStatus",outcome.getReviewStatus());
+            saved.set("answerReasonCodes",toolCallMapper.valueToTree(outcome.getAnswerReasonCodes()));
+            if(outcome.getFailureCode()!=null)saved.put("failureCode",outcome.getFailureCode());
+            if(outcome.getUpstreamStatus()!=null)saved.put("upstreamStatus",outcome.getUpstreamStatus());
+            message.setOutcomeJson(saved.toString());
+        }
+        if (!toolCalls.isEmpty()) {
+            try { message.setToolCallsJson(toolCallMapper.writeValueAsString(toolCalls)); }
+            catch (com.fasterxml.jackson.core.JsonProcessingException error) { throw new IllegalStateException("Cannot save tool execution evidence", error); }
+        }
+        if (!references.isEmpty() && "assistant".equals(role) && "COMPLETE".equals(status)) {
+            try { message.setReferencesJson(toolCallMapper.writeValueAsString(references)); }
+            catch (com.fasterxml.jackson.core.JsonProcessingException error) { throw new IllegalStateException("Cannot save answer references",error); }
+        }
         messageRepository.save(message);
         conversation.setUpdatedAt(AppTime.now());
         conversationRepository.save(conversation);
@@ -148,10 +182,32 @@ public class AssistantConversationService {
 
     @Transactional
     public Long appendTurn(AssistantConversation conversation,String question,String answer,String requestId,String status) {
+        return appendTurn(conversation, question, answer, requestId, status, List.of());
+    }
+
+    @Transactional
+    public Long appendTurn(AssistantConversation conversation,String question,String answer,String requestId,String status,
+                           List<com.example.mealcheck.dto.assistant.AssistantToolCall> toolCalls) {
+        return appendTurn(conversation,question,answer,requestId,status,toolCalls,List.of());
+    }
+    @Transactional
+    public Long appendTurn(AssistantConversation conversation,String question,String answer,String requestId,String status,
+                           List<com.example.mealcheck.dto.assistant.AssistantToolCall> toolCalls,
+                           List<com.example.mealcheck.dto.assistant.AssistantReference> references) {
+        return appendTurn(conversation,question,answer,requestId,status,toolCalls,references,null);
+    }
+    @Transactional
+    public Long appendTurn(AssistantConversation conversation,String question,String answer,String requestId,String status,
+                           List<com.example.mealcheck.dto.assistant.AssistantToolCall> toolCalls,
+                           List<com.example.mealcheck.dto.assistant.AssistantReference> references,
+                           com.example.mealcheck.dto.assistant.AssistantResponse outcome) {
+        AssistantExecutionScope.preparePublication();
         var owner=users.findByIdForUpdate(conversation.getUser().getId()).orElseThrow(()->new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED));
         var current=conversationRepository.findByIdAndUser(conversation.getId(),owner).orElseThrow(()->new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND,"会话已删除"));
+        AssistantExecutionScope.guardPublication("COMPLETE".equals(status));
+        if("COMPLETE".equals(status))AiCallContext.guardTransactionCommit();
         append(current,"user",question,requestId,"COMPLETE");
-        return append(current,"assistant",answer,requestId,status);
+        return appendWithEvidence(current,"assistant",answer,requestId,status,toolCalls,references,outcome);
     }
 
     @Transactional
@@ -167,7 +223,7 @@ public class AssistantConversationService {
 
     @Transactional
     public void delete(UserAccount user, Long conversationId) {
-        AssistantConversation conversation = conversationRepository.findByIdAndUser(conversationId, user).orElseThrow();
+        AssistantConversation conversation = owned(user, conversationId);
         messageRepository.deleteByConversation(conversation);
         conversationRepository.delete(conversation);
     }
@@ -180,10 +236,42 @@ public class AssistantConversationService {
         return normalized.length() <= 24 ? normalized : normalized.substring(0, 24) + "...";
     }
 
+    private AssistantConversation owned(UserAccount user, Long conversationId) {
+        return conversationRepository.findByIdAndUser(conversationId, user)
+                .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.NOT_FOUND, "会话不存在"));
+    }
+
     private List<AssistantChatMessage> toChatMessages(List<AssistantConversationMessage> messages) {
         return messages.stream()
                 .map(message -> { var dto=new AssistantChatMessage(message.getRole(),message.getText());
-                    dto.setMessageId(message.getId()); dto.setRequestId(message.getRequestId()); dto.setDeliveryStatus(message.getDeliveryStatus()); return dto; })
+                    dto.setMessageId(message.getId()); dto.setRequestId(message.getRequestId()); dto.setDeliveryStatus(message.getDeliveryStatus());
+                    if("assistant".equals(message.getRole())) {
+                        var outcome=new com.example.mealcheck.dto.assistant.AssistantResponse(message.getText(),List.of());
+                        outcome.setReviewStatus("UNKNOWN");
+                        if("ERROR".equals(message.getDeliveryStatus()))outcome.degraded("MODEL_SERVICE_UNAVAILABLE",null);
+                        if(message.getOutcomeJson()!=null) {
+                            try {
+                                var saved=toolCallMapper.readTree(message.getOutcomeJson());
+                                outcome.setReviewStatus(saved.path("reviewStatus").asText("UNKNOWN"));
+                                String state=saved.path("answerStatus").asText();
+                                if("PARTIAL".equals(state))outcome.partial(toolCallMapper.convertValue(saved.path("answerReasonCodes"),new TypeReference<List<String>>() {}));
+                                else if("DEGRADED".equals(state))outcome.degraded(saved.path("failureCode").asText("MODEL_SERVICE_UNAVAILABLE"),saved.path("upstreamStatus").isInt()?saved.path("upstreamStatus").asInt():null);
+                                else if(!"COMPLETE".equals(state))outcome.partial(List.of("INVALID_SAVED_OUTCOME"));
+                            } catch(Exception malformed) {outcome.partial(List.of("INVALID_SAVED_OUTCOME"));}
+                        }
+                        dto.setOutcome(outcome);
+                    }
+                    if ("assistant".equals(message.getRole()) && "COMPLETE".equals(message.getDeliveryStatus()) && message.getReferencesJson()!=null) {
+                        try { dto.setReferences(toolCallMapper.readValue(message.getReferencesJson(),new TypeReference<List<com.example.mealcheck.dto.assistant.AssistantReference>>() {})); }
+                        catch (Exception malformed) { dto.setReferences(List.of()); }
+                    }
+                    if (message.getToolCallsJson() != null) {
+                        try { dto.setToolCalls(toolCallMapper.readValue(message.getToolCallsJson(),
+                                new com.fasterxml.jackson.core.type.TypeReference<List<com.example.mealcheck.dto.assistant.AssistantToolCall>>() {})); }
+                        catch (com.fasterxml.jackson.core.JsonProcessingException error) { throw new IllegalStateException("Cannot read tool execution evidence", error); }
+                    }
+                    return dto; })
                 .toList();
     }
 

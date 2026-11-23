@@ -1,4 +1,5 @@
 import http from 'k6/http';
+import { authHeaders } from './auth-headers.js';
 import { check, sleep } from 'k6';
 import exec from 'k6/execution';
 import { SharedArray } from 'k6/data';
@@ -127,7 +128,7 @@ export default function (data) {
   const iteration = exec.scenario.iterationInTest;
   const account = accounts[iteration % accounts.length];
   const key = `analysis-${data.run}-${iteration}`;
-  const headers = { Authorization: `Bearer ${account.token}` };
+  const headers = authHeaders(base, account.token);
   const start = Date.now();
   const deadline = start + taskTimeout * 1000;
   attempted.add(1);

@@ -1,12 +1,12 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/authTest.js'
 
 async function workspace(page, role, handler) {
   const requests = []
   const errors = []
   page.on('pageerror', error => errors.push(error.message))
   await page.addInitScript(role => {
-    localStorage.setItem('mealcheck_token', 'data-isolation-test')
-    localStorage.setItem('mealcheck_user', JSON.stringify({ username: 'tester', role }))
+
+    sessionStorage.setItem('mealcheck_fixture_user', JSON.stringify({ username: 'tester', role }))
   }, role)
   await page.route('**/api/**', async route => {
     const request = route.request(), url = new URL(request.url())
@@ -14,9 +14,11 @@ async function workspace(page, role, handler) {
     requests.push({ path: url.pathname, method: request.method(), query: Object.fromEntries(url.searchParams) })
     const send = (data, status = 200) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(data) })
     if (await handler?.({ request, url, send })) return
+    if (url.pathname === '/api/admin/knowledge/indexing') return send({ activeMode: 'LOCAL', semanticAvailable: false, semanticModel: 'qwen3.7-text-embedding-flash', dimension: 512, job: null })
+    if (url.pathname === '/api/admin/knowledge/embedding-settings') return send({ version: 0, activeMode: 'LOCAL', active: null, draft: null, rebuildRequired: false })
     if (url.pathname === '/api/profile/goals/current') return send({ goalType: 'balanced', note: '已保存的目标', endDate: '' })
     if (url.pathname === '/api/admin/users') return send({ content: [{ id: 2, username: 'page-user', role: 'USER' }], page: Number(url.searchParams.get('page') || 0), totalElements: 40, totalPages: 2 })
-    if (url.pathname === '/api/meals') return send({ content: [], page: Number(url.searchParams.get('page') || 0), totalElements: 12, totalPages: 3 })
+    if (['/api/meals', '/api/meals/summaries'].includes(url.pathname)) return send({ content: [], page: Number(url.searchParams.get('page') || 0), totalElements: 12, totalPages: 3 })
     if (url.pathname === '/api/meals/trends') return send({ totalMeals: 0, dailyScores: [], commonFoods: [], commonRisks: [] })
     if (url.pathname === '/api/admin/dashboard') return send({ overview: { userCount: 40 } })
     if (url.pathname === '/api/health') return send({ status: 'UP' })
@@ -93,7 +95,7 @@ test('record filters and pagination preserve an unsaved goal and fetch only reco
   await expect.poll(() => reads(state).filter(item => item.query.minScore === '80').length).toBe(1)
   await page.getByRole('button', { name: '下一页', exact: true }).click()
   await expect(page.locator('.pagination')).toContainText('第 2 / 3 页')
-  expect(reads(state).slice(before).every(item => ['/api/meals', '/api/meals/coverage', '/api/profile/behavior-goals'].includes(item.path))).toBe(true)
+  expect(reads(state).slice(before).every(item => ['/api/meals', '/api/meals/summaries', '/api/meals/coverage', '/api/profile/behavior-goals'].includes(item.path))).toBe(true)
   await page.getByRole('button', { name: '饮食目标', exact: true }).click()
   await expect(note).toHaveValue('尚未保存：每天增加蔬菜')
   await expect(page.getByRole('combobox', { name: '当前饮食目标' })).toHaveValue('light')

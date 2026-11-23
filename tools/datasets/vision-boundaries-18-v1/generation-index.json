@@ -1,0 +1,97 @@
+{
+  "mode": "built-in image_gen",
+  "generatedOn": "2026-10-24",
+  "note": "Intermittent image-generation HTTP403 failures were retried; all 18 final images were visually inspected before any recognition-model evaluation. No CLI fallback was used. Local source directories are redacted as <LOCAL_GENERATED_IMAGES>; original image filenames are retained.",
+  "images": [
+    {
+      "id": "leftover-01",
+      "sourcePath": "<LOCAL_GENERATED_IMAGES>/exec-f5c8319f-9cb7-49af-b304-f79481998972.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: independent synthetic MealCheck vision evaluation photograph, case leftover-01. Create exactly ONE realistic ordinary smartphone photo, square frame, no montage or panels. Subject: a large plain white dinner plate on a wooden dining table, almost empty, with a tiny but clearly identifiable loose cluster of about a spoonful of cooked white rice left near the edge. Most of the plate is bare. The rice grains must be unambiguously visible and edible; this is small leftover food, not a stain. Natural daylight, realistic slight imperfections, neutral overhead view, no artistic styling. No other food, no people, no text, no branding, no watermark. Do not print the case identifier or any answer label in the image."
+    },
+    {
+      "id": "leftover-02",
+      "sourcePath": "<LOCAL_GENERATED_IMAGES>/exec-39d2c94b-d5a0-445f-aa1f-642b12d1cf07.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A large nearly empty white plate on a pale dining table, containing only TWO small unmistakable cooked broccoli florets near one rim. More than 90 percent of plate surface is empty. The green florets are real clearly identifiable edible leftovers, not stains. No other food."
+    },
+    {
+      "id": "leftover-03",
+      "sourcePath": "<LOCAL_GENERATED_IMAGES>/exec-dc7e1311-8dd8-4798-9b39-9d22bd7e7dff.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A nearly empty gray ceramic plate on a wooden table, with one small bite-sized chunk of bread crust and its pale soft interior clearly visible. Very little edible food remains but the bread texture must be unmistakable. No butter, spread or other food."
+    },
+    {
+      "id": "leftover-04",
+      "sourcePath": "<LOCAL_GENERATED_IMAGES>/exec-e903e67a-33ca-4475-8ab4-ece31ca6e37f.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. An otherwise empty white ceramic noodle bowl on a simple dining table, containing only three or four long strands of cooked plain wheat noodles at the bottom. The noodle strands are distinct and clearly visible, not sauce streaks. No toppings, broth or other food."
+    },
+    {
+      "id": "leftover-05",
+      "sourcePath": "<LOCAL_GENERATED_IMAGES>/exec-ea7c192b-c603-4a47-9f18-2aa3e64edc80.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A completely eaten white dinner plate on a wooden table. Only very thin flat dry reddish sauce streaks and smears adhere to the plate surface; no chunks, no rice, no vegetables, no crumbs and no pooled sauce. Every visible mark is a flat stain, nothing that forms an edible portion. Clearly empty used tableware."
+    },
+    {
+      "id": "leftover-06",
+      "sourcePath": "<LOCAL_GENERATED_IMAGES>/exec-cb85bfa0-91ac-48c2-8cf1-e96feef12924.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. An empty brushed stainless steel cafeteria tray, with only faint greasy brown translucent wipe marks and dry circular sauce residue in its empty compartments. No solid food, no crumbs, no pieces, no liquid pooling. Clearly used empty tableware, not a meal. Natural side daylight."
+    },
+    {
+      "id": "occlusion-01",
+      "sourcePath": "<LOCAL_GENERATED_IMAGES>/exec-ae0ee1a9-d9fd-4fde-9574-072518568fbd.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A white rice bowl on a dining table. A large folded opaque plain napkin lies diagonally over about TWO THIRDS of the bowl opening. In the remaining third, cooked white rice grains are clearly visible and identifiable. Do not show or imply any other food. The image is sharp, only part of the contents is visible."
+    },
+    {
+      "id": "occlusion-02",
+      "sourcePath": "<LOCAL_GENERATED_IMAGES>/exec-b9de8c7f-aaa2-452b-9a7e-668bddad4bb9.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A white shallow plate of leafy cooked bok choy on a dining table. A large opaque metal lid and a broad serving spoon obscure about THREE QUARTERS of the plate. At the unobstructed edge a few green bok choy leaves and their white stems remain clearly identifiable. No other food is visible. Sharp realistic photo."
+    },
+    {
+      "id": "occlusion-03",
+      "sourcePath": "<LOCAL_GENERATED_IMAGES>/exec-8ae5c053-2ee1-4bd5-a274-f320e14a8f9c.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A deep bowl on a table viewed from a low oblique angle. A large plain opaque folded napkin conceals almost the entire opening and about 95 percent of the contents. Only a tiny out-of-focus beige patch is visible through a narrow gap; no grain structure, ingredients, shape or food identity can be determined from that patch. Keep the bowl, table and napkin in focus so the limitation is specifically obstruction, not general darkness. No identifiable food elsewhere."
+    },
+    {
+      "id": "occlusion-04",
+      "sourcePath": "<LOCAL_GENERATED_IMAGES>/exec-e0608dcb-da68-4a89-85a9-41a37c9e2422.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. An ordinary dinner plate almost completely concealed under a large opaque stainless steel serving lid. A folded cloth further covers its only narrow edge gap. Through that tiny gap one sees a shapeless unidentifiable tan-orange sliver, with no distinguishing ingredient detail. At least 95 percent of the contents is hidden. Bright enough to assess the obstruction, no recognizable edible items elsewhere, no person."
+    },
+    {
+      "id": "occlusion-05",
+      "sourcePath": "<LOCAL_GENERATED_IMAGES>/exec-756022ba-30b0-41a4-a01e-5f4c99b9e171.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A plain white ceramic food bowl on a wooden dining table with a perfectly fitted fully opaque metal lid, completely closed. Absolutely none of the contents can be seen. Sharp daylight photo of bowl and lid. No labels, no other food or objects. This must not be an open or transparently covered bowl. Contents and whether food is present are visually unknowable."
+    },
+    {
+      "id": "occlusion-06",
+      "sourcePath": "<LOCAL_GENERATED_IMAGES>/exec-bb3bcadf-bee6-4c6e-a79a-e9e3e0a19f18.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A shallow ceramic dish on a light dining table viewed obliquely. The ENTIRE dish opening and contents are hidden underneath a thick opaque folded kitchen cloth, tucked all around the rim. Only part of the ceramic rim and dish side are visible. No food or ingredients can be seen anywhere. Good light and sharp focus show the occluding cloth clearly. No text."
+    },
+    {
+      "id": "package-01",
+      "sourcePath": "<LOCAL_GENERATED_IMAGES>/exec-56ffb746-3cc2-4d07-875b-5797bd0b406e.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A sealed transparent plastic food bag containing two clearly visible slices of whole wheat bread. A small plain white label on the bag reads exactly 全麦面包 in large legible black Chinese characters. No brand and no nutrition numbers. The bread is visibly inside the sealed bag, with an ordinary table backdrop. Keep package text limited to the specified food name."
+    },
+    {
+      "id": "package-02",
+      "sourcePath": "<LOCAL_GENERATED_IMAGES>/exec-a330964f-9181-4dc7-80be-563998f13f2f.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A single unopened generic milk carton on a kitchen table, no other food. The carton has simple neutral white and blue packaging, a sealed cap, and a prominent clear black Chinese label reading exactly 纯牛奶. No brand, no nutrition table, no volume or other numerical text. Realistic commercial carton material. The label must be readable, not mirrored."
+    },
+    {
+      "id": "package-03",
+      "sourcePath": "<LOCAL_GENERATED_IMAGES>/exec-b9d2a587-ebca-4dc9-a8b3-9b61d42fb799.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A single fully opaque unbranded sealed matte gray food pouch standing on a dining table. No transparent window and absolutely no writing, picture, branding, readable label or nutrition text. The sealed pouch shape is generic and does not reveal the contents. Nothing edible is visible. Do not add food illustrations, cookies, bread, snacks or loose food around it."
+    },
+    {
+      "id": "package-04",
+      "sourcePath": "<LOCAL_GENERATED_IMAGES>/exec-266b48db-7fb5-4b8d-a842-40358f67a725.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A generic opaque white paper takeaway cup on a table with a fully closed opaque lid, no straw hole revealing contents. Any small label is completely covered by blank masking tape so there are no readable words or logos. No liquid or contents can be seen. The drink identity, whether it has milk or sugar, and amount are unknowable from the image. No other food or drink."
+    },
+    {
+      "id": "package-05",
+      "sourcePath": "<LOCAL_GENERATED_IMAGES>/exec-fcc1d7be-bb87-4da1-8c0b-c09d3d4e403b.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. A fully OPEN empty clear plastic bread bag on a wooden table. The bag is pulled wide open and laid flat so the interior is plainly visible and demonstrably EMPTY. No bread, no crumbs, no food and no label. Realistic transparent crinkled plastic. The image must clearly show there is nothing inside, rather than a closed opaque bag."
+    },
+    {
+      "id": "package-06",
+      "sourcePath": "<LOCAL_GENERATED_IMAGES>/exec-8dfe574c-59c6-4304-beb0-8aa10741b025.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: one independent synthetic MealCheck vision evaluation photo. Create exactly ONE ordinary realistic smartphone photograph, square composition, natural household daylight, realistic food and container textures, no montage or split panels, no people, no watermark, no branding. The scene must look candid, not like an infographic or illustration. Do not print a case identifier, test outcome or any instructional label in the photograph. An empty rectangular transparent plastic takeaway food box with its clear lid fully open beside it, on a dining table. Every part of the empty inside and corners is plainly visible. No food, no residues, no crumbs, no labels. Bright natural light shows the transparent material and bare table behind it. It must clearly be an empty container."
+    }
+  ]
+}

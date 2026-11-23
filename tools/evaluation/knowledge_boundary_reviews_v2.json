@@ -1,0 +1,44 @@
+{
+  "independentlyAnnotated": false,
+  "decisions": [
+    {
+      "caseId": "rag-018",
+      "previousKnowledgeId": "713a793c3cb02c7fb807c3dfbbc7e27300f3b9e31b478293682deb630e7cda2d",
+      "newKnowledgeId": "0b0ff0b4b67d28d63f65926e624a6414a00d3f2ad193b79644b384e06e5ebb00",
+      "relevance": 1,
+      "quotes": [
+        "如果原问题是饭菜经常剩很多，则先尝试合适的小份。"
+      ],
+      "rationale": "主代理全文复核新片：末段新增根据剩饭尝试小份的观察，与份量调整相关，原0级不再适用；但未提供主食实际份量、其他餐次与个人需求的完整判断，标为背景，不加入任何必要证据组。",
+      "reviewer": "Codex primary assistant, not independent human",
+      "corpusSha256": "09f60831a24bce93982862e885fa97dcacc82675f05b1c2436e45834496a39b7",
+      "newManifestSha256": "3606c224cc10c09fc0a56a74209441b7e1e66bb657d0fe05132ffed2447beea7"
+    },
+    {
+      "caseId": "rag-103",
+      "previousKnowledgeId": "394460d288d9d801faf6c63b23f0ec9906215487d959c18a5ed72f7b9351a0a6",
+      "newKnowledgeId": "77c2539164b4dbe75c6dca246987279f300ca5e03525f1e1e694ff82409d0783",
+      "relevance": 0,
+      "quotes": [
+        "不能仅靠某张照片看起来干爽，就给出确定的低油结论。"
+      ],
+      "rationale": "主代理全文复核新片：内容涉及称重口径、实际原料分项与用油外观边界，没有解释几颗青豆蛋花是否足够搭配，也未提供补足食材的证据；对本题仍无实质回答支持，确认0级。",
+      "reviewer": "Codex primary assistant, not independent human",
+      "corpusSha256": "09f60831a24bce93982862e885fa97dcacc82675f05b1c2436e45834496a39b7",
+      "newManifestSha256": "3606c224cc10c09fc0a56a74209441b7e1e66bb657d0fe05132ffed2447beea7"
+    },
+    {
+      "caseId": "rag-161",
+      "previousKnowledgeId": "45c2ae82b43670918e8157c85827065965913d2445ce4105f49c0a8fa9cb361d",
+      "newKnowledgeId": "308e41ca4c7791bb0f1eebf42e387b87bf28f1bfe6cfb7c8e520e0edeb05c843",
+      "relevance": 0,
+      "quotes": [
+        "外带粥需要稳妥容器、可坐下食用的地点以及符合要求的保存条件。"
+      ],
+      "rationale": "主代理全文复核新片：内容为粥的采购、搭配、盛放与进餐地点，未说明照片缺少碗大小和稠度时能否确定主食重量；对本题确认0级。",
+      "reviewer": "Codex primary assistant, not independent human",
+      "corpusSha256": "09f60831a24bce93982862e885fa97dcacc82675f05b1c2436e45834496a39b7",
+      "newManifestSha256": "3606c224cc10c09fc0a56a74209441b7e1e66bb657d0fe05132ffed2447beea7"
+    }
+  ]
+}

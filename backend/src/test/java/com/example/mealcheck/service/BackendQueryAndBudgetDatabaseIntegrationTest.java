@@ -4,8 +4,8 @@ import com.example.mealcheck.entity.UserAccount;
 import com.example.mealcheck.repository.*;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.*;
@@ -53,12 +53,97 @@ class BackendQueryAndBudgetDatabaseIntegrationTest {
         org.springframework.test.util.ReflectionTestUtils.setField(budgets,"globalDailyCalls",100000);
         jdbc.execute("TRUNCATE ai_call_permits");
         jdbc.execute("TRUNCATE ai_call_starts");
+        jdbc.execute("TRUNCATE ai_call_waiters");
         org.springframework.test.util.ReflectionTestUtils.setField(permits,"maxStartsPerMinute",120);
+        org.springframework.test.util.ReflectionTestUtils.setField(permits,"minStartIntervalMillis",0L);
+        org.springframework.test.util.ReflectionTestUtils.setField(permits,"maxAdmissionWaiters",1024);
         jdbc.execute("TRUNCATE ai_budget_daily,users CASCADE");
         user=create("query-user");other=create("other-user");
     }
+    @Test void admissionQueueIsBoundedAndCancelledHeadDoesNotBlockSuccessors() {
+        org.springframework.test.util.ReflectionTestUtils.setField(permits,"maxAdmissionWaiters",2);
+        UUID first=permits.enqueue(false,60000),second=permits.enqueue(false,60000);
+        assertThatThrownBy(()->permits.enqueue(false,60000)).isInstanceOf(RemoteCallGuard.RemoteCallRejectedException.class);
+        permits.cancelWaiter(first);
+        assertThat(permits.tryAcquireQueued(3,60000,false,second).permit()).isNotNull();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_call_waiters",Long.class)).isZero();
+    }
+    @Test void queuedAdmissionsRespectOrderReservedSlotsExpiryAndCancellation() {
+        UUID first=permits.enqueue(true,60000), second=permits.enqueue(true,60000), interactive=permits.enqueue(false,60000);
+        assertThat(permits.tryAcquireQueued(3,60000,true,second).reason()).isEqualTo("queued");
+        var accepted=permits.tryAcquireQueued(3,60000,true,first);
+        assertThat(accepted.permit()).isNotNull();
+        // A waiting background call cannot block the foreground reservation.
+        assertThat(permits.tryAcquireQueued(3,60000,false,interactive).permit()).isNotNull();
+        assertThat(permits.tryAcquireQueued(3,60000,true,second).permit()).isNull();
+        permits.cancelWaiter(second);
+        UUID expired=permits.enqueue(false,60000);
+        jdbc.update("UPDATE ai_call_waiters SET expires_at=clock_timestamp()-INTERVAL '1 second' WHERE id=?",expired);
+        assertThatThrownBy(()->permits.tryAcquireQueued(3,60000,false,expired)).isInstanceOf(RemoteCallGuard.LocalAdmissionDeadlineException.class);
+        UUID next=permits.enqueue(false,60000);
+        assertThat(permits.tryAcquireQueued(3,60000,false,next).permit()).isNotNull();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_call_waiters",Long.class)).isZero();
+    }
+    @Test void fiftyMixedLocalPipelinesReleaseEveryPermitAndTicket() throws Exception {
+        org.springframework.test.util.ReflectionTestUtils.setField(permits,"maxStartsPerMinute",10000);
+        org.springframework.test.util.ReflectionTestUtils.setField(permits,"minStartIntervalMillis",5L);
+        var gate=new AiCallConcurrency(permits,new io.micrometer.core.instrument.simple.SimpleMeterRegistry(),10);
+        var pool=Executors.newFixedThreadPool(50);var start=new CountDownLatch(1);
+        var active=new java.util.concurrent.atomic.AtomicInteger();var peak=new java.util.concurrent.atomic.AtomicInteger();
+        try {
+            var results=new ArrayList<Future<Integer>>();
+            for(int i=0;i<50;i++) {
+                final boolean background=i%2==0;
+                results.add(pool.submit(()->{
+                    start.await();
+                    try(var context=AiCallContext.restore(new AiCallContext.Context(1L,System.nanoTime()+Duration.ofSeconds(45).toNanos(),null,background))) {
+                        for(int phase=0;phase<3;phase++) {
+                            var id=gate.acquire(Duration.ofSeconds(30));
+                            peak.accumulateAndGet(active.incrementAndGet(),Math::max);
+                            try { Thread.sleep(5); } finally { active.decrementAndGet();gate.release(id); }
+                        }
+                    }
+                    return 3;
+                }));
+            }
+            start.countDown();int phases=0;for(var result:results)phases+=result.get(60,TimeUnit.SECONDS);
+            assertThat(phases).isEqualTo(150);assertThat(peak.get()).isBetween(1,10);
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_call_waiters",Long.class)).isZero();
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_call_permits",Long.class)).isZero();
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_call_starts",Long.class)).isEqualTo(150);
+        } finally { pool.shutdownNow(); }
+    }
     UserAccount create(String name) { var u=new UserAccount();u.setUsername(name);u.setPasswordHash("hash");return users.saveAndFlush(u); }
     String key() { return "user:"+user.getId(); }
+    @Test void pacedAdmissionsSurviveReleaseAndDoNotReserveBlockedCalls() {
+        org.springframework.test.util.ReflectionTestUtils.setField(permits,"minStartIntervalMillis",1000L);
+        var first=permits.tryAcquire(10,60000,false);
+        assertThat(first.permit()).isNotNull();
+        permits.release(first.permit());
+        var blocked=permits.tryAcquire(10,60000,false);
+        assertThat(blocked.reason()).isEqualTo("pacing");
+        assertThat(blocked.permit()).isNull();
+        assertThat(blocked.retryMillis()).isBetween(1L,1000L);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_call_permits",Long.class)).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_call_starts",Long.class)).isEqualTo(1);
+        jdbc.update("UPDATE ai_call_starts SET started_at=clock_timestamp()-INTERVAL '2 seconds'");
+        assertThat(permits.tryAcquire(10,60000,true).permit()).isNotNull();
+    }
+
+    @Test void simultaneousInstancesShareOnePacingWindow() throws Exception {
+        org.springframework.test.util.ReflectionTestUtils.setField(permits,"minStartIntervalMillis",60000L);
+        var pool=Executors.newFixedThreadPool(8);
+        var start=new CountDownLatch(1);
+        try {
+            List<Future<AiCallPermitStore.Admission>> results=new ArrayList<>();
+            for(int i=0;i<8;i++) results.add(pool.submit(()->{start.await();return permits.tryAcquire(10,60000,false);}));
+            start.countDown();
+            int accepted=0;
+            for(var result:results) if(result.get(20,TimeUnit.SECONDS).permit()!=null) accepted++;
+            assertThat(accepted).isEqualTo(1);
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_call_starts",Long.class)).isEqualTo(1);
+        } finally { pool.shutdownNow(); }
+    }
     AiBudgetStore.Reservation reserve(BigDecimal limit,BigDecimal amount) { return budgets.reserve(key(),user.getId(),day,20,limit,amount,3600); }
 
     @Test void concurrentReservationsCannotExceedDailyCallLimit() throws Exception {
@@ -179,7 +264,9 @@ class BackendQueryAndBudgetDatabaseIntegrationTest {
         var oldest=conversations.detail(user,id,2,middle.getNextBefore());
         assertThat(oldest.getMessages()).extracting(m->m.getText()).containsExactly("message-1");
         assertThat(oldest.isHasMore()).isFalse();assertThat(oldest.getNextBefore()).isNull();
-        assertThatThrownBy(()->conversations.detail(other,id,2,null)).isInstanceOf(NoSuchElementException.class);
+        assertThatThrownBy(()->conversations.detail(other,id,2,null))
+                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                .satisfies(error->assertThat(((org.springframework.web.server.ResponseStatusException)error).getStatusCode().value()).isEqualTo(404));
         assertThatThrownBy(()->conversations.detail(user,conversation(user),2,latest.getNextBefore())).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(()->conversations.detail(user,id,101,null)).isInstanceOf(IllegalArgumentException.class);
     }

@@ -21,10 +21,8 @@ public class MealReportInvalidationService {
             jdbc.update("""
                 UPDATE weekly_report_jobs SET status='STALE',version=version+1,updated_at=CURRENT_TIMESTAMP
                 WHERE user_id=? AND status<>'STALE'
-                  AND CAST(created_at AT TIME ZONE ? AT TIME ZONE ? AS date)>=?
-                  AND CAST(created_at AT TIME ZONE ? AT TIME ZONE ? AS date)-(days-1)<=?
-                """, userId, com.example.mealcheck.util.AppTime.storageZone().getId(), com.example.mealcheck.util.AppTime.businessZone().getId(), day,
-                com.example.mealcheck.util.AppTime.storageZone().getId(), com.example.mealcheck.util.AppTime.businessZone().getId(), day);
+                  AND report_week>=? AND report_week-(days-1)<=?
+                """, userId, day, day);
             jdbc.update("""
                 UPDATE weekly_report_snapshots SET stale=true,invalidated_at=CURRENT_TIMESTAMP
                 WHERE user_id=? AND stale=false AND (period_start IS NULL OR period_end IS NULL OR (period_start<=? AND period_end>=?))

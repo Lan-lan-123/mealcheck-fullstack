@@ -1,0 +1,34 @@
+{
+  "status": "PREPARATION_ONLY_NOT_EXECUTED",
+  "createdAt": "2026-10-24T08:08:39.101288+00:00",
+  "files": {
+    "tools/evaluation/full_chain_pilot10_v1.json": {
+      "bytes": 107982,
+      "sha256": "71777686868dd7acf5e761d097867f8897ba900a8a3bf245f2c408523986b19f"
+    },
+    "deploy/FULL_CHAIN_PILOT10_PLAN_20261024.md": {
+      "bytes": 6299,
+      "sha256": "00db94539cabdcf0767de993809e97787c2d101a66057f2826459a18e8c65304"
+    },
+    "backend/src/main/resources/knowledge/rag_eval_cases.json": {
+      "bytes": 1562585,
+      "sha256": "97abed1849e64fc89446c95d4f23066c23706ab4341c4a093889dc3cb6e49b87"
+    },
+    "backend/src/main/resources/knowledge/rag_chunking_eval_suite.json": {
+      "bytes": 157569,
+      "sha256": "8c8684aeb86afd20c89ebc01a87e7cebb73a4dfb9c13db11d830649e7d872162"
+    },
+    "backend/src/main/resources/knowledge/rag_eval_splits.json": {
+      "bytes": 2420,
+      "sha256": "57cf42ff9a81ec12dcc4099632b80567d16c9358e803f0ed4f844603f0d6657b"
+    },
+    "backend/src/main/resources/knowledge/diet_guides.md": {
+      "bytes": 1419042,
+      "sha256": "09f60831a24bce93982862e885fa97dcacc82675f05b1c2436e45834496a39b7"
+    },
+    "backend/src/main/resources/knowledge/diet_guides_metadata.json": {
+      "bytes": 135168,
+      "sha256": "0927cf4a8366a07bedd730986e108d5e0a1c3c9b80bf2b5a7c698be2b0d18f79"
+    }
+  }
+}

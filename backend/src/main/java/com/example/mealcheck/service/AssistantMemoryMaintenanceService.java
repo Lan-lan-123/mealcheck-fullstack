@@ -25,7 +25,7 @@ public class AssistantMemoryMaintenanceService {
         this.store=store;this.embeddings=embeddings;this.compression=compression;this.properties=properties;this.executor=executor;this.metrics=metrics;
     }
     public String signature() { return embeddings.signature()+":"+compression.signatureSuffix(); }
-    public long request() { return store.request(signature(),properties.getKnowledge().getEmbeddingDim(),compression.storageType().sqlName()); }
+    public long request() { return store.request(signature(),embeddings.activeDimension(),compression.storageType().sqlName()); }
     public void retry(long id) { store.retry(id,signature()); }
     @Scheduled(fixedDelayString="${mealcheck.assistant-memory.maintenance-poll-ms:5000}",initialDelayString="${mealcheck.assistant-memory.initial-delay-ms:5000}")
     public void tick() {
@@ -42,7 +42,7 @@ public class AssistantMemoryMaintenanceService {
         if (work==null) return;
         try (var scope=AiCallContext.systemOperation(Duration.ofSeconds(properties.getAiBudget().getOperationTimeoutSeconds()))) {
             for (var fact:store.pending(work,5)) {
-                String vector=embeddings.toPgVector(embeddings.embed(fact.text()));
+                String vector=embeddings.toPgVector(embeddings.embedForSignature(fact.text(),work.signature()));
                 if (!store.stage(work,fact,vector)) return;
             }
             if (store.activate(work)) metrics.counter("mealcheck.assistant.memory.rebuild","outcome","success").increment();

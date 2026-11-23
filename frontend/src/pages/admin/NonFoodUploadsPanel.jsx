@@ -1,3 +1,4 @@
+import Button from '../../components/Button'
 import { formatTime, Pagination } from './AdminUi'
 
 export default function NonFoodUploadsPanel({ applyNonFoodFilters, defaultNonFoodFilters, loading, nonFoodFiltersDraft, nonFoodPageData, nonFoodSize, nonFoodUploads, setNonFoodFilters, setNonFoodFiltersDraft, setNonFoodPage, setNonFoodSize }) {
@@ -16,8 +17,8 @@ export default function NonFoodUploadsPanel({ applyNonFoodFilters, defaultNonFoo
               <input type="checkbox" checked={nonFoodFiltersDraft.blockedOnly} onChange={e => setNonFoodFiltersDraft({ ...nonFoodFiltersDraft, blockedOnly: e.target.checked })} />
               只看限制中用户
             </label>
-            <button className="secondary-btn" type="submit">筛选</button>
-            <button className="secondary-btn" type="button" onClick={() => { setNonFoodFiltersDraft(defaultNonFoodFilters); setNonFoodFilters(defaultNonFoodFilters); setNonFoodPage(0) }}>重置</button>
+            <Button variant="secondary" className="secondary-btn" type="submit">筛选</Button>
+            <Button variant="secondary" className="secondary-btn" type="button" onClick={() => { setNonFoodFiltersDraft(defaultNonFoodFilters); setNonFoodFilters(defaultNonFoodFilters); setNonFoodPage(0) }}>重置</Button>
           </form>
 
           <div className="admin-table-wrap">

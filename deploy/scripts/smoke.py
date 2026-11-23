@@ -1,4 +1,9 @@
 """Exercise a running release using a temporary account; never invokes AI."""
+
+import sys as _auth_sys
+from pathlib import Path as _AuthPath
+_auth_sys.path.insert(0, str(_AuthPath(__file__).resolve().parents[2] / 'tools'))
+import cookie_http as _auth_http
 import argparse
 import json
 import re
@@ -14,7 +19,7 @@ def check(base, path, method="GET", body=None, token=None, expected=200, extra_h
     request = urllib.request.Request(base.rstrip("/") + path, method=method,
                                      data=json.dumps(body).encode() if body is not None else None, headers=headers)
     try:
-        with urllib.request.urlopen(request, timeout=15) as response:
+        with _auth_http.urlopen(request, timeout=15) as response:
             status, raw = response.status, response.read()
     except urllib.error.HTTPError as error:
         status, raw = error.code, error.read()

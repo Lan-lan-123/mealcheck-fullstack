@@ -8,5 +8,9 @@ public record MealCorrectionRequest(@Min(0) long expectedRevision,
         @NotEmpty @Size(max=30) List<@NotNull @Valid CorrectedFood> foods,
         @NotBlank @Size(max=500) String reason) {
     public record CorrectedFood(@NotBlank @Size(max=100) String name,
-            @NotBlank @Pattern(regexp="staple|protein|vegetable|fruit|dairy|soup|drink|dessert|fried|oily|other") String category) { }
+            @NotBlank @Pattern(regexp="staple|protein|vegetable|fruit|dairy|soup|drink|dessert|fried|oily|other") String category,
+            @Valid FoodAttributes attributes) {
+        public CorrectedFood(String name, String category) { this(name, category, null); }
+        public FoodItem toFoodItem(String note) { return new FoodItem(name.trim(), category, 1.0, note, attributes); }
+    }
 }

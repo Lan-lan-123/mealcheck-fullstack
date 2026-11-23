@@ -8,10 +8,10 @@ import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -39,7 +39,7 @@ import static org.mockito.Mockito.*;
         "spring.jpa.properties.hibernate.generate_statistics=true"})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-@Import({AdminMealQueryService.class, AdminAnalyticsQueryService.class, AdminQueryOptimizationDatabaseIntegrationTest.Beans.class})
+@Import({AdminMealQueryService.class, UserMealQueryService.class, AdminAnalyticsQueryService.class, AdminQueryOptimizationDatabaseIntegrationTest.Beans.class})
 @Testcontainers
 class AdminQueryOptimizationDatabaseIntegrationTest {
     @Container static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(
@@ -53,8 +53,10 @@ class AdminQueryOptimizationDatabaseIntegrationTest {
         @Bean ObjectMapper objectMapper() { return new ObjectMapper(); }
     }
     @Autowired AdminMealQueryService meals;
+    @Autowired UserMealQueryService userMeals;
+    @Autowired org.springframework.transaction.PlatformTransactionManager transactions;
     @Autowired AdminAnalyticsQueryService analytics;
-    @SpyBean JdbcTemplate jdbc;
+    @MockitoSpyBean JdbcTemplate jdbc;
     @Autowired EntityManagerFactory entityManagerFactory;
     long alice, other;
     final LocalDate day = LocalDate.of(2026, 10, 9);
@@ -81,6 +83,63 @@ class AdminQueryOptimizationDatabaseIntegrationTest {
         assertThat(next.getContent()).extracting(AdminMealRecordResponse::getId).containsExactly(first);
         assertThat(next.getContent().get(0).getFoodNames()).containsExactly("米饭");
         assertThat(entityManagerFactory.unwrap(SessionFactory.class).getStatistics().getEntityLoadCount()).isZero();
+    }
+
+    @Test void userSummaryUsesActualMealDateStableOrderAndOnlySixFoodNamesWithoutLoadingEntities() throws Exception {
+        var start = AppTime.startOfDay(day);
+        String foods = java.util.stream.IntStream.rangeClosed(1, 8)
+                .mapToObj(i -> "{\"name\":\"food-" + i + "\",\"notes\":\"long description\"}")
+                .collect(java.util.stream.Collectors.joining(",", "[", "]"));
+        long first = meal(alice, start.minusDays(2), 88, foods);
+        long second = meal(alice, start.minusDays(3), 90, "[]");
+        jdbc.update("UPDATE meal_records SET occurred_at=?,goal='balanced' WHERE id IN (?,?)", start.plusHours(1), first, second);
+        meal(alice, start.plusDays(1), 90, "[]");
+        meal(other, start.plusHours(1), 90, "[]");
+        var page = userMeals.page(alice, 0, 1, "balanced", day, day, 80, 100);
+        assertThat(page.totalElements()).isEqualTo(2);
+        assertThat(page.totalPages()).isEqualTo(2);
+        assertThat(page.content()).extracting(com.example.mealcheck.dto.MealSummaryPageResponse.MealSummary::id).containsExactly(second);
+        var next = userMeals.page(alice, 1, 1, "balanced", day, day, 80, 100);
+        assertThat(next.content().get(0).id()).isEqualTo(first);
+        assertThat(next.content().get(0).foodNames()).containsExactly("food-1", "food-2", "food-3", "food-4", "food-5", "food-6");
+        String json = new ObjectMapper().findAndRegisterModules().writeValueAsString(next);
+        assertThat(json).doesNotContain("long advice", "long description", "categoryCounts", "originalFoods", "advice");
+        assertThat(entityManagerFactory.unwrap(SessionFactory.class).getStatistics().getEntityLoadCount()).isZero();
+    }
+
+    @Test void knowledgeRevisionChangesAtomicallyWithContentButNotHitStatistics() {
+        long initial = knowledgeRevision();
+        String vector = java.util.stream.IntStream.range(0, 512).mapToObj(i -> "0")
+                .collect(java.util.stream.Collectors.joining(",", "[", "]"));
+        long id = jdbc.queryForObject("INSERT INTO knowledge_chunks(source,title,content,embedding) VALUES ('test','test','original',?::halfvec) RETURNING id", Long.class, vector);
+        long inserted = knowledgeRevision();
+        assertThat(inserted).isGreaterThan(initial);
+        jdbc.update("UPDATE knowledge_chunks SET hit_count=hit_count+1,last_hit_at=CURRENT_TIMESTAMP WHERE id=?", id);
+        assertThat(knowledgeRevision()).isEqualTo(inserted);
+        String newVector = java.util.stream.IntStream.range(0, 512).mapToObj(i -> i == 0 ? "1" : "0")
+                .collect(java.util.stream.Collectors.joining(",", "[", "]"));
+        jdbc.update("UPDATE knowledge_chunks SET embedding=?::halfvec WHERE id=?", newVector, id);
+        long vectorUpdated = knowledgeRevision();
+        assertThat(vectorUpdated).isGreaterThan(inserted);
+        jdbc.update("UPDATE knowledge_chunks SET embedding=?::halfvec,updated_at=CURRENT_TIMESTAMP WHERE id=?", newVector, id);
+        assertThat(knowledgeRevision()).isEqualTo(vectorUpdated);
+        var transaction = new org.springframework.transaction.support.TransactionTemplate(transactions);
+        transaction.executeWithoutResult(status -> {
+            jdbc.update("UPDATE knowledge_chunks SET content='rolled back' WHERE id=?", id);
+            assertThat(knowledgeRevision()).isGreaterThan(vectorUpdated);
+            status.setRollbackOnly();
+        });
+        assertThat(knowledgeRevision()).isEqualTo(vectorUpdated);
+        assertThat(jdbc.queryForObject("SELECT content FROM knowledge_chunks WHERE id=?", String.class, id)).isEqualTo("original");
+        jdbc.update("UPDATE knowledge_chunks SET content='updated' WHERE id=?", id);
+        long updated = knowledgeRevision();
+        assertThat(updated).isGreaterThan(vectorUpdated);
+        jdbc.update("DELETE FROM knowledge_chunks WHERE id=?", id);
+        assertThat(knowledgeRevision()).isGreaterThan(updated);
+    }
+
+    private long knowledgeRevision() {
+        return jdbc.queryForObject("SELECT revision FROM knowledge_cache_state WHERE id=1", Long.class);
     }
 
     @Test void cursorRemainsStableAcrossTimestampTiesAndNewerInsertions() {

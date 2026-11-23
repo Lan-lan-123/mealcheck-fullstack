@@ -26,6 +26,22 @@ public class RemoteCallGuard {
 
     /** Each HTTP attempt receives the remaining budget, including prior attempts and backoff. */
     public <T> T execute(String name, Duration attemptTimeout, java.util.function.Function<Duration,T> remoteCall) {
+        return executeWithBudget(name, attemptTimeout, budget -> remoteCall.apply(budget.httpRemaining()));
+    }
+
+    /** Admission consumes the operation deadline, while the HTTP window begins at dispatch. */
+    public record AttemptBudget(long deadlineNanos, Duration httpTimeout) {
+        public Duration remaining() {
+            long left=deadlineNanos-System.nanoTime();
+            if(left<=0) throw new LocalAdmissionDeadlineException("AI operation deadline expired before dispatch");
+            return Duration.ofNanos(left);
+        }
+        public Duration httpRemaining() {
+            Duration left=remaining();
+            return left.compareTo(httpTimeout)<0?left:httpTimeout;
+        }
+    }
+    public <T> T executeWithBudget(String name, Duration attemptTimeout, java.util.function.Function<AttemptBudget,T> remoteCall) {
         AiCallContext.checkExecution();
         String safeName = name == null || name.isBlank() ? "remote" : name.trim();
         CallState state = states.computeIfAbsent(safeName,
@@ -41,16 +57,18 @@ public class RemoteCallGuard {
             throw new RemoteCallRejectedException("Remote concurrency limit reached: " + safeName);
         }
 
+        boolean attempted = false;
         try {
             RuntimeException lastFailure = null;
             for (int attempt = 1; attempt <= maxAttempts(); attempt++) {
                 checkInterrupted();
                 Duration remaining = remaining(deadline);
                 try {
-                    T result = remoteCall.apply(remaining.compareTo(attemptTimeout) < 0 ? remaining : attemptTimeout);
+                    attempted = true;
+                    T result = remoteCall.apply(new AttemptBudget(deadline,attemptTimeout));
                     remaining(deadline);
-                    state.consecutiveFailures.set(0);
-                    state.openUntilNanos.set(0);
+                    // An older in-flight success must not reopen a newly tripped circuit.
+                    if (state.openUntilNanos.get() <= System.nanoTime()) state.consecutiveFailures.set(0);
                     return result;
                 } catch (RemoteCallRejectedException e) {
                     throw e;
@@ -61,21 +79,42 @@ public class RemoteCallGuard {
                 } catch (RuntimeException e) {
                     lastFailure = e;
                     if (attempt < maxAttempts()) {
+                        // A review retry needs a useful execution window, not just a positive deadline.
+                        if("diet-assistant-evidence-review".equals(safeName) && remaining(deadline).toMillis()
+                                < Math.max(1,properties.getAssistantFunctionCalling().getReviewReserveSeconds())*1000L)throw e;
                         backoff(attempt, e instanceof RetryableRemoteCallException retryable ? retryable.retryAfter() : null, deadline);
+                        if("diet-assistant-evidence-review".equals(safeName) && remaining(deadline).toMillis()
+                                < Math.max(1,properties.getAssistantFunctionCalling().getReviewReserveSeconds())*1000L)throw e;
                     }
                 }
-            }
-            int failures = state.consecutiveFailures.incrementAndGet();
-            if (failures >= failureThreshold()) {
-                state.openUntilNanos.set(System.nanoTime() + openDuration().toNanos());
-                state.consecutiveFailures.set(0);
             }
             throw lastFailure == null
                     ? new IllegalStateException("Remote call failed: " + safeName)
                     : lastFailure;
+        } catch (RuntimeException failure) {
+            // One terminal failure per operation, including deadline expiry in
+            // remaining()/backoff(). Local rejections and cancellations are not
+            // evidence that the downstream service failed.
+            if (attempted && countsForCircuit(failure)) {
+                int failures = state.consecutiveFailures.incrementAndGet();
+                if (failures >= failureThreshold()) {
+                    state.openUntilNanos.accumulateAndGet(
+                            System.nanoTime() + openDuration().toNanos(), Math::max);
+                    state.consecutiveFailures.set(0);
+                }
+            }
+            throw failure;
         } finally {
             state.bulkhead.release();
         }
+    }
+
+    private boolean countsForCircuit(RuntimeException failure) {
+        if (Thread.currentThread().isInterrupted()
+                || failure instanceof java.util.concurrent.CancellationException
+                || failure instanceof LocalAdmissionDeadlineException
+                || failure instanceof NonRetryableRemoteCallException) return false;
+        return failure instanceof RemoteCallDeadlineException || !(failure instanceof RemoteCallRejectedException);
     }
 
     private void backoff(int attempt, Duration retryAfter, long deadline) {
@@ -152,15 +191,20 @@ public class RemoteCallGuard {
     }
 
     public static class NonRetryableRemoteCallException extends RuntimeException {
+        private final Integer status;
         public NonRetryableRemoteCallException(String message) {
-            super(message);
+            this(message,null);
         }
+        public NonRetryableRemoteCallException(String message,Integer status) { super(message);this.status=status; }
+        public Integer status() { return status; }
     }
     public static class RetryableRemoteCallException extends RuntimeException {
         private final Duration retryAfter;
+        private final int status;
         public RetryableRemoteCallException(int status, Duration retryAfter) {
-            super("AI provider returned HTTP " + status); this.retryAfter=retryAfter;
+            super("AI provider returned HTTP " + status); this.retryAfter=retryAfter;this.status=status;
         }
+        public int status() { return status; }
         public Duration retryAfter() { return retryAfter; }
     }
     public static class RemoteCallDeadlineException extends RemoteCallRejectedException {
@@ -168,5 +212,8 @@ public class RemoteCallGuard {
         public RemoteCallDeadlineException(String message) { this(message,null); }
         public RemoteCallDeadlineException(String message,Duration retryAfter) { super(message);this.retryAfter=retryAfter; }
         public Duration retryAfter() { return retryAfter; }
+    }
+    public static class LocalAdmissionDeadlineException extends RemoteCallDeadlineException {
+        public LocalAdmissionDeadlineException(String message) { super(message); }
     }
 }

@@ -42,17 +42,21 @@
 @media (max-width: 720px) {
   .assistant-panel {
     width: min(420px, calc(100vw - 24px));
-    height: min(640px, calc(100vh - 96px));
+    height: min(640px, calc(100dvh - 96px));
   }
 
   .assistant-workspace {
     grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
   }
 
   .assistant-sidebar {
     border-right: none;
     border-bottom: 1px solid #e3eedf;
-    grid-template-rows: auto;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    padding: 8px;
+    gap: 8px;
   }
 
   .assistant-session-list {
@@ -157,6 +161,6 @@
   }
 
   .assistant-panel {
-    height: min(540px, calc(100vh - 96px));
+    height: min(540px, calc(100dvh - 96px));
   }
 }

@@ -64,23 +64,49 @@ public class KnowledgeIndexService {
     }
 
     public int reindex() {
+        return synchronizeSource(true, activeSplitterStrategy());
+    }
+    public int reindex(String splitterStrategy) {
+        return synchronizeSource(true, MarkdownKnowledgeChunker.normalizeStrategy(splitterStrategy));
+    }
+    public String activeSplitterStrategy() {
+        String stored = vectorKnowledgeService.splitterStrategy(SOURCE);
+        return MarkdownKnowledgeChunker.normalizeStrategy(stored == null ? properties.getKnowledge().getSplitterStrategy() : stored);
+    }
+    public int initialize() {
+        return synchronizeSource(false, activeSplitterStrategy());
+    }
+    private int synchronizeSource(boolean explicit, String splitterStrategy) {
+        return synchronizeSource(explicit,splitterStrategy,null,null,null);
+    }
+    public int reindex(String strategy,Long expectedRevision,KnowledgeRebuildStore.Work work,String expectedCorpusSha) {
+        return synchronizeSource(true,MarkdownKnowledgeChunker.normalizeStrategy(strategy),expectedRevision,work,expectedCorpusSha);
+    }
+    private int synchronizeSource(boolean explicit, String splitterStrategy,Long expectedRevision,KnowledgeRebuildStore.Work work,String expectedCorpusSha) {
         long startedAt = observability.start();
         PgVectorKnowledgeService.SyncResult result = null;
         try {
             ClassPathResource resource = new ClassPathResource("knowledge/diet_guides.md");
-            String text = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-            List<PgVectorKnowledgeService.KnowledgeChunk> chunks = chunker.split(text);
-            result = vectorKnowledgeService.syncSource(
+            String text;
+            try(var input=resource.getInputStream()) {text=new String(input.readAllBytes(), StandardCharsets.UTF_8);}
+            if(expectedCorpusSha!=null&&!expectedCorpusSha.equals(sha256(text)))
+                throw new KnowledgeJobFailure.EmbeddingException(new KnowledgeJobFailure("PREVIEW_STALE","源文件在预览后发生变化，请重新预览并提交。",false));
+            List<PgVectorKnowledgeService.KnowledgeChunk> chunks = chunker.split(text, splitterStrategy);
+            result = expectedRevision==null&&work==null ? vectorKnowledgeService.syncSource(
                     SOURCE,
                     properties.getKnowledge().getSourceVersion(),
                     AppTime.now(),
-                    chunks);
-            clearSearchCache();
+                    chunks,explicit,splitterStrategy) : vectorKnowledgeService.syncSource(SOURCE,properties.getKnowledge().getSourceVersion(),AppTime.now(),chunks,explicit,splitterStrategy,expectedRevision,work);
+            // Cache revisions already advance atomically with writes. A startup no-op
+            // must not evict valid caches across the whole cluster.
             observability.recordIndex(startedAt, "success", result);
             log.info("Knowledge index synchronized. source={}, version={}, total={}, inserted={}, updated={}, unchanged={}, deleted={}",
                     SOURCE, properties.getKnowledge().getSourceVersion(), result.total(), result.inserted(),
                     result.updated(), result.unchanged(), result.deleted());
             return result.total();
+        } catch (org.springframework.web.server.ResponseStatusException deferred) {
+            observability.recordIndex(startedAt,"deferred",result);
+            throw deferred;
         } catch (Exception e) {
             observability.recordIndex(startedAt, "failure", result);
             log.error("Knowledge index synchronization failed. source={}, version={}",
@@ -89,11 +115,17 @@ public class KnowledgeIndexService {
         }
     }
 
+    public List<java.util.Map<String,Object>> sourceSyncStatus() {return vectorKnowledgeService.sourceSyncStatus();}
+
     public List<KnowledgeSnippet> search(String query, int limit) {
+        AiCallContext.checkExecution();
+        if (query == null || query.isBlank()) return List.of();
+        long timingStartedAt=System.nanoTime();
         long startedAt = observability.start();
         int safeLimit = Math.max(1, Math.min(limit, 20));
         String key = searchCacheKey(query, safeLimit);
         String cache = "miss";
+        boolean timingSuccess=false;
         try {
             Optional<List<KnowledgeSnippet>> cached = redisCacheService.getJson(
                     key, new TypeReference<List<KnowledgeSnippet>>() {});
@@ -109,6 +141,7 @@ public class KnowledgeIndexService {
                         stale.map(value -> new SearchLoad(value, null, "stale"))
                 );
             }
+            AiCallContext.checkExecution();
             cache = searchLoad.cache();
             List<KnowledgeSnippet> snippets = searchLoad.snippets();
             KnowledgeResultPostProcessor.Result processingResult = searchLoad.processingResult();
@@ -119,10 +152,14 @@ public class KnowledgeIndexService {
             }
             double topScore = snippets.isEmpty() ? 0.0 : snippets.get(0).getScore();
             observability.recordRagSearch(startedAt, cache, "success", snippets.size(), topScore);
+            timingSuccess=true;
             return snippets;
         } catch (RuntimeException e) {
             observability.recordRagSearch(startedAt, cache, "failure", 0, 0.0);
             throw e;
+        } finally {
+            log.info("Assistant phase timing. phase=retrieval, elapsedMicros={}, outcome={}, cache={}",
+                    Math.max(0,System.nanoTime()-timingStartedAt)/1000,timingSuccess?"success":"failure",cache);
         }
     }
 
@@ -133,34 +170,47 @@ public class KnowledgeIndexService {
             return new SearchLoad(cached.get(), null, "hit");
         }
 
+        KnowledgeResultPostProcessor.Result processingResult = retrieve(query, safeLimit);
+        AiCallContext.checkExecution();
+        List<KnowledgeSnippet> snippets = List.copyOf(processingResult.snippets());
+        observability.recordRagFiltering(
+                processingResult.inputCount(), snippets.size(), processingResult.thresholdFilteredCount(),
+                processingResult.duplicateFilteredCount(), processingResult.effectiveThreshold());
+        observability.recordRagScoreLayers(processingResult.topRoughScore(), processingResult.topRerankerRawScore(),
+                processingResult.topFinalScore(), processingResult.rerankerApplied());
+
+        boolean empty = snippets.isEmpty();
+        Duration freshTtl = empty ? EMPTY_SEARCH_CACHE_TTL : SEARCH_CACHE_TTL;
+        Duration jitter = empty ? EMPTY_SEARCH_CACHE_JITTER : SEARCH_CACHE_JITTER;
+        Duration staleTtl = empty ? EMPTY_SEARCH_STALE_TTL : SEARCH_STALE_TTL;
+        // Do not cache fallback results, including an empty result after fallback filtering.
+        if (!rerankerService.isConfigured() || processingResult.rerankerApplied() || processingResult.inputCount() == 0) {
+            AiCallContext.checkExecution();
+            redisCacheService.setJsonWithJitter(key, snippets, freshTtl, jitter);
+            AiCallContext.checkExecution();
+            redisCacheService.setJsonWithJitter(staleKey(key), snippets, staleTtl, jitter);
+        }
+        return new SearchLoad(snippets, processingResult, "miss");
+    }
+
+    /** Same retrieval/reranking/filtering as a fresh production search, without cache or user statistics. */
+    public List<KnowledgeSnippet> searchForEvaluation(String query, int limit) {
+        if (query == null || query.isBlank() || query.length() > 500 || limit < 1 || limit > 5)
+            throw new IllegalArgumentException("Invalid evaluation knowledge query");
+        return List.copyOf(retrieve(query, limit).snippets());
+    }
+
+    private KnowledgeResultPostProcessor.Result retrieve(String query, int safeLimit) {
         int rerankMultiplier = rerankerService.isConfigured()
                 ? Math.max(2, properties.getKnowledge().getRerankCandidateMultiplier())
                 : 1;
         int candidateMultiplier = Math.max(resultPostProcessor.candidateMultiplier(), rerankMultiplier);
         int candidateLimit = Math.min(20, safeLimit * candidateMultiplier);
         List<KnowledgeSnippet> candidates = vectorKnowledgeService.search(query, candidateLimit);
+        AiCallContext.checkExecution();
         List<KnowledgeSnippet> ranked = rerankerService.rerank(query, candidates, candidateLimit);
-        KnowledgeResultPostProcessor.Result processingResult = resultPostProcessor.process(ranked, safeLimit);
-        List<KnowledgeSnippet> snippets = List.copyOf(processingResult.snippets());
-        observability.recordRagFiltering(
-                processingResult.inputCount(),
-                snippets.size(),
-                processingResult.thresholdFilteredCount(),
-                processingResult.duplicateFilteredCount(),
-                processingResult.effectiveThreshold());
-        observability.recordRagScoreLayers(
-                processingResult.topRoughScore(),
-                processingResult.topRerankerRawScore(),
-                processingResult.topFinalScore(),
-                processingResult.rerankerApplied());
-
-        boolean empty = snippets.isEmpty();
-        Duration freshTtl = empty ? EMPTY_SEARCH_CACHE_TTL : SEARCH_CACHE_TTL;
-        Duration jitter = empty ? EMPTY_SEARCH_CACHE_JITTER : SEARCH_CACHE_JITTER;
-        Duration staleTtl = empty ? EMPTY_SEARCH_STALE_TTL : SEARCH_STALE_TTL;
-        redisCacheService.setJsonWithJitter(key, snippets, freshTtl, jitter);
-        redisCacheService.setJsonWithJitter(staleKey(key), snippets, staleTtl, jitter);
-        return new SearchLoad(snippets, processingResult, "miss");
+        AiCallContext.checkExecution();
+        return resultPostProcessor.process(ranked, safeLimit);
     }
 
     public void recordHits(List<Long> ids) {
@@ -173,7 +223,9 @@ public class KnowledgeIndexService {
 
     private String searchCacheKey(String query, int limit) {
         String normalized = query == null ? "" : query.trim().toLowerCase(Locale.ROOT);
-        return SEARCH_CACHE_PREFIX + rerankerService.cacheSignature() + ":"
+        // The revision commits in the same transaction as knowledge changes. An older search
+        // may finish later, but it can only populate its old namespace, including stale results.
+        return SEARCH_CACHE_PREFIX + "complete-v2:v" + vectorKnowledgeService.searchRevision() + ":" + vectorKnowledgeService.retrievalSignature() + ":" + rerankerService.cacheSignature() + ":"
                 + resultPostProcessor.cacheSignature() + ":" + limit + ":" + sha256(normalized);
     }
 

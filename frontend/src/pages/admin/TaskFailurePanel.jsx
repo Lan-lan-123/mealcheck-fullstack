@@ -1,3 +1,4 @@
+import Button from '../../components/Button'
 import { useEffect, useRef, useState } from 'react'
 import { adminTaskFailures, adminTaskFailureSummary, adminTaskFailureDetail, adminTaskFailureAction } from '../../api/client'
 import usePageResource from '../../hooks/usePageResource'
@@ -58,7 +59,7 @@ export default function TaskFailurePanel({ refreshRevision, onAction }) {
     {message && <div className="admin-message" role="status">{message}</div>}
     <section className="admin-section">
       <div className="admin-section-head"><div><h2>失败任务管理</h2><p>查看失败原因，处理图片分析、周报任务及死信，并跟踪恢复结果。</p></div>
-        <button className="secondary-btn" type="button" onClick={refresh} disabled={list.loading || busy}>刷新失败任务</button></div>
+        <Button variant="secondary" className="secondary-btn" type="button" onClick={refresh} disabled={list.loading || busy}>刷新失败任务</Button></div>
       {summary.data && <div className="meal-stat-grid">
         <MetricSmall label="待处理事件" value={summary.data.open} /><MetricSmall label="已发起重试" value={summary.data.retrying} />
         <MetricSmall label="最老待处理时间" value={`${Math.floor(summary.data.oldestOpenSeconds / 60)} 分钟`} /></div>}
@@ -71,8 +72,8 @@ export default function TaskFailurePanel({ refreshRevision, onAction }) {
         <input aria-label="失败用户 ID" placeholder="用户 ID" type="number" min="1" value={draft.userId} onChange={event => setDraft({ ...draft, userId: event.target.value })} />
         <label>起始时间（北京时间）<input type="datetime-local" value={draft.from} onChange={event => setDraft({ ...draft, from: event.target.value })} /></label>
         <label>结束时间（北京时间）<input type="datetime-local" value={draft.to} onChange={event => setDraft({ ...draft, to: event.target.value })} /></label>
-        <button className="secondary-btn" type="submit">筛选</button>
-        <button className="secondary-btn" type="button" onClick={() => { setDraft(defaults); setFilters(defaults); setPage(0) }}>重置</button>
+        <Button variant="secondary" className="secondary-btn" type="submit">筛选</Button>
+        <Button variant="secondary" className="secondary-btn" type="button" onClick={() => { setDraft(defaults); setFilters(defaults); setPage(0) }}>重置</Button>
       </form>
       <div className="admin-table-wrap"><table className="admin-table"><thead><tr>
         <th>事件 / 业务</th><th>用户 / 任务</th><th>原因</th><th>处理状态</th><th>执行次数</th><th>失败时间</th><th>详情</th>
@@ -81,13 +82,13 @@ export default function TaskFailurePanel({ refreshRevision, onAction }) {
         <td>{item.userId ? `用户 #${item.userId}` : '未关联用户'}<br /><code>{item.taskKey || '未关联任务'}</code></td>
         <td>{item.errorSummary}<br /><span className="muted-text">{phases[item.phase] || item.phase} · {item.errorCode}</span></td>
         <td>{statuses[item.status] || item.status}</td><td>{item.attempts}</td><td>{formatTime(item.failedAt)}</td>
-        <td><button className="secondary-btn" type="button" onClick={() => { setSelected(item.id); setMessage('') }}>查看并处理</button></td>
+        <td><Button variant="secondary" className="secondary-btn" type="button" onClick={() => { setSelected(item.id); setMessage('') }}>查看并处理</Button></td>
       </tr>)}{!list.data?.content?.length && <tr><td colSpan="7" className="empty-cell">{list.loading ? '加载中…' : '当前筛选下没有失败事件'}</td></tr>}</tbody></table></div>
       <Pagination pageData={{ ...list.data, page }} pageSize={size} setPage={setPage} setPageSize={setSize} loading={list.loading} />
     </section>
     {selected !== null && <DetailDrawer title="失败任务详情" onClose={() => { if (!busy) setSelected(null) }}>
       {detail.loading && <p role="status">正在加载详情…</p>}
-      {detail.error && <div className="admin-message error" role="alert">{detail.error}<button type="button" className="secondary-btn" onClick={detail.invalidate}>重新加载详情</button></div>}
+      {detail.error && <div className="admin-message error" role="alert">{detail.error}<Button variant="secondary" type="button" className="secondary-btn" onClick={detail.invalidate}>重新加载详情</Button></div>}
       {failure && <>
         <h3>{types[failure.taskType]} · #{failure.id}</h3><p>{failure.errorSummary}</p>
         <dl className="failure-detail-grid"><dt>错误代码</dt><dd>{failure.errorCode}</dd><dt>失败阶段</dt><dd>{phases[failure.phase]}</dd>
@@ -98,12 +99,12 @@ export default function TaskFailurePanel({ refreshRevision, onAction }) {
         {failure.retryable && <p className="hint">重新执行可能再次调用模型并产生费用。结果会经过幂等检查。</p>}
         {['OPEN', 'RETRY_FAILED'].includes(failure.status) && <form onSubmit={event => event.preventDefault()}>
           <label className="form-field">处理原因<textarea maxLength={500} required value={reason} onChange={event => setReason(event.target.value)} disabled={busy} /></label>
-          <div className="failure-actions"><button className="secondary-btn" type="button" onClick={() => act('retry')} disabled={busy || detail.loading || !failure.retryable || !reason.trim()}>重新执行任务</button>
-            <button className="secondary-btn" type="button" onClick={() => act('close')} disabled={busy || detail.loading || !reason.trim()}>关闭失败事件</button></div>
+          <div className="failure-actions"><Button variant="secondary" className="secondary-btn" type="button" onClick={() => act('retry')} disabled={busy || detail.loading || !failure.retryable || !reason.trim()}>重新执行任务</Button>
+            <Button variant="secondary" className="secondary-btn" type="button" onClick={() => act('close')} disabled={busy || detail.loading || !reason.trim()}>关闭失败事件</Button></div>
         </form>}
         {error && <div className="admin-message error" role="alert">{error}</div>}
         {message && <div className="admin-message" role="status">{message}</div>}
-        <button className="secondary-btn" type="button" onClick={detail.invalidate} disabled={busy || detail.loading}>刷新任务结果</button>
+        <Button variant="secondary" className="secondary-btn" type="button" onClick={detail.invalidate} disabled={busy || detail.loading}>刷新任务结果</Button>
         <h3>失败与恢复记录</h3><ol className="failure-timeline">{detail.data.history.map(item => <li key={item.id}>
           <strong>{formatTime(item.failedAt)} · {statuses[item.status]}</strong><p>{item.errorSummary} · {phases[item.phase]} · 第 {item.attempts} 次执行</p>
           {item.handlingNote && <p>处理说明：{item.handlingNote}</p>}</li>)}</ol>

@@ -34,19 +34,22 @@ public class AssistantController {
     private final AssistantConversationService conversationService;
     private final AssistantProactiveAdviceService proactiveAdviceService;
     private final UserGoalService userGoalService;
+    private final com.example.mealcheck.service.AssistantTaskManager tasks;
 
     public AssistantController(LangChainDietAssistantService assistantService,
                                RateLimitService rateLimitService,
                                UserAccountRepository userAccountRepository,
                                AssistantConversationService conversationService,
                                AssistantProactiveAdviceService proactiveAdviceService,
-                               UserGoalService userGoalService) {
+                               UserGoalService userGoalService,
+                               com.example.mealcheck.service.AssistantTaskManager tasks) {
         this.assistantService = assistantService;
         this.rateLimitService = rateLimitService;
         this.userAccountRepository = userAccountRepository;
         this.conversationService = conversationService;
         this.proactiveAdviceService = proactiveAdviceService;
         this.userGoalService = userGoalService;
+        this.tasks=tasks;
     }
 
     @PostMapping({"/assistant/ask", "/chat"})
@@ -68,9 +71,12 @@ public class AssistantController {
                     rateLimit.retryAfter()
             );
         }
-        AssistantResponse response = assistantService.ask(
-                principal, question, request.getConversationId(), request.getHistory());
+        AssistantResponse response = tasks.call(principal.getId(),delivery->{
+            delivery.reviewMode=request.getReviewMode();
+            return assistantService.deliver(principal, question, request.getConversationId(), request.getHistory(),delivery);
+        });
         return ResponseEntity.ok()
+                .header("X-Assistant-Request-ID",response.getRequestId())
                 .headers(RateLimitHttpHeaders.from(rateLimit))
                 .body(response);
     }

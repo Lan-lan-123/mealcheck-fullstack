@@ -1,5 +1,7 @@
 # 大图内存优化结果与暂停交接
 
+> 2026-10-26 本地证据精简：以下批次保留原始汇总、日志和清单，已删除逐点采样与测试图片，不能再作为完整原始证据包：[20261004-195236](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-195236.md)；[20261004-221949](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-221949.md)；[20261004-222559](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-222559.md)；[20261004-223131](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-223131.md)。原验收结论与原清单校验值未改写。
+
 测试日期：2026-10-04（北京时间）。文档补齐日期：2026-10-05。
 
 **状态：按用户要求暂停。已完成内存基线、图片处理优化和 50% 堆配置的三轮复测；45% 堆配置仅完成第一轮。消费者 4/6 对比、长时间混合负载及故障恢复测试尚未执行。** 本次补写文档没有启动新压测。
@@ -82,9 +84,9 @@ E:\Anaconda\python.exe -X utf8 loadtests/run-capacity-next.py --mode memory --la
 
 | 测试组 | 运行清单 | JVM/cgroup 原始采样 | 内存汇总 |
 | --- | --- | --- | --- |
-| 基线 60% | [manifest](E:/mealcheck-fullstack/loadtests/results/20261004-221949/manifest.json) | [jvm.jsonl](E:/mealcheck-fullstack/loadtests/results/20261004-221949/jvm.jsonl) | [memory-summary](E:/mealcheck-fullstack/loadtests/results/20261004-221949/memory-summary.json) |
-| 优化 50% | [manifest](E:/mealcheck-fullstack/loadtests/results/20261004-222559/manifest.json) | [jvm.jsonl](E:/mealcheck-fullstack/loadtests/results/20261004-222559/jvm.jsonl) | [memory-summary](E:/mealcheck-fullstack/loadtests/results/20261004-222559/memory-summary.json) |
-| 优化 45%，部分完成 | [manifest](E:/mealcheck-fullstack/loadtests/results/20261004-223131/manifest.json) | [jvm.jsonl](E:/mealcheck-fullstack/loadtests/results/20261004-223131/jvm.jsonl) | [memory-summary](E:/mealcheck-fullstack/loadtests/results/20261004-223131/memory-summary.json) |
+| 基线 60% | [manifest](E:/mealcheck-fullstack/loadtests/results/20261004-221949/manifest.json) | [jvm.jsonl（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-221949.md) | [memory-summary](E:/mealcheck-fullstack/loadtests/results/20261004-221949/memory-summary.json) |
+| 优化 50% | [manifest](E:/mealcheck-fullstack/loadtests/results/20261004-222559/manifest.json) | [jvm.jsonl（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-222559.md) | [memory-summary](E:/mealcheck-fullstack/loadtests/results/20261004-222559/memory-summary.json) |
+| 优化 45%，部分完成 | [manifest](E:/mealcheck-fullstack/loadtests/results/20261004-223131/manifest.json) | [jvm.jsonl（原始文件已精简，见清单）](../../logs/root/results-compaction-20261026-204118-469e74/summaries/20261004-223131.md) | [memory-summary](E:/mealcheck-fullstack/loadtests/results/20261004-223131/memory-summary.json) |
 
 各目录还保留 `c4-large*.json`、k6 日志、时序数据和测试开始时的源码快照。50% 组的逐轮 k6 结果：[第一轮](E:/mealcheck-fullstack/loadtests/results/20261004-222559/c4-large1.json)、[第二轮](E:/mealcheck-fullstack/loadtests/results/20261004-222559/c4-large2.json)、[第三轮](E:/mealcheck-fullstack/loadtests/results/20261004-222559/c4-large3.json)。
 

@@ -1,10 +1,40 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/authTest.js'
+
+test('administrator can render successful and failed AI calls with timestamps', async ({ page }) => {
+  const errors = []
+  page.on('pageerror', error => errors.push(error.message))
+  await page.addInitScript(() => {
+
+    sessionStorage.setItem('mealcheck_fixture_user', JSON.stringify({ username: 'admin', role: 'ADMIN' }))
+  })
+  await page.route('**/api/**', route => {
+    const path = new URL(route.request().url()).pathname
+    if (!path.startsWith('/api/')) return route.continue()
+    const data = path === '/api/health' ? { status: 'UP', aiCalls: [
+      { operation: 'vision-recognition', success: false, message: '最近调用失败', at: '2026-10-18T08:32:59Z' },
+      { operation: 'meal-advice', success: true, message: '最近调用成功', at: '2026-10-18T08:30:00Z' },
+    ] } : path === '/api/admin/dashboard' ? { system: { aiMetrics: [
+      { operation: 'vision-recognition', calls: 1, successCount: 0, failureCount: 1, averageLatencyMs: 335, maxLatencyMs: 335 },
+    ] } } : {}
+    return route.fulfill({ contentType: 'application/json', body: JSON.stringify(data) })
+  })
+  await page.goto('/admin/monitor')
+  await page.getByRole('button', { name: 'AI 调用', exact: true }).click()
+  const failed = page.locator('.meal-chart-card').filter({ has: page.getByRole('heading', { name: 'vision-recognition', exact: true }) })
+  await expect(failed).toContainText('最近调用失败')
+  await expect(failed).toContainText('16:32:59')
+  const successful = page.locator('.meal-chart-card').filter({ has: page.getByRole('heading', { name: 'meal-advice', exact: true }) })
+  await expect(successful).toContainText('最近调用成功')
+  await expect(successful).toContainText('16:30:00')
+  await expect(page.locator('.ai-metrics-table')).toContainText('335 ms')
+  expect(errors).toEqual([])
+})
 
 test('administrator sees the global quota, warning and refreshed consumption', async ({ page }) => {
   let attempts = 85000
   await page.addInitScript(() => {
-    localStorage.setItem('mealcheck_token', 'budget-admin-test-token')
-    localStorage.setItem('mealcheck_user', JSON.stringify({ username: 'admin', role: 'ADMIN' }))
+
+    sessionStorage.setItem('mealcheck_fixture_user', JSON.stringify({ username: 'admin', role: 'ADMIN' }))
   })
   await page.route('**/api/**', route => {
     const url = new URL(route.request().url())
@@ -34,8 +64,8 @@ test('administrator sees the global quota, warning and refreshed consumption', a
 test('budget notice refreshes and async quota failure preserves the user session', async ({ page }) => {
   let remaining = 5
   await page.addInitScript(() => {
-    localStorage.setItem('mealcheck_token', 'budget-test-token')
-    localStorage.setItem('mealcheck_user', JSON.stringify({ username: 'budget-user', role: 'USER' }))
+
+    sessionStorage.setItem('mealcheck_fixture_user', JSON.stringify({ username: 'budget-user', role: 'USER' }))
   })
   await page.route('**/api/**', route => {
     const url = new URL(route.request().url())
@@ -44,8 +74,8 @@ test('budget notice refreshes and async quota failure preserves the user session
     if (url.pathname === '/api/profile/ai-budget') return send({ enabled: true, remainingCalls: remaining, callLimit: 100, resetAt: '2026-10-05T00:00:00+08:00', costLimit: .5, spent: .1, reserved: .02 })
     if (url.pathname === '/api/assistant/conversations') return send([])
     if (url.pathname === '/api/assistant/proactive') return send({ items: [] })
-    if (url.pathname === '/api/meals/analysis-requests') return send({ key: 'budget-analysis-key', status: 'PENDING', retryAfterSeconds: 1 })
-    if (url.pathname === '/api/meals/analysis-requests/budget-analysis-key') { remaining = 0;return send({ key: 'budget-analysis-key', status: 'FAILED', errorCode: 'AI_BUDGET_EXCEEDED' }) }
+    if (url.pathname === '/api/meals/analysis-requests') return send({ key: route.request().headers()['idempotency-key'], status: 'PENDING', retryAfterSeconds: 1 })
+    if (url.pathname.startsWith('/api/meals/analysis-requests/')) { remaining = 0;return send({ key: decodeURIComponent(url.pathname.split('/').pop()), status: 'FAILED', errorCode: 'AI_BUDGET_EXCEEDED' }) }
     return send(url.pathname.endsWith('/goals/current') ? { goalType: 'balanced' } : {})
   })
   await page.goto('/')
@@ -54,9 +84,9 @@ test('budget notice refreshes and async quota failure preserves the user session
   await expect(notice).toContainText('预留 0.0200')
   await page.getByLabel('选择饮食图片').setInputFiles({ name: 'meal.png', mimeType: 'image/png', buffer: Buffer.from('test-image') })
   await page.getByRole('button', { name: '开始分析', exact: true }).click()
-  await expect(page.getByRole('status').filter({ hasText: '重置后使用原图重试' })).toBeVisible()
+  await expect(page.getByRole('region', { name: '餐食分析进度' }).getByRole('status')).toContainText('重置后再使用原图重试')
   await expect(notice).toContainText('今日 AI 额度已用尽')
-  expect(await page.evaluate(() => localStorage.getItem('mealcheck_token'))).toBe('budget-test-token')
+  expect(await page.evaluate(() => localStorage.getItem('mealcheck_token'))).toBeNull()
   remaining = 7
   await notice.getByRole('button', { name: '刷新额度' }).click()
   await expect(notice).toContainText('7 / 100')

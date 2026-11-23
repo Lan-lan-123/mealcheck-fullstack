@@ -86,14 +86,8 @@ public class AdminService {
     private final MealRecordPersistenceService mealRecordPersistenceService;
     private final AdminMealQueryService mealQueryService;
 
-    @Value("${mealcheck.ai.api-key:}")
-    private String apiKey;
-
-    @Value("${mealcheck.ai.base-url:}")
-    private String baseUrl;
-
-    @Value("${mealcheck.ai.model:unknown}")
-    private String aiModel;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.example.mealcheck.config.AppProperties properties;
 
     public AdminService(UserAccountRepository userAccountRepository,
                         MealRecordRepository mealRecordRepository,
@@ -180,6 +174,7 @@ public class AdminService {
 
     public AdminDashboardResponse dashboard() {
         AdminStatsResponse overview = stats();
+        var connection=properties.getAi().connection();
 
         AdminSystemResponse system = new AdminSystemResponse(
                 "Spring Boot",
@@ -187,9 +182,9 @@ public class AdminService {
                 "pgvector",
                 pgVectorKnowledgeService.embeddingProviderName(),
                 pgVectorKnowledgeService.embeddingDimension(),
-                aiModel,
-                apiKey != null && !apiKey.isBlank(),
-                baseUrl != null && !baseUrl.isBlank(),
+                connection.model(),
+                connection.apiKey() != null && !connection.apiKey().isBlank(),
+                connection.baseUrl() != null && !connection.baseUrl().isBlank(),
                 "resources/knowledge/diet_guides.md",
                 aiStatusService.recentCalls(),
                 aiStatusService.metrics()
@@ -349,7 +344,7 @@ public class AdminService {
         pgVectorKnowledgeService.add(
                 "admin",
                 request.getTitle().trim(),
-                request.getContent().trim()
+                request.getContent().trim(), admin == null ? "unknown" : admin.getUsername()
         );
         knowledgeIndexService.clearSearchCache();
         clearAdminCaches();
@@ -367,10 +362,12 @@ public class AdminService {
     }
 
     public void updateKnowledgeChunk(Long id, AdminKnowledgeChunkRequest request, UserPrincipal admin) {
+        if (request.getExpectedRevision() == null)
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "请刷新知识列表后再编辑，保存时必须提供内容版本。");
         boolean updated = pgVectorKnowledgeService.update(
                 id,
                 request.getTitle().trim(),
-                request.getContent().trim()
+                request.getContent().trim(), request.getExpectedRevision(), admin == null ? "unknown" : admin.getUsername(), request.getReason()
         );
         if (!updated) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "RAG 知识片段不存在");
@@ -378,6 +375,11 @@ public class AdminService {
         knowledgeIndexService.clearSearchCache();
         clearAdminCaches();
         adminAuditService.log(admin, "UPDATE_KNOWLEDGE", "knowledge_chunk", id, request.getTitle());
+    }
+
+    public void deleteKnowledgeChunk(Long id, long expectedRevision, UserPrincipal admin) {
+        pgVectorKnowledgeService.delete(id, expectedRevision, admin == null ? "unknown" : admin.getUsername());
+        clearAdminCaches();
     }
 
     @Transactional
@@ -412,13 +414,32 @@ public class AdminService {
         adminAuditService.log(currentAdmin, "DELETE_USER", "user", userId, "delete user " + user.getUsername());
     }
 
+    @Transactional
+    public AdminUserResponse setUserEnabled(Long userId, boolean enabled, UserPrincipal currentAdmin) {
+        UserAccount user = userAccountRepository.findByIdForUpdate(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "用户不存在"));
+        if ("ADMIN".equalsIgnoreCase(user.getRole())
+                || (currentAdmin != null && Objects.equals(userId, currentAdmin.getId()))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "不能封禁或解封管理员账号");
+        }
+        if (user.isEnabled() != enabled) {
+            user.setEnabled(enabled);
+            // Never reactivate a credential issued before a ban, even after unbanning.
+            user.invalidateTokens();
+            userAccountRepository.saveAndFlush(user);
+            adminAuditService.log(currentAdmin, enabled ? "UNBAN_USER" : "BAN_USER", "user", userId,
+                    (enabled ? "解封用户 " : "封禁用户 ") + user.getUsername());
+        }
+        return toUserResponse(user);
+    }
+
     private void clearAdminCaches() {
         redisCacheService.delete(ADMIN_STATS_CACHE_KEY);
         redisCacheService.delete(ADMIN_STATS_STALE_CACHE_KEY);
     }
 
     private AdminUserResponse toUserResponse(UserAccount user) {
-        return new AdminUserResponse(
+        AdminUserResponse response = new AdminUserResponse(
                 user.getId(),
                 user.getUsername(),
                 user.getDisplayName(),
@@ -426,6 +447,8 @@ public class AdminService {
                 user.getCreatedAt(),
                 user.getLastUploadAt()
         );
+        response.setEnabled(user.isEnabled());
+        return response;
     }
 
     private AdminNonFoodUploadEventResponse toNonFoodUploadResponse(NonFoodUploadEvent event, boolean currentlyBlocked) {

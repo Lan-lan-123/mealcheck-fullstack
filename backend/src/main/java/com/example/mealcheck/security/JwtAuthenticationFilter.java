@@ -32,24 +32,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final TokenBlacklistService tokenBlacklistService;
     private final ObjectMapper mapper;
     private final ObjectProvider<MeterRegistry> registries;
+    private final AuthenticationCookies cookies;
 
     public JwtAuthenticationFilter(JwtService jwtService,
                                    CustomUserDetailsService userDetailsService,
                                    TokenBlacklistService tokenBlacklistService,
-                                   ObjectMapper mapper, ObjectProvider<MeterRegistry> registries) {
+                                   ObjectMapper mapper, ObjectProvider<MeterRegistry> registries, AuthenticationCookies cookies) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
         this.tokenBlacklistService = tokenBlacklistService;
         this.mapper = mapper;
         this.registries = registries;
+        this.cookies = cookies;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         String header = request.getHeader("Authorization");
-        if (header != null && header.startsWith("Bearer ") && SecurityContextHolder.getContext().getAuthentication() == null) {
-            String token = header.substring(7);
+        String token = cookies.read(request);
+        // Non-browser clients can explicitly submit newly issued credentials. Legacy generations fail verification.
+        if(token==null && header!=null && header.startsWith("Bearer "))token=header.substring(7);
+        if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             JwtService.TokenIdentity identity;
             try {
                 identity = jwtService.extractIdentity(token);
@@ -59,11 +63,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
             try {
-                if (tokenBlacklistService.isBlacklisted(token)) {
+                if (tokenBlacklistService.isBlacklisted(identity.tokenId())) {
                     throw new BadCredentialsException("Token has been revoked");
                 }
                 UserPrincipal userDetails = userDetailsService.loadUserById(identity.userId());
                 if (!identity.username().equals(userDetails.getUsername())
+                        || identity.tokenVersion() != userDetails.getTokenVersion()
                         || !userDetails.isEnabled() || !userDetails.isAccountNonLocked()
                         || !userDetails.isAccountNonExpired() || !userDetails.isCredentialsNonExpired()) {
                     throw new BadCredentialsException("Token does not match an active account");

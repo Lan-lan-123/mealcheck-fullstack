@@ -1,5 +1,7 @@
 # Use the exact images built for this candidate; never rebuild during acceptance.
 services:
+  postgres:
+    image: ${MEALCHECK_RELEASE_POSTGRES_IMAGE:?Set candidate PostgreSQL image}
   backend:
     image: ${MEALCHECK_RELEASE_BACKEND_IMAGE:?Set candidate backend image}
     build: !reset null

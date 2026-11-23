@@ -5,6 +5,9 @@ import java.time.LocalDateTime;
 public class AdminKnowledgeChunkResponse {
 
     private Long id;
+    private long contentRevision;
+    public long getContentRevision() { return contentRevision; }
+    public void setContentRevision(long value) { contentRevision = value; }
     private String source;
     private String title;
     private String content;
@@ -13,6 +16,8 @@ public class AdminKnowledgeChunkResponse {
     private int vectorDimension;
     private int contentLength;
     private int tokenCount;
+    private Long embeddingInputTokens;
+    private Long embeddingTotalTokens;
     private int chunkIndex;
     private String contentHash;
     private String sourceVersion;
@@ -91,6 +96,11 @@ public class AdminKnowledgeChunkResponse {
     }
 
     public int getTokenCount() { return tokenCount; }
+
+    public Long getEmbeddingInputTokens() { return embeddingInputTokens; }
+    public void setEmbeddingInputTokens(Long tokens) { this.embeddingInputTokens = tokens; }
+    public Long getEmbeddingTotalTokens() { return embeddingTotalTokens; }
+    public void setEmbeddingTotalTokens(Long tokens) { this.embeddingTotalTokens = tokens; }
 
     public int getChunkIndex() { return chunkIndex; }
 

@@ -1,4 +1,9 @@
 """Bounded overload, database interruption and live stale-worker takeover on the private stub stack."""
+
+import sys as _auth_sys
+from pathlib import Path as _AuthPath
+_auth_sys.path.insert(0, str(_AuthPath(__file__).resolve().parents[1] / 'tools'))
+import cookie_http as _auth_http
 import base64
 from concurrent.futures import ThreadPoolExecutor
 import importlib.util
@@ -7,7 +12,7 @@ from pathlib import Path
 import shutil
 import sys
 import time
-import requests
+import cookie_http as requests
 
 spec=importlib.util.spec_from_file_location('faults',Path(__file__).with_name('run-capacity-faults.py'))
 f=importlib.util.module_from_spec(spec);spec.loader.exec_module(f)

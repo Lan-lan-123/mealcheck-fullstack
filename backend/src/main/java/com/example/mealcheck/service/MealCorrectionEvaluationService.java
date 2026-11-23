@@ -97,7 +97,8 @@ public class MealCorrectionEvaluationService {
         // The reviewer supplies a separate sanitized fixture and expected score.
         // No account, image, free-text correction reason or timestamps are exported.
         var recognition = new RecognitionResult();
-        recognition.setFoods(request.foods().stream().map(food -> new FoodItem(food.name().trim(), food.category(), 1.0, null)).toList());
+        recognition.setFoods(request.foods().stream().map(food -> food.toFoodItem(null)).toList());
+        recognition.setFoods(scoring.acceptedFoods(recognition));
         String json = writeJson(recognition.getFoods());
         int updated = jdbc.update("UPDATE meal_corrections SET evaluation_status=?,evaluation_foods_json=?,expected_score=?,reviewed_by=? WHERE id=?",
                 request.status(), json, request.expectedScore(), reviewer, id);

@@ -1,0 +1,23 @@
+rule_files:
+  - mealcheck-alerts.yml
+evaluation_interval: 1m
+tests:
+  - interval: 1m
+    input_series:
+      - series: 'mealcheck_lifecycle_payload_bytes{instance="test"}'
+        values: '90+0x6 10+0x3'
+      - series: 'mealcheck_lifecycle_payload_budget_bytes{instance="test"}'
+        values: '100+0x10'
+      - series: 'mealcheck_lifecycle_monitor_healthy{instance="test"}'
+        values: '1+0x10'
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: MealCheckImagePayloadBudgetHigh
+        exp_alerts:
+          - exp_labels: {instance: test, severity: warning, service: mealcheck}
+            exp_annotations:
+              summary: "暂存图片已超过逻辑预算的 80%"
+              description: "检查失败图片占用、清理策略与消费恢复；逻辑预算不包含 WAL、表膨胀及备份。"
+      - eval_time: 8m
+        alertname: MealCheckImagePayloadBudgetHigh
+        exp_alerts: []

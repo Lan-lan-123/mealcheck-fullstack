@@ -1,3 +1,4 @@
+import Button from '../../components/Button'
 import { goals } from '../userWorkspaceConfig'
 
 export default function DietGoalsPanel({ goalLabel, goalDraft, setGoalDraft, saveGoal, loading }) {
@@ -15,7 +16,7 @@ export default function DietGoalsPanel({ goalLabel, goalDraft, setGoalDraft, sav
                   </select></label>
                   <label className="form-field">结束日期（可选）<input type="date" aria-label="目标结束日期" value={goalDraft.endDate} onChange={e => setGoalDraft({ ...goalDraft, endDate: e.target.value })} /></label>
                   <label className="form-field form-field-wide">目标说明<input aria-label="目标说明" value={goalDraft.note} onChange={e => setGoalDraft({ ...goalDraft, note: e.target.value })} placeholder="目标说明" /></label>
-                  <button className="secondary-btn" type="submit" disabled={loading}>保存目标</button>
+                  <Button variant="secondary" className="secondary-btn" type="submit" disabled={loading}>保存目标</Button>
                 </form>
         </section>
   )

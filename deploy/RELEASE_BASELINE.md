@@ -6,13 +6,14 @@
 ## 创建候选版本
 
 先审查并提交业务源码、测试、依赖锁文件、配置示例及部署工具。真实密钥、上传文件、数据库备份和学习用 Word 文档不属于本轮候选源码。
-脚本要求已跟踪文件没有未提交改动，通过 `git archive HEAD` 导出源码。未跟踪文件不会混入构建或验收。
+脚本要求已跟踪文件没有未提交改动，也没有未处理的未跟踪文件，通过 `git archive HEAD` 导出源码；Git忽略的本地日志和密钥不阻塞导出。版本参数必须与后端、前端及锁文件中的产品版本一致。新增源码必须审查并提交，不能遗漏在归档外。
 
-在仓库根目录运行（Python 3.11+、Java 17、Maven、Node/npm、Docker Compose、k6、Pillow）：
+在仓库根目录运行（Python 3.11+、Java 17、Maven、Node/npm、Docker Compose、k6；Python依赖见`tools/requirements-ci.txt`）：
 
 ```powershell
 $env:PLAYWRIGHT_CHROMIUM_EXECUTABLE='C:/Program Files/Google/Chrome/Application/chrome.exe'
-python deploy/scripts/release_baseline.py --version baseline-20261009-rc1
+python -m pip install -r tools/requirements-ci.txt
+python tools/run_logged.py --group deploy --name release-2.0.0 -- python deploy/scripts/release_baseline.py --version 2.0.0
 ```
 
 Linux CI 使用 `.github/workflows/release-baseline.yml` 的手动工作流，安装 Chromium 和 Nginx，并要求代理链验收通过。
@@ -21,12 +22,15 @@ Linux CI 使用 `.github/workflows/release-baseline.yml` 的手动工作流，�
 ## 验收内容
 
 - 从同一个提交的干净源码归档运行后端单元/HTTP 与 PostgreSQL/RabbitMQ 集成测试。
+- 双后端助手与知识源验收复用同一个已验证JAR，核对各自结果中的JAR SHA256；不允许用其他构建的通过报告代替。生命周期和助手测试契约也纳入发布脚本。
+- 必须有数据库集成测试实际执行；Maven成功但全部因Docker不可用而跳过，不算通过。现有Surefire/Failsafe报告目录均检查并保存。
+- 从刚编译的生产切分器和版本库中的知识正文生成离线测试清单与计划，不读取开发机器历史`logs/`证据；离线契约测试不调用模型或数据库。
 - 周报协调监控测试分别在 UTC 与 Asia/Shanghai 时区执行；保留完整后端报告后再执行单项测试，避免覆盖完整结果。
 - 数据库回归覆盖 UTC、上海和洛杉矶 JVM 时区下的原生 SQL 时间参数、ORM 时间存取与任务到期领取。LocalDateTime 已由 AppTime 明确存储口径，不额外设置 Hibernate JDBC Calendar 时区。
 - `npm ci`、前端测试、生产构建、浏览器验收，以及运维、容量和模型桩的 Python 合约测试。
 - 浏览器验收启用 CI 模式，必须启动归档中的源码，不复用其他工作区的开发服务。
-- 用该归档构建一次后端与前端镜像，写入提交和版本 OCI 标签，保存镜像内容 ID 与镜像归档。
-- 容量/依赖故障测试和生产配置冒烟共用该后端镜像；生产配置冒烟使用该前端镜像。逐一核对运行容器的实际镜像内容 ID，禁止验收时重新构建。
+- 用该归档构建一次后端、前端及 PostgreSQL 16 + pgvector 镜像，写入提交和版本 OCI 标签，保存镜像内容 ID 与镜像归档。
+- 容量/依赖故障测试和生产配置冒烟共用候选后端及数据库镜像，生产配置冒烟使用候选前端镜像。逐一核对运行容器的实际镜像内容 ID。
 - 完整迁移库恢复、运行栈数据库与图片联合恢复、备份后 HTTP 冒烟、告警规则检查。
 - 验证代理链：本机缺少 Nginx 时在隔离 Python/Alpine 容器安装 Nginx 并执行；Linux 候选 CI 使用预装 Nginx，强制执行。
 
@@ -37,7 +41,9 @@ Linux CI 使用 `.github/workflows/release-baseline.yml` 的手动工作流，�
 
 ## 证据与镜像保留
 
-证据写入 Git 忽略的 `deploy/release-results/<时间>-<提交>/`：
+新证据写入 Git 忽略的 `logs/deploy/release-baseline/<时间>-<提交>/`，终端输出由`tools/run_logged.py`另存同一`logs/deploy/`分类。CI常规检查使用`logs/deploy/ci-<时间>-<运行编号>-<重试编号>/`，归档路径同步更新。
+
+此前`deploy/release-results/`与`deploy/recovery-results/`中的历史成套证据保留原位置，不能仅移动日志导致旧报告或哈希失效。
 
 | 文件 | 内容 |
 | --- | --- |
@@ -57,5 +63,6 @@ Linux CI 使用 `.github/workflows/release-baseline.yml` 的手动工作流，�
 
 仅在本轮要求的检查全部通过后创建本地候选标签。正式发布时使用本轮保留的同一个镜像内容，核对提交标签及镜像 digest，保存环境配置版本。
 生产迁移前先执行数据库与上传文件一致备份，并证明该备份可恢复。
+候选数据库基于 Alpine。现有 Debian 数据库切换时，在独立环境用逻辑备份恢复到新卷，检查排序规则、索引和业务查询，再用 `MEALCHECK_POSTGRES_IMAGE` 选择已验证镜像。生产配置默认沿用原数据库镜像。
 回退旧镜像的迁移兼容性需单独验证；本轮验证可恢复性，不承诺任意旧应用都兼容新数据库。
 生产启用、异地备份、告警通知、真实模型质量和配额/费用验收应各有证据。

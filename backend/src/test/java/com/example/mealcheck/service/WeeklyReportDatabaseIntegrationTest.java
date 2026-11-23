@@ -11,11 +11,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -68,6 +68,56 @@ class WeeklyReportDatabaseIntegrationTest {
     @Autowired ImageStorageService images;
     @Autowired AppProperties properties;
     @Autowired JdbcTemplate jdbc;
+    @Autowired MealReportInvalidationService invalidation;
+    @Autowired org.springframework.transaction.PlatformTransactionManager transactionManager;
+
+    @Test void resumedDispatchPublishesAndInvalidatesUsingTheOriginalReportPeriod() throws Exception {
+        LocalDate originalEnd = AppTime.today().minusDays(3);
+        workerJobs.enqueue(List.of(user.getId()), 7, originalEnd);
+        var job = workerJobs.claimBatch(1).get(0);
+        assertThat(AppTime.businessDate(job.getCreatedAt())).isNotEqualTo(originalEnd);
+        assertThat(workerJobs.beginExecution(job.getId(), job.getAttempts(), job.getExecutionToken())).isTrue();
+        var report = report(); report.setReportText("Period ending " + originalEnd);
+        assertThat(completion.complete(job.getId(), job.getAttempts(), job.getExecutionToken(), report)).isTrue();
+        var snapshot = snapshots.findByJobId(job.getId()).orElseThrow();
+        assertThat(snapshot.getPeriodEnd()).isEqualTo(originalEnd);
+        assertThat(snapshot.getPeriodStart()).isEqualTo(originalEnd.minusDays(6));
+        var stored = new ObjectMapper().findAndRegisterModules().readValue(snapshot.getReportJson(), WeeklyReportResponse.class);
+        assertThat(stored.getPeriodEnd()).isEqualTo(originalEnd);
+        assertThat(stored.getReportText()).isEqualTo("Period ending " + originalEnd);
+        var tx = new org.springframework.transaction.support.TransactionTemplate(transactionManager);
+        tx.executeWithoutResult(status -> invalidation.mealDates(user.getId(), AppTime.today()));
+        assertThat(jobs.findById(job.getId()).orElseThrow().getStatus()).isEqualTo("SUCCEEDED");
+        assertThat(snapshots.findByJobId(job.getId()).orElseThrow().isStale()).isFalse();
+        tx.executeWithoutResult(status -> invalidation.mealDates(user.getId(), originalEnd.minusDays(6)));
+        assertThat(jobs.findById(job.getId()).orElseThrow().getStatus()).isEqualTo("STALE");
+        assertThat(snapshots.findByJobId(job.getId()).orElseThrow().isStale()).isTrue();
+    }
+
+    @Test void expiredReplacedAndInvalidatedClaimsCannotBeginExecution() {
+        var first = claim();
+        assertThat(workerJobs.beginExecution(first.getId(), first.getAttempts(), first.getExecutionToken())).isTrue();
+        jdbc.update("UPDATE weekly_report_jobs SET updated_at=? WHERE id=?", AppTime.now().minusDays(2), first.getId());
+        assertThat(workerJobs.beginExecution(first.getId(), first.getAttempts(), first.getExecutionToken())).isFalse();
+        var second = workerJobs.claimBatch(1).get(0);
+        assertThat(workerJobs.beginExecution(first.getId(), first.getAttempts(), first.getExecutionToken())).isFalse();
+        assertThat(workerJobs.beginExecution(second.getId(), second.getAttempts(), second.getExecutionToken())).isTrue();
+        jdbc.update("UPDATE weekly_report_jobs SET status='STALE' WHERE id=?", second.getId());
+        assertThat(workerJobs.beginExecution(second.getId(), second.getAttempts(), second.getExecutionToken())).isFalse();
+    }
+
+    @Test void shortConfiguredLeaseDoesNotRecoverAnOperationWithinItsDeadline() {
+        long originalLease = properties.getWeeklyReport().getStaleLeaseSeconds();
+        try {
+            properties.getWeeklyReport().setStaleLeaseSeconds(60);
+            var job = claim();
+            jdbc.update("UPDATE weekly_report_jobs SET updated_at=? WHERE id=?", AppTime.now().minusSeconds(100), job.getId());
+            workerJobs.claimBatch(0);
+            assertThat(jobs.findById(job.getId()).orElseThrow().getStatus()).isEqualTo("RUNNING");
+            assertThat(workerJobs.beginExecution(job.getId(), job.getAttempts(), job.getExecutionToken())).isTrue();
+            assertThat(jobs.findById(job.getId()).orElseThrow().getUpdatedAt()).isAfter(AppTime.now().minusSeconds(5));
+        } finally { properties.getWeeklyReport().setStaleLeaseSeconds(originalLease); }
+    }
 
     @Test void dispatchCursorIsDurableSkipsInactiveAccountsAndPreventsDuplicateEnqueue() {
         jdbc.execute("TRUNCATE weekly_report_dispatch");
@@ -92,8 +142,8 @@ class WeeklyReportDatabaseIntegrationTest {
         assertThat(deferred.getNextRetryAt()).isAfter(AppTime.now().plusMinutes(59));
         assertThat(workerJobs.markFailed(job.getId(),3,job.getExecutionToken(),new IllegalStateException("late"))).isFalse();
     }
-    @MockBean RateLimitService limits;
-    @SpyBean UserDietProfileService profiles;
+    @MockitoBean RateLimitService limits;
+    @MockitoSpyBean UserDietProfileService profiles;
     @TempDir Path uploadDir;
     UserAccount user;
 

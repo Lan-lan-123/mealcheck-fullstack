@@ -39,7 +39,8 @@ button:disabled { cursor: not-allowed; opacity: .6; }
 .sidebar-account > div { min-width: 0; flex: 1; }
 .sidebar-account strong { display: block; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sidebar-account small { display: block; color: var(--muted); font-size: 10px; margin-top: 2px; }
-.icon-button { width: 36px; height: 36px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 8px; background: transparent; color: #698074; cursor: pointer; }
+.icon-button { width: 36px; height: 36px; padding: 0; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 8px; background: transparent; color: #698074; cursor: pointer; }
+.icon-button > svg { flex-shrink: 0; }
 .icon-button:hover { background: #eaf4ee; color: var(--accent); }
 .sidebar-collapse { width: 100%; border: 0; display: flex; justify-content: center; align-items: center; gap: 8px; padding: 9px; color: #829087; background: transparent; font-size: 11px; cursor: pointer; border-radius: 8px; }
 .sidebar-collapse:hover { background: #f4f7f5; }
@@ -69,3 +70,9 @@ button:disabled { cursor: not-allowed; opacity: .6; }
 .workspace-page-heading p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.8; }
 .page-heading-icon { width: 58px; height: 58px; display: grid; place-items: center; border: 1px solid #e0e9e2; border-radius: 16px; color: #7b9c88; background: #f0f5f1; flex-shrink: 0; }
 .workspace-footer { display: flex; justify-content: space-between; gap: 12px; margin-top: 30px; padding: 20px 0 4px; border-top: 1px solid var(--line); color: #8b9b90; font-size: 10px; letter-spacing: .5px; }
+.recognition-review { margin: 14px 0; padding: 14px; border: 1px solid #d4ac64; border-radius: 10px; background: #fff8e9; color: #674b1d; overflow-wrap: anywhere; }
+.recognition-review p { font-size: 13px; line-height: 1.7; }
+.recognition-review ul { padding-left: 20px; }
+.recognition-review li { margin: 8px 0; font-size: 13px; }
+.chips .food-needs-review { border: 1px solid #d4ac64; background: #fff8e9; color: #674b1d; }
+.analysis-failure-actions { margin: 12px 0; }

@@ -6,6 +6,8 @@ export default function useDialogFocus(ref, close, busy) {
   useEffect(() => {
     const prior = document.activeElement
     const dialog = ref.current
+    const overflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
     const focusable = () => [...dialog.querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex="0"]')]
     focusable()[0]?.focus()
     const key = event => {
@@ -17,6 +19,6 @@ export default function useDialogFocus(ref, close, busy) {
       }
     }
     dialog.addEventListener('keydown', key)
-    return () => { dialog.removeEventListener('keydown', key); if (prior?.isConnected) prior.focus() }
+    return () => { dialog.removeEventListener('keydown', key); document.body.style.overflow = overflow; if (prior?.isConnected) prior.focus() }
   }, [ref])
 }

@@ -38,6 +38,7 @@ public class AssistantDeliveryController {
         // The task manager owns the operation deadline, including time spent in its queue.
         var emitter=new SseEmitter(180_000L);
         var delivery=new AssistantStreamDelivery((event,data)->send(emitter,event,data));
+        delivery.reviewMode=request.getReviewMode();
         emitter.onTimeout(()->tasks.cancel(user.getId(),delivery.requestId));
         emitter.onError(error->tasks.cancel(user.getId(),delivery.requestId));
         emitter.onCompletion(()->tasks.cancel(user.getId(),delivery.requestId));
@@ -59,13 +60,16 @@ public class AssistantDeliveryController {
                 org.slf4j.MDC.remove("requestId");
             }
         },state->{
-            try { send(emitter,"error",Map.of("requestId",delivery.requestId,"code",state.name(),"message",state==AssistantTaskManager.State.TIMED_OUT?"回复已超时（包含排队时间）。":"回复已取消")); }catch(CancellationException ignored) { }
+            String message=state==AssistantTaskManager.State.TIMED_OUT?"回复已超时（包含排队时间）。"
+                    :state==AssistantTaskManager.State.INTERRUPTED?"执行已中断，请查看会话历史后重试。":"回复已取消";
+            try { send(emitter,"error",Map.of("requestId",delivery.requestId,"code",state.name(),"message",message)); }catch(CancellationException ignored) { }
             emitter.complete();
         },emitter::complete);
         return ResponseEntity.ok().headers(RateLimitHttpHeaders.from(limit)).header("X-Assistant-Request-ID",delivery.requestId)
             .header("Cache-Control","no-cache").header("X-Accel-Buffering","no").body(emitter);
     }
     @DeleteMapping("/requests/{requestId}") public void cancel(@AuthenticationPrincipal UserPrincipal user,@PathVariable String requestId) { tasks.cancel(user.getId(),requestId); }
+    @GetMapping("/requests/{requestId}") public AssistantTaskStore.Status status(@AuthenticationPrincipal UserPrincipal user,@PathVariable String requestId) { return tasks.status(user.getId(),requestId); }
     @PutMapping("/messages/{id}/feedback") public void feedback(@AuthenticationPrincipal UserPrincipal user,@PathVariable long id,@Valid @RequestBody Feedback body) { feedback.save(user,id,body); }
     @GetMapping("/messages/{id}/feedback") public AnswerFeedback feedback(@AuthenticationPrincipal UserPrincipal user,@PathVariable long id) { return feedback.get(user.getId(),id); }
 }

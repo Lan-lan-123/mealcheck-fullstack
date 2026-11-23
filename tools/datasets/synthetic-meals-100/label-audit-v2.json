@@ -1,0 +1,30 @@
+{
+  "version": "synthetic-meals-100-v2-assistant-audit",
+  "baseVersion": "synthetic-meals-100-v1",
+  "baseDatasetSha256": "532e7bc6cba4577b5d4968bcd64761f2145f9d5cc06373c0853f331864228d83",
+  "reviewer": "Codex assistant visual review; not independent human annotation",
+  "reviewDate": "2026-10-16",
+  "policy": "Retain the original dataset. Correct visible label errors and explicit lexical/shape aliases only. Do not use model answers to infer hidden ingredients, preparation, sweetness, portions or nutritional truth. Keep unresolved attributes and category-design conflicts explicit.",
+  "groups": [
+    {"first": 1, "last": 5, "observation": "米饭、番茄炒蛋和小白菜类青菜均可见。清炒青菜是原有青菜别名的同义表达。", "updates": [{"originalName": "清炒小白菜", "aliasesAdd": ["清炒青菜"]}]},
+    {"first": 6, "last": 10, "observation": "可见鱼肉、米饭和西兰花；鱼肉表面纹理和褐色痕迹不足以确认清蒸或煎制。", "uncertainties": ["鱼的具体品种及烹饪方法无法确认。"], "updates": [{"originalName": "清蒸鱼", "name": "鱼肉", "aliases": ["鱼排"]}]},
+    {"first": 11, "last": 15, "observation": "可见鸡肉片、米饭与胡萝卜切片；补充切片形态别名。", "uncertainties": ["全谷物比例及具体烹饪方法无法仅凭画面确认。"], "updates": [{"originalName": "胡萝卜", "aliasesAdd": ["胡萝卜片"]}]},
+    {"first": 16, "last": 20, "observation": "可见面条、肉块和绿叶菜；不把菜的近似外观当作物种确认。", "uncertainties": ["原始菠菜和牛肉标签保留生成场景来源，未独立确认品种或肉类来源；做法不确定。"], "updates": [{"originalName": "牛肉", "aliasesAdd": ["牛肉块"]}]},
+    {"first": 21, "last": 25, "observation": "可见豆腐块、绿色豆角类蔬菜和米饭。", "uncertainties": ["豆腐是否煎制和具体用油量无法确认。"], "updates": [{"originalName": "豆腐", "aliasesAdd": ["豆腐块"]}, {"originalName": "四季豆", "aliasesAdd": ["豆角"]}]},
+    {"first": 26, "last": 30, "observation": "五张图片均有包子褶口；原始馒头标签与画面不符。", "uncertainties": ["未见馅料，不能判断包子馅；白色饮品的牛奶来源保留生成场景声明，画面不能确认。"], "updates": [{"originalName": "馒头", "name": "包子", "aliases": []}]},
+    {"first": 31, "last": 35, "observation": "可见白粥、蒸蛋状食物及黄瓜切片。", "uncertainties": ["没有实际重量、餐次或营养摄入量标注。"]},
+    {"first": 36, "last": 40, "observation": "可见薯类块、虾仁和卷心菜类蔬菜；保留原始食材标签。", "uncertainties": ["具体做法及用油量不确定。"]},
+    {"first": 41, "last": 45, "observation": "可见玉米、炒蛋状食物及蘑菇；煮玉米与原别名水煮玉米同义。", "updates": [{"originalName": "玉米", "aliasesAdd": ["煮玉米"]}, {"originalName": "蘑菇", "aliasesAdd": ["蘑菇片"]}]},
+    {"first": 46, "last": 50, "observation": "可见面包、酸奶状食物和苹果切片；画面不能证明酸奶原味或无糖。", "uncertainties": ["面包全麦比例及酸奶是否含糖无法从画面确认。"], "updates": [{"originalName": "原味酸奶", "name": "酸奶", "aliases": []}, {"originalName": "苹果", "aliasesAdd": ["苹果切片"]}]},
+    {"first": 51, "last": 55, "observation": "可见带明显肥瘦层次的肉块、米饭和花椰菜；菜花与花椰菜同义。", "uncertainties": ["保留原有 oily 标签并显式记录其与 protein 基础类别的维度冲突，不把标签代入得到的43分当作营养真值；实际含油量未知。"], "updates": [{"originalName": "菜花", "aliasesAdd": ["花椰菜", "炒花椰菜"]}]},
+    {"first": 56, "last": 60, "observation": "可见裹粉炸物、薯条及带冰块的深色饮品。", "uncertainties": ["深色饮品是否可乐及含糖量不能由画面独立证实；fried 与基础营养类别的维度冲突尚未拆分。"], "updates": [{"originalName": "可乐", "aliasesAdd": ["冰可乐"]}]},
+    {"first": 61, "last": 65, "observation": "可见米饭、黄瓜和海藻类汤；汤中叶片近似海带，也可能是其他海藻。", "uncertainties": ["原始紫菜汤标签保留为生成场景声明，未独立确认；不把海带汤加入紫菜汤的同义别名。"]},
+    {"first": 66, "last": 70, "observation": "可见米饭、茄子类菜肴和白色饮品。", "uncertainties": ["白色饮品是否豆浆及是否含糖无法从画面确认；茄子做法和用油量不确定。"]},
+    {"first": 71, "last": 75, "observation": "可见燕麦状粥、香蕉切片和鸡蛋。", "uncertainties": ["餐次、实际份量、燕麦粥配方均未独立确认。"]},
+    {"first": 76, "last": 80, "observation": "可见深色蛋糕、草莓及橙色饮品。", "uncertainties": ["蛋糕配方、饮品是否纯橙汁、添加糖及实际糖含量不能从画面独立确认。"]},
+    {"first": 81, "last": 85, "observation": "空餐盘，无可见食物。"},
+    {"first": 86, "last": 90, "observation": "书本、笔、手机等物品，无可见食物。"},
+    {"first": 91, "last": 95, "observation": "鞋子，无可见食物。"},
+    {"first": 96, "last": 100, "observation": "盆栽植物，无可见餐食。"}
+  ]
+}

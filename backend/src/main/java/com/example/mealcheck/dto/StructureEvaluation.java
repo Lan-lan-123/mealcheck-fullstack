@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 public class StructureEvaluation {
+    private ScoreBreakdown scoreBreakdown;
+    public ScoreBreakdown getScoreBreakdown() { return scoreBreakdown; }
+    public void setScoreBreakdown(ScoreBreakdown value) { scoreBreakdown = value; }
     private int score;
     private String summary;
     private Map<String, Integer> categoryCounts = new LinkedHashMap<>();

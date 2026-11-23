@@ -224,10 +224,21 @@ public class AssistantBenchmarkHistoryService {
         }
         if (!Objects.equals(before.status(), after.status())
                 || !Objects.equals(before.selectedSkill(), after.selectedSkill())
-                || before.toolTracePassed() != after.toolTracePassed()) {
+                || before.toolTracePassed() != after.toolTracePassed()
+                || !Objects.equals(chainComparisonKey(before), chainComparisonKey(after))) {
             return "CHANGED";
         }
         return null;
+    }
+
+    private Object chainComparisonKey(AssistantBenchmarkResponse.CaseResult item) {
+        var report = item.ragChain();
+        if (report == null) return null;
+        // Timing noise alone must not mark an unchanged retrieval as a regression/change.
+        return java.util.Arrays.asList(report.retrievalStatus(), report.firstRelevantRank(),
+                report.assessmentVersion(), report.finalEvidenceCovered(), report.finalEvidenceCoverage(),
+                report.retrievals().stream().map(search -> java.util.Arrays.asList(
+                        search.query(), search.requestedLimit(), search.status(), search.hits())).toList());
     }
 
     private AssistantBenchmarkComparisonResponse.CategoryDelta categoryDelta(

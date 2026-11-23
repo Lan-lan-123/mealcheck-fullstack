@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/authTest.js'
 
 const foods = Array.from({ length: 10 }, (_, i) => ({ name: `食物 ${i + 1}`, category: 'vegetable' }))
 const advice = '完整饮食建议。'.repeat(100) + '建议末尾仍然保留'
@@ -13,8 +13,8 @@ async function fixture(page, role) {
   const errors = [], mutations = []
   page.on('pageerror', error => errors.push(error.message))
   await page.addInitScript(role => {
-    localStorage.setItem('mealcheck_token', 'separation-test')
-    localStorage.setItem('mealcheck_user', JSON.stringify({ username: 'demo', displayName: '测试账户', role }))
+
+    sessionStorage.setItem('mealcheck_fixture_user', JSON.stringify({ username: 'demo', displayName: '测试账户', role }))
   }, role)
   let goal = { goalType: 'balanced', note: '', endDate: '' }
   await page.route('**/api/**', route => {
@@ -22,14 +22,18 @@ async function fixture(page, role) {
     if (!path.startsWith('/api/')) return route.continue()
     if (!['GET', 'HEAD'].includes(request.method())) mutations.push(path)
     const send = data => route.fulfill({ contentType: 'application/json', body: JSON.stringify(data) })
+    if (path === '/api/meals/today') return send({ date: '2026-10-18', businessZone: 'Asia/Shanghai', totalMeals: 0,
+      slots: { BREAKFAST: 'UNKNOWN', LUNCH: 'UNKNOWN', DINNER: 'UNKNOWN', SNACK: 'UNKNOWN' },
+      reviewFoodCount: 0, reviewMealCount: 0, reviews: [], pendingPlanCount: 0, pendingPlans: [] })
     if (path === '/api/profile/goals/current') {
       if (request.method() !== 'GET') goal = request.postDataJSON()
       return send(goal)
     }
-    if (path === '/api/meals/analysis-requests') return send({ status: 'SUCCEEDED', result: { recordId: 1, evaluation: { score: 88, summary: meal.summary, riskTags: meal.riskTags }, recognition: { foods }, advice, references: [{ id: 1, title: '均衡搭配知识', score: .9, content: '知识片段原文完整保留' }] } })
-    if (path === '/api/meals') return send({ content: [meal], totalPages: 1, totalElements: 1, page: 0 })
+    if (path === '/api/meals/analysis-requests') return send({ key: request.headers()['idempotency-key'], status: 'SUCCEEDED', result: { recordId: 1, evaluation: { score: 88, summary: meal.summary, riskTags: meal.riskTags }, recognition: { foods }, advice, references: [{ id: 1, title: '均衡搭配知识', score: .9, content: '知识片段原文完整保留' }] } })
+    if (path === '/api/meals/1' && request.method() === 'GET') return send(meal)
+    if (['/api/meals', '/api/meals/summaries'].includes(path)) return send({ content: [meal], totalPages: 1, totalElements: 1, page: 0 })
     if (path === '/api/meals/1/nutrition') return send({ recordId: 1, recordRevision: 0, version: 0, enabled: false,
-      status: 'DISABLED', totals: null, items: foods.map((food, foodIndex) => ({ ...food, foodIndex })) })
+      status: 'DISABLED', estimatedFoods: 0, totals: null, items: foods.map((food, foodIndex) => ({ ...food, foodIndex })) })
     if (path === '/api/reports/weekly/latest') return send(report)
     if (path === '/api/meals/trends') return send(trend)
     if (path === '/api/admin/dashboard') return send({ overview: { userCount: 12 }, operations: { activeUsers7d: 9, aiSuccessCount: 18 }, system: { aiMetrics: [{ operation: '餐食识别', calls: 20, successCount: 18, failureCount: 2, averageLatencyMs: 300 }] },
@@ -47,12 +51,14 @@ async function fixture(page, role) {
   return { errors, mutations }
 }
 
-test('user pages keep the home compact and retain complete analysis, trends, reports and goals', async ({ page }) => {
+test('user home includes daily planning and retains complete analysis, trends, reports and goals', async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 })
   const state = await fixture(page, 'USER')
   await expect(page.getByRole('heading', { name: '上传饮食图片' })).toBeVisible()
   await expect(page.getByRole('heading', { name: '本周饮食概览' })).toHaveCount(0)
-  expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(768)
+  await expect(page.getByRole('region', { name: '今日饮食总览' })).toBeVisible()
+  await expect(page.getByRole('region', { name: '下一餐搭配推荐' })).toBeVisible()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
   await page.screenshot({ path: 'test-results/compact-user-analysis.png', fullPage: true })
   await page.locator('input[type=file]').setInputFiles({ name: 'meal.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('fixture') })
   await page.getByRole('button', { name: '开始分析', exact: true }).click()
@@ -107,6 +113,8 @@ test('meal detail drawer preserves the current filters and keyboard focus on mob
   await page.keyboard.press('Tab')
   await expect(drawer.getByRole('button', { name: '修改用餐信息' })).toBeFocused()
   await page.keyboard.press('Tab')
+  await expect(drawer.getByText('查看评分明细', { exact: true })).toBeFocused()
+  await page.keyboard.press('Tab')
   await expect(drawer.getByRole('button', { name: '加入计划' })).toBeFocused()
   await page.keyboard.press('Tab')
   await expect(drawer.getByRole('checkbox', { name: '开启本餐可选份量与估算' })).toBeFocused()
@@ -143,7 +151,8 @@ test('admin overview fits a standard screen and links to complete monitor and as
   await expect(page.getByRole('dialog').locator('.mini-bar-row')).toHaveCount(20)
   await page.keyboard.press('Escape')
   await page.getByRole('button', { name: '质量评测', exact: true }).click()
-  await page.getByRole('button', { name: '检索质量评测', exact: true }).click()
+  await page.getByRole('button', { name: 'RAG 链路评测', exact: true }).click()
+  await page.getByText('单独检索诊断（可选）', { exact: true }).click()
   await page.getByRole('button', { name: '运行 RAG 评测集' }).click()
   await expect(page.getByText('评测题数', { exact: true })).toBeVisible()
   expect(state.errors).toEqual([])

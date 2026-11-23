@@ -60,8 +60,9 @@ public class AssistantLongTermMemoryService {
             return List.of();
         }
         try {
-            if (!store.ready(signature())) return textRecall(user, conversation, limit);
-            String vector = embeddingService.toPgVector(embeddingService.embed(query));
+            String signature=signature();
+            if (!store.ready(signature)) return textRecall(user, conversation, limit);
+            String vector = embeddingService.toPgVector(embeddingService.embedForSignature(query,signature));
             int safeLimit = Math.max(1, Math.min(10, limit));
             Long conversationId = conversation == null ? null : conversation.getId();
             return jdbcTemplate.query("""
@@ -80,7 +81,7 @@ public class AssistantLongTermMemoryService {
                             rs.getString("fact_type"), rs.getString("fact_text"),
                             rs.getDouble("confidence"), rs.getDouble("semantic_score"),
                             rs.getDouble("final_score")),
-                    vector, vector, conversationId, user.getId(), signature(), safeLimit)
+                    vector, vector, conversationId, user.getId(), signature, safeLimit)
                     .stream().filter(fact -> fact.finalScore() >= 0.35).toList();
         } catch (Exception e) {
             log.warn("Long-term memory recall degraded: {}", e.getMessage());
@@ -99,9 +100,11 @@ public class AssistantLongTermMemoryService {
                 String hash=sha256(fact.text());
                 long id=store.saveText(user.getId(),conversation.getId(),fact.type(),fact.text(),hash,fact.confidence());
                 stored++;
-                if (store.ready(signature())) {
-                    String vector=embeddingService.toPgVector(embeddingService.embed(fact.text()));
-                    store.saveVector(id,hash,signature(),properties.getKnowledge().getEmbeddingDim(),compressionService.storageType().sqlName(),vector);
+                String signature=signature();
+                if (store.ready(signature)) {
+                    float[] embedded=embeddingService.embedForSignature(fact.text(),signature);
+                    String vector=embeddingService.toPgVector(embedded);
+                    store.saveVector(id,hash,signature,embedded.length,compressionService.storageType().sqlName(),vector);
                 }
             } catch (Exception e) {
                 // A failed embedding cannot roll back already saved preference/restriction text.

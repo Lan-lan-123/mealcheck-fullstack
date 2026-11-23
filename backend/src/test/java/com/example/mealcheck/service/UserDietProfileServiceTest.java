@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,6 +22,74 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class UserDietProfileServiceTest {
+
+    @Test void replacesOnlyTheEditedMealsContributionWithoutScanningHistory() {
+        var profileRepository = mock(UserDietProfileRepository.class);
+        var mealRepository = mock(MealRecordRepository.class);
+        var mapper = new ObjectMapper();
+        var service = new UserDietProfileService(profileRepository, mealRepository, mapper);
+        var user = new UserAccount();
+        var profile = new UserDietProfile(); profile.setUser(user); profile.setAggregateInitialized(true);
+        profile.setTotalMeals(1000); profile.setTotalScore(70000);
+        profile.setFoodCountsJson("{\"米饭\":1000,\"炸鸡\":1}");
+        profile.setRiskCountsJson("{\"油炸\":1,\"蔬菜不足\":500}");
+        profile.setGoalCountsJson("{\"balanced\":1000}");
+        when(profileRepository.findByUser(user)).thenReturn(Optional.of(profile));
+        when(profileRepository.save(any())).thenAnswer(call -> call.getArgument(0));
+        var edited = record(mapper, user, 50, "balanced", "炸鸡", "油炸");
+        var before = service.contribution(edited);
+        // Mutate the same managed object, not a second meal, to catch aliased snapshots.
+        edited.setDetectedFoodsJson(Jsons.toJson(mapper, List.of(new FoodItem("青菜", "vegetable", 1, "用户确认"))));
+        edited.setRiskTagsJson("[]"); edited.setScore(90);
+        service.replaceMeal(user, before, edited);
+        assertThat(profile.getTotalMeals()).isEqualTo(1000);
+        assertThat(profile.getTotalScore()).isEqualTo(70040);
+        assertThat(profile.getAverageScore()).isEqualTo(70);
+        assertThat(Jsons.fromJson(mapper, profile.getFoodCountsJson(), Map.class)).containsEntry("米饭", 1000).containsEntry("青菜", 1).doesNotContainKey("炸鸡");
+        assertThat(Jsons.fromJson(mapper, profile.getRiskCountsJson(), Map.class)).containsEntry("蔬菜不足", 500).doesNotContainKey("油炸");
+        assertThat(profile.getGoalCountsJson()).isEqualTo("{\"balanced\":1000}");
+        verify(mealRepository, never()).findByUser(user);
+    }
+
+    @Test void repeatedReplacementPreservesMultiplicityZerosAndRankingForUnchangedValues() {
+        var profileRepository = mock(UserDietProfileRepository.class); var mealRepository = mock(MealRecordRepository.class);
+        var mapper = new ObjectMapper(); var service = new UserDietProfileService(profileRepository, mealRepository, mapper);
+        var user = new UserAccount(); var meal = record(mapper, user, 0, "balanced", " 米饭 ", " ");
+        meal.setDetectedFoodsJson("[{\"name\":\" 米饭 \"},{\"name\":\"米饭\"}]");
+        when(profileRepository.save(any())).thenAnswer(call -> call.getArgument(0));
+        when(profileRepository.findByUser(user)).thenReturn(Optional.empty());
+        var profile = service.applyMeal(user, meal);
+        when(profileRepository.findByUser(user)).thenReturn(Optional.of(profile));
+        var before = service.contribution(meal);
+        meal.setDetectedFoodsJson("[{\"name\":\"米饭\"}]");
+        service.replaceMeal(user, before, meal);
+        assertThat(profile.getFoodCountsJson()).isEqualTo("{\"米饭\":1}");
+        var identical = service.contribution(meal);
+        service.replaceMeal(user, identical, meal);
+        assertThat(profile.getTotalMeals()).isEqualTo(1); assertThat(profile.getTotalScore()).isZero();
+        assertThat(profile.getAverageScore()).isZero(); assertThat(profile.getRiskCountsJson()).isEqualTo("{}");
+        assertThat(profile.getFoodCountsJson()).isEqualTo("{\"米饭\":1}");
+        verify(mealRepository, never()).findByUser(user);
+    }
+
+    @Test void missingLegacyOrInconsistentAggregatesRebuildFromTheAlreadyCorrectedRecords() {
+        for (String state : List.of("missing", "legacy", "broken-json", "missing-count", "invalid-total")) {
+            var profileRepository = mock(UserDietProfileRepository.class); var mealRepository = mock(MealRecordRepository.class);
+            var mapper = new ObjectMapper(); var service = new UserDietProfileService(profileRepository, mealRepository, mapper);
+            var user = new UserAccount(); var profile = new UserDietProfile(); profile.setUser(user);
+            profile.setAggregateInitialized(!state.equals("legacy")); profile.setTotalMeals(1); profile.setTotalScore(state.equals("invalid-total") ? 0 : 40);
+            profile.setFoodCountsJson(state.equals("broken-json") ? "broken" : "{}"); profile.setRiskCountsJson("{}"); profile.setGoalCountsJson("{}");
+            when(profileRepository.findByUser(user)).thenReturn(state.equals("missing") ? Optional.empty() : Optional.of(profile));
+            when(profileRepository.save(any())).thenAnswer(call -> call.getArgument(0));
+            var edited = record(mapper, user, 40, "balanced", "炸鸡", "油炸"); var before = service.contribution(edited);
+            edited.setDetectedFoodsJson("[{\"name\":\"青菜\"}]"); edited.setRiskTagsJson("[]"); edited.setScore(90);
+            when(mealRepository.findByUser(user)).thenReturn(List.of(edited));
+            var rebuilt = service.replaceMeal(user, before, edited);
+            assertThat(rebuilt.getTotalMeals()).isEqualTo(1); assertThat(rebuilt.getTotalScore()).isEqualTo(90);
+            assertThat(service.commonFoods(rebuilt)).containsExactly("青菜"); assertThat(service.commonRisks(rebuilt)).isEmpty();
+            verify(mealRepository).findByUser(user);
+        }
+    }
 
     @Test
     void appliesNewMealWithoutScanningHistory() {

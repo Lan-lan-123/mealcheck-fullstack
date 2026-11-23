@@ -96,6 +96,56 @@ public class UserDietProfileService {
         return updateDerivedProfile(profile, totalMeals, totalScore, foodCounts, riskCounts, goalCounts);
     }
 
+    /** Immutable contribution captured before a managed meal entity is edited. */
+    public record MealContribution(long score, List<String> foods, List<String> risks, String goal) {
+        public MealContribution {
+            foods = List.copyOf(foods);
+            risks = List.copyOf(risks);
+        }
+    }
+
+    public MealContribution contribution(MealRecord record) {
+        return new MealContribution(safeScore(record), extractFoodNames(record), extractRiskTags(record), nullToEmpty(record.getGoal()));
+    }
+
+    /** Caller holds the account lock and has flushed the corrected meal in the same transaction. */
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.MANDATORY)
+    public UserDietProfile replaceMeal(UserAccount user, MealContribution before, MealRecord after) {
+        UserDietProfile profile = profileRepository.findByUser(user).orElse(null);
+        if (profile == null || !profile.isAggregateInitialized() || profile.getTotalMeals() < 1
+                || profile.getTotalScore() < before.score()) return refresh(user);
+
+        Map<String, Long> foodCounts, riskCounts, goalCounts;
+        try {
+            foodCounts = readCountMap(profile.getFoodCountsJson());
+            riskCounts = readCountMap(profile.getRiskCountsJson());
+            goalCounts = readCountMap(profile.getGoalCountsJson());
+        } catch (IllegalStateException invalidAggregate) {
+            return refresh(user);
+        }
+        if (!containsContribution(foodCounts, before.foods()) || !containsContribution(riskCounts, before.risks())
+                || !containsContribution(goalCounts, List.of(before.goal()))) return refresh(user);
+
+        replaceCounts(foodCounts, before.foods(), extractFoodNames(after));
+        replaceCounts(riskCounts, before.risks(), extractRiskTags(after));
+        replaceCounts(goalCounts, List.of(before.goal()), List.of(nullToEmpty(after.getGoal())));
+        long totalScore = profile.getTotalScore() - before.score() + safeScore(after);
+        return updateDerivedProfile(profile, profile.getTotalMeals(), totalScore, foodCounts, riskCounts, goalCounts);
+    }
+
+    private boolean containsContribution(Map<String, Long> counts, List<String> values) {
+        return countValues(values).entrySet().stream()
+                .allMatch(entry -> counts.get(entry.getKey()) != null && counts.get(entry.getKey()) >= entry.getValue());
+    }
+
+    private void replaceCounts(Map<String, Long> counts, List<String> before, List<String> after) {
+        Map<String, Long> changes = new LinkedHashMap<>();
+        countValues(before).forEach((value, count) -> changes.merge(value, -count, Long::sum));
+        countValues(after).forEach((value, count) -> changes.merge(value, count, Long::sum));
+        // Net-zero entries retain their order, preserving existing tie ordering in top values.
+        changes.forEach((value, delta) -> { if (delta != 0) updateCounts(counts, List.of(value), delta); });
+    }
+
     @Transactional
     public void removeMeal(UserAccount user, MealRecord record) {
         profileRepository.findByUser(user).ifPresent(profile -> {
@@ -163,12 +213,14 @@ public class UserDietProfileService {
     }
 
     private List<String> extractFoodNames(MealRecord record) {
+        if (record.getDetectedFoodsJson() == null || record.getDetectedFoodsJson().isBlank()) return List.of();
         List<FoodItem> foods = Jsons.fromJson(objectMapper, record.getDetectedFoodsJson(), new TypeReference<List<FoodItem>>() {});
         if (foods == null) return List.of();
         return foods.stream().map(FoodItem::getName).filter(name -> name != null && !name.isBlank()).toList();
     }
 
     private List<String> extractRiskTags(MealRecord record) {
+        if (record.getRiskTagsJson() == null || record.getRiskTagsJson().isBlank()) return List.of();
         List<String> tags = Jsons.fromJson(objectMapper, record.getRiskTagsJson(), new TypeReference<List<String>>() {});
         return tags == null ? List.of() : tags.stream().filter(tag -> tag != null && !tag.isBlank()).toList();
     }

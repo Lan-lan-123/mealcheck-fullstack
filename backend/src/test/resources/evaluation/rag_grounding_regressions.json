@@ -1,0 +1,300 @@
+[
+  {
+    "caseId": 33,
+    "answer": {
+      "summary": "漏了一餐后，下一次仍可从完整搭配开始，不必一次吃很大的量作为补偿。",
+      "suggestions": [
+        "下一次仍可从完整搭配开始，不必一次吃很大的量作为补偿。",
+        "设置提醒并预备易获取的替代餐，更适合解决反复错过就餐时间的问题。"
+      ],
+      "riskLevel": "LOW",
+      "weeklyTrend": "",
+      "referenceIds": [
+        21
+      ],
+      "refused": false,
+      "claims": [
+        {
+          "text": "漏了一餐后，下一次仍可从完整搭配开始，不必一次吃很大的量作为补偿。",
+          "sourceId": 21,
+          "quote": "若漏了一餐，下一次仍可从完整搭配开始，不必一次吃很大的量作为补偿。"
+        },
+        {
+          "text": "设置提醒并预备易获取的替代餐，更适合解决反复错过就餐时间的问题。",
+          "sourceId": 21,
+          "quote": "设置提醒并预备易获取的替代餐，更适合解决反复错过就餐时间的问题；计划需要允许临时课程变化。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "id": 21,
+        "title": "一日餐次与节奏管理",
+        "content": "餐次安排可以围绕课表和食堂营业时间规划，避免忙起来连续漏掉原本打算吃的一餐。午餐后困倦或晚上很饿不一定只有一个饮食原因，记录应先说明时间和实际食物，不能直接作健康诊断。\r\n\r\n若漏了一餐，下一次仍可从完整搭配开始，不必一次吃很大的量作为补偿。设置提醒并预备易获取的替代餐，更适合解决反复错过就餐时间的问题；计划需要允许临时课程变化。\r\n\r\n参考：[国家卫健委 膳食指南说明](https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml)。校园例子为应用建议。",
+        "category": "general",
+        "score": 0.9691358024691359,
+        "roughScore": 0.9691358024691359,
+        "roughRank": 1,
+        "rerankerRawScore": null,
+        "rerankerRank": null,
+        "reranked": false,
+        "finalScore": 0.9691358024691359
+      },
+      {
+        "id": 81,
+        "title": "聚餐后恢复正常节奏",
+        "content": "聚餐后的记录可以如实保留，不必删除或跳过下一餐来让趋势看起来更好。一次特殊场景不足以说明长期习惯，也不需要用禁食或过量运动作为补偿。\r\n\r\n下一餐回到容易执行的普通搭配，把想改变的一项写入未来计划。复盘同时考虑聚餐频率、实际份量和记录完整性，不把单次高低分解释成个人健康的最终结论。\r\n\r\n参考：[国家卫健委 膳食指南说明](https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml)。校园例子为应用建议。",
+        "category": "general",
+        "score": 0.8469104952294412,
+        "roughScore": 0.8469104952294412,
+        "roughRank": 2,
+        "rerankerRawScore": null,
+        "rerankerRank": null,
+        "reranked": false,
+        "finalScore": 0.8469104952294412
+      },
+      {
+        "id": 26,
+        "title": "饮食记录与持续改进",
+        "content": "饮食记录用于发现重复场景，例如经常忘记饮料、午餐缺少配菜或课程导致漏餐。记录越完整越容易比较，但未记录的日期只表示信息缺失，不能直接判断吃了什么或是否吃过。\r\n\r\n每周选一个可执行的小目标，明确场景和次数，并在下次复盘核对。失败一次可调整计划而非清空全部记录；照片识别、结构评分和营养粗估都有边界，建议应以真实记录为基础。\r\n\r\n参考：[国家卫健委 膳食指南说明](https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml)。校园例子为应用建议。",
+        "category": "sugar",
+        "score": 0.7688474497885835,
+        "roughScore": 0.7688474497885835,
+        "roughRank": 3,
+        "rerankerRawScore": null,
+        "rerankerRank": null,
+        "reranked": false,
+        "finalScore": 0.7688474497885835
+      },
+      {
+        "id": 18,
+        "title": "低分餐常见原因",
+        "content": "低分可能与记录中的蔬菜缺项、甜饮叠加、烹饪方式或识别错误有关。不要只看到低分就认为自己吃得很差，应先检查图片是否完整、是否漏记配菜，以及食物名字是否被识别错。\r\n\r\n更正事实后再决定如何调整，例如下一次补充一份青菜或更换饮料。比较一周内相同问题的次数比看一次最低分更有用；系统评分不用于诊断，也不能推算未记录的餐次。\r\n\r\n参考：[国家卫健委 膳食指南说明](https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml)。校园例子为应用建议。",
+        "category": "sugar",
+        "score": 0.7655668677727502,
+        "roughScore": 0.7655668677727502,
+        "roughRank": 4,
+        "rerankerRawScore": null,
+        "rerankerRank": null,
+        "reranked": false,
+        "finalScore": 0.7655668677727502
+      },
+      {
+        "id": 49,
+        "title": "外卖便当的组合",
+        "content": "外卖便当先确认主食、蔬菜和蛋白质食物是否分别看得见，菜单宣传图可能与收到的餐不同。评价和价格可以帮助选店，但不直接证明营养或卫生情况。\r\n\r\n收到餐后按实际内容记录，缺少配菜时选择能安全补充的食品。下次可保存一套明确的点单要求，注意储存与配送时间，不将便当名字自动转换成热量或健康保证。\r\n\r\n参考：[国家卫健委 膳食指南说明](https://www.nhc.gov.cn/xcs/c100122/202206/d4941efa5d6544e2abac68127c3238c0.shtml)。校园例子为应用建议。",
+        "category": "fat_loss",
+        "score": 0.7633948380575472,
+        "roughScore": 0.7633948380575472,
+        "roughRank": 5,
+        "rerankerRawScore": null,
+        "rerankerRank": null,
+        "reranked": false,
+        "finalScore": 0.7633948380575472
+      }
+    ]
+  },
+  {
+    "caseId": 129,
+    "answer": {
+      "summary": "判断大包装是否省钱，需将价格换算为同一计量单位（如每百克或每份）进行比较。同时必须确认包装总重量与标签“一份”重量的关系，并评估自身能否在保质期内吃完以避免浪费，因为单件低价不等于实际每份花费低。",
+      "suggestions": [
+        "按统一单位比价：比较每百克、每升或每份的花费，而非仅看单件总价。",
+        "核对份量与总量：确认整包包含多少份，以及标签的一份数据是否对应实际食用量。",
+        "考虑保存与消耗：确保食品能在合适时间内吃完或按要求保存，避免浪费抵消低价优势。"
+      ],
+      "riskLevel": "LOW",
+      "weeklyTrend": "",
+      "referenceIds": [
+        181,
+        65
+      ],
+      "refused": false,
+      "claims": [
+        {
+          "text": "判断大包装是否省钱，需将价格换算为同一计量单位（如每百克或每份）进行比较。同时必须确认包装总重量与标签“一份”重量的关系，并评估自身能否在保质期内吃完以避免浪费，因为单件低价不等于实际每份花费低。",
+          "sourceId": 181,
+          "quote": "不同包装、单杯与大瓶食品的价格需要按同一计量单位比较，单件价格低不一定代表实际每份更便宜。还应考虑能否按要求保存，以及是否能在合适时间内吃完。预算有限时可比较每百克、每升或每份的花费"
+        },
+        {
+          "text": "按统一单位比价：比较每百克、每升或每份的花费，而非仅看单件总价。",
+          "sourceId": 181,
+          "quote": "预算有限时可比较每百克、每升或每份的花费，再结合真正需要的数量购买。"
+        },
+        {
+          "text": "核对份量与总量：确认整包包含多少份，以及标签的一份数据是否对应实际食用量。",
+          "sourceId": 65,
+          "quote": "一整包食品可能包含多份，吃完整包时不能只记录标签的一份数据。先确认每份重量、总包装量和实际食用比例，单位也要保持一致。"
+        },
+        {
+          "text": "考虑保存与消耗：确保食品能在合适时间内吃完或按要求保存，避免浪费抵消低价优势。",
+          "sourceId": 181,
+          "quote": "不同包装、单杯与大瓶食品的价格需要按同一计量单位比较，单件价格低不一定代表实际每份更便宜。还应考虑能否按要求保存，以及是否能在合适时间内吃完。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "id": 181,
+        "title": "单价与实际每份花费",
+        "content": "不同包装、单杯与大瓶食品的价格需要按同一计量单位比较，单件价格低不一定代表实际每份更便宜。还应考虑能否按要求保存，以及是否能在合适时间内吃完。\r\n\r\n预算有限时可比较每百克、每升或每份的花费，再结合真正需要的数量购买。分享装要记录自己分到的部分与成本，不因为促销就增加原本不需要的食品，也不把浪费后的低单价视为节省。\r\n\r\n参考：[USDA 预算内购物与单价](https://www.myplate.gov/sites/default/files/2024-06/TipSheet-23-Eat-Healthy-On-A-Budget.pdf)。校园例子为应用建议。",
+        "category": "general",
+        "score": 0.8655303030303031,
+        "roughScore": 0.8655303030303031,
+        "roughRank": 1,
+        "rerankerRawScore": null,
+        "rerankerRank": null,
+        "reranked": false,
+        "finalScore": 0.8655303030303031
+      },
+      {
+        "id": 65,
+        "title": "整包与每份的换算",
+        "content": "一整包食品可能包含多份，吃完整包时不能只记录标签的一份数据。先确认每份重量、总包装量和实际食用比例，单位也要保持一致。\r\n\r\n例如记录是否与别人分食或只吃了一部分，再按可靠标签计算已知营养。没有重量或配方时不要给出整餐总值，保留估算来源；包装份量并非个人必须吃下的推荐量。\r\n\r\n参考：[FDA 营养标签阅读](https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label)。校园例子为应用建议。",
+        "category": "general",
+        "score": 0.8485711862353084,
+        "roughScore": 0.8485711862353084,
+        "roughRank": 2,
+        "rerankerRawScore": null,
+        "rerankerRank": null,
+        "reranked": false,
+        "finalScore": 0.8485711862353084
+      },
+      {
+        "id": 64,
+        "title": "营养标签的计量单位",
+        "content": "营养标签可能按每份、每百克或每百毫升标注，读取时先确认单位，再看实际吃了多少。不同计量基础的数据不能直接比较，也不能把包装总量误当成标签的一份。\r\n\r\n录入系统时写出标签来源和重量，缺少其中一项就保持未知。需要换算时使用一致单位，不按商品图片或宣传词填数字；结构评分与标签营养数据分别解释。\r\n\r\n参考：[FDA 营养标签阅读](https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label)。校园例子为应用建议。",
+        "category": "general",
+        "score": 0.7865743530662885,
+        "roughScore": 0.7865743530662885,
+        "roughRank": 3,
+        "rerankerRawScore": null,
+        "rerankerRank": null,
+        "reranked": false,
+        "finalScore": 0.7865743530662885
+      },
+      {
+        "id": 88,
+        "title": "减少浪费与合理点单",
+        "content": "合理点单可以先按人数和实际需求选择，再决定是否增加配菜，避免套餐优惠导致重复购买。少量多次取餐或共享某个喜欢的菜，有助于把选择与真实食用分开。\r\n\r\n记录吃下的部分，而不是为了不浪费强行吃完全部。剩余易腐食品按合适条件保存，不能因为节约忽略食品安全；下次根据实际剩余调整购买量，而非只依赖宣传份量。\r\n\r\n参考：[USDA 预算内健康饮食](https://www.myplate.gov/web/eat-healthy/healthy-eating-budget)。校园例子为应用建议。",
+        "category": "general",
+        "score": 0.7395161290322582,
+        "roughScore": 0.7395161290322582,
+        "roughRank": 4,
+        "rerankerRawScore": null,
+        "rerankerRank": null,
+        "reranked": false,
+        "finalScore": 0.7395161290322582
+      },
+      {
+        "id": 12,
+        "title": "炸鸡和油炸食品风险",
+        "content": "炸鸡、炸薯条和油炸小吃同时作为一餐时，可以先减少一种叠加项，并补充可获得的蔬菜或普通主食。去掉名字里的炸字或把表面油擦掉，并不能可靠推算剩余用油量。\r\n\r\n下一次购买时比较份量、套餐配菜和饮品，而不是只比较宣传中的蛋白质。把购买频率写入计划，有助于观察是否从每天都吃变成偶尔选择；单次评分不作为食物绝对禁用清单。\r\n\r\n参考：[WHO 健康饮食](https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet)。校园例子为应用建议。",
+        "category": "muscle_gain",
+        "score": 0.7394699988449989,
+        "roughScore": 0.7394699988449989,
+        "roughRank": 5,
+        "rerankerRawScore": null,
+        "rerankerRank": null,
+        "reranked": false,
+        "finalScore": 0.7394699988449989
+      }
+    ]
+  },
+  {
+    "caseId": 134,
+    "answer": {
+      "summary": "长期全素食者确认维生素B12来源，需认真核对强化食品标签与补充剂成分，不可将未强化的普通植物食品视为可靠来源。建议整理实际饮食与可获得的强化食品清单，并咨询专业人士以持续安排；不应凭单次饮食判断缺乏或自行决定补充剂剂量，特殊情况应遵循专业方案。",
+      "suggestions": [
+        "检查强化食品和补充剂的具体信息（如标签），确保其含有维生素B12。",
+        "将实际饮食与可获得的强化食品整理成清单，并咨询专业人士如何持续安排。",
+        "不要凭一顿素食判断已经缺乏，也不自行根据餐食评分决定补充剂剂量，特殊情况按专业方案执行。"
+      ],
+      "riskLevel": "LOW",
+      "weeklyTrend": "",
+      "referenceIds": [
+        186
+      ],
+      "refused": false,
+      "claims": [
+        {
+          "text": "长期全素食需要认真核对维生素B12来源，不能把未强化的普通植物食品都当作可靠来源。强化食品和补充剂应检查具体信息，有需要时获得个体专业指导。",
+          "sourceId": 186,
+          "quote": "长期全素食需要认真核对维生素B12来源，不能把未强化的普通植物食品都当作可靠来源。强化食品和补充剂应检查具体信息，有需要时获得个体专业指导。"
+        },
+        {
+          "text": "校园全素食者可把实际饮食与可获得的强化食品整理成清单，咨询如何持续安排。不要凭一顿素食判断已经缺乏，也不自行根据餐食评分决定补充剂剂量；特殊情况按专业方案执行。",
+          "sourceId": 186,
+          "quote": "校园全素食者可把实际饮食与可获得的强化食品整理成清单，咨询如何持续安排。不要凭一顿素食判断已经缺乏，也不自行根据餐食评分决定补充剂剂量；特殊情况按专业方案执行。"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "id": 186,
+        "title": "全素食与维生素B12来源",
+        "content": "长期全素食需要认真核对维生素B12来源，不能把未强化的普通植物食品都当作可靠来源。强化食品和补充剂应检查具体信息，有需要时获得个体专业指导。\r\n\r\n校园全素食者可把实际饮食与可获得的强化食品整理成清单，咨询如何持续安排。不要凭一顿素食判断已经缺乏，也不自行根据餐食评分决定补充剂剂量；特殊情况按专业方案执行。\r\n\r\n参考：[NIH 维生素B12](https://ods.od.nih.gov/factsheets/VitaminB12-Consumer/)。校园例子为应用建议。",
+        "category": "vegetable",
+        "score": 1.0,
+        "roughScore": 1.0,
+        "roughRank": 1,
+        "rerankerRawScore": null,
+        "rerankerRank": null,
+        "reranked": false,
+        "finalScore": 1.0
+      },
+      {
+        "id": 138,
+        "title": "维生素补充剂与正常吃饭",
+        "content": "维生素、矿物质等补充剂不能替代多样化食物，也不能因为熬夜、漏餐或一次低分就自行判断必须补充。需要与否还要考虑饮食、已有产品、用药和专业建议。\r\n\r\n记录时把补充剂名称与正常餐食分开，避免只写吃了维生素就视为完成蔬菜或水果目标。已有处方方案按方案执行；不要根据应用推测缺乏种类或叠加多个产品追求更快效果。\r\n\r\n参考：[NIH 补充剂常见问题](https://ods.od.nih.gov/HealthInformation/ODS_Frequently_Asked_Questions.aspx)。校园例子为应用建议。",
+        "category": "vegetable",
+        "score": 0.9654989919354838,
+        "roughScore": 0.9654989919354838,
+        "roughRank": 2,
+        "rerankerRawScore": null,
+        "rerankerRank": null,
+        "reranked": false,
+        "finalScore": 0.9654989919354838
+      },
+      {
+        "id": 43,
+        "title": "膳食纤维来源轮换",
+        "content": "全谷、豆类、蔬菜和水果都可以作为日常食物轮换的一部分，不能把纤维粉当作蔬菜的完全替代品。记录时写出具体食物，比只填高纤维这一宣传词更有依据。\r\n\r\n可以先把一次普通配菜换成豆类，或选择一份可接受的杂粮主食，同时保留其他食物组。持续饮食不适或特殊疾病的调整需个体评估，系统不据单次记录给出治疗建议。\r\n\r\n参考：[WHO 健康饮食](https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet)。校园例子为应用建议。",
+        "category": "vegetable",
+        "score": 0.8746411976435653,
+        "roughScore": 0.8746411976435653,
+        "roughRank": 3,
+        "rerankerRawScore": null,
+        "rerankerRank": null,
+        "reranked": false,
+        "finalScore": 0.8746411976435653
+      },
+      {
+        "id": 3,
+        "title": "蔬菜结构建议",
+        "content": "蔬菜选择可以从常见绿叶菜、瓜茄类和菌菇类轮换开始。只有几片葱花或作为装饰的生菜，不宜在记录里写成一整份蔬菜；玉米和土豆较多的菜还需要考虑其中的主食部分。\r\n\r\n食堂套餐蔬菜不足时，可以单加一份青菜，或下次选择带独立蔬菜配菜的窗口。改进目标写成某几次午餐增加蔬菜，比要求每餐评分满分更容易核对；照片被遮挡时先补充说明。\r\n\r\n参考：[WHO 健康饮食](https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet)。校园例子为应用建议。",
+        "category": "vegetable",
+        "score": 0.8642704506021637,
+        "roughScore": 0.8642704506021637,
+        "roughRank": 4,
+        "rerankerRawScore": null,
+        "rerankerRank": null,
+        "reranked": false,
+        "finalScore": 0.8642704506021637
+      },
+      {
+        "id": 136,
+        "title": "含铁食物与维生素C搭配",
+        "content": "肉类、豆类和部分强化食品可以提供铁，植物来源铁的吸收还受搭配影响，含维生素C的食物可帮助吸收。不能凭一次餐盘、脸色或乏力感判断是否缺铁。\r\n\r\n校园选餐可在豆类或其他含铁食物之外，轮换搭配甜椒、番茄或水果等可获得食物。记录实际选择，不承诺某个菜单能纠正贫血；怀疑缺铁时应接受评估，补铁剂按专业建议使用。\r\n\r\n参考：[NIH 铁的食物来源](https://ods.od.nih.gov/factsheets/Iron%20-Consumer/)。校园例子为应用建议。",
+        "category": "sugar",
+        "score": 0.8269938394938396,
+        "roughScore": 0.8269938394938396,
+        "roughRank": 5,
+        "rerankerRawScore": null,
+        "rerankerRank": null,
+        "reranked": false,
+        "finalScore": 0.8269938394938396
+      }
+    ]
+  }
+]

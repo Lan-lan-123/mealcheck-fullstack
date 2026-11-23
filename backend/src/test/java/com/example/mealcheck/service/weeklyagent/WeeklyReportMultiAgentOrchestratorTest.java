@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -27,6 +28,22 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class WeeklyReportMultiAgentOrchestratorTest {
+    @Test void savedPreferencesReachPlanningAndGuardAnApprovedButConflictingDraft() {
+        var fixture = fixture();
+        var preferences = mock(com.example.mealcheck.service.DietPreferenceService.class);
+        org.springframework.test.util.ReflectionTestUtils.setField(fixture.orchestrator,"dietPreferences",preferences);
+        when(preferences.get(42L)).thenReturn(new com.example.mealcheck.dto.DietPreferences(
+                com.example.mealcheck.dto.DietPreferences.Style.VEGAN,List.of("花生"),List.of(),1));
+        when(fixture.planAgent.createPlan(any(),anyString(),any(),any(),anyString())).thenAnswer(call -> {
+            assertThat(call.getArgument(1,String.class)).contains("纯素","花生");
+            return new WeeklyReportDraft("下周可选鸡蛋",List.of("有记录"),List.of("推荐鸡蛋","增加青菜"),true);
+        });
+        when(fixture.reviewAgent.review(any(),anyString(),any(),anyList(),any()))
+                .thenReturn(new WeeklyReportReview(true,"通过",List.of(),true));
+        var result = fixture.orchestrator.generate(fixture.user,baseReport());
+        assertThat(result.getReportText()).isEqualTo(com.example.mealcheck.service.DietPreferenceService.SAFE_SUGGESTION);
+        assertThat(result.getNextWeekSuggestions()).contains("增加青菜").noneMatch(s -> s.contains("鸡蛋"));
+    }
     private final ExecutorService graphExecutor = Executors.newFixedThreadPool(2);
 
     @AfterEach
@@ -43,7 +60,7 @@ class WeeklyReportMultiAgentOrchestratorTest {
                 "审查通过后的周报", List.of("蔬菜覆盖不足"), List.of("下周每餐增加一份蔬菜"), true);
         when(fixture.planAgent.createPlan(any(), anyString(), any(), any(), anyString()))
                 .thenReturn(firstDraft, revisedDraft);
-        when(fixture.reviewAgent.review(any(), anyString(), any(), any()))
+        when(fixture.reviewAgent.review(any(), anyString(), any(), anyList(), any()))
                 .thenReturn(
                         new WeeklyReportReview(false, "建议需要更具体", List.of("不够具体"), true),
                         new WeeklyReportReview(true, "通过", List.of(), true));
@@ -62,8 +79,10 @@ class WeeklyReportMultiAgentOrchestratorTest {
                 "plan-agent:ai:attempt-2",
                 "review-agent:approved:ai");
         verify(fixture.planAgent, times(2)).createPlan(any(), anyString(), any(), any(), anyString());
-        verify(fixture.reviewAgent, times(2)).review(any(), anyString(), any(), any());
+        verify(fixture.reviewAgent, times(2)).review(any(), anyString(), any(), anyList(), any());
         verify(fixture.knowledgeIndexService).recordHits(List.of(7L));
+        verify(fixture.reviewAgent, times(2)).review(any(), anyString(), any(),
+                org.mockito.ArgumentMatchers.argThat(items -> items.size() == 1 && items.get(0).getId().equals(7L)), any());
         verify(fixture.coordinationRecorder).completeRun("run-1", "MULTI_AGENT", "APPROVED_AI", 2);
     }
 
@@ -73,7 +92,7 @@ class WeeklyReportMultiAgentOrchestratorTest {
         fixture.properties.getWeeklyReport().setMaxReviewRevisions(0);
         when(fixture.planAgent.createPlan(any(), anyString(), any(), any(), anyString()))
                 .thenReturn(new WeeklyReportDraft("有风险的草稿", List.of("重点"), List.of("建议"), true));
-        when(fixture.reviewAgent.review(any(), anyString(), any(), any()))
+        when(fixture.reviewAgent.review(any(), anyString(), any(), anyList(), any()))
                 .thenReturn(new WeeklyReportReview(false, "不通过", List.of("风险"), true));
         WeeklyReportResponse base = baseReport();
 

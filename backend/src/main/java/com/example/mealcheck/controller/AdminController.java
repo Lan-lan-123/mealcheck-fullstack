@@ -12,6 +12,7 @@ import com.example.mealcheck.dto.AdminNonFoodUploadEventPageResponse;
 import com.example.mealcheck.dto.AdminStatsResponse;
 import com.example.mealcheck.dto.AdminUserPageResponse;
 import com.example.mealcheck.dto.AdminUserResponse;
+import com.example.mealcheck.dto.AdminUserStatusRequest;
 import com.example.mealcheck.dto.AssistantBenchmarkResponse;
 import com.example.mealcheck.dto.AssistantBenchmarkHistoryResponse;
 import com.example.mealcheck.dto.AssistantBenchmarkRequest;
@@ -97,6 +98,13 @@ public class AdminController {
         return adminService.users(page, size, username, role);
     }
 
+    @PutMapping("/users/{id}/status")
+    public AdminUserResponse setUserStatus(@PathVariable Long id,
+                                          @Valid @RequestBody AdminUserStatusRequest request,
+                                          @AuthenticationPrincipal UserPrincipal principal) {
+        return adminService.setUserEnabled(id, request.enabled(), principal);
+    }
+
     @DeleteMapping("/users/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id,
                                            @AuthenticationPrincipal UserPrincipal principal) {
@@ -165,8 +173,9 @@ public class AdminController {
 
     @DeleteMapping("/knowledge/chunks/{id}")
     public ResponseEntity<Void> deleteKnowledgeChunk(@PathVariable Long id,
+                                                     @RequestParam long expectedRevision,
                                                      @AuthenticationPrincipal UserPrincipal principal) {
-        adminService.deleteKnowledgeChunk(id, principal);
+        adminService.deleteKnowledgeChunk(id, expectedRevision, principal);
         return ResponseEntity.noContent().build();
     }
 

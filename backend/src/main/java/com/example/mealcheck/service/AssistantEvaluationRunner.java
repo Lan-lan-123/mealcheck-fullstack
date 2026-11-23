@@ -1,6 +1,7 @@
 package com.example.mealcheck.service;
 
 import com.example.mealcheck.dto.assistant.AssistantChatMessage;
+import com.example.mealcheck.dto.RagChainReport;
 import com.example.mealcheck.service.skill.AssistantSkillPlan;
 import com.example.mealcheck.service.skill.AssistantSkillRegistry;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -48,7 +49,8 @@ public class AssistantEvaluationRunner {
                 "No older conversation summary.",
                 objectMapper.createObjectNode()
         );
-        AssistantFunctionToolRuntime runtime = toolRuntimeFactory.create(safeContext, knowledgeContext);
+        AssistantFunctionToolRuntime runtime = safeContext.path("ragChainEvaluation").asBoolean()
+                ? toolRuntimeFactory.createRagChain() : toolRuntimeFactory.create(safeContext, knowledgeContext);
         try {
             AssistantFunctionCallingService.FunctionCallingResult result = functionCallingService.askWithRuntime(
                     systemPrompt,
@@ -57,12 +59,12 @@ public class AssistantEvaluationRunner {
                     runtime
             );
             return new EvaluationResult(
-                    normalizeAnswer(result.answer()),
+                    normalizeAnswer(result.answer(),question),
                     "PRODUCTION_FUNCTION_CALLING",
                     selectedSkill.intentCode(),
                     result.toolRounds(),
                     result.calledTools(),
-                    result.toolTrace()
+                    result.toolTrace(), retrievals(runtime)
             );
         } catch (AssistantFunctionCallingService.FunctionCallingExecutionException ex) {
             throw new EvaluationExecutionException(
@@ -71,9 +73,13 @@ public class AssistantEvaluationRunner {
                     "PRODUCTION_FUNCTION_CALLING",
                     selectedSkill.intentCode(),
                     ex.getToolRounds(),
-                    ex.getToolTrace()
+                    ex.getToolTrace(), retrievals(runtime)
             );
         }
+    }
+
+    private static List<RagChainReport.Retrieval> retrievals(AssistantFunctionToolRuntime runtime) {
+        return runtime instanceof RagChainToolRuntime chain ? chain.retrievals() : List.of();
     }
 
     private List<AssistantChatMessage> history(JsonNode context) {
@@ -107,7 +113,7 @@ public class AssistantEvaluationRunner {
         return lines.isEmpty() ? "No durable user profile facts." : String.join("\n", lines);
     }
 
-    private String normalizeAnswer(String rawAnswer) {
+    private String normalizeAnswer(String rawAnswer,String question) {
         String raw = rawAnswer == null ? "" : rawAnswer.trim();
         if (raw.isBlank()) {
             return raw;
@@ -119,7 +125,8 @@ public class AssistantEvaluationRunner {
             if (!summary.isBlank()) {
                 parts.add(summary);
             }
-            String trend = root.path("weeklyTrend").asText("").trim();
+            String trend = AssistantAnswerFormatting.wantsTrend(question)
+                    ? AssistantAnswerFormatting.trend(root.path("weeklyTrend").asText("")) : "";
             if (!trend.isBlank() && !"null".equalsIgnoreCase(trend)) {
                 parts.add("本周趋势：" + trend);
             }
@@ -156,10 +163,16 @@ public class AssistantEvaluationRunner {
                                    String selectedSkill,
                                    int toolRounds,
                                    List<String> calledTools,
-                                   List<AssistantFunctionCallingService.ToolCallTrace> toolTrace) {
+                                   List<AssistantFunctionCallingService.ToolCallTrace> toolTrace,
+                                   List<RagChainReport.Retrieval> retrievals) {
+        public EvaluationResult(String answer, String executionPath, String selectedSkill, int toolRounds,
+                                List<String> calledTools, List<AssistantFunctionCallingService.ToolCallTrace> toolTrace) {
+            this(answer, executionPath, selectedSkill, toolRounds, calledTools, toolTrace, List.of());
+        }
         public EvaluationResult {
             calledTools = calledTools == null ? List.of() : List.copyOf(calledTools);
             toolTrace = toolTrace == null ? List.of() : List.copyOf(toolTrace);
+            retrievals = retrievals == null ? List.of() : List.copyOf(retrievals);
         }
     }
 
@@ -168,6 +181,7 @@ public class AssistantEvaluationRunner {
         private final String selectedSkill;
         private final int toolRounds;
         private final List<AssistantFunctionCallingService.ToolCallTrace> toolTrace;
+        private final List<RagChainReport.Retrieval> retrievals;
 
         public EvaluationExecutionException(String message,
                                             Throwable cause,
@@ -175,12 +189,21 @@ public class AssistantEvaluationRunner {
                                             String selectedSkill,
                                             int toolRounds,
                                             List<AssistantFunctionCallingService.ToolCallTrace> toolTrace) {
+            this(message, cause, executionPath, selectedSkill, toolRounds, toolTrace, List.of());
+        }
+
+        public EvaluationExecutionException(String message, Throwable cause, String executionPath, String selectedSkill,
+                int toolRounds, List<AssistantFunctionCallingService.ToolCallTrace> toolTrace,
+                List<RagChainReport.Retrieval> retrievals) {
             super(message, cause);
             this.executionPath = executionPath;
             this.selectedSkill = selectedSkill;
             this.toolRounds = toolRounds;
             this.toolTrace = toolTrace == null ? List.of() : List.copyOf(toolTrace);
+            this.retrievals = retrievals == null ? List.of() : List.copyOf(retrievals);
         }
+
+        public List<RagChainReport.Retrieval> retrievals() { return retrievals; }
 
         public String executionPath() {
             return executionPath;

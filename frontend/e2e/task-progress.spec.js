@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/authTest.js'
 
 const result = { recordId: 1, recognition: { foods: [{ name: '米饭', category: 'staple' }] }, evaluation: { score: 80, summary: '餐食搭配良好', riskTags: [] }, advice: '继续保持' }
 const report = { periodStart: '2026-10-01', periodEnd: '2026-10-07', totalMeals: 3, averageScore: 80, reportText: '本周饮食总结', riskTotals: {}, nextWeekSuggestions: [] }
@@ -6,8 +6,8 @@ const image = { name: 'meal.png', mimeType: 'image/png', buffer: Buffer.from('iV
 
 async function setup(page, handler) {
   await page.addInitScript(() => {
-    localStorage.setItem('mealcheck_token', 'progress-test-token')
-    localStorage.setItem('mealcheck_user', JSON.stringify({ username: 'demo', role: 'USER', displayName: '测试用户' }))
+
+    sessionStorage.setItem('mealcheck_fixture_user', JSON.stringify({ username: 'demo', role: 'USER', displayName: '测试用户' }))
   })
   await page.route('**/api/**', async route => {
     const request = route.request(), path = new URL(request.url()).pathname
@@ -17,7 +17,7 @@ async function setup(page, handler) {
     return send(path === '/api/profile/goals/current' ? { goalType: 'balanced' }
       : path === '/api/assistant/conversations' ? [{ id: 7, title: '历史对话' }]
       : path === '/api/assistant/proactive' ? { items: [] }
-      : path === '/api/meals' ? { content: [], totalPages: 0 }
+      : ['/api/meals', '/api/meals/summaries'].includes(path) ? { content: [], totalPages: 0 }
       : null)
   })
   await page.goto('/user/overview')
@@ -49,19 +49,45 @@ test('meal stages follow backend status, survive reload without resubmission, an
   release()
   await expect(progress.getByText('图片已接收，正在排队', { exact: true })).toBeVisible()
   await page.reload()
-  await expect(progress.locator('[aria-current="step"]')).toHaveText('2等待处理')
+  await expect(progress.locator('[aria-current="step"]')).toHaveText('3排队中')
   status = 'PROCESSING'
   await expect(progress.getByText('正在分析餐食', { exact: true })).toBeVisible({ timeout: 10000 })
-  await expect(progress.locator('[aria-current="step"]')).toHaveText('3智能分析')
+  await expect(progress.locator('[aria-current="step"]')).toHaveText('4处理中')
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
-  await page.screenshot({ path: 'test-results/progress-meal-mobile.png', fullPage: true })
+  await page.screenshot({ path: test.info().outputPath('progress-meal-mobile.png'), fullPage: true })
   await page.setViewportSize({ width: 1440, height: 1000 })
-  await page.screenshot({ path: 'test-results/progress-meal-desktop.png', fullPage: true })
+  await page.screenshot({ path: test.info().outputPath('progress-meal-desktop.png'), fullPage: true })
   status = 'SUCCEEDED'
   await expect(progress.getByText('餐食分析已完成', { exact: true })).toBeVisible({ timeout: 10000 })
   await expect(progress.getByRole('progressbar')).toHaveCount(0)
-  await expect(progress.locator('.is-complete')).toHaveCount(4)
+  await expect(progress.locator('.is-complete')).toHaveCount(5)
   await expect(page.getByRole('button', { name: '纠正识别结果', exact: true })).toBeVisible()
+  expect(posts).toBe(1)
+})
+
+test('accepted upload and recovery queue remain visible without submitting another image', async ({ page }) => {
+  test.setTimeout(60000)
+  let status = 'PROCESSING', stage = 'ACCEPTED', message = '上传请求已接收，正在校验图片并准备入队。', posts = 0
+  await setup(page, async ({ path, request, send }) => {
+    if (path === '/api/meals/analysis-requests' || path.startsWith('/api/meals/analysis-requests/')) {
+      if (request.method() === 'POST') posts++
+      const key = request.headers()['idempotency-key'] || decodeURIComponent(path.split('/').pop())
+      await send({ key, status, stage, message, retryAfterSeconds: 2, ...(status === 'SUCCEEDED' ? { result } : {}) }); return true
+    }
+  })
+  await startAnalysis(page)
+  const progress = page.getByRole('region', { name: '餐食分析进度' })
+  await expect(progress.getByText('上传请求已接收', { exact: true })).toBeVisible()
+  await expect(progress.locator('[aria-current="step"]')).toHaveText('2已接收')
+  status = 'PENDING'; stage = 'QUEUED'; message = '处理进程中断，任务已保留，正在等待自动恢复；请勿重新上传。'
+  await expect(progress.getByText(message, { exact: true })).toBeVisible({ timeout: 15000 })
+  await page.reload()
+  await expect(progress.getByText(message, { exact: true })).toBeVisible()
+  await expect(progress.locator('[aria-current="step"]')).toHaveText('3排队中')
+  status = 'PROCESSING'; stage = 'PROCESSING'; message = '正在识别食物、计算评分并生成饮食建议。'
+  await expect(progress.locator('[aria-current="step"]')).toHaveText('4处理中', { timeout: 15000 })
+  status = 'SUCCEEDED'; stage = 'COMPLETED'; message = ''
+  await expect(progress.getByText('餐食分析已完成', { exact: true })).toBeVisible({ timeout: 15000 })
   expect(posts).toBe(1)
 })
 
@@ -73,7 +99,7 @@ test('meal network interruption is visible and reconnects without another upload
     }
     if (path.startsWith('/api/meals/analysis-requests/')) {
       if (++reads === 1) await route.abort('failed')
-      else await send({ status: 'SUCCEEDED', result })
+      else await send({ key: decodeURIComponent(path.split('/').pop()), status: 'SUCCEEDED', result })
       return true
     }
   })
@@ -105,13 +131,79 @@ test('weekly progress shows queue, retry and completion across navigation', asyn
   status = 'RETRY'
   await page.getByRole('button', { name: '我的周报', exact: true }).click()
   await expect(progress.getByText('周报正在自动重试', { exact: true })).toBeVisible({ timeout: 10000 })
-  await page.screenshot({ path: 'test-results/progress-weekly-retry.png', fullPage: true })
+  await page.screenshot({ path: test.info().outputPath('progress-weekly-retry.png'), fullPage: true })
   status = 'SUCCEEDED'
   await expect(progress.getByText('周报已生成', { exact: true })).toBeVisible({ timeout: 10000 })
   await expect(progress.getByRole('progressbar')).toHaveCount(0)
   await expect(page.getByRole('button', { name: '查看周报详情' })).toBeEnabled()
   expect(posts).toBe(1)
 })
+
+test('weekly network interruption reconnects to the same job without another submission', async ({ page }) => {
+  await page.clock.install()
+  let reads = 0, posts = 0
+  await setup(page, async ({ path, route, send }) => {
+    if (path === '/api/reports/weekly/latest') { await send(report); return true }
+    if (path === '/api/reports/weekly/jobs') { posts++; await send({ id: 9, status: 'RUNNING' }); return true }
+    if (path === '/api/reports/weekly/jobs/9') {
+      if (++reads === 1) await route.abort('failed')
+      else await send({ id: 9, status: 'SUCCEEDED', report })
+      return true
+    }
+  })
+  await page.getByRole('button', { name: '我的周报', exact: true }).click()
+  await page.getByRole('button', { name: '生成今日周报 / 查看进度' }).click()
+  const progress = page.getByRole('region', { name: '周报生成进度' })
+  await expect(progress.getByText('正在生成周报', { exact: true })).toBeVisible()
+  await page.clock.runFor(3500)
+  await expect(progress.getByText('连接暂时中断，正在重新查询', { exact: true })).toBeVisible()
+  await page.clock.runFor(5000)
+  await expect(progress.getByText('周报已生成', { exact: true })).toBeVisible()
+  expect(posts).toBe(1)
+  expect(reads).toBe(2)
+})
+
+for (const kind of ['meal', 'weekly']) {
+  test(`${kind} visibility changes slow down polling and returning queries immediately`, async ({ page }) => {
+    await page.clock.install()
+    let reads = 0, posts = 0, key
+    await setup(page, async ({ path, request, send }) => {
+      if (path === '/api/reports/weekly/latest') { await send(report); return true }
+      if (path === '/api/meals/analysis-requests') {
+        posts++; key = request.headers()['idempotency-key']; await send({ key, status: 'PENDING' }); return true
+      }
+      if (path.startsWith('/api/meals/analysis-requests/')) {
+        reads++; await send({ key, status: 'SUCCEEDED', result }); return true
+      }
+      if (path === '/api/reports/weekly/jobs') { posts++; await send({ id: 9, status: 'PENDING' }); return true }
+      if (path === '/api/reports/weekly/jobs/9') {
+        reads++; await send({ id: 9, status: 'SUCCEEDED', report }); return true
+      }
+    })
+    if (kind === 'meal') await startAnalysis(page)
+    else {
+      await page.getByRole('button', { name: '我的周报', exact: true }).click()
+      await page.getByRole('button', { name: '生成今日周报 / 查看进度' }).click()
+    }
+    const progress = page.getByRole('region', { name: kind === 'meal' ? '餐食分析进度' : '周报生成进度' })
+    await expect(progress.getByText(kind === 'meal' ? '图片已接收，正在排队' : '周报正在排队', { exact: true })).toBeVisible()
+    await page.evaluate(() => {
+      Object.defineProperty(document, 'hidden', { configurable: true, value: true })
+      document.dispatchEvent(new Event('visibilitychange'))
+    })
+    await page.clock.runFor(20000)
+    expect(reads).toBe(0)
+    await page.evaluate(() => {
+      Object.defineProperty(document, 'hidden', { configurable: true, value: false })
+      document.dispatchEvent(new Event('visibilitychange'))
+    })
+    await expect(progress.getByText(kind === 'meal' ? '餐食分析已完成' : '周报已生成', { exact: true })).toBeVisible()
+    expect(reads).toBe(1)
+    expect(posts).toBe(1)
+    await page.clock.runFor(30000)
+    expect(reads).toBe(1)
+  })
+}
 
 test('a failed analysis stops animation and offers result recovery', async ({ page }) => {
   await setup(page, async ({ path, send }) => {
@@ -126,21 +218,26 @@ test('a failed analysis stops animation and offers result recovery', async ({ pa
   await expect(page.getByRole('button', { name: '开始分析', exact: true })).toBeEnabled()
 })
 
-test('assistant distinguishes history from a reply, handles long waits and reduced motion', async ({ page }) => {
+for (const [mode, title] of [['REVIEWED', '正在生成并复核回答'], ['FAST', '正在生成快速回答']]) {
+test(`assistant ${mode} distinguishes history from a reply, handles long waits and reduced motion`, async ({ page }) => {
   await page.clock.install()
   await page.emulateMedia({ reducedMotion: 'reduce' })
   let releaseReply, releaseHistory
   const replyGate = new Promise(resolve => { releaseReply = resolve })
   const historyGate = new Promise(resolve => { releaseHistory = resolve })
-  await setup(page, async ({ path, send }) => {
-    if (['/api/assistant/ask', '/api/assistant/stream'].includes(path)) { await replyGate; await send({ conversationId: 8, answer: '生成完成的建议' }); return true }
+  const requestedModes = []
+  await setup(page, async ({ path, request, send }) => {
+    if (['/api/assistant/ask', '/api/assistant/stream'].includes(path)) { requestedModes.push(request.postDataJSON().reviewMode); await replyGate; await send({ conversationId: 8, answer: '生成完成的建议' }); return true }
     if (path === '/api/assistant/conversations/7') { await historyGate; await send({ id: 7, messages: [{ role: 'assistant', text: '历史消息内容' }] }); return true }
   })
   await page.locator('.assistant-fab').click()
+  await page.getByLabel('回答方式').selectOption(mode)
   await page.getByPlaceholder('问问怎么吃更合适').fill('今天怎么吃？')
   await page.getByRole('button', { name: '发送问题' }).click()
   const progress = page.getByRole('region', { name: '饮食助手进度' })
-  await expect(progress.getByText('正在整理饮食建议', { exact: true })).toBeVisible()
+  await expect(progress.getByText(title, { exact: true })).toBeVisible()
+  await expect.poll(() => requestedModes.length).toBeGreaterThan(0)
+  expect(requestedModes.every(value => value === mode)).toBe(true)
   await page.clock.fastForward(31000)
   await expect(progress.getByText(/等待时间较长/)).toBeVisible()
   expect(await progress.locator('.task-progress-track > span').evaluate(el => getComputedStyle(el).animationName)).toBe('none')
@@ -148,14 +245,15 @@ test('assistant distinguishes history from a reply, handles long waits and reduc
   await page.clock.fastForward(3000)
   await page.locator('.assistant-fab').click()
   await expect(progress.getByText(/已等待 34 秒/)).toBeVisible()
-  await page.screenshot({ path: 'test-results/progress-assistant.png', fullPage: true })
+  await page.screenshot({ path: test.info().outputPath('progress-assistant.png'), fullPage: true })
   releaseReply()
   await expect(page.getByText('生成完成的建议', { exact: true })).toBeVisible()
   await expect(progress).toHaveCount(0)
   await page.getByRole('button', { name: '历史对话', exact: true }).click()
   await expect(progress.getByText('正在加载历史对话', { exact: true })).toBeVisible()
-  await expect(progress.getByText('正在整理饮食建议', { exact: true })).toHaveCount(0)
+  await expect(progress.getByText(title, { exact: true })).toHaveCount(0)
   releaseHistory()
   await expect(page.getByText('历史消息内容', { exact: true })).toBeVisible()
   await expect(progress).toHaveCount(0)
 })
+}

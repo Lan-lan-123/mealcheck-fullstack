@@ -1,13 +1,16 @@
-import React, { useEffect, useState } from 'react'
+import Button from './components/Button'
+import React, { lazy, Suspense, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Utensils } from 'lucide-react'
-import { captcha, clearSession, deleteCurrentAccount, getUser, login, logout, register, setSession } from './api/client'
-import AdminPage from './pages/AdminPage'
-import UserWorkspacePage from './pages/UserWorkspacePage'
+import { captcha, clearSession, deleteCurrentAccount, getUser, restoreSession, login, logout, register, setSession } from './api/client'
+import WorkspaceBoundary from './components/WorkspaceBoundary'
 import { DialogProvider, useDialog } from './components/DialogProvider'
 import { WorkspaceNavigationProvider, useWorkspaceNavigation } from './hooks/useWorkspaceNavigation'
 import { resolveWorkspaceRoute } from './utils/workspaceRoute'
 import './styles/index.css'
+
+const AdminPage = lazy(() => import('./pages/AdminPage'))
+const UserWorkspacePage = lazy(() => import('./pages/UserWorkspacePage'))
 
 function isAdmin(user) {
   return user?.role === 'ADMIN'
@@ -91,22 +94,22 @@ function AuthPage({ onAuthed }) {
         </div>
 
         <div className="role-tabs">
-          <button className={loginRole === 'USER' ? 'active' : ''} onClick={() => switchRole('USER')} type="button">
+          <Button variant="plain" className={loginRole === 'USER' ? 'active' : ''} onClick={() => switchRole('USER')} type="button">
             普通用户
-          </button>
-          <button className={loginRole === 'ADMIN' ? 'active' : ''} onClick={() => switchRole('ADMIN')} type="button">
+          </Button>
+          <Button variant="plain" className={loginRole === 'ADMIN' ? 'active' : ''} onClick={() => switchRole('ADMIN')} type="button">
             管理员
-          </button>
+          </Button>
         </div>
 
         <div className="tabs">
-          <button className={mode === 'login' ? 'active' : ''} onClick={() => setMode('login')} type="button">
+          <Button variant="plain" className={mode === 'login' ? 'active' : ''} onClick={() => setMode('login')} type="button">
             登录
-          </button>
+          </Button>
           {loginRole === 'USER' && (
-            <button className={mode === 'register' ? 'active' : ''} onClick={() => setMode('register')} type="button">
+            <Button variant="plain" className={mode === 'register' ? 'active' : ''} onClick={() => setMode('register')} type="button">
               注册
-            </button>
+            </Button>
           )}
         </div>
 
@@ -131,14 +134,14 @@ function AuthPage({ onAuthed }) {
               <div className="captcha-row">
                 <span>{captchaData?.question || '加载中...'}</span>
                 <input value={form.captchaAnswer} onChange={e => setForm({ ...form, captchaAnswer: e.target.value })} placeholder="答案" />
-                <button type="button" onClick={refreshCaptcha}>换一题</button>
+                <Button variant="secondary" type="button" onClick={refreshCaptcha}>换一题</Button>
               </div>
             </label>
           )}
           {error && <p className="error">{error}</p>}
-          <button className="primary" disabled={loading}>
+          <Button variant="primary" type="submit" className="primary" disabled={loading}>
             {loading ? '处理中...' : mode === 'login' ? `${loginRole === 'ADMIN' ? '管理员' : '用户'}登录` : '创建账号'}
-          </button>
+          </Button>
         </form>
 
         <p className="hint">管理员账号只能从管理员入口登录，普通用户登录后进入图片上传分析页面。</p>
@@ -149,6 +152,17 @@ function AuthPage({ onAuthed }) {
 
 function App() {
   const [user, setUser] = useState(getUser())
+  const [sessionLoading, setSessionLoading] = useState(true)
+  const [sessionError, setSessionError] = useState('')
+  const [sessionRetry, setSessionRetry] = useState(0)
+  useEffect(() => {
+    const controller = new AbortController()
+    setSessionLoading(true); setSessionError('')
+    restoreSession(controller.signal).then(value => { if (!controller.signal.aborted) setUser(value) })
+      .catch(error => { if (!controller.signal.aborted) setSessionError(error.message || '登录状态暂时无法确认，请稍后重试。') })
+      .finally(() => { if (!controller.signal.aborted) setSessionLoading(false) })
+    return () => controller.abort()
+  }, [sessionRetry])
   const { pathname, navigate } = useWorkspaceNavigation()
   const { confirm, prompt, notify } = useDialog()
   const route = resolveWorkspaceRoute(pathname, user?.role)
@@ -195,23 +209,28 @@ function App() {
     }
   }
 
+  if (sessionLoading || sessionError) return <main className="workspace-fallback" role="status" aria-live="polite">
+    {sessionLoading ? '正在确认登录状态…' : <><p>{sessionError}</p><Button onClick={() => setSessionRetry(value => value + 1)}>重试登录状态</Button></>}
+  </main>
   if (!user) {
     return <AuthPage onAuthed={handleAuthed} />
   }
 
-  if (route.mode === 'admin' && isAdmin(user)) {
-    return <AdminPage onBack={() => navigate('/user/overview')} onLogout={handleLogout} />
-  }
-
   return (
-    <UserWorkspacePage
-      user={user}
-      onLogout={handleLogout}
-      onDeleteAccount={handleDeleteAccount}
-      onOpenAdmin={() => {
-        if (isAdmin(user)) navigate('/admin/overview')
-      }}
-    />
+    <WorkspaceBoundary resetKey={route.path}>
+      <Suspense fallback={<main className="workspace-fallback" role="status" aria-live="polite">正在加载工作台…</main>}>
+        {route.mode === 'admin' && isAdmin(user)
+          ? <AdminPage onBack={() => navigate('/user/overview')} onLogout={handleLogout} />
+          : <UserWorkspacePage
+              user={user}
+              onLogout={handleLogout}
+              onDeleteAccount={handleDeleteAccount}
+              onOpenAdmin={() => {
+                if (isAdmin(user)) navigate('/admin/overview')
+              }}
+            />}
+      </Suspense>
+    </WorkspaceBoundary>
   )
 }
 

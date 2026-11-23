@@ -1,0 +1,1593 @@
+{
+  "reviewer": "Codex assistant",
+  "independentlyAnnotated": false,
+  "reviewMethod": "Literal case-specific assistant reading of selected complete chunks; not exhaustive, not independent human annotation, not external factual verification",
+  "corpusSha256": "09f60831a24bce93982862e885fa97dcacc82675f05b1c2436e45834496a39b7",
+  "baseDatasetSha256": "7a3b81e279c1aca9c4c4f810fce03a52f961c67bc770d17cbb3e0d51e959d9fe",
+  "cases": [
+    {
+      "caseId": "rag-121",
+      "inspectedKnowledgeIds": [
+        "9edada5c79dadf547ed86f6401309d65740f73f62af7f653de7e44095f2f2bee"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "9edada5c79dadf547ed86f6401309d65740f73f62af7f653de7e44095f2f2bee",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "酸味与乳白色不能证明蛋白质含量相同，菌的宣传也不能代替食品组成。"
+          ],
+          "rationale": "直接区分食品组成与益生菌功效；本片同时明确菌株研究不能跨产品推广或替代治疗。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": [
+        {
+          "knowledgeId": "9edada5c79dadf547ed86f6401309d65740f73f62af7f653de7e44095f2f2bee",
+          "kind": "TRAILING_HEADING_WITHOUT_BODY",
+          "detail": "片尾仅有“活菌数量不是跨产品的通用排名”标题，没有该小节正文；只能引用本片已完整出现的组成与菌株边界，不以片尾标题推定后节内容。"
+        }
+      ]
+    },
+    {
+      "caseId": "rag-122",
+      "inspectedKnowledgeIds": [
+        "e145e61eba4c3d0f34dfbef60c1fa08031b4e65b633e010f273d8c0cf73ec606"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "e145e61eba4c3d0f34dfbef60c1fa08031b4e65b633e010f273d8c0cf73ec606",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "蜂蜜、糖浆或糖粉如果额外加入，应作为真实配料理解，不能因为听起来天然就说没有添加糖。"
+          ],
+          "rationale": "直接解释无糖酸奶底不代表加蜂蜜后的整碗无添加糖；还区分完整产品资料与自选配料。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-123",
+      "inspectedKnowledgeIds": [
+        "d807e1e17a7fe17ade07bf83a0eed4551dc878c770b045692064c6b1efdcf36e"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "d807e1e17a7fe17ade07bf83a0eed4551dc878c770b045692064c6b1efdcf36e",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "若目标是确认钙来源，优先寻找可核对的钙信息；没有标签或配方时，不自行填入包装产品的数据。"
+          ],
+          "rationale": "直接禁止在现磨豆浆资料缺失时套用包装豆饮营养数据，并说明浓稠、风味不能证明组成。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-124",
+      "inspectedKnowledgeIds": [
+        "efce6d53638936be38fa311e6f28305d0e7c1d44d3a56e876beede0d3266bd6b"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "efce6d53638936be38fa311e6f28305d0e7c1d44d3a56e876beede0d3266bd6b",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "加入奶、谷物或水果会使食品整体组成与单纯的甜味水不同，不能把“用代糖”自动换成“所有营养项目都是零”。"
+          ],
+          "rationale": "直接支持零蔗糖或代糖宣传不能推出总糖及全部营养为零；未提供项目仍未知。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-125",
+      "inspectedKnowledgeIds": [
+        "774927650cdd758c13fc8b009ef72ca4e20f5bd16727c62b565f1b4945ac09e6"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "774927650cdd758c13fc8b009ef72ca4e20f5bd16727c62b565f1b4945ac09e6",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "千焦与千卡都用于表达能量，转换时改变的是数值表达，不是食品本身，也不是把一份换成了整包。"
+          ],
+          "rationale": "直接解释不能只复制数字，并给出千焦除以4.184换为千卡的假设演算，保留计量基础。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-126",
+      "inspectedKnowledgeIds": [
+        "c3f78657fceecccf90924ca8ffd1572683da19d01ed2991bba91e94b48d5cf8c"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "c3f78657fceecccf90924ca8ffd1572683da19d01ed2991bba91e94b48d5cf8c",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "百分比让不同营养素各自放到参考尺度上理解，不会把性质不同的项目自动变成同一份个人任务。"
+          ],
+          "rationale": "相关背景说明标签参考体系与不同营养素不可相加；本片未完整解释个人目标如何确定，不替代原证据组。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-127",
+      "inspectedKnowledgeIds": [
+        "1f0de1777076cc757c2db8050b07228fac168396b064c0be37bd8a87f201c05b"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "1f0de1777076cc757c2db8050b07228fac168396b064c0be37bd8a87f201c05b",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "这里的比例仅属于这组假设过程，不适用于所有米、面、豆或不同烹调方法，也不能作为看一张熟食照片反推生重的依据。"
+          ],
+          "rationale": "直接否定用熟面重量套固定吸水系数反推干面，要求数据与加工状态一致。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-128",
+      "inspectedKnowledgeIds": [
+        "a81854e091a030d11a6e8fa0e680edc3c81b8f5f521566326b6193b84d724d22"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "a81854e091a030d11a6e8fa0e680edc3c81b8f5f521566326b6193b84d724d22",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "秤上的去皮功能通常用于扣除已放容器的重量，不能自动扣水果皮、果核或肉骨。"
+          ],
+          "rationale": "直接区分容器去皮重与食品可食部分，说明带皮核总重不是本人吃下的量。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-129",
+      "inspectedKnowledgeIds": [
+        "e6f986a5cc7a8a5dcf5f06fccb3360a24b17df4ac32d728586c0d929537242ff"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "e6f986a5cc7a8a5dcf5f06fccb3360a24b17df4ac32d728586c0d929537242ff",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "若最后只用了两次，剩余因不合适的保存或不喜欢而丢弃，实际购买仍付了十二元，不能继续用计划中的三次计算花费。"
+          ],
+          "rationale": "直接给出以真实可用份数比较每份成本的假设算例，而非只比较大包装标价。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-130",
+      "inspectedKnowledgeIds": [
+        "cc4d8ebc8665b5ca21b96233489a8ef062054f63ddd0b9f1573b8301ace9e98a"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "cc4d8ebc8665b5ca21b96233489a8ef062054f63ddd0b9f1573b8301ace9e98a",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "可以先换成同样质量比较组成，再回到各自一次会吃的数量理解实际用途。"
+          ],
+          "rationale": "本片同时要求分别比较脂肪、糖及食用量，低脂卖点不能替代多项比较。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-131",
+      "inspectedKnowledgeIds": [
+        "2e69658a132ce838d550a1748b761353a6ad3c55ee35b40623bc79d24aa214f0"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "2e69658a132ce838d550a1748b761353a6ad3c55ee35b40623bc79d24aa214f0",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "在同一个品牌下，原味、果味、巧克力味或其他版本可能采用不同配料与规格，不能只看熟悉的商标就沿用上一件商品资料。"
+          ],
+          "rationale": "直接回答换口味不能沿用原味数据，要求对齐当前口味和规格。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-132",
+      "inspectedKnowledgeIds": [
+        "1ba8bb791d0237efcaa3a07bc6cc04fff5a2848333e95e947d4fcec00c0fa6f5"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "1ba8bb791d0237efcaa3a07bc6cc04fff5a2848333e95e947d4fcec00c0fa6f5",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "原视频给出的数字和份数若有，不能不加判断地继续沿用。"
+          ],
+          "rationale": "直接说明换原料形成自己的变体，原营养估算不能复制为当前成品确定事实。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-133",
+      "inspectedKnowledgeIds": [
+        "12b19c10b0cdca3ea42918a364fffdb66b60d7f6e872ce4fb1da32dceac35550"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "12b19c10b0cdca3ea42918a364fffdb66b60d7f6e872ce4fb1da32dceac35550",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "选择时可以把商品看成它真实的产品形式，不用先把一勺粉自动换成几盘菜，也不因配方名字很长就推断所有日常果蔬安排都已完成。"
+          ],
+          "rationale": "直接否定绿色果蔬粉凭宣传即可完成全部蔬菜目标，并要求明确等价比较指标。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-134",
+      "inspectedKnowledgeIds": [
+        "44c10fe2eb55b001e6dc1773c939f8c04795fe992a81273e9542124fd0a0eac4"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "44c10fe2eb55b001e6dc1773c939f8c04795fe992a81273e9542124fd0a0eac4",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "不能因为某种植物食物被称为超级食品，就直接视为足够可靠的B12安排；也不应以颜色、发酵风味或传统经验，替代对具体食品是否提供相应营养的可靠说明。"
+          ],
+          "rationale": "本片明确全素安排应关注强化食品或补充来源，不自行定剂量，直接支持确认可靠B12来源。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-135",
+      "inspectedKnowledgeIds": [
+        "a0cdd38ea4e81a1ff2126b06b206f763ee1da96c8a226ddc56ee4944b4e8c3c5"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "a0cdd38ea4e81a1ff2126b06b206f763ee1da96c8a226ddc56ee4944b4e8c3c5",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "普通食堂的米饭、鸡蛋、豆腐和青菜，也可以按实际组合纳入候选。"
+          ],
+          "rationale": "直接支持普通食品可纳入健康餐食候选，价格高或进口标签不能单独证明营养更好。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-136",
+      "inspectedKnowledgeIds": [
+        "c95751b4c65363318d460612fe2d271189a16fd78c25f9b1436ff722f554c66a",
+        "0939bdc9e172bb6b740226bfce2abc0f4c74d06d48a3eb745dc3b77e41f843f6"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "c95751b4c65363318d460612fe2d271189a16fd78c25f9b1436ff722f554c66a",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "阅读餐厅资料时，先确认品名、规格、饼底或基底以及默认配料，再看能量或其他项目。"
+          ],
+          "rationale": "仅提供菜单身份、单品套餐范围的相关背景，未完整处理加肉换酱后的数值变化。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "0939bdc9e172bb6b740226bfce2abc0f4c74d06d48a3eb745dc3b77e41f843f6",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "去酱或去一层芝士是具体制作选择，但若商家只有整份数据，就不能从中随意扣一个经验值。"
+          ],
+          "rationale": "直接说明定制取消项不能从原版随意扣值，并要求新增配料与标准版范围对应；缺少分项数据时保留未知。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-137",
+      "inspectedKnowledgeIds": [
+        "8591ae122c74fb8dfc8d1c178be3f4c8734089731109e702227e194f87071d06"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "8591ae122c74fb8dfc8d1c178be3f4c8734089731109e702227e194f87071d06",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "没有必要先购买某个清洁周期，才能恢复正常生活。"
+          ],
+          "rationale": "本片同时明确排毒功效研究有限，聚餐后可恢复普通餐食，不用几天果汁抵消。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-138",
+      "inspectedKnowledgeIds": [
+        "ed611c9772e7b967fca742c8c60121622c238172eb06b4e183c435aed925be39",
+        "fae76984757e424e4c495fae802360695cbb2db486bd62a9d755494200661315"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "ed611c9772e7b967fca742c8c60121622c238172eb06b4e183c435aed925be39",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "设备或软件给出的能量属于相应方法下的估算，不应改称直接测得个人实际消耗。"
+          ],
+          "rationale": "相关背景解释手表数值是估算；不能仅此视为已完整解释餐食抵消。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "fae76984757e424e4c495fae802360695cbb2db486bd62a9d755494200661315",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "两数相减可以得到一百，但不能因此宣称已经测出个人精确能量结余。"
+          ],
+          "rationale": "直接指出活动和餐食估算相减不等于测得个人能量结余，不能据此决定下一餐是否可吃。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-139",
+      "inspectedKnowledgeIds": [
+        "e468158f760b7666f6f4457f07e3684273c3daa209a80536400b9a24e3a79e8a"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "e468158f760b7666f6f4457f07e3684273c3daa209a80536400b9a24e3a79e8a",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "自己无法可靠判断时，不应靠尝一口作最后决定，也不为了省下购买费用把可疑内容倒进正在做的菜里。"
+          ],
+          "rationale": "直接反对对包装异常罐头开盖试吃，未过期不能覆盖异常包装条件。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-140",
+      "inspectedKnowledgeIds": [
+        "622355af56a3dca47cc3f8a45c9e402f0486b827348f7ee45c02c4810feec9d5",
+        "c65e4898d76147d8d0c9dbb0ae59e6aa3a9dcfb68f7611f0f7c6f82698c04ee8"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "622355af56a3dca47cc3f8a45c9e402f0486b827348f7ee45c02c4810feec9d5",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "设备恢复、箱内空气状态与每一类食品经历，是相互关联却不完全相同的信息，应分别整理后再对应可靠指引。"
+          ],
+          "rationale": "相关背景区分重新通电与食品经历，未给出具体奶肉处理边界。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "c65e4898d76147d8d0c9dbb0ae59e6aa3a9dcfb68f7611f0f7c6f82698c04ee8",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "奶、肉、蛋、海鲜和剩余餐食等易腐食品，需要按适用的时间与温度条件判断，不能只按购买价格或包装是否没打开分组。"
+          ],
+          "rationale": "直接针对奶肉要求核对时间温度经历；过程不清不能自动判可吃，也不能试吃验证。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-141",
+      "inspectedKnowledgeIds": [
+        "c9e92392d08917ac2b2bbfe96dc849b064a76535667a470874c658a0d6d2b489"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "c9e92392d08917ac2b2bbfe96dc849b064a76535667a470874c658a0d6d2b489",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "不要把早晨装盒的动作当作所有后续环节已经完成，也不应因午间摸着还有一点温度，就反推食品整个上午都符合要求。"
+          ],
+          "rationale": "直接否定保温桶装好即可保证晚上安全，要求全过程温度条件和适合的冷源安排。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-142",
+      "inspectedKnowledgeIds": [
+        "d5e5138edf955cf3c1f86980518e8d5cd0e2ff5e6bfe932c7be87e4d80c377eb"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "d5e5138edf955cf3c1f86980518e8d5cd0e2ff5e6bfe932c7be87e4d80c377eb",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "美国食品药品监督管理局建议用冰箱温度计并经常查看，以确认设备实际工作情况。"
+          ],
+          "rationale": "直接说明触感不能替代测量，冷藏与冷冻区域需要分别理解读数。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-143",
+      "inspectedKnowledgeIds": [
+        "a62d7e01213c2b624cef76100934bff9a8a4be5e48276f02dcee8275c9e83e07",
+        "fb7be25b44643fc363d707fb95a0740edb1b93b6200add8d8b80194ee9971659"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "a62d7e01213c2b624cef76100934bff9a8a4be5e48276f02dcee8275c9e83e07",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "数量清楚有助于使用，也能避免以后只想吃一点，却必须拿出整大份反复处理。"
+          ],
+          "rationale": "仅提供预先分装和冷却的相关操作，未完整覆盖反复复热的判断。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "fb7be25b44643fc363d707fb95a0740edb1b93b6200add8d8b80194ee9971659",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "盒子盖回去不会使之前的暴露消失，重新冷藏也不是重新制作。"
+          ],
+          "rationale": "直接支持每次盛出当次份量，并保留实际时间、温度与接触历史；本片末尾复热小节尚无正文，不将其当作复热温度依据。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": [
+        {
+          "knowledgeId": "fb7be25b44643fc363d707fb95a0740edb1b93b6200add8d8b80194ee9971659",
+          "kind": "TRAILING_HEADING_WITHOUT_BODY",
+          "detail": "片尾为“复热按当次份量安排完整步骤”标题，不能单靠该片声称具体复热条件已得到支持。"
+        }
+      ]
+    },
+    {
+      "caseId": "rag-144",
+      "inspectedKnowledgeIds": [
+        "3a4f10044b06245d020799516f731f95ab28180e03805e73706ab9576e1ad50c"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "3a4f10044b06245d020799516f731f95ab28180e03805e73706ab9576e1ad50c",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "了解这一点，是为了明白为什么只看收获后是否洗得干净不足以回答问题，不需要家庭使用者自己去判断具体微生物，也不应从某份芽菜外观猜出实际污染水平。"
+          ],
+          "rationale": "直接解释芽菜发芽过程的风险使洗净外观不足以保证安全，同时避免反向断言某袋必然污染。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": [
+        {
+          "knowledgeId": "3a4f10044b06245d020799516f731f95ab28180e03805e73706ab9576e1ad50c",
+          "kind": "TRAILING_HEADING_WITHOUT_BODY",
+          "detail": "片尾为“清洗与充分熟制承担不同作用”标题，该小节内容未在本片出现；直接证据引用的是此前完整的发芽条件与清洗不足段落。"
+        }
+      ]
+    },
+    {
+      "caseId": "rag-145",
+      "inspectedKnowledgeIds": [
+        "4db3316d7361366f86e22b116a77bc69bc15e6ad26a19067fddea0f663c26179"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "4db3316d7361366f86e22b116a77bc69bc15e6ad26a19067fddea0f663c26179",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "因此选择时，可以直接寻找明确熟制的菜，而不需要在餐桌上尝试推算某种酒的浓度能否代替加热。"
+          ],
+          "rationale": "直接支持酒腌不等于充分熟制，并提醒熟制不能自动解除过敏限制。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-146",
+      "inspectedKnowledgeIds": [
+        "99933762892ca5cb4f7d2e6dc989723c03786ff6e9326aa4097222fe8589e5da"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "99933762892ca5cb4f7d2e6dc989723c03786ff6e9326aa4097222fe8589e5da",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "不能继续只看外盒未开封保质期，就保证开封后放到同一天仍适用，更不能为所有牛奶统一编一个可用天数。"
+          ],
+          "rationale": "直接说明开封改变包装状态，分装不能沿用未开封日期保证安全。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-147",
+      "inspectedKnowledgeIds": [
+        "48ceea8124c916463d42bb1443e4e9b33f0888ec70638ee76577b727a9ff0800"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "48ceea8124c916463d42bb1443e4e9b33f0888ec70638ee76577b727a9ff0800",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "多人一起做饭时，可以提前约定公共取样勺只用于盛取，不直接入口。若需要再次试味，就换清洁工具或按相应要求处理，而不是只在衣服或纸上擦一下继续用。"
+          ],
+          "rationale": "直接区分试味和公共盛取工具，反对入口工具擦一下就继续共用。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-148",
+      "inspectedKnowledgeIds": [
+        "57949681654be79594d4261af36a8754cb1606a5e815d64c0e9edec34a69437b"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "57949681654be79594d4261af36a8754cb1606a5e815d64c0e9edec34a69437b",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "实际核对时要使用当前通知给出的条件，而不是自行规定每次召回都必须有同一套字段。"
+          ],
+          "rationale": "本片要求以完整官方或企业通知对照实际品名、规格、批号及日期，不由品牌或配图直接确认批次。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-149",
+      "inspectedKnowledgeIds": [],
+      "judgments": [],
+      "notes": "库外题无需检索；本轮保持原工具边界及无证据目标，不添加知识相关性判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-150",
+      "inspectedKnowledgeIds": [],
+      "judgments": [],
+      "notes": "库外题无需检索；本轮保持原工具边界及无证据目标，不添加知识相关性判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-151",
+      "inspectedKnowledgeIds": [],
+      "judgments": [],
+      "notes": "库外题无需检索；本轮保持原工具边界及无证据目标，不添加知识相关性判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-152",
+      "inspectedKnowledgeIds": [],
+      "judgments": [],
+      "notes": "库外题无需检索；本轮保持原工具边界及无证据目标，不添加知识相关性判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-153",
+      "inspectedKnowledgeIds": [],
+      "judgments": [],
+      "notes": "库外题无需检索；本轮保持原工具边界及无证据目标，不添加知识相关性判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-154",
+      "inspectedKnowledgeIds": [],
+      "judgments": [],
+      "notes": "库外题无需检索；本轮保持原工具边界及无证据目标，不添加知识相关性判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-155",
+      "inspectedKnowledgeIds": [],
+      "judgments": [],
+      "notes": "库外题无需检索；本轮保持原工具边界及无证据目标，不添加知识相关性判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-156",
+      "inspectedKnowledgeIds": [],
+      "judgments": [],
+      "notes": "库外题无需检索；本轮保持原工具边界及无证据目标，不添加知识相关性判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-157",
+      "inspectedKnowledgeIds": [],
+      "judgments": [],
+      "notes": "库外题无需检索；本轮保持原工具边界及无证据目标，不添加知识相关性判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-158",
+      "inspectedKnowledgeIds": [],
+      "judgments": [],
+      "notes": "库外题无需检索；本轮保持原工具边界及无证据目标，不添加知识相关性判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-159",
+      "inspectedKnowledgeIds": [
+        "2bee39900a154f46c01d4c2b1cbe09a0522a97cc687688efc6316582e539669f"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "2bee39900a154f46c01d4c2b1cbe09a0522a97cc687688efc6316582e539669f",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "可以把轮换放在午餐这个现实机会中，不要求每餐都找到同一种饭。"
+          ],
+          "rationale": "支持按可获得性轮换的背景，但本片未直接完整说明只有白米饭时无需停吃，保留原直接证据。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-160",
+      "inspectedKnowledgeIds": [
+        "212e4fdc62c3a853fe97a106490d3986c1c10078edd7a85fd49c6c6fb82e1347"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "212e4fdc62c3a853fe97a106490d3986c1c10078edd7a85fd49c6c6fb82e1347",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "面馆可能提供加蛋、加豆腐、加青菜，也可能只有加面和加肉。"
+          ],
+          "rationale": "直接给出补充蛋豆与蔬菜的实际点单方法，说明加面只改变主食部分。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-161",
+      "inspectedKnowledgeIds": [
+        "45c2ae82b43670918e8157c85827065965913d2445ce4105f49c0a8fa9cb361d",
+        "56a87588214efd1708084dc45d8e9f94333759bba35aa56a3839b1819fead356"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "45c2ae82b43670918e8157c85827065965913d2445ce4105f49c0a8fa9cb361d",
+          "relevance": 0,
+          "evidenceQuotes": [
+            "外带粥需要稳妥容器、可坐下食用的地点以及符合要求的保存条件。"
+          ],
+          "rationale": "本片是采购、搭配和携带路线，没有说明照片、碗大小、稠度与实际重量关系；不能因同标题判为本题有效证据。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "56a87588214efd1708084dc45d8e9f94333759bba35aa56a3839b1819fead356",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "拍摄角度、遮挡、碗深和食物堆叠都可能影响观感，不能把画面面积当成克数尺。"
+          ],
+          "rationale": "直接支持白粥照片缺少碗深等资料时不能生成克数；缺失事实保持未知。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-162",
+      "inspectedKnowledgeIds": [
+        "445ae610c71a500eddf9b2bfe951065afe361e5ac0159dc132ad966e9b2d9fc3",
+        "fce6557932527c111957da00d27418fc3fd34da2861419b23fb1338ed79326a4"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "445ae610c71a500eddf9b2bfe951065afe361e5ac0159dc132ad966e9b2d9fc3",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "多人合买不同馅料的包子或饺子时，可以按颜色标记、包装分区或店铺说明区分，避免只剩一个笼统的拼盘名称。"
+          ],
+          "rationale": "仅说明馅料辨认和点单搭配，未证明数量与比例缺失时蛋白质克数不可确定，不替代边界依据。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "fce6557932527c111957da00d27418fc3fd34da2861419b23fb1338ed79326a4",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "可确认材料与分项重量是不同信息，不要让一个总数自动填满所有原料字段。"
+          ],
+          "rationale": "本片用肉末豆腐等混合菜说明名称或总重不足以拆出原料，支持饺子馅料比例、数量未知时不能编造蛋白质克数。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-163",
+      "inspectedKnowledgeIds": [
+        "a8fdd4a6dd187f2121a34f04306dd2702f54502099af2eec99977e415a60ddc8"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "a8fdd4a6dd187f2121a34f04306dd2702f54502099af2eec99977e415a60ddc8",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "想让餐盘有更多其他蔬菜时，下一次换掉一种重复的薯谷类配菜，是清楚的改变，不需要把各道菜先换算成一个假设的标准份。"
+          ],
+          "rationale": "本片提供薯谷配菜与其他蔬菜的组合背景，但没有完整明确说明土豆玉米不能当绿叶菜的分类依据，保留原直接证据组。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-164",
+      "inspectedKnowledgeIds": [
+        "92560b8c04495c824802bcb1637d61cdc55c127f396155250847664ea16cb042"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "92560b8c04495c824802bcb1637d61cdc55c127f396155250847664ea16cb042",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "想知道具体比例，则看产品是否有相应公开信息。没有标出时，不把视觉印象换算成一个看似合理的百分数。"
+          ],
+          "rationale": "直接处理全麦比例的证据缺失，要求对应配料说明与公开比例，不凭名称或外观填数。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-165",
+      "inspectedKnowledgeIds": [
+        "e165844f00dc24e1a36d7ef28f52166df3606317189732f03fc25e61b31e8db5"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "e165844f00dc24e1a36d7ef28f52166df3606317189732f03fc25e61b31e8db5",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "把原因写清楚，才能决定下一次是否调整；种类多只是一个观察入口，不能单独等同于个人过量。"
+          ],
+          "rationale": "直接要求记录面和饭的真实来源、食用量及加购原因，不按名称数量机械判断调整。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-166",
+      "inspectedKnowledgeIds": [
+        "b643c549eacb6fce50b9523607018ebafca1e0474043e891b13dff12aecca202",
+        "1b4ec759065563e622509628f57fb479f1f82bc13d0ccf6c2dcf83e0cda3fe4a"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "b643c549eacb6fce50b9523607018ebafca1e0474043e891b13dff12aecca202",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "选择方便食品的价值，在于补上当前能取得的一部分，而不是要求鸡蛋承担整餐所有食物的角色。"
+          ],
+          "rationale": "直接涉及鸡蛋的食品角色，但未完整说明份量、其他餐次和个人需求缺失，作为背景而非完整达标边界。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "1b4ec759065563e622509628f57fb479f1f82bc13d0ccf6c2dcf83e0cda3fe4a",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "餐盘照片可以提示可见食品、摆放和部分做法线索，却通常无法独立说明完整配方、本人实际吃下的量、其他餐次和个人背景。"
+          ],
+          "rationale": "直接解释可见单一食品不能承担全部个人营养目标评估，明确缺少实际量、其他餐次和背景。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-167",
+      "inspectedKnowledgeIds": [
+        "1978da961314c417ef356d4a1d176af89931c6120f9f436cd79e2e2e44e140ff"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "1978da961314c417ef356d4a1d176af89931c6120f9f436cd79e2e2e44e140ff",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "清蒸豆腐、煎炸豆腐和调味豆干虽有共同原料背景，最后成品仍不同；不要仅凭都带豆字，就把它们的标签或调味信息互相套用。"
+          ],
+          "rationale": "直接回答要区分清蒸油炸做法，不能以同原料名称套标签或生成固定脂肪变化比例。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-168",
+      "inspectedKnowledgeIds": [
+        "e3f6538c324a619624b880836a42a6f5ea5cc5cd4eaf39a1687f82704a2776ff"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "e3f6538c324a619624b880836a42a6f5ea5cc5cd4eaf39a1687f82704a2776ff",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "不要因为一栏需要克数就套用统一可食率，也不把商品页面的示例重量当作这盘产品已称出的结果。"
+          ],
+          "rationale": "直接否定带壳总重按统一可食率生成精确净肉和营养；本片同时说明冰衣、汤汁与加工状态不同。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-169",
+      "inspectedKnowledgeIds": [
+        "252bff75d580850cec4e25be53f1b6944cb38118c67497498da9947d2a947e1e"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "252bff75d580850cec4e25be53f1b6944cb38118c67497498da9947d2a947e1e",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "便利店里的香肠、冷藏豆腐、鸡蛋和肉类产品，可能有不同食用与加热要求。"
+          ],
+          "rationale": "本片列出普通替代食品并要求结合设备和处理条件，在每餐主菜层次轮换，而非只删除少量配料。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-170",
+      "inspectedKnowledgeIds": [
+        "ccf812aa38e876a7dd459f7a21e71727a63675200a9abf532bd43b06051c2309"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "ccf812aa38e876a7dd459f7a21e71727a63675200a9abf532bd43b06051c2309",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "先看窗口能否提供本人接受的豆类、豆制品，或在个人范围内的蛋奶食品，再安排主食与蔬菜。"
+          ],
+          "rationale": "直接反对只靠水果叶菜判断素餐完整，结合本人素食范围安排蛋白质食品和主食。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-171",
+      "inspectedKnowledgeIds": [
+        "52e87cbbb153b4d825070d04102894de60400f52344c1427911f95d4da3294cd"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "52e87cbbb153b4d825070d04102894de60400f52344c1427911f95d4da3294cd",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "提前确认一个不同叶菜和一个其他蔬菜选项，能使计划适应实际供应；备选是为了继续正常吃饭，不是要求当天将所有选项都买齐。"
+          ],
+          "rationale": "直接给出轮换、换窗口和原料辨认的方法；本片没有完整列出可替换的具体蔬菜品种，作为直接分项证据，不单独替代整组。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-172",
+      "inspectedKnowledgeIds": [
+        "e972fe1e36ed6395329295aa6ee1889a142e7567bdd17b86cf27473004c248a3",
+        "e48d11bfc82b55dbd2db95d6b7b89776adda9c51e8f7790f5494138c37930054"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "e972fe1e36ed6395329295aa6ee1889a142e7567bdd17b86cf27473004c248a3",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "若最后整杯用完，就如实记录结果，不能把点单时选了另放当成已经减少固定比例。"
+          ],
+          "rationale": "仅提供用酱行为与实际结果的相关背景，未说明照片缺少配方用量时不能估油量。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "e48d11bfc82b55dbd2db95d6b7b89776adda9c51e8f7790f5494138c37930054",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "照片无法可靠读出调味油、酱料或喝下的汤量，光泽、颜色和咸味也不能转成固定克数。"
+          ],
+          "rationale": "直接支持缺配方与用量记录时不能由照片推算沙拉用油，未知成分也不能写成零。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-173",
+      "inspectedKnowledgeIds": [
+        "2e55def837539e20d4499a343cba0647a72c7f86dd0c80ea4fa0f4b05e6b71c6"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "2e55def837539e20d4499a343cba0647a72c7f86dd0c80ea4fa0f4b05e6b71c6",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "采购替换可以很明确，营养完全相同的结论却不能由替换动作推出。"
+          ],
+          "rationale": "直接区分完整水果与果汁的食品形式、容量和实际配方，不因替换行为认定营养完全相同。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-174",
+      "inspectedKnowledgeIds": [
+        "7547591fdf332388bba453cbd9acafbe46f92ef958989b033a1ac40913095326"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "7547591fdf332388bba453cbd9acafbe46f92ef958989b033a1ac40913095326",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "如果当天并不需要加餐，也可以把采购量调小，避免为了清空库存而继续吃。"
+          ],
+          "rationale": "只提供普通水果加餐时间、采购和携带背景，未完整回答水果不能替代每天全部正餐。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-175",
+      "inspectedKnowledgeIds": [
+        "f7564b6aa23af5a8a20b29034ca34b6c455845861972d6ae15105c2d4b5ec5d1",
+        "d8b143a51a839b71a2f1becdc22a19337f68bd092f3b96564baaae23ccb8fa14"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "f7564b6aa23af5a8a20b29034ca34b6c455845861972d6ae15105c2d4b5ec5d1",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "不同口味的同类麦片，可能仍属于相近来源；全谷、豆类、蔬菜与水果则提供了不同食品选择。"
+          ],
+          "rationale": "直接回答纤维来源可在全谷豆类果蔬间轮换，但本片未覆盖纤维粉不能代替蔬菜，不能单片替代完整证据组。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "d8b143a51a839b71a2f1becdc22a19337f68bd092f3b96564baaae23ccb8fa14",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "纤维粉涉及某种成分，而一份蔬菜是具体食品，两者不能只因都与纤维有关，就在饮食目标中完全等同。"
+          ],
+          "rationale": "直接回答纤维粉与蔬菜不能完全互换；本片不列足轮换食物，作为直接分项证据，不单独替代整组。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。 主代理复核后将复合问题拆成两个必要证据面；原完整证据可同时覆盖，两条新增分项须共同召回，单条不能通过。",
+      "chunkIssues": [],
+      "coveragePlan": {
+        "groups": [
+          [
+            "8e017ec925e871c2528fe776442ace2f7d0207bb9dec6dfa015ed428fc1f54e6",
+            "d8b143a51a839b71a2f1becdc22a19337f68bd092f3b96564baaae23ccb8fa14"
+          ],
+          [
+            "8e017ec925e871c2528fe776442ace2f7d0207bb9dec6dfa015ed428fc1f54e6",
+            "f7564b6aa23af5a8a20b29034ca34b6c455845861972d6ae15105c2d4b5ec5d1"
+          ]
+        ],
+        "rationales": [
+          "纤维粉不能完全替代蔬菜",
+          "全谷、豆类、蔬菜、水果的轮换来源"
+        ]
+      }
+    },
+    {
+      "caseId": "rag-176",
+      "inspectedKnowledgeIds": [
+        "831a30349602d31ccc258d6e034fac8e38266da7ca43cf0cec11a6042d75aed9"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "831a30349602d31ccc258d6e034fac8e38266da7ca43cf0cec11a6042d75aed9",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "把白水设成默认饮品，可以从食堂点单时不自动加购甜饮做起。"
+          ],
+          "rationale": "提供取得白水的实施背景，但未说明如何如实记录饮品改变，不替代本题原有记录证据。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-177",
+      "inspectedKnowledgeIds": [
+        "aa412dcace565a29769c102c607f7ce4798ce8003ccebd030d1fceda1c7c7922"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "aa412dcace565a29769c102c607f7ce4798ce8003ccebd030d1fceda1c7c7922",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "拿铁、奶茶或奶味饮品没有公开配方时，不能随便套用一盒纯奶的数据。"
+          ],
+          "rationale": "直接支持奶味饮料缺少配料营养资料时不能确定与牛奶等同，要求具体产品证据。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-178",
+      "inspectedKnowledgeIds": [
+        "b0331fedbfb47a1db5bcae02f5a2c88bba3996b1e0a086518faf8104ca6f1a0b"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "b0331fedbfb47a1db5bcae02f5a2c88bba3996b1e0a086518faf8104ca6f1a0b",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "如果没有杯重或每份定义，先保留缺失，不用容器外观看起来差不多代替。"
+          ],
+          "rationale": "直接说明按每份与每百克比较前需确认重量，缺少每份重量时不能凭容器外观换算。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-179",
+      "inspectedKnowledgeIds": [
+        "33da77d960cfa9908d4fde016c997b6f2b6aff8359a11f42500401bad6c8bb78",
+        "a19e1347f3cbe6637e5efb5047002d763755b9c9fa48698c1b4cfde6a1e90107",
+        "7df0460e90bca0f819c0e247f9a76e8045a3daf658e8a15aef88748854a4813b"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "33da77d960cfa9908d4fde016c997b6f2b6aff8359a11f42500401bad6c8bb78",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "乳糖不耐受与牛奶过敏不是同一个问题，替代方案需要对应本人已明确的情况。"
+          ],
+          "rationale": "相关安全背景区分诊断与限制，未完整比较无乳糖奶、植物饮品的具体配方。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "a19e1347f3cbe6637e5efb5047002d763755b9c9fa48698c1b4cfde6a1e90107",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "同样出现无乳糖字样，仍要看当前产品全称、配料、规格与营养表，不把所有版本视为完全相同。"
+          ],
+          "rationale": "直接回答无乳糖产品仍需核对配料，但植物饮品比较正文在下一片，不能单片视作完整替代组。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "7df0460e90bca0f819c0e247f9a76e8045a3daf658e8a15aef88748854a4813b",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "豆饮、燕麦饮及其他植物饮品的配方和营养可能不同，不能默认都与牛奶等同，也不能认为它们相互完全一样。"
+          ],
+          "rationale": "直接支持植物饮品不能随意互换，应看具体蛋白质、钙等数据；与无乳糖产品片共同解释，不各自替代整个复合证据组。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。 主代理复核后将复合问题拆成两个必要证据面；原完整证据可同时覆盖，两条新增分项须共同召回，单条不能通过。",
+      "chunkIssues": [],
+      "coveragePlan": {
+        "groups": [
+          [
+            "7cf65f0f7184f61d54ab3a869000d6efd36eb2e5f779b50514da2a51869dee83",
+            "a19e1347f3cbe6637e5efb5047002d763755b9c9fa48698c1b4cfde6a1e90107"
+          ],
+          [
+            "7cf65f0f7184f61d54ab3a869000d6efd36eb2e5f779b50514da2a51869dee83",
+            "7df0460e90bca0f819c0e247f9a76e8045a3daf658e8a15aef88748854a4813b"
+          ]
+        ],
+        "rationales": [
+          "无乳糖产品仍需核对具体配料与类别",
+          "植物饮品的配方营养不能默认等同"
+        ]
+      }
+    },
+    {
+      "caseId": "rag-180",
+      "inspectedKnowledgeIds": [
+        "d3aaf6cd9a50aaf76dbb5e8f33f1828f307da0ab584df8740258da740a46ba2c",
+        "0c9fb8d35c03265e3cede2135b0345d6eaadb1fb354512d29927f09d83630061"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "d3aaf6cd9a50aaf76dbb5e8f33f1828f307da0ab584df8740258da740a46ba2c",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "不能用任意包装饮料的数据代替，也不能因为点单写无糖就把整杯所有营养字段都设为零。"
+          ],
+          "rationale": "直接支持无糖不代表所有营养字段为零，但未覆盖不能替代完整正餐这一分项。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "0c9fb8d35c03265e3cede2135b0345d6eaadb1fb354512d29927f09d83630061",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "无糖饮料不因标签而成为完整正餐，也不能补齐原来餐盘缺少的主食或蛋白质食品。"
+          ],
+          "rationale": "本片同时区分无资料与标签零值，直接支持无糖不能自动填零或替代正餐的双重边界。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-181",
+      "inspectedKnowledgeIds": [
+        "91ff3d8a649f7e5a47081f8a08b7642c72eeb8ead676eddcf0b8467cb22e3c42",
+        "8a9861b65183d81108625e6fe493eeeff95a213ba8effb6a4baa66513e8af6dc"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "91ff3d8a649f7e5a47081f8a08b7642c72eeb8ead676eddcf0b8467cb22e3c42",
+          "relevance": 1,
+          "evidenceQuotes": [
+            "复购前再看当前规格、配菜和送达安排，不能只按历史照片确认整份内容。"
+          ],
+          "rationale": "相关背景提醒菜单变化，但未完整明确当前宣传图不能证明实际收到组成，保留原组。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "8a9861b65183d81108625e6fe493eeeff95a213ba8effb6a4baa66513e8af6dc",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "平台显示的菜品图片和通用标签只是辅助，不能替代对实际门店、具体产品和当天制作情况的核实。"
+          ],
+          "rationale": "直接支持宣传图不能确认为收到的真实组成，并要求到餐后核对实际品名备注和配料。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-182",
+      "inspectedKnowledgeIds": [
+        "869c537eef1f51f4857b6fe4c00b369ed09fdd922936f47b987b6f34c936ae94"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "869c537eef1f51f4857b6fe4c00b369ed09fdd922936f47b987b6f34c936ae94",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "店家若允许饭菜分装或酱汁另放，可以先按口味拌入一部分，再决定是否继续添加。"
+          ],
+          "rationale": "直接回答酱汁可单独选择且不能据此算油盐差额；本片未完整给出拆开记录规范，作为分项直接证据。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-183",
+      "inspectedKnowledgeIds": [
+        "b659c14a7f000817e045bdb16ce53f4d120d58c5482394a677b71c18a44fa169",
+        "56a87588214efd1708084dc45d8e9f94333759bba35aa56a3839b1819fead356"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "b659c14a7f000817e045bdb16ce53f4d120d58c5482394a677b71c18a44fa169",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "小票总重可以保留，但不足以自动拆成每种材料的重量，更不能直接生成整碗油盐数据。"
+          ],
+          "rationale": "直接反对结账总重拆分各原料，但本片未覆盖汤和剩余与实际食用量关系，不单片替代整个边界组。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "56a87588214efd1708084dc45d8e9f94333759bba35aa56a3839b1819fead356",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "分享、剩余、续添和更换食品都影响最终范围，不能跳过这些关系，直接把购物总重算成个人摄入。"
+          ],
+          "rationale": "直接支持小票采购量不等于吃下量，缺少剩余和实际食用范围时不能生成实际摄入。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-184",
+      "inspectedKnowledgeIds": [
+        "2c646727abd98497f995d591ea8d1411287a668ee3d00a61432b44215f50ec8f",
+        "0e1ce5cfaf2cb34e270388fa5670b0bf1ade5edde4e34ec118bc83659c0a9a2e"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "2c646727abd98497f995d591ea8d1411287a668ee3d00a61432b44215f50ec8f",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "不能把整桌菜单、付款金额或订单数量直接当作个人摄入。"
+          ],
+          "rationale": "直接支持共享订单不能代表个人吃下范围，但平均分摊的明确条件在下一片，保守不单片替代整组。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "0e1ce5cfaf2cb34e270388fa5670b0bf1ade5edde4e34ec118bc83659c0a9a2e",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "四个人点一盘菜，并不自动意味着每人吃四分之一。"
+          ],
+          "rationale": "本片同时说明拿到个人盘也需扣剩余与分享，直接支持无个人分食和剩余时不能按人数平摊。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-185",
+      "inspectedKnowledgeIds": [
+        "2dfcdd0d26660fe436f56b6a6f5a00317738218572b368fc5920c84365fff8ff"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "2dfcdd0d26660fe436f56b6a6f5a00317738218572b368fc5920c84365fff8ff",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "再将一部分重复炸物换为现场能取得的其他食品。"
+          ],
+          "rationale": "直接支持烧烤聚餐替换配菜和小轮次点单；未提供串数不能换算肉克数的完整依据，不替代原组。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-186",
+      "inspectedKnowledgeIds": [
+        "6a12664216a338989cca1bcbbeca0702a9586b951ccf06229cdda8e36217d8fa"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "6a12664216a338989cca1bcbbeca0702a9586b951ccf06229cdda8e36217d8fa",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "价格已经发生，后续取用仍应依据真实需要与口味；吃更多盘不等于买得更聪明，也不能用食物种类数量衡量这一餐是否值得。"
+          ],
+          "rationale": "本片同时说明第一盘取适量、按需要调整及先看食物角色，直接回答不为回本持续加菜。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-187",
+      "inspectedKnowledgeIds": [
+        "53126f92e7412e5cac969f6741594be402159dc6248e8d203763d21f9776d23c",
+        "83fe7cba5a8860391df6849a206f9e30b1cb7ff743fa2b95e1e72c130e42adc8"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "53126f92e7412e5cac969f6741594be402159dc6248e8d203763d21f9776d23c",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "可以先找到普通主食，再选择本人可接受的蛋、豆制品或其他食品，最后查看可取得的蔬菜水果与饮品。"
+          ],
+          "rationale": "直接给出便利店按组件组餐的方法；保存要求在其他片，不能单片替代复合问题整组。",
+          "alternativeForGroups": []
+        },
+        {
+          "knowledgeId": "83fe7cba5a8860391df6849a206f9e30b1cb7ff743fa2b95e1e72c130e42adc8",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "先读当前产品的储存与开封后说明，再看自己是否能立即食用、是否有冷藏条件以及需要携带多久。"
+          ],
+          "rationale": "直接回答购买前核对保存、携带和加热条件；本片不完整列出组餐方案，作为另一直接分项证据。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-188",
+      "inspectedKnowledgeIds": [
+        "2b4f4ff9445714242fbadcfe54d0e49c3079b2110b8202b48baef7d351c09214"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "2b4f4ff9445714242fbadcfe54d0e49c3079b2110b8202b48baef7d351c09214",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "若打算用作午餐，则需要看主食、明确蛋白质食品与蔬菜如何安排。"
+          ],
+          "rationale": "直接区分叶菜配餐与完整正餐用途，不能由轻食标签补出缺失主食及蛋白质食品。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-189",
+      "inspectedKnowledgeIds": [
+        "51cfb049fabb23bb66e4cd492f503a24b7f76c5daac80d4bacce3c10342158cb"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "51cfb049fabb23bb66e4cd492f503a24b7f76c5daac80d4bacce3c10342158cb",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "米饭、面食、蛋、豆制品和青菜的价格会随地点、份型与供应变化，不宜直接套用网络上的低价清单。"
+          ],
+          "rationale": "直接列出普通食堂可选食物并要求建立本校真实可买的组合和价格表，避免必须昂贵套餐的假设。",
+          "alternativeForGroups": [
+            0
+          ]
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-190",
+      "inspectedKnowledgeIds": [
+        "a58b21104d83eea3c7208327fd5d32c5419de0ffaa64b2b22c853cd693156afe"
+      ],
+      "judgments": [
+        {
+          "knowledgeId": "a58b21104d83eea3c7208327fd5d32c5419de0ffaa64b2b22c853cd693156afe",
+          "relevance": 2,
+          "evidenceQuotes": [
+            "可以分别确认在哪里买、怎样带到合适地点、什么时候能够食用。"
+          ],
+          "rationale": "直接给出购买携带食用全过程备选规划，含未营业时寻找更早可买或按说明备食；本片未完整给出便携早餐食品例子，作为直接分项证据，不单片替代整组。",
+          "alternativeForGroups": []
+        }
+      ],
+      "notes": "助手逐题阅读所列完整候选片段后作有限范围相关性复核；并非全标题或全库穷举，也不是独立人工事实核验。未列出的片段仍未判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-191",
+      "inspectedKnowledgeIds": [],
+      "judgments": [],
+      "notes": "库外题无需检索；本轮保持原工具边界及无证据目标，不添加知识相关性判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-192",
+      "inspectedKnowledgeIds": [],
+      "judgments": [],
+      "notes": "库外题无需检索；本轮保持原工具边界及无证据目标，不添加知识相关性判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-193",
+      "inspectedKnowledgeIds": [],
+      "judgments": [],
+      "notes": "库外题无需检索；本轮保持原工具边界及无证据目标，不添加知识相关性判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-194",
+      "inspectedKnowledgeIds": [],
+      "judgments": [],
+      "notes": "库外题无需检索；本轮保持原工具边界及无证据目标，不添加知识相关性判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-195",
+      "inspectedKnowledgeIds": [],
+      "judgments": [],
+      "notes": "库外题无需检索；本轮保持原工具边界及无证据目标，不添加知识相关性判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-196",
+      "inspectedKnowledgeIds": [],
+      "judgments": [],
+      "notes": "库外题无需检索；本轮保持原工具边界及无证据目标，不添加知识相关性判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-197",
+      "inspectedKnowledgeIds": [],
+      "judgments": [],
+      "notes": "库外题无需检索；本轮保持原工具边界及无证据目标，不添加知识相关性判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-198",
+      "inspectedKnowledgeIds": [],
+      "judgments": [],
+      "notes": "库外题无需检索；本轮保持原工具边界及无证据目标，不添加知识相关性判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-199",
+      "inspectedKnowledgeIds": [],
+      "judgments": [],
+      "notes": "库外题无需检索；本轮保持原工具边界及无证据目标，不添加知识相关性判断。",
+      "chunkIssues": []
+    },
+    {
+      "caseId": "rag-200",
+      "inspectedKnowledgeIds": [],
+      "judgments": [],
+      "notes": "库外题无需检索；本轮保持原工具边界及无证据目标，不添加知识相关性判断。",
+      "chunkIssues": []
+    }
+  ]
+}

@@ -17,6 +17,16 @@ public interface WeeklyReportJobRepository extends JpaRepository<WeeklyReportJob
     Optional<WeeklyReportJob> findByIdAndUserId(Long id, Long userId);
 
     @Modifying
+    @Query("""
+            update WeeklyReportJob job set job.updatedAt=:now, job.version=job.version+1
+            where job.id=:jobId and job.status='RUNNING' and job.attempts=:attempt
+              and job.executionToken=:token and job.updatedAt>=:staleBefore
+            """)
+    int beginExecution(@Param("jobId") Long jobId, @Param("attempt") int attempt,
+                       @Param("token") String token, @Param("staleBefore") LocalDateTime staleBefore,
+                       @Param("now") LocalDateTime now);
+
+    @Modifying
     @Query(value = """
             INSERT INTO weekly_report_jobs
                 (user_id, report_week, days, status, attempts, next_retry_at, created_at, updated_at, version)

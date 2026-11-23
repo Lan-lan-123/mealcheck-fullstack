@@ -14,7 +14,6 @@ public class VisionEvaluationController {
     private final ImageUploadValidationService validation;
     private final VisionFoodRecognitionService vision;
     private final AiChatClient ai;
-    @Value("${mealcheck.ai.model:unknown}") private String model;
     public VisionEvaluationController(ImageUploadValidationService validation,VisionFoodRecognitionService vision,AiChatClient ai) {
         this.validation=validation;this.vision=vision;this.ai=ai;
     }
@@ -24,7 +23,7 @@ public class VisionEvaluationController {
         long start=System.nanoTime();
         try {
             var result=vision.recognize(validation.validateAndNormalize(image));
-            return new Prediction(model,(System.nanoTime()-start)/1_000_000,result,ai.lastUsage());
+            return new Prediction(ai.lastModel(),(System.nanoTime()-start)/1_000_000,result,ai.lastUsage());
         } finally { ai.clearUsage(); }
     }
 }

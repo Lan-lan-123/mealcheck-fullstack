@@ -2,6 +2,9 @@ server:
   port: ${SERVER_PORT:8080}
 
 spring:
+  http:
+    converters:
+      preferred-json-mapper: jackson2
   rabbitmq:
     host: ${SPRING_RABBITMQ_HOST:localhost}
     port: ${SPRING_RABBITMQ_PORT:5672}
@@ -72,6 +75,8 @@ mealcheck:
     dead-letter-archive-enabled: ${MEALCHECK_FAILURE_DEAD_LETTER_ARCHIVE_ENABLED:true}
     metrics-ms: ${MEALCHECK_FAILURE_METRICS_MS:15000}
   jwt:
+    generation: ${MEALCHECK_AUTH_GENERATION:cookie-v1}
+    cookie-secure: ${MEALCHECK_AUTH_COOKIE_SECURE:false}
     secret: ${MEALCHECK_JWT_SECRET:mealcheck-jwt-secret-change-me-please-32chars}
     expiration-minutes: ${MEALCHECK_JWT_EXPIRATION_MINUTES:10080}
   cors:
@@ -91,8 +96,8 @@ mealcheck:
     catalog-json: ${MEALCHECK_AI_PRICE_CATALOG_JSON:[]}
   upload:
     max-concurrent-decodes: ${MEALCHECK_UPLOAD_MAX_CONCURRENT_DECODES:2}
-    max-pending-decodes: ${MEALCHECK_UPLOAD_MAX_PENDING_DECODES:20}
-    decode-wait-millis: ${MEALCHECK_UPLOAD_DECODE_WAIT_MILLIS:8000}
+    max-pending-decodes: ${MEALCHECK_UPLOAD_MAX_PENDING_DECODES:62}
+    decode-wait-millis: ${MEALCHECK_UPLOAD_DECODE_WAIT_MILLIS:15000}
     temporary-max-bytes: ${MEALCHECK_UPLOAD_TEMPORARY_MAX_BYTES:1073741824}
     max-input-bytes: ${MEALCHECK_UPLOAD_MAX_INPUT_BYTES:10485760}
     max-width: ${MEALCHECK_UPLOAD_MAX_WIDTH:4096}
@@ -104,12 +109,15 @@ mealcheck:
     orphan-cleanup-cron: ${MEALCHECK_UPLOAD_ORPHAN_CLEANUP_CRON:0 30 3 * * *}
     orphan-grace-hours: ${MEALCHECK_UPLOAD_ORPHAN_GRACE_HOURS:24}
   analysis:
-    max-outstanding: ${MEALCHECK_ANALYSIS_MAX_OUTSTANDING:32}
+    max-outstanding: ${MEALCHECK_ANALYSIS_MAX_OUTSTANDING:200}
+    max-stored-image-bytes: ${MEALCHECK_ANALYSIS_MAX_STORED_IMAGE_BYTES:536870912}
     max-outstanding-per-user: ${MEALCHECK_ANALYSIS_MAX_OUTSTANDING_PER_USER:2}
     dispatch: ${MEALCHECK_ANALYSIS_DISPATCH:rabbitmq}
-    concurrency: ${MEALCHECK_ANALYSIS_CONCURRENCY:8}
+    concurrency: ${MEALCHECK_ANALYSIS_CONCURRENCY:40}
     lease-seconds: ${MEALCHECK_ANALYSIS_LEASE_SECONDS:90}
     outbox-poll-ms: ${MEALCHECK_ANALYSIS_OUTBOX_POLL_MS:1000}
+    outbox-window-size: ${MEALCHECK_ANALYSIS_OUTBOX_WINDOW_SIZE:8}
+    outbox-confirm-timeout-ms: ${MEALCHECK_ANALYSIS_OUTBOX_CONFIRM_TIMEOUT_MS:5000}
     worker-enabled: ${MEALCHECK_ANALYSIS_WORKER_ENABLED:true}
     poll-ms: ${MEALCHECK_ANALYSIS_POLL_MS:1000}
     metrics-ms: ${MEALCHECK_ANALYSIS_METRICS_MS:15000}
@@ -120,16 +128,30 @@ mealcheck:
     failed-request-days: ${MEALCHECK_RETENTION_FAILED_REQUEST_DAYS:90}
     stale-report-days: ${MEALCHECK_RETENTION_STALE_REPORT_DAYS:30}
     audit-days: ${MEALCHECK_RETENTION_AUDIT_DAYS:180}
+  ai-settings:
+    encryption-key: ${MEALCHECK_AI_SETTINGS_ENCRYPTION_KEY:}
   ai:
     input-cost-per-million: ${MEALCHECK_AI_INPUT_COST_PER_MILLION:0}
     output-cost-per-million: ${MEALCHECK_AI_OUTPUT_COST_PER_MILLION:0}
     api-key: ${MEALCHECK_AI_API_KEY:}
     base-url: ${MEALCHECK_AI_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
-    model: ${MEALCHECK_AI_MODEL:qwen3-vl-30b-a3b-instruct}
+    model: ${MEALCHECK_AI_MODEL:Qwen/Qwen3.8-27B}
+    vision-model: ${MEALCHECK_AI_VISION_MODEL:Qwen/Qwen3.8-27B}
     timeout-seconds: ${MEALCHECK_AI_TIMEOUT_SECONDS:60}
+    vision-thinking-mode: ${MEALCHECK_AI_VISION_THINKING_MODE:off}
+    advice-thinking-mode: ${MEALCHECK_AI_ADVICE_THINKING_MODE:off}
+    assistant-thinking-mode: ${MEALCHECK_AI_ASSISTANT_THINKING_MODE:off}
+    weekly-thinking-mode: ${MEALCHECK_AI_WEEKLY_THINKING_MODE:off}
+    thinking-budget-tokens: ${MEALCHECK_AI_THINKING_BUDGET_TOKENS:512}
   knowledge:
+    source-sync-lease-seconds: ${MEALCHECK_KNOWLEDGE_SOURCE_SYNC_LEASE_SECONDS:120}
     auto-index: ${MEALCHECK_KNOWLEDGE_AUTO_INDEX:true}
+    embedding-api-key: ${MEALCHECK_KNOWLEDGE_EMBEDDING_API_KEY:}
+    embedding-base-url: ${MEALCHECK_KNOWLEDGE_EMBEDDING_BASE_URL:}
+    embedding-model: ${MEALCHECK_KNOWLEDGE_EMBEDDING_MODEL:qwen3.7-text-embedding-flash}
+    embedding-timeout-seconds: ${MEALCHECK_KNOWLEDGE_EMBEDDING_TIMEOUT_SECONDS:30}
     embedding-dim: ${MEALCHECK_KNOWLEDGE_EMBEDDING_DIM:512}
+    embedding-send-dimensions: ${MEALCHECK_KNOWLEDGE_EMBEDDING_SEND_DIMENSIONS:true}
     vector-storage: ${MEALCHECK_KNOWLEDGE_VECTOR_STORAGE:halfvec}
     vector-weight: ${MEALCHECK_KNOWLEDGE_VECTOR_WEIGHT:0.65}
     keyword-weight: ${MEALCHECK_KNOWLEDGE_KEYWORD_WEIGHT:0.25}
@@ -152,7 +174,7 @@ mealcheck:
     chunk-max-tokens: ${MEALCHECK_KNOWLEDGE_CHUNK_MAX_TOKENS:500}
     chunk-overlap-tokens: ${MEALCHECK_KNOWLEDGE_CHUNK_OVERLAP_TOKENS:50}
     splitter-strategy: ${MEALCHECK_KNOWLEDGE_SPLITTER_STRATEGY:recursive-markdown}
-    source-version: ${MEALCHECK_KNOWLEDGE_SOURCE_VERSION:v3-curated-100}
+    source-version: ${MEALCHECK_KNOWLEDGE_SOURCE_VERSION:v8-longform-200-boundary-v2}
     benchmark-regression-tolerance: ${MEALCHECK_KNOWLEDGE_BENCHMARK_REGRESSION_TOLERANCE:0.02}
   upload-guard:
     non-food-window-minutes: ${MEALCHECK_NON_FOOD_WINDOW_MINUTES:5}
@@ -201,7 +223,8 @@ mealcheck:
     enqueue-resume-ms: ${MEALCHECK_WEEKLY_REPORT_ENQUEUE_RESUME_MS:60000}
     executor-core-pool-size: ${MEALCHECK_WEEKLY_REPORT_EXECUTOR_CORE_POOL_SIZE:2}
     executor-max-pool-size: ${MEALCHECK_WEEKLY_REPORT_EXECUTOR_MAX_POOL_SIZE:4}
-    executor-queue-capacity: ${MEALCHECK_WEEKLY_REPORT_EXECUTOR_QUEUE_CAPACITY:20}
+    # Durable jobs wait in PostgreSQL; dispatch directly to available worker threads.
+    executor-queue-capacity: ${MEALCHECK_WEEKLY_REPORT_EXECUTOR_QUEUE_CAPACITY:0}
     agent-executor-core-pool-size: ${MEALCHECK_WEEKLY_REPORT_AGENT_EXECUTOR_CORE_POOL_SIZE:2}
     agent-executor-max-pool-size: ${MEALCHECK_WEEKLY_REPORT_AGENT_EXECUTOR_MAX_POOL_SIZE:4}
     agent-executor-queue-capacity: ${MEALCHECK_WEEKLY_REPORT_AGENT_EXECUTOR_QUEUE_CAPACITY:20}
@@ -219,12 +242,17 @@ mealcheck:
     enabled: ${MEALCHECK_MCP_ENABLED:true}
     endpoint: ${MEALCHECK_MCP_ENDPOINT:/mcp}
     server-name: ${MEALCHECK_MCP_SERVER_NAME:mealcheck-mcp-server}
-    server-version: ${MEALCHECK_MCP_SERVER_VERSION:1.0.0}
+    server-version: ${MEALCHECK_MCP_SERVER_VERSION:2.0.0}
+  assistant-delivery:
+    workers: ${MEALCHECK_ASSISTANT_DELIVERY_WORKERS:4}
+    queue-capacity: ${MEALCHECK_ASSISTANT_DELIVERY_QUEUE_CAPACITY:16}
+    lease-seconds: ${MEALCHECK_ASSISTANT_DELIVERY_LEASE_SECONDS:15}
   assistant-function-calling:
-    enabled: ${MEALCHECK_ASSISTANT_FUNCTION_CALLING_ENABLED:false}
+    enabled: ${MEALCHECK_ASSISTANT_FUNCTION_CALLING_ENABLED:true}
     max-tool-rounds: ${MEALCHECK_ASSISTANT_FUNCTION_CALLING_MAX_TOOL_ROUNDS:3}
     max-tool-calls: ${MEALCHECK_ASSISTANT_FUNCTION_CALLING_MAX_TOOL_CALLS:6}
-    total-timeout-seconds: ${MEALCHECK_ASSISTANT_FUNCTION_CALLING_TOTAL_TIMEOUT_SECONDS:30}
+    total-timeout-seconds: ${MEALCHECK_ASSISTANT_FUNCTION_CALLING_TOTAL_TIMEOUT_SECONDS:90}
+    review-reserve-seconds: ${MEALCHECK_ASSISTANT_REVIEW_RESERVE_SECONDS:30}
   assistant-memory:
     history-token-budget: ${MEALCHECK_ASSISTANT_MEMORY_HISTORY_TOKEN_BUDGET:1200}
     recent-messages: ${MEALCHECK_ASSISTANT_MEMORY_RECENT_MESSAGES:6}
@@ -241,8 +269,8 @@ mealcheck:
     rag-queue-capacity: ${MEALCHECK_ASSISTANT_RAG_QUEUE_CAPACITY:8}
     background-pool-size: ${MEALCHECK_ASSISTANT_BACKGROUND_POOL_SIZE:2}
     background-queue-capacity: ${MEALCHECK_ASSISTANT_BACKGROUND_QUEUE_CAPACITY:16}
-    timeout-millis: ${MEALCHECK_ASSISTANT_TOOLS_TIMEOUT_MILLIS:2500}
-    total-timeout-millis: ${MEALCHECK_ASSISTANT_TOOLS_TOTAL_TIMEOUT_MILLIS:3000}
+    timeout-millis: ${MEALCHECK_ASSISTANT_TOOLS_TIMEOUT_MILLIS:15000}
+    total-timeout-millis: ${MEALCHECK_ASSISTANT_TOOLS_TOTAL_TIMEOUT_MILLIS:20000}
   assistant-evaluation:
     lease-seconds: ${MEALCHECK_ASSISTANT_EVALUATION_LEASE_SECONDS:90}
     poll-ms: ${MEALCHECK_ASSISTANT_EVALUATION_POLL_MS:2000}
@@ -256,13 +284,33 @@ mealcheck:
     initial-backoff-millis: ${MEALCHECK_REMOTE_INITIAL_BACKOFF_MILLIS:200}
     failure-threshold: ${MEALCHECK_REMOTE_FAILURE_THRESHOLD:5}
     open-duration-seconds: ${MEALCHECK_REMOTE_OPEN_DURATION_SECONDS:30}
-    max-concurrent-calls: ${MEALCHECK_REMOTE_MAX_CONCURRENT_CALLS:8}
+    max-concurrent-calls: ${MEALCHECK_REMOTE_MAX_CONCURRENT_CALLS:42}
+  assistant-review-audit:
+    enabled: ${MEALCHECK_ASSISTANT_REVIEW_AUDIT_ENABLED:false}
+    user-ids: ${MEALCHECK_ASSISTANT_REVIEW_AUDIT_USER_IDS:}
+    parent-directory: ${MEALCHECK_ASSISTANT_REVIEW_AUDIT_PARENT_DIRECTORY:}
+    max-files: ${MEALCHECK_ASSISTANT_REVIEW_AUDIT_MAX_FILES:500}
+  advice-audit:
+    enabled: ${MEALCHECK_ADVICE_AUDIT_ENABLED:false}
+    user-ids: ${MEALCHECK_ADVICE_AUDIT_USER_IDS:}
+    directory: ${MEALCHECK_ADVICE_AUDIT_DIRECTORY:}
+    max-files: ${MEALCHECK_ADVICE_AUDIT_MAX_FILES:500}
+  # Conservative starting limits; replace with verified account quotas after small live validation.
+  ai-model-limits:
+    - host: api.siliconflow.cn
+      model: Qwen/Qwen3.8-27B
+      concurrency: ${MEALCHECK_SF_QWEN_MAX_CONCURRENT_CALLS:10}
+      rpm: ${MEALCHECK_SF_QWEN_MAX_STARTS_PER_MINUTE:40}
+      tpm: ${MEALCHECK_SF_QWEN_MAX_TOKENS_PER_MINUTE:0}
   ai-budget:
     interactive-reserved-permits: ${MEALCHECK_AI_INTERACTIVE_RESERVED_PERMITS:2}
     global-daily-calls: ${MEALCHECK_AI_GLOBAL_DAILY_CALLS:100000}
     global-daily-cost: ${MEALCHECK_AI_GLOBAL_DAILY_COST:0}
-    max-concurrent-calls: ${MEALCHECK_AI_GLOBAL_MAX_CONCURRENT_CALLS:10}
+    max-concurrent-calls: ${MEALCHECK_AI_GLOBAL_MAX_CONCURRENT_CALLS:42}
     max-starts-per-minute: ${MEALCHECK_AI_GLOBAL_MAX_STARTS_PER_MINUTE:120}
+    min-start-interval-millis: ${MEALCHECK_AI_GLOBAL_MIN_START_INTERVAL_MILLIS:400}
+    max-admission-waiters: ${MEALCHECK_AI_MAX_ADMISSION_WAITERS:1024}
+    minimum-http-execution-millis: ${MEALCHECK_AI_MINIMUM_HTTP_EXECUTION_MILLIS:1000}
     enabled: ${MEALCHECK_AI_BUDGET_ENABLED:true}
     daily-calls: ${MEALCHECK_AI_DAILY_CALLS:100}
     system-daily-calls: ${MEALCHECK_AI_SYSTEM_DAILY_CALLS:5000}
