@@ -7,4 +7,8 @@ RUN tar -xzf /tmp/pgvector.tar.gz --strip-components=1 \
     && make with_llvm=no DESTDIR=/install install
 
 FROM postgres:16-alpine3.24@sha256:f2f98726820d0342055351c6e9d36e705f5bfffb3dd53ff556325114b08afb6d
+# The official entrypoint uses `gosu postgres` to drop privileges.
+RUN apk add --no-cache 'libxml2>=2.13.9-r3' su-exec \
+    && ln -sf /sbin/su-exec /usr/local/bin/gosu \
+    && test "$(gosu postgres id -u)" = "$(id -u postgres)"
 COPY --from=build /install/usr/local/ /usr/local/
